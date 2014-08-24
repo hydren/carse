@@ -38,7 +38,29 @@ namespace GameEngine
 	Color::DARK_GREY	( 96,  96,  96),
 	Color::ORANGE		(255, 127,   0),
 	Color::PINK			(255, 192, 192),
-	Color::BROWN		(144,  92,  48);
+	Color::BROWN		(144,  92,  48),
+
+	Color::BEIGE		(245, 245, 220),
+	Color::LIME			(191, 255,   0),
+	Color::SCARLET		(253,  14,  53),
+	Color::MINT			(116, 195, 101),
+	Color::AZURE		(  0, 127, 255),
+	Color::TURQUOISE	( 64, 224, 208),
+	Color::VIOLET		(127,   0, 255),
+	Color::GOLD			(255, 215,   0),
+	Color::SALMON		(250, 127, 114),
+	Color::BRONZE		(205, 127,  50),
+	Color::WINE			(196,  30,  58),
+	Color::INDIGO		( 75,   0, 130),
+	Color::CELESTE		(  0, 191, 255),
+	Color::FLAME		(226,  88,  34),
+	Color::CREAM		(253, 252, 143),
+	Color::CARAMEL		(193, 154, 107),
+	Color::RUBY			(255, 255, 255),
+	Color::JADE			(224,  17,  95),
+	Color::CERULEAN		(  0, 123, 167),
+	Color::AQUA			(176, 224, 230),
+	Color::FUSCHIA 		(193,  84, 193);
 	//TODO add more colors
 
 }

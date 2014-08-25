@@ -19,24 +19,40 @@ int main(int argc, char** argv)
 	try
 	{
 		GameEngine::initialize();
-		GameEngine::display = new Display(640, 480, "Project SpeedME - CARSE Engine");
+		GameEngine::display = new Display(640, 480, "carse");
 
 		Image loading_image("carse-logo.jpg");
 		loading_image.draw();
 		GameEngine::display->refresh();
+		GameEngine::rest(0.5);
 
 		Image car("car-delorean-dmc12.png");
-		for(int i = 20; i < 200; i++)
+
+		GameEngine::EventQueue eventQueue;
+		GameEngine::Event* ev;
+
+		int posx=20, posy=20;
+		bool running = true;
+		do
 		{
+			while(!eventQueue.isEmpty())
+			{
+				ev = eventQueue.waitForEvent();
+
+				if(ev->getEventType() == GameEngine::Event::Type::DISPLAY_CLOSURE)
+				{
+					running=false;
+				}
+
+			}
+
 			GameEngine::display->clear();
 
-			car.draw_rotated(i, i, 23, 48, (3.0/4.0)*Math::PI, 0, 0);
+			car.draw_rotated(posx, posy, 23, 48, (5.0/4.0)*Math::PI, 0, 0);
 			GameEngine::rest(0.1);
-
 			GameEngine::display->refresh();
-		}
 
-		GameEngine::rest(2);
+		}while(running);
 
 		delete GameEngine::display;
 		GameEngine::finalize();

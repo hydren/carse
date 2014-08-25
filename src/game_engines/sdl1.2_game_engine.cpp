@@ -18,10 +18,13 @@
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_gfxPrimitives.h>
+#include <SDL/SDL_rotozoom.h>
 
 //aux variables
 SDL_Rect srcrect;
 SDL_Rect dstrect;
+SDL_Surface* rotozoom_surface;
+const double toDegree = (180.0/Math::PI);
 
 SDL_Color create_SDL_Color(Uint8 r, Uint8 g, Uint8 b)
 {
@@ -260,11 +263,21 @@ namespace GameEngine
 	//FIXME do code to properly draw rotated, using SDL_gfx maybe
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
-		this->draw(x, y, from_x, from_y, w, h);
-//		if(w == -1 && h == -1) //draw all source region
-//			al_draw_rotated_bitmap(this->implementation->bitmap, ax, ay, x, y, angle, 0);
-//		else
-//			al_draw_tinted_scaled_rotated_bitmap_region(this->implementation->bitmap, from_x, from_y, w, h, al_map_rgba_f(1, 1, 1, 1), ax, ay, x, y, 1, 1, angle, 0);
+		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
+		dstrect.x = x; dstrect.y = y;
+
+		 //draws all source region
+		if(w == -1 and h == -1)
+			SDL_BlitSurface(rotozoom_surface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+
+		//draws selected region
+		else
+		{
+			srcrect.x = from_x; srcrect.y = from_y;
+			srcrect.w = w; srcrect.h = h;
+			SDL_BlitSurface(rotozoom_surface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		}
+		SDL_FreeSurface(rotozoom_surface);
 	}
 
 

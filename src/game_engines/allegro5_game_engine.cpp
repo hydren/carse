@@ -203,7 +203,7 @@ namespace GameEngine
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
 		if(w == -1 && h == -1) //draw all source region
-			al_draw_rotated_bitmap(this->implementation->bitmap, ax, ay, x, y, angle, 0);
+			al_draw_rotated_bitmap(this->implementation->bitmap, ax, ay, x, y, 2*ALLEGRO_PI - angle, 0);
 		else
 			al_draw_tinted_scaled_rotated_bitmap_region(this->implementation->bitmap, from_x, from_y, w, h, al_map_rgba_f(1, 1, 1, 1), ax, ay, x, y, 1, 1, angle, 0);
 	}

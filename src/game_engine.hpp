@@ -49,6 +49,12 @@ namespace GameEngine
 		//delete the display
 		~Display();
 
+		/** Returns the display width */
+		int getWidth();
+
+		/** Returns the display height */
+		int getHeight();
+
 		/** Change the window title. */
 		void setTitle(const string& title);
 

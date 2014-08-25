@@ -159,6 +159,16 @@ namespace GameEngine
 		delete this->implementation;
 	}
 
+	int Display::getWidth()
+	{
+		return implementation->sdlDisplaySurface->w;
+	}
+
+	int Display::getHeight()
+	{
+		return implementation->sdlDisplaySurface->h;
+	}
+
 	void Display::setTitle(const string& title)
 	{
 		SDL_WM_SetCaption(title.c_str(), title.c_str());

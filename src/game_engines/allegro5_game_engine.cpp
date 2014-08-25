@@ -111,6 +111,16 @@ namespace GameEngine
 		al_destroy_display(this->implementation->allegroDisplay);
 	}
 
+	int Display::getWidth()
+	{
+		return al_get_display_width(implementation->allegroDisplay);
+	}
+
+	int Display::getHeight()
+	{
+		return al_get_display_height(implementation->allegroDisplay);
+	}
+
 	void Display::setTitle(const string& title)
 	{
 		al_set_window_title(this->implementation->allegroDisplay, title.c_str());

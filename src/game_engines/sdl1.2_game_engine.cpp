@@ -145,7 +145,9 @@ namespace GameEngine
 		}
 
 		SDL_WM_SetCaption(title.c_str(), title.c_str());
-		SDL_WM_SetIcon(icon->implementation->sdlSurface, null);
+
+		if(icon != null)
+			SDL_WM_SetIcon(icon->implementation->sdlSurface, null);
 	}
 
 	Display::~Display()

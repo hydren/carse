@@ -239,7 +239,11 @@ namespace GameEngine
 		this->implementation->allegroEvent = new ALLEGRO_EVENT;
 	}
 
-
+	Event::~Event()
+	{
+		delete this->implementation->allegroEvent;
+		delete this->implementation;
+	}
 
 	Event::Type::value Event::getEventType()
 	{

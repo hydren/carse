@@ -134,10 +134,10 @@ namespace GameEngine
 		struct Implementation;
 		Implementation* implementation;
 
+		public:
+
 		Event();
 		~Event();
-
-		public:
 
 		struct Type{ enum value
 		{

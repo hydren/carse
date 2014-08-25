@@ -10,7 +10,7 @@
 #include "game_engine.hpp"
 #include "race.hpp"
 
-#define VERSION 0.2.1
+#define VERSION 0.2.2
 
 using GameEngine::Image;
 using GameEngine::Display;

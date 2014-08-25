@@ -9,7 +9,7 @@
 #include "util.hpp"
 #include "game_engine.hpp"
 
-#define VERSION 0.2
+#define VERSION 0.2.1
 
 using GameEngine::Image;
 using GameEngine::Display;

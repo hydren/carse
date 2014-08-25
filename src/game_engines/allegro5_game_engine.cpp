@@ -303,6 +303,13 @@ namespace GameEngine
 		al_register_event_source(this->implementation->allegroEventQueue, al_get_mouse_event_source());
 	}
 
+	EventQueue::~EventQueue()
+	{
+		al_destroy_event_queue(implementation->allegroEventQueue);
+		delete implementation->allegroEvent;
+		delete implementation;
+	}
+
 	bool EventQueue::isEmpty()
 	{
 		return al_is_event_queue_empty(this->implementation->allegroEventQueue);

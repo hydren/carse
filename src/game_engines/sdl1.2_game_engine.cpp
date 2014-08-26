@@ -291,12 +291,21 @@ namespace GameEngine
 		}
 	}
 
-	//FIXME do code to properly draw rotated, using SDL_gfx maybe
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
-		dstrect.x = x; dstrect.y = y;
+
+		int w1 = implementation->sdlSurface->w,
+			h1 = implementation->sdlSurface->h,
+			w2 = rotozoom_surface->w,
+			h2 = rotozoom_surface->h;
+
+		int ax2 = w2/2 + (ax - w1/2)*cos(angle) - (ay - h1/2)*sin(angle);
+		int ay2 = h2/2 + (ay - h1/2)*cos(angle) - (ax - w1/2)*sin(angle);
+
+		dstrect.x = x-ax2;
+		dstrect.y = y-ay2;
 
 		 //draws all source region
 		if(w == -1 and h == -1)

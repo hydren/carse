@@ -10,7 +10,7 @@
 #include "game_engine.hpp"
 #include "race.hpp"
 
-#define VERSION 0.2.3
+#define VERSION "0.2.3"
 
 using GameEngine::Image;
 using GameEngine::Display;
@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	try
 	{
 		GameEngine::initialize();
-		GameEngine::display = new Display(640, 480, "carse");
+		GameEngine::display = new Display(640, 480, "carse " VERSION);
 
 		Image loading_image("carse-logo.jpg");
 		loading_image.draw();

@@ -21,6 +21,7 @@
 #include <SDL/SDL_rotozoom.h>
 
 //aux variables
+const Uint32 sdlInitFlags = (SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 SDL_Rect srcrect;
 SDL_Rect dstrect;
 SDL_Surface* rotozoom_surface;
@@ -33,6 +34,11 @@ SDL_Color create_SDL_Color(Uint8 r, Uint8 g, Uint8 b)
 	c.g = g;
 	c.b = b;
 	return c;
+}
+
+bool checkInit()
+{
+	return (SDL_WasInit(sdlInitFlags) == sdlInitFlags) and TTF_WasInit();
 }
 
 namespace GameEngine
@@ -66,7 +72,7 @@ namespace GameEngine
 	// initialize all SDL stuff
 	void initialize()
 	{
-		if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO ) < 0 )
+		if( SDL_Init( sdlInitFlags ) < 0 )
 		{
 			string message = string("SDL could not be initialized: ") + SDL_GetError();
 			cout << message << endl;
@@ -109,12 +115,14 @@ namespace GameEngine
 
 	void finalize()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		// while(Mix_Init(0)) Mix_Quit();
 		SDL_Quit();
 	}
 
 	void rest(double seconds)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		int ms = (seconds*1000.0);
 		SDL_Delay(ms>0? ms : 1);
 	}
@@ -122,6 +130,7 @@ namespace GameEngine
 	//FIXME add implementation, possibly using PhysicsFS, or dirent.h
 	list<string> getFilenamesWithinDirectory(const string& directoryPath)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 //		ALLEGRO_FS_ENTRY* directory = al_create_fs_entry(directoryPath.c_str());
 //		al_open_directory(directory);
 //
@@ -138,6 +147,7 @@ namespace GameEngine
 
 	Display::Display(int width, int height, const string& title, Image* icon)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->sdlDisplaySurface = SDL_SetVideoMode(width, height, 32, SDL_DOUBLEBUF | SDL_HWSURFACE | SDL_HWACCEL);
 
@@ -155,32 +165,38 @@ namespace GameEngine
 
 	Display::~Display()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		SDL_FreeSurface(this->implementation->sdlDisplaySurface);
 		delete this->implementation;
 	}
 
 	int Display::getWidth()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return implementation->sdlDisplaySurface->w;
 	}
 
 	int Display::getHeight()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return implementation->sdlDisplaySurface->h;
 	}
 
 	void Display::setTitle(const string& title)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		SDL_WM_SetCaption(title.c_str(), title.c_str());
 	}
 
 	void Display::setIcon(Image* image)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		SDL_WM_SetIcon(image->implementation->sdlSurface,  null);
 	}
 
 	void Display::refresh()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		//flip surface if double-buffered, update rect if single-buffered instead
 		if( SDL_Flip(this->implementation->sdlDisplaySurface) == -1 )
 		{
@@ -192,6 +208,7 @@ namespace GameEngine
 
 	void Display::clear()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		if ( SDL_FillRect(this->implementation->sdlDisplaySurface, null, 0) == -1 )
 		{
 			string msg = string("SDL_FillRect error! ") + SDL_GetError();
@@ -204,6 +221,7 @@ namespace GameEngine
 
 	Image::Image(string filename)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->sdlSurface = IMG_Load(filename.c_str() );
 		if ( this->implementation->sdlSurface == null)
@@ -220,6 +238,7 @@ namespace GameEngine
 	 * */
 	Image::Image(Shape shape, Color color, float arg1, float arg2, float arg3)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 
 		switch(shape)
@@ -247,12 +266,14 @@ namespace GameEngine
 
 	Image::~Image()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		SDL_FreeSurface(this->implementation->sdlSurface);
 		delete implementation;
 	}
 
 	void Image::draw(float x, float y, float from_x, float from_y, float w, float h)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		//COUT << x << " " << y << " " << from_x << " " << from_y << " " << w << " " << h << " " << ENDL;
 
 		dstrect.x = x; dstrect.y = y;
@@ -273,6 +294,7 @@ namespace GameEngine
 	//FIXME do code to properly draw rotated, using SDL_gfx maybe
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
 		dstrect.x = x; dstrect.y = y;
 
@@ -293,6 +315,7 @@ namespace GameEngine
 
 	void Image::blit(Image& img2, float x, float y, float from_x, float from_y, float h, float w)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		dstrect.x = x; dstrect.y = y;
 
 		 //draws all source region
@@ -311,10 +334,12 @@ namespace GameEngine
 	//XXX Does this work correctly?
 	float Image::getWidth()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->sdlSurface->w;
 	}
 	float Image::getHeight()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->sdlSurface->h;
 	}
 
@@ -322,18 +347,21 @@ namespace GameEngine
 
 	Event::Event()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->sdlEvent = new SDL_Event;
 	}
 
 	Event::~Event()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		delete implementation->sdlEvent;
 		delete implementation;
 	}
 
 	Event::Type::value Event::getEventType()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		switch(this->implementation->sdlEvent->type)
 		{
 			case SDL_QUIT:				return Event::Type::DISPLAY_CLOSURE;
@@ -350,6 +378,7 @@ namespace GameEngine
 
 	Event::Key::value Event::getEventKeyCode()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		switch(this->implementation->sdlEvent->key.keysym.sym)
 		{
 			case SDLK_UP:	return Event::Key::ARROW_UP;
@@ -369,6 +398,7 @@ namespace GameEngine
 
 	Event::MouseButton::value Event::getEventMouseButton()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		switch(this->implementation->sdlEvent->button.button)
 		{
 			case SDL_BUTTON_LEFT:		return Event::MouseButton::LEFT;
@@ -381,11 +411,13 @@ namespace GameEngine
 
 	int Event::getEventMouseX()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->sdlEvent->button.x;
 	}
 
 	int Event::getEventMouseY()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->sdlEvent->button.y;
 	}
 
@@ -393,21 +425,25 @@ namespace GameEngine
 
 	EventQueue::EventQueue()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 	}
 
 	EventQueue::~EventQueue()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		delete implementation;
 	}
 
 	bool EventQueue::isEmpty()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return (SDL_PollEvent(null) == 0);
 	}
 
 	Event* EventQueue::waitForEvent()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		Event* ev = new Event;
 		SDL_WaitEvent(ev->implementation->sdlEvent);
 		return ev;
@@ -415,12 +451,14 @@ namespace GameEngine
 
 	void EventQueue::waitForEvent(Event* container)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		SDL_WaitEvent(container->implementation->sdlEvent);
 	}
 
 	//FIXME
 	void EventQueue::ignoreEvents()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 //		al_unregister_event_source(this->implementation->allegroEventQueue, al_get_display_event_source(GameEngine::display->implementation->allegroDisplay));
 //		al_unregister_event_source(this->implementation->allegroEventQueue, al_get_keyboard_event_source());
 //		al_unregister_event_source(this->implementation->allegroEventQueue, al_get_mouse_event_source());
@@ -430,6 +468,7 @@ namespace GameEngine
 	//FIXME
 	void EventQueue::listenEvents()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 //		al_flush_event_queue(this->implementation->allegroEventQueue);
 //		al_register_event_source(this->implementation->allegroEventQueue, al_get_display_event_source(GameEngine::display->implementation->allegroDisplay));
 //		al_register_event_source(this->implementation->allegroEventQueue, al_get_keyboard_event_source());
@@ -439,6 +478,7 @@ namespace GameEngine
 	//FIXME
 	void EventQueue::flushEvents()
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 //		al_flush_event_queue(this->implementation->allegroEventQueue);
 	}
 
@@ -446,6 +486,7 @@ namespace GameEngine
 
 	Font::Font(string filename, int size, bool antialiasing, bool hinting, bool kerning)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 
 		if(not TTF_WasInit())
@@ -462,6 +503,7 @@ namespace GameEngine
 
 	void Font::draw_text(string text, float x, float y, Color color)
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		SDL_Surface* renderedText = null;
 		if(this->implementation->isAntialiased)
 			renderedText = TTF_RenderText_Blended(this->implementation->sdlttfFont, text.c_str(), create_SDL_Color(color.r, color.g, color.b));
@@ -477,6 +519,7 @@ namespace GameEngine
 
 	int Font::getSize() const
 	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return TTF_FontHeight(this->implementation->sdlttfFont);
 	}
 }

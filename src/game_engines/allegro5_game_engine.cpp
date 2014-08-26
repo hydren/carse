@@ -69,17 +69,20 @@ namespace GameEngine
 
 	void finalize()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		//TODO delete other stuff
 		//delete display;
 	}
 
 	void rest(double seconds)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_rest(seconds);
 	}
 
 	list<string> getFilenamesWithinDirectory(const string& directoryPath)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		ALLEGRO_FS_ENTRY* directory = al_create_fs_entry(directoryPath.c_str());
 		al_open_directory(directory);
 
@@ -94,6 +97,7 @@ namespace GameEngine
 
 	Display::Display(int width, int height, const string& title, Image* icon)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->allegroDisplay = al_create_display(width, height);
 
@@ -108,41 +112,49 @@ namespace GameEngine
 
 	Display::~Display()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_destroy_display(this->implementation->allegroDisplay);
 	}
 
 	int Display::getWidth()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return al_get_display_width(implementation->allegroDisplay);
 	}
 
 	int Display::getHeight()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return al_get_display_height(implementation->allegroDisplay);
 	}
 
 	void Display::setTitle(const string& title)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_set_window_title(this->implementation->allegroDisplay, title.c_str());
 	}
 
 	void Display::setIcon(Image* image)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_set_display_icon(this->implementation->allegroDisplay, image->implementation->bitmap);
 	}
 
 	void Display::refresh()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_flip_display();
 	}
 
 	void Display::clear()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_clear_to_color(al_map_rgb(0,0,0));
 	}
 
 	Image::Image(string filename)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->bitmap = al_load_bitmap(filename.c_str());
 		if ( this->implementation->bitmap == null)
@@ -159,6 +171,7 @@ namespace GameEngine
 	 * */
 	Image::Image(Shape shape, Color color, float arg1, float arg2, float arg3)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->bitmap = null;
 
@@ -198,11 +211,13 @@ namespace GameEngine
 
 	Image::~Image()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_destroy_bitmap(this->implementation->bitmap);
 	}
 
 	void Image::draw(float x, float y, float from_x, float from_y, float w, float h)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		//COUT << x << " " << y << " " << from_x << " " << from_y << " " << w << " " << h << " " << ENDL;
 		if(w == -1 && h == -1) //draw all source region
 			al_draw_bitmap(this->implementation->bitmap, x, y, 0);
@@ -212,6 +227,7 @@ namespace GameEngine
 
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		if(w == -1 && h == -1) //draw all source region
 			al_draw_rotated_bitmap(this->implementation->bitmap, ax, ay, x, y, 2*ALLEGRO_PI - angle, 0);
 		else
@@ -220,6 +236,7 @@ namespace GameEngine
 
 	void Image::blit(Image& img2, float x, float y, float from_x, float from_y, float h, float w)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_set_target_bitmap( img2.implementation->bitmap );
 
 		if(w == -1 && h == -1) //draw all source region
@@ -230,23 +247,36 @@ namespace GameEngine
 		al_set_target_backbuffer(al_get_current_display());
 	}
 
-	float Image::getWidth()  { return al_get_bitmap_width(this->implementation->bitmap); } //TODO possibly incorrect!
-	float Image::getHeight() { return al_get_bitmap_height(this->implementation->bitmap); }
+	//XXX possibly incorrect
+	float Image::getWidth()
+	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		return al_get_bitmap_width(this->implementation->bitmap);
+	}
+
+	float Image::getHeight()
+	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		return al_get_bitmap_height(this->implementation->bitmap);
+	}
 
 	Event::Event()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 		this->implementation->allegroEvent = new ALLEGRO_EVENT;
 	}
 
 	Event::~Event()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		delete this->implementation->allegroEvent;
 		delete this->implementation;
 	}
 
 	Event::Type::value Event::getEventType()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		switch(this->implementation->allegroEvent->type)
 		{
 			case ALLEGRO_EVENT_DISPLAY_CLOSE:		return Event::Type::DISPLAY_CLOSURE;
@@ -263,6 +293,7 @@ namespace GameEngine
 
 	Event::Key::value Event::getEventKeyCode()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		switch(this->implementation->allegroEvent->keyboard.keycode)
 		{
 			case ALLEGRO_KEY_UP:	return Event::Key::ARROW_UP;
@@ -282,6 +313,7 @@ namespace GameEngine
 
 	Event::MouseButton::value Event::getEventMouseButton()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		switch(this->implementation->allegroEvent->mouse.button)
 		{
 			case 1:		return Event::MouseButton::LEFT;
@@ -294,16 +326,19 @@ namespace GameEngine
 
 	int Event::getEventMouseX()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->allegroEvent->mouse.x;
 	}
 
 	int Event::getEventMouseY()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->allegroEvent->mouse.y;
 	}
 
 	EventQueue::EventQueue()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 
 		this->implementation->allegroEvent = new ALLEGRO_EVENT;
@@ -319,6 +354,7 @@ namespace GameEngine
 
 	EventQueue::~EventQueue()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_destroy_event_queue(implementation->allegroEventQueue);
 		delete implementation->allegroEvent;
 		delete implementation;
@@ -326,11 +362,13 @@ namespace GameEngine
 
 	bool EventQueue::isEmpty()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return al_is_event_queue_empty(this->implementation->allegroEventQueue);
 	}
 
 	Event* EventQueue::waitForEvent()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_wait_for_event(this->implementation->allegroEventQueue, this->implementation->allegroEvent);
 		Event* ev = new Event;
 		ev->implementation->allegroEvent = this->implementation->allegroEvent;
@@ -339,11 +377,13 @@ namespace GameEngine
 
 	void EventQueue::waitForEvent(Event* container)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_wait_for_event(this->implementation->allegroEventQueue, container->implementation->allegroEvent);
 	}
 
 	void EventQueue::ignoreEvents()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_unregister_event_source(this->implementation->allegroEventQueue, al_get_display_event_source(GameEngine::display->implementation->allegroDisplay));
 		al_unregister_event_source(this->implementation->allegroEventQueue, al_get_keyboard_event_source());
 		al_unregister_event_source(this->implementation->allegroEventQueue, al_get_mouse_event_source());
@@ -352,6 +392,7 @@ namespace GameEngine
 
 	void EventQueue::listenEvents()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_flush_event_queue(this->implementation->allegroEventQueue);
 		al_register_event_source(this->implementation->allegroEventQueue, al_get_display_event_source(GameEngine::display->implementation->allegroDisplay));
 		al_register_event_source(this->implementation->allegroEventQueue, al_get_keyboard_event_source());
@@ -360,11 +401,13 @@ namespace GameEngine
 
 	void EventQueue::flushEvents()
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_flush_event_queue(this->implementation->allegroEventQueue);
 	}
 
 	Font::Font(string filename, int size, bool antialiasing, bool hinting, bool kerning)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
 
 		//I know, pretty odd...
@@ -377,11 +420,13 @@ namespace GameEngine
 
 	void Font::draw_text(string text, float x, float y, Color color)
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		al_draw_text(this->implementation->allegroFont, al_map_rgb(color.r, color.g, color.b), x, y, ALLEGRO_ALIGN_LEFT, text.c_str());
 	}
 
 	int Font::getSize() const
 	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return al_get_font_line_height(this->implementation->allegroFont);
 	}
 }

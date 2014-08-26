@@ -215,23 +215,31 @@ namespace GameEngine
 		al_destroy_bitmap(this->implementation->bitmap);
 	}
 
+	void Image::draw(float x, float y)
+	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		//COUT << x << " " << y << " " << from_x << " " << from_y << " " << w << " " << h << " " << ENDL;
+		//draw all source region
+		al_draw_bitmap(this->implementation->bitmap, x, y, 0);
+	}
+
 	void Image::draw(float x, float y, float from_x, float from_y, float w, float h)
 	{
 		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		//COUT << x << " " << y << " " << from_x << " " << from_y << " " << w << " " << h << " " << ENDL;
-		if(w == -1 && h == -1) //draw all source region
-			al_draw_bitmap(this->implementation->bitmap, x, y, 0);
-		else
-			al_draw_bitmap_region(this->implementation->bitmap, from_x, from_y, w, h, x, y, 0);
+		al_draw_bitmap_region(this->implementation->bitmap, from_x, from_y, w, h, x, y, 0);
 	}
 
+	void Image::draw_rotated(float x, float y, float ax, float ay, float angle)
+	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		//draw all source region
+		al_draw_rotated_bitmap(this->implementation->bitmap, ax, ay, x, y, 2*ALLEGRO_PI - angle, 0);
+	}
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
 		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		if(w == -1 && h == -1) //draw all source region
-			al_draw_rotated_bitmap(this->implementation->bitmap, ax, ay, x, y, 2*ALLEGRO_PI - angle, 0);
-		else
-			al_draw_tinted_scaled_rotated_bitmap_region(this->implementation->bitmap, from_x, from_y, w, h, al_map_rgba_f(1, 1, 1, 1), ax, ay, x, y, 1, 1, angle, 0);
+		al_draw_tinted_scaled_rotated_bitmap_region(this->implementation->bitmap, from_x, from_y, w, h, al_map_rgba_f(1, 1, 1, 1), ax, ay, x, y, 1, 1, angle, 0);
 	}
 
 	void Image::blit(Image& img2, float x, float y, float from_x, float from_y, float h, float w)

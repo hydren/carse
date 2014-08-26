@@ -106,14 +106,31 @@ namespace GameEngine
 	        return (*this);
 	    }
 
+
 		/**
+		 * Render an area of this Image in the game screen, positioning the Image in the given coordinates.
+		 */
+		void draw(float x=0, float y=0);
+
+	    /**
 		 * Render an area of this Image in the game screen, positioning the Image in the given coordinates.
 		 * The area selected is selected following the given parameters.
 		 * from_x and from_y specifies the position, w and h specifies the size of the selected area.
 		 */
-		void draw(float x=0, float y=0, float from_x=0, float from_y=0, float w=-1, float h=-1);
+		void draw(float x, float y, float from_x, float from_y, float w, float h);
 
-		void draw_rotated(float x=0, float y=0, float ax=0, float ay=0, float angle=0, float from_x=0, float from_y=0, float w=-1, float h=-1);
+		/**
+		 * Render an area of this Image in the game screen, positioning the Image in the given coordinates, rotating as specified.
+		 * ax and ay specifies point from which the rotatin is relative. angle specifies the angle of rotation, counter-clockwise, in radians.
+		 * */
+		void draw_rotated(float x=0, float y=0, float ax=0, float ay=0, float angle=0);
+
+		/**
+		 * Render an area of this Image in the game screen, positioning the Image in the given coordinates, rotating as specified.
+		 * The area selected is selected following the given parameters.
+		 * ax and ay specifies point from which the rotatin is relative. angle specifies the angle of rotation, counter-clockwise, in radians.
+		 * from_x and from_y specifies the position, w and h specifies the size of the selected area.		 * */
+		void draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h);
 
 		/**
 		 * Render an area of this Image in Image img2, positioning the Image in the given coordinates.

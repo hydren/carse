@@ -118,7 +118,7 @@ void Race::handleRender()
 {
 	GameEngine::display->clear();
 
-	car_sprite->draw_rotated(posx-camera.x, posy-camera.y, 23, 48, angle, 0, 0);
+	car_sprite->draw_rotated(posx-camera.x, posy-camera.y, 23, 48, angle);
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
 }

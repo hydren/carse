@@ -271,27 +271,29 @@ namespace GameEngine
 		delete implementation;
 	}
 
+	void Image::draw(float x, float y)
+	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+
+		//draws all source region
+		dstrect.x = x; dstrect.y = y;
+
+		SDL_BlitSurface(this->implementation->sdlSurface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+	}
+
 	void Image::draw(float x, float y, float from_x, float from_y, float w, float h)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		//COUT << x << " " << y << " " << from_x << " " << from_y << " " << w << " " << h << " " << ENDL;
-
-		dstrect.x = x; dstrect.y = y;
-
-		 //draws all source region
-		if(w == -1 and h == -1)
-			SDL_BlitSurface(this->implementation->sdlSurface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
 
 		//draws selected region
-		else
-		{
-			srcrect.x = from_x; srcrect.y = from_y;
-			srcrect.w = w; srcrect.h = h;
-			SDL_BlitSurface(this->implementation->sdlSurface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
-		}
+		dstrect.x = x; dstrect.y = y;
+		srcrect.x = from_x; srcrect.y = from_y;
+		srcrect.w = w; srcrect.h = h;
+
+		SDL_BlitSurface(this->implementation->sdlSurface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
 	}
 
-	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
+	void Image::draw_rotated(float x, float y, float ax, float ay, float angle)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
@@ -307,17 +309,31 @@ namespace GameEngine
 		dstrect.x = x-ax2;
 		dstrect.y = y-ay2;
 
-		 //draws all source region
-		if(w == -1 and h == -1)
-			SDL_BlitSurface(rotozoom_surface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		SDL_BlitSurface(rotozoom_surface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
 
-		//draws selected region
-		else
-		{
-			srcrect.x = from_x; srcrect.y = from_y;
-			srcrect.w = w; srcrect.h = h;
-			SDL_BlitSurface(rotozoom_surface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
-		}
+		SDL_FreeSurface(rotozoom_surface);
+	}
+
+	//FIXME Image is not cropped as specified
+	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
+	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
+
+		int w1 = implementation->sdlSurface->w,
+			h1 = implementation->sdlSurface->h,
+			w2 = rotozoom_surface->w,
+			h2 = rotozoom_surface->h;
+
+		int ax2 = w2/2 + (ax - w1/2)*cos(angle) - (ay - h1/2)*sin(angle);
+		int ay2 = h2/2 + (ay - h1/2)*cos(angle) - (ax - w1/2)*sin(angle);
+
+		dstrect.x = x-ax2;
+		dstrect.y = y-ay2;
+		srcrect.x = from_x; srcrect.y = from_y;
+		srcrect.w = w; srcrect.h = h;
+
+		SDL_BlitSurface(rotozoom_surface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
 		SDL_FreeSurface(rotozoom_surface);
 	}
 

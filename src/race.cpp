@@ -125,7 +125,7 @@ void Race::handleRender()
 
 void Race::handlePhysics()
 {
-	int speed = 20;
+	int speed = 10;
 	if(    isKeyUpPressed and     isKeyDownPressed and     isKeyLeftPressed and     isKeyRightPressed)
 	{
 		//clear

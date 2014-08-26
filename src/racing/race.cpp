@@ -7,8 +7,8 @@
 
 #include "race.hpp"
 
-#include "util.hpp"
-#include "game_engine.hpp"
+#include "../util.hpp"
+#include "../game_engine.hpp"
 
 using GameEngine::Image;
 

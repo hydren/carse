@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include "util.hpp"
 #include "game_engine.hpp"
-#include "race.hpp"
+#include "racing/race.hpp"
 
 #define VERSION "0.2.5"
 
@@ -20,6 +20,8 @@ int main(int argc, char** argv)
 	try
 	{
 		GameEngine::initialize();
+		atexit(GameEngine::finalize);
+
 		GameEngine::display = new Display(640, 480, "carse " VERSION);
 
 		Image loading_image("carse-logo.jpg");
@@ -31,7 +33,6 @@ int main(int argc, char** argv)
 		race.start();
 
 		delete GameEngine::display;
-		GameEngine::finalize();
 	}
 	catch(Exception& e)
 	{

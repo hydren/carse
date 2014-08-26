@@ -60,7 +60,6 @@ void Race::handleInput()
 {
 	while(not eventQueue->isEmpty())
 	{
-		cout << "events found" << endl;
 		ev = eventQueue->waitForEvent();
 
 		if(ev->getEventType() == GameEngine::Event::Type::DISPLAY_CLOSURE)

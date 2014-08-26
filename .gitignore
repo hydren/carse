@@ -1,2 +1,6 @@
 /Allegro 5 Debug
 /SDL 1.2 Debug
+/Linux SDL 1.2 Debug
+/Linux SDL 1.2 Release
+/Linux Allegro 5 Debug
+/Linux Allegro 5 Release

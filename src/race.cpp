@@ -21,6 +21,9 @@ Image* car_sprite;
 int posx=20, posy=20;
 float angle = 0;
 
+GameEngine::EventQueue* eventQueue;
+GameEngine::Event* ev;
+
 bool isKeyUpPressed = false,
 	isKeyDownPressed = false,
 	isKeyRightPressed = false,
@@ -33,6 +36,7 @@ Race::Race()
 	camera.x = camera.y = 0;
 
 	car_sprite = new Image("car-delorean-dmc12.png");
+	eventQueue = new GameEngine::EventQueue;
 }
 
 Race::~Race()
@@ -54,12 +58,10 @@ void Race::start()
 
 void Race::handleInput()
 {
-	GameEngine::EventQueue eventQueue;
-	GameEngine::Event* ev;
-
-	while(!eventQueue.isEmpty())
+	while(not eventQueue->isEmpty())
 	{
-		ev = eventQueue.waitForEvent();
+		cout << "events found" << endl;
+		ev = eventQueue->waitForEvent();
 
 		if(ev->getEventType() == GameEngine::Event::Type::DISPLAY_CLOSURE)
 		{

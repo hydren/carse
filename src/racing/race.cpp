@@ -16,7 +16,7 @@ using GameEngine::Image;
 Rect camera;
 bool running = true;
 
-Image* car_sprite;
+Image* car_sprite, *track_bg;
 
 int posx=20, posy=20;
 float angle = 0;
@@ -36,6 +36,7 @@ Race::Race()
 	camera.x = camera.y = 0;
 
 	car_sprite = new Image("car-delorean-dmc12.png");
+	track_bg = new Image("simple_track.jpg");
 	eventQueue = new GameEngine::EventQueue;
 }
 
@@ -118,6 +119,7 @@ void Race::handleRender()
 {
 	GameEngine::display->clear();
 
+	track_bg->draw(-camera.x, -camera.y);
 	car_sprite->draw_rotated(posx-camera.x, posy-camera.y, 23, 48, angle);
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();

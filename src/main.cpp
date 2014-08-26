@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 		GameEngine::initialize();
 		atexit(GameEngine::finalize);
 
-		GameEngine::display = new Display(640, 480, "carse " VERSION);
+		GameEngine::display = new Display(800, 600, "carse " VERSION);
 
 		Image loading_image("carse-logo.jpg");
 		loading_image.draw();

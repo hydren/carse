@@ -314,11 +314,19 @@ namespace GameEngine
 		SDL_FreeSurface(rotozoom_surface);
 	}
 
-	//FIXME Image is not cropped as specified
+	//may cause a performace drop...
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
+
+		//create a cropped surface from the original
+		SDL_Surface* cropped = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
+		srcrect.x = from_x; srcrect.y = from_y;
+		srcrect.w = w; srcrect.h = h;
+		SDL_BlitSurface(implementation->sdlSurface, &srcrect, cropped, null);
+
+		//zoom the cropped fragment
+		rotozoom_surface = rotozoomSurface(cropped, angle*toDegree, 1, 0);
 
 		int w1 = implementation->sdlSurface->w,
 			h1 = implementation->sdlSurface->h,
@@ -330,10 +338,10 @@ namespace GameEngine
 
 		dstrect.x = x-ax2;
 		dstrect.y = y-ay2;
-		srcrect.x = from_x; srcrect.y = from_y;
-		srcrect.w = w; srcrect.h = h;
 
-		SDL_BlitSurface(rotozoom_surface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		//blit the rotated cropped fragment, leaving the original intact
+		SDL_BlitSurface(rotozoom_surface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		SDL_FreeSurface(cropped);
 		SDL_FreeSurface(rotozoom_surface);
 	}
 

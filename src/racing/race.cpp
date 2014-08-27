@@ -8,7 +8,9 @@
 #include "race.hpp"
 
 #include "../util.hpp"
+#include "../physics/vector2d.hpp"
 #include "../game_engine.hpp"
+#include <cmath>
 
 using GameEngine::Image;
 
@@ -18,8 +20,11 @@ bool running = true;
 
 Image* car_sprite, *track_bg;
 
-int posx=400, posy=300;
-float angle = 0;
+double angle = 0;
+vector2d car_pos(200, 200);
+vector2d car_speed;
+
+
 
 GameEngine::EventQueue* eventQueue;
 GameEngine::Event* ev;
@@ -120,10 +125,7 @@ void Race::handleRender()
 	GameEngine::display->clear();
 
 	track_bg->draw(-camera.x, -camera.y);
-	car_sprite->draw_rotated(posx-camera.x, posy-camera.y, 23, 48, -angle);
-
-//	track_bg->draw_rotated(-camera.x, -camera.y, posx, posy, -angle);
-//	car_sprite->draw(posx-camera.x, posy-camera.y);
+	car_sprite->draw_rotated(car_pos.x-camera.x, car_pos.y-camera.y, 23, 48, angle);
 
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
@@ -131,106 +133,79 @@ void Race::handleRender()
 
 void Race::handlePhysics()
 {
-	int speed = 10;
-	if(    isKeyUpPressed and     isKeyDownPressed and     isKeyLeftPressed and     isKeyRightPressed)
+//	const double speed = 10;
+//	double speed_abs = 0;
+//
+//	if(isKeyDownPressed || isKeyUpPressed)
+//	{
+//		if(isKeyDownPressed)
+//			speed_abs = speed;
+//		else if(isKeyUpPressed)
+//			speed_abs = -speed;
+//
+//		if(isKeyLeftPressed)
+//		{
+//			angle += (car_speed.magnitude()/speed)*Math::PI/64;
+//		}
+//		else if(isKeyRightPressed)
+//		{
+//			angle -= (car_speed.magnitude()/speed)*Math::PI/64;
+//		}
+//
+//		car_speed.x = speed_abs*sin(angle);
+//		car_speed.y = speed_abs*cos(angle);
+//	}
+//	else
+//	{
+//		if(isKeyLeftPressed)
+//		{
+//			angle += (car_speed.magnitude()/speed)*Math::PI/64;
+//		}
+//		else if(isKeyRightPressed)
+//		{
+//			angle -= (car_speed.magnitude()/speed)*Math::PI/64;
+//		}
+//
+//		car_speed.x *= 0.9;
+//		car_speed.y *= 0.9;
+//	}
+
+	const double speed = 10;
+	if(isKeyLeftPressed)
 	{
-		//clear
+		angle -= (car_speed.unit().innerProduct(vector2d(sin(angle), cos(angle))))
+		* atan(car_speed.magnitude()) * Math::PI/64;
 	}
-	else if(    isKeyUpPressed and     isKeyDownPressed and     isKeyLeftPressed and not isKeyRightPressed)
+	else if(isKeyRightPressed)
 	{
-		posx -= speed;
-		angle = Math::PI/2.0;
+		angle += (car_speed.unit().innerProduct(vector2d(sin(angle), cos(angle))))
+		* atan(car_speed.magnitude()) * Math::PI/64;
 	}
-	else if(    isKeyUpPressed and     isKeyDownPressed and not isKeyLeftPressed and     isKeyRightPressed)
+	double speed_abs = 0;
+	if(isKeyDownPressed)
+		speed_abs = speed;
+	else if(isKeyUpPressed)
+		speed_abs = -speed;
+
+	if(speed_abs == 0)
 	{
-		posx += speed;
-		angle = 3.0*Math::PI/2.0;
+		car_speed.x *= 0.99;
+		car_speed.y *= 0.99;
+	}
+	else
+	{
+		car_speed.x = speed_abs*sin(angle);
+		car_speed.y = speed_abs*cos(angle);
 	}
 
-	else if(    isKeyUpPressed and     isKeyDownPressed and not isKeyLeftPressed and not isKeyRightPressed)
-	{
-		//clear
-	}
-
-	else if(    isKeyUpPressed and not isKeyDownPressed and     isKeyLeftPressed and     isKeyRightPressed)
-	{
-		posy -= speed;
-		angle = 0;
-	}
-
-	else if(    isKeyUpPressed and not isKeyDownPressed and     isKeyLeftPressed and not isKeyRightPressed)
-	{
-		posy -= speed/2;
-		posx -= speed/2;
-		angle = Math::PI/4.0;
-	}
-
-	else if(    isKeyUpPressed and not isKeyDownPressed and not isKeyLeftPressed and     isKeyRightPressed)
-	{
-		posy -= speed/2;
-		posx += speed/2;
-		angle = 7.0*Math::PI/4.0;
-	}
-
-	else if(    isKeyUpPressed and not isKeyDownPressed and not isKeyLeftPressed and not isKeyRightPressed)
-	{
-		posy -= speed;
-		angle = 0;
-	}
-
-	else if(not isKeyUpPressed and     isKeyDownPressed and     isKeyLeftPressed and     isKeyRightPressed)
-	{
-		posy += speed;
-		angle = Math::PI;
-	}
-
-	else if(not isKeyUpPressed and     isKeyDownPressed and     isKeyLeftPressed and not isKeyRightPressed)
-	{
-		posy += speed/2;
-		posx -= speed/2;
-		angle = 3.0*Math::PI/4.0;
-	}
-	else if(not isKeyUpPressed and     isKeyDownPressed and not isKeyLeftPressed and     isKeyRightPressed)
-	{
-		posy += speed/2;
-		posx += speed/2;
-		angle = 5.0*Math::PI/4.0;
-	}
-
-	else if(not isKeyUpPressed and     isKeyDownPressed and not isKeyLeftPressed and not isKeyRightPressed)
-	{
-		posy += speed;
-		angle = Math::PI;
-	}
-
-	else if(not isKeyUpPressed and not isKeyDownPressed and     isKeyLeftPressed and     isKeyRightPressed)
-	{
-		//clear
-	}
-
-	else if(not isKeyUpPressed and not isKeyDownPressed and     isKeyLeftPressed and not isKeyRightPressed)
-	{
-		posx -= speed;
-		angle = Math::PI/2.0;
-	}
-
-	else if(not isKeyUpPressed and not isKeyDownPressed and not isKeyLeftPressed and     isKeyRightPressed)
-	{
-		posx += speed;
-		angle = 3.0*Math::PI/2.0;
-	}
-
-	else if(not isKeyUpPressed and not isKeyDownPressed and not isKeyLeftPressed and not isKeyRightPressed)
-	{
-		//clear
-	}
+	car_pos.x += car_speed.x;
+	car_pos.y += car_speed.y;
 
 	//update the camera
-
-	camera.x = posx - camera.w/2;
-	camera.y = posy - camera.h/2;
-	if(camera.x < 0)
-		camera.x = 0;
-	if(camera.y < 0)
-		camera.y = 0;
+	camera.x = car_pos.x - camera.w/2;
+	camera.y = car_pos.y - camera.h/2;
+//	if(camera.x < 0)
+//		camera.x = 0;
+//	if(camera.y < 0)
+//		camera.y = 0;
 }

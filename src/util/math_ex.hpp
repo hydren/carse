@@ -19,6 +19,10 @@ namespace Math
 		return i < 0 ? -i : i;
 	}
 
+	template <typename T> int sgn(T val) {
+	    return (T(0) < val) - (val < T(0));
+	}
+
 	/** Parses the string for matching an integer. */
 	int parseInt(const std::string& str);
 

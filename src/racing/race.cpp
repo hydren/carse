@@ -18,7 +18,7 @@ bool running = true;
 
 Image* car_sprite, *track_bg;
 
-int posx=20, posy=20;
+int posx=400, posy=300;
 float angle = 0;
 
 GameEngine::EventQueue* eventQueue;
@@ -120,7 +120,11 @@ void Race::handleRender()
 	GameEngine::display->clear();
 
 	track_bg->draw(-camera.x, -camera.y);
-	car_sprite->draw_rotated(posx-camera.x, posy-camera.y, 23, 48, angle);
+	car_sprite->draw_rotated(posx-camera.x, posy-camera.y, 23, 48, -angle);
+
+//	track_bg->draw_rotated(-camera.x, -camera.y, posx, posy, -angle);
+//	car_sprite->draw(posx-camera.x, posy-camera.y);
+
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
 }
@@ -221,4 +225,12 @@ void Race::handlePhysics()
 		//clear
 	}
 
+	//update the camera
+
+	camera.x = posx - camera.w/2;
+	camera.y = posy - camera.h/2;
+	if(camera.x < 0)
+		camera.x = 0;
+	if(camera.y < 0)
+		camera.y = 0;
 }

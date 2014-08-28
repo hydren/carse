@@ -137,6 +137,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1740754932" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.1239781823" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.libs.1425966323" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="Box2D"/>
 									<listOptionValue builtIn="false" value="allegro"/>
 									<listOptionValue builtIn="false" value="allegro_image"/>
 									<listOptionValue builtIn="false" value="allegro_font"/>
@@ -194,6 +195,7 @@
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS}" id="cdt.managedbuild.tool.gnu.cpp.linker.base.1317240878" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.flags.1043504626" name="Linker flags" superClass="gnu.cpp.link.option.flags" value=" `sdl-config --cflags --libs`" valueType="string"/>
 								<option id="gnu.cpp.link.option.libs.1734007240" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="Box2D"/>
 									<listOptionValue builtIn="false" value="SDL_image"/>
 									<listOptionValue builtIn="false" value="SDL_ttf"/>
 									<listOptionValue builtIn="false" value="SDL_gfx"/>
@@ -248,7 +250,8 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.842569140" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS} ${FLAGS}" id="cdt.managedbuild.tool.gnu.cpp.linker.base.1410637544" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.flags.1736653462" name="Linker flags" superClass="gnu.cpp.link.option.flags" value=" `sdl-config --cflags --libs`" valueType="string"/>
-								<option id="gnu.cpp.link.option.libs.1737669010" superClass="gnu.cpp.link.option.libs" valueType="libs">
+								<option id="gnu.cpp.link.option.libs.1737669010" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="Box2D"/>
 									<listOptionValue builtIn="false" value="SDL_image"/>
 									<listOptionValue builtIn="false" value="SDL_ttf"/>
 									<listOptionValue builtIn="false" value="SDL_gfx"/>
@@ -303,6 +306,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.744555208" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.base.959912675" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.base">
 								<option id="gnu.cpp.link.option.libs.1219607463" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="Box2D"/>
 									<listOptionValue builtIn="false" value="allegro"/>
 									<listOptionValue builtIn="false" value="allegro_image"/>
 									<listOptionValue builtIn="false" value="allegro_font"/>

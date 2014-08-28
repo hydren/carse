@@ -8,9 +8,10 @@
 #include "race.hpp"
 
 #include "../util.hpp"
-#include "../physics/vector2d.hpp"
 #include "../game_engine.hpp"
 #include <cmath>
+#include <Box2D/Box2D.h>
+#include "../util/b2Math_ex.hpp"
 
 using GameEngine::Image;
 
@@ -21,8 +22,8 @@ bool running = true;
 Image* car_sprite, *track_bg;
 
 double angle = 0;
-vector2d car_pos(200, 200);
-vector2d car_speed;
+b2Vec2 car_pos(200, 200);
+b2Vec2 car_speed;
 
 
 
@@ -133,53 +134,16 @@ void Race::handleRender()
 
 void Race::handlePhysics()
 {
-//	const double speed = 10;
-//	double speed_abs = 0;
-//
-//	if(isKeyDownPressed || isKeyUpPressed)
-//	{
-//		if(isKeyDownPressed)
-//			speed_abs = speed;
-//		else if(isKeyUpPressed)
-//			speed_abs = -speed;
-//
-//		if(isKeyLeftPressed)
-//		{
-//			angle += (car_speed.magnitude()/speed)*Math::PI/64;
-//		}
-//		else if(isKeyRightPressed)
-//		{
-//			angle -= (car_speed.magnitude()/speed)*Math::PI/64;
-//		}
-//
-//		car_speed.x = speed_abs*sin(angle);
-//		car_speed.y = speed_abs*cos(angle);
-//	}
-//	else
-//	{
-//		if(isKeyLeftPressed)
-//		{
-//			angle += (car_speed.magnitude()/speed)*Math::PI/64;
-//		}
-//		else if(isKeyRightPressed)
-//		{
-//			angle -= (car_speed.magnitude()/speed)*Math::PI/64;
-//		}
-//
-//		car_speed.x *= 0.9;
-//		car_speed.y *= 0.9;
-//	}
-
 	const double speed = 10;
 	if(isKeyLeftPressed)
 	{
-		angle -= (car_speed.unit().innerProduct(vector2d(sin(angle), cos(angle))))
-		* atan(car_speed.magnitude()) * Math::PI/64;
+		angle -= b2Dot(b2Unit(car_speed), b2Vec2(sin(angle), cos(angle)))
+		* atan(car_speed.Length()) * Math::PI/64;
 	}
 	else if(isKeyRightPressed)
 	{
-		angle += (car_speed.unit().innerProduct(vector2d(sin(angle), cos(angle))))
-		* atan(car_speed.magnitude()) * Math::PI/64;
+		angle += b2Dot(b2Unit(car_speed), b2Vec2(sin(angle), cos(angle)))
+		* atan(car_speed.Length()) * Math::PI/64;
 	}
 	double speed_abs = 0;
 	if(isKeyDownPressed)

@@ -15,6 +15,43 @@
 
 using GameEngine::Image;
 
+
+class TDTire {
+  public:
+  b2Body* m_body;
+
+  TDTire(b2World* world) {
+	  b2BodyDef bodyDef;
+	  bodyDef.type = b2_dynamicBody;
+	  m_body = world->CreateBody(&bodyDef);
+
+	  b2PolygonShape polygonShape;
+	  polygonShape.SetAsBox( 0.5f, 1.25f );
+	  m_body->CreateFixture(&polygonShape, 1);//shape, density
+
+	  m_body->SetUserData( this );
+  }
+
+  ~TDTire() {
+	  m_body->GetWorld()->DestroyBody(m_body);
+  }
+
+  b2Vec2 getLateralVelocity() {
+	b2Vec2 currentRightNormal = m_body->GetWorldVector( b2Vec2(1,0) );
+	return b2Dot( currentRightNormal, m_body->GetLinearVelocity() ) * currentRightNormal;
+  }
+  void updateFriction() {
+     b2Vec2 impulse = m_body->GetMass() * -getLateralVelocity();
+     m_body->ApplyLinearImpulse( impulse, m_body->GetWorldCenter() , true);
+//     m_body->ApplyAngularImpulse( 0.1f * m_body->GetInertia() * -m_body->GetAngularVelocity() , true);
+  }
+};
+
+TDTire* tire;
+b2World* world;
+
+
+
 //the race camera
 Rect camera;
 bool running = true;
@@ -24,8 +61,6 @@ Image* car_sprite, *track_bg;
 double angle = 0;
 b2Vec2 car_pos(200, 200);
 b2Vec2 car_speed;
-
-
 
 GameEngine::EventQueue* eventQueue;
 GameEngine::Event* ev;
@@ -44,6 +79,8 @@ Race::Race()
 	car_sprite = new Image("car-delorean-dmc12.png");
 	track_bg = new Image("simple_track.jpg");
 	eventQueue = new GameEngine::EventQueue;
+	world = new b2World(b2Vec2(0, 0));
+	tire = new TDTire(world);
 }
 
 Race::~Race()
@@ -126,7 +163,8 @@ void Race::handleRender()
 	GameEngine::display->clear();
 
 	track_bg->draw(-camera.x, -camera.y);
-	car_sprite->draw_rotated(car_pos.x-camera.x, car_pos.y-camera.y, 23, 48, angle);
+//	car_sprite->draw_rotated(car_pos.x-camera.x, car_pos.y-camera.y, 23, 48, angle);
+	car_sprite->draw_rotated(tire->m_body->GetPosition().x-camera.x, tire->m_body->GetPosition().y-camera.y, 23, 48, tire->m_body->GetAngle());
 
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
@@ -134,40 +172,37 @@ void Race::handleRender()
 
 void Race::handlePhysics()
 {
-	const double speed = 10;
+	const double forceFactorAbs = 50000000;
 	if(isKeyLeftPressed)
 	{
-		angle -= b2Dot(b2Unit(car_speed), b2Vec2(sin(angle), cos(angle)))
-		* atan(car_speed.Length()) * Math::PI/64;
+		tire->m_body->ApplyAngularImpulse(+Math::PI/32, true);
 	}
 	else if(isKeyRightPressed)
 	{
-		angle += b2Dot(b2Unit(car_speed), b2Vec2(sin(angle), cos(angle)))
-		* atan(car_speed.Length()) * Math::PI/64;
+		tire->m_body->ApplyAngularImpulse(-Math::PI/32, true);
 	}
-	double speed_abs = 0;
+
+	double forceFactor = 0;
 	if(isKeyDownPressed)
-		speed_abs = speed;
+		forceFactor = forceFactorAbs;
 	else if(isKeyUpPressed)
-		speed_abs = -speed;
+		forceFactor = -forceFactorAbs;
 
-	if(speed_abs == 0)
-	{
-		car_speed.x *= 0.99;
-		car_speed.y *= 0.99;
-	}
-	else
-	{
-		car_speed.x = speed_abs*sin(angle);
-		car_speed.y = speed_abs*cos(angle);
-	}
+	b2Vec2 force(sin(tire->m_body->GetAngle()), cos(tire->m_body->GetAngle()));
+	force *= forceFactor;
+	tire->m_body->ApplyForceToCenter(force, true);
+	tire->m_body->ApplyAngularImpulse( 0.1f * tire->m_body->GetInertia() * -tire->m_body->GetAngularVelocity() , true);
 
-	car_pos.x += car_speed.x;
-	car_pos.y += car_speed.y;
+	b2Vec2 forceDrag = tire->m_body->GetLinearVelocity();
+//	forceDrag *= 0.1;
+	tire->m_body->ApplyForceToCenter(-forceDrag, true);
+
+	world->Step((1.0f / 60.0f), 10, 10);
+	cout << tire->m_body->GetLinearVelocity().x << " " << tire->m_body->GetLinearVelocity().y << " " << tire->m_body->GetLinearVelocity().Length() << endl;
 
 	//update the camera
-	camera.x = car_pos.x - camera.w/2;
-	camera.y = car_pos.y - camera.h/2;
+	camera.x = tire->m_body->GetPosition().x - camera.w/2;
+	camera.y = tire->m_body->GetPosition().y - camera.h/2;
 //	if(camera.x < 0)
 //		camera.x = 0;
 //	if(camera.y < 0)

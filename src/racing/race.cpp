@@ -29,9 +29,6 @@ double cameraAngle = 0;
 
 Image* car_sprite, *track_bg;
 
-b2Vec2 car_pos(0, 0);
-b2Vec2 car_speed;
-
 GameEngine::EventQueue* eventQueue;
 GameEngine::Event* ev;
 

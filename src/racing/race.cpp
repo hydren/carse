@@ -15,6 +15,8 @@
 #include "../game_engine.hpp"
 #include "elements.hpp"
 
+#define LOCK_ON
+
 using GameEngine::Image;
 using Math::toPixels;
 
@@ -129,8 +131,19 @@ void Race::handleRender()
 {
 	GameEngine::display->clear();
 
+#ifdef LOCK_ON
+
 	track_bg->draw_rotated(camera.w/2, camera.h/2, camera.x, camera.y, -cameraAngle);
 	car_sprite->draw_rotated(toPixels(player->m_body->GetPosition().x)-camera.x, toPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle()-cameraAngle);
+
+#endif
+
+#ifndef LOCK_ON
+
+	track_bg->draw(-camera.x, -camera.y);
+	car_sprite->draw_rotated(toPixels(player->m_body->GetPosition().x)-camera.x, toPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle());
+
+#endif
 
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
@@ -159,15 +172,23 @@ void Race::handlePhysics()
 	cout << player->m_body->GetLinearVelocity().x << " " << player->m_body->GetLinearVelocity().y << " " << player->m_body->GetLinearVelocity().Length() << endl;
 
 	//update the camera
+
+#ifdef LOCK_ON
 	camera.x = toPixels(player->m_body->GetPosition().x) - camera.w/2;
 	camera.y = toPixels(player->m_body->GetPosition().y) - camera.h/2;
 
 	float angleDiff = cameraAngle - (Math::PI - player->m_body->GetAngle());
 	cameraAngle -= angleDiff/10;
+#endif
 
+#ifndef LOCK_ON
+	camera.x = toPixels(player->m_body->GetPosition().x) - camera.w/2;
+	camera.y = toPixels(player->m_body->GetPosition().y) - camera.h/2;
 	//prevent camera out of bounds
 //	if(camera.x < 0)
 //		camera.x = 0;
 //	if(camera.y < 0)
 //		camera.y = 0;
+#endif
+
 }

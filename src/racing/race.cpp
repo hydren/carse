@@ -21,14 +21,15 @@ using Math::toPixels;
 b2World* world;
 Car* player;
 
+bool running = true;
+
 //the race camera
 Rect camera;
-bool running = true;
+double cameraAngle = 0;
 
 Image* car_sprite, *track_bg;
 
-double angle = 0;
-b2Vec2 car_pos(200, 200);
+b2Vec2 car_pos(0, 0);
 b2Vec2 car_speed;
 
 GameEngine::EventQueue* eventQueue;
@@ -131,8 +132,8 @@ void Race::handleRender()
 {
 	GameEngine::display->clear();
 
-	track_bg->draw(-camera.x, -camera.y);
-	car_sprite->draw_rotated(toPixels(player->m_body->GetPosition().x)-camera.x, toPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle());
+	track_bg->draw_rotated(camera.w/2, camera.h/2, camera.x, camera.y, -cameraAngle);
+	car_sprite->draw_rotated(toPixels(player->m_body->GetPosition().x)-camera.x, toPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle()-cameraAngle);
 
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
@@ -163,6 +164,7 @@ void Race::handlePhysics()
 	//update the camera
 	camera.x = toPixels(player->m_body->GetPosition().x) - camera.w/2;
 	camera.y = toPixels(player->m_body->GetPosition().y) - camera.h/2;
+	cameraAngle = Math::PI - player->m_body->GetAngle();
 
 	//prevent camera out of bounds
 //	if(camera.x < 0)

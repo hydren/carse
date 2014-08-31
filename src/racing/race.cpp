@@ -161,7 +161,9 @@ void Race::handlePhysics()
 	//update the camera
 	camera.x = toPixels(player->m_body->GetPosition().x) - camera.w/2;
 	camera.y = toPixels(player->m_body->GetPosition().y) - camera.h/2;
-	cameraAngle = Math::PI - player->m_body->GetAngle();
+
+	float angleDiff = cameraAngle - (Math::PI - player->m_body->GetAngle());
+	cameraAngle -= angleDiff/10;
 
 	//prevent camera out of bounds
 //	if(camera.x < 0)

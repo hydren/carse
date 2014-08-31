@@ -16,6 +16,7 @@
 #include "elements.hpp"
 
 using GameEngine::Image;
+using Math::toPixels;
 
 b2World* world;
 Car* player;
@@ -131,7 +132,7 @@ void Race::handleRender()
 	GameEngine::display->clear();
 
 	track_bg->draw(-camera.x, -camera.y);
-	car_sprite->draw_rotated(10*player->m_body->GetPosition().x-camera.x, 10*player->m_body->GetPosition().y-camera.y, 23, 48, Math::PI - player->m_body->GetAngle());
+	car_sprite->draw_rotated(toPixels(player->m_body->GetPosition().x)-camera.x, toPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle());
 
 	GameEngine::rest(0.01);
 	GameEngine::display->refresh();
@@ -160,8 +161,8 @@ void Race::handlePhysics()
 	cout << player->m_body->GetLinearVelocity().x << " " << player->m_body->GetLinearVelocity().y << " " << player->m_body->GetLinearVelocity().Length() << endl;
 
 	//update the camera
-	camera.x = 10*player->m_body->GetPosition().x - camera.w/2;
-	camera.y = 10*player->m_body->GetPosition().y - camera.h/2;
+	camera.x = toPixels(player->m_body->GetPosition().x) - camera.w/2;
+	camera.y = toPixels(player->m_body->GetPosition().y) - camera.h/2;
 
 	//prevent camera out of bounds
 //	if(camera.x < 0)

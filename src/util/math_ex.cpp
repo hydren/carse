@@ -51,3 +51,8 @@ int Math::aleatorioEntre(int min, int max)
 	}
 //	else return min + rand()%(max-min); // enviesado
 }
+
+float Math::toPixels(float meters)
+{
+	return meters*10;
+}

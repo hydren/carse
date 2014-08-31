@@ -46,6 +46,8 @@ namespace Math
 	{
 		return (a < b)? a : b;
 	}
+
+	float toPixels(float meters);
 }
 
 

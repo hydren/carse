@@ -250,14 +250,14 @@ namespace GameEngine
 //				float thickness = arg3; //XXX needed to be used
 				this->implementation->sdlSurface = SDL_CreateRGBSurface(SDL_SRCALPHA, width, height, 32, 0, 0, 0, 0);
 				rectangleRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-			}
+			}break;
 			case Image::FILLED_RECTANGLE:
 			{
 				float width = arg1;
 				float height = arg2;
 				this->implementation->sdlSurface = SDL_CreateRGBSurface(SDL_SRCALPHA, width, height, 32, 0, 0, 0, 0);
 				boxRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-			}
+			}break;
 			//TODO finish other cases with other shapes
 
 			default: break;

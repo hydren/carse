@@ -94,23 +94,6 @@ namespace GameEngine
 			std::cout << "Nao foi possivel inicializar a SDL TTF: " << TTF_GetError() << std::endl;
 			throw Exception(TTF_GetError());
 		}
-
-
-//		al_init();
-//		al_init_image_addon();
-//		al_init_font_addon();
-//		al_init_ttf_addon();
-//		al_init_primitives_addon();
-//
-//		if(!al_install_keyboard())
-//		{
-//			throw(Exception("Could not install keyboard"));
-//		}
-//
-//		if(!al_install_mouse())
-//		{
-//			throw(Exception("Could not install mouse"));
-//		}
 	}
 
 	void finalize()

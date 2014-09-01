@@ -27,6 +27,7 @@ SDL_Rect dstrect;
 SDL_Point center;
 SDL_Surface* ttf_aux_surf;
 SDL_Texture* ttf_aux_tex;
+SDL_Surface* prim_aux_surf;
 const double toDegree = (180.0/Math::PI);
 
 SDL_Color create_SDL_Color(Uint8 r, Uint8 g, Uint8 b)
@@ -220,43 +221,6 @@ namespace GameEngine
 			throw Exception("Could not load image \"" + filename + "\"" + IMG_GetError());
 	}
 
-	/**
-	 * Creates a colored shape. Depending on the shape, differents arguments are used.
-	 *
-	 * RECTANGLE				width, height, thickness
-	 * FILLED_RECTANGLE			width, height
-	 *
-	 * All of them must be int.
-	 * */
-	Image::Image(Shape shape, Color color, float arg1, float arg2, float arg3)
-	{
-		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		//FIXME NOT WORKING! maybe isnt necessary...
-		this->implementation = new Implementation;
-//
-//		switch(shape)
-//		{
-//			case Image::RECTANGLE:
-//			{
-//				float width = arg1;
-//				float height = arg2;
-////				float thickness = arg3; //XXX needed to be used
-//				this->implementation->sdlSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
-////				rectangleRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-//			}break;
-//			case Image::FILLED_RECTANGLE:
-//			{
-//				float width = arg1;
-//				float height = arg2;
-//				this->implementation->sdlSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
-////				boxRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-//			}break;
-//			//TODO finish other cases with other shapes
-//
-//			default: break;
-//		}
-	}
-
 	Image::~Image()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
@@ -270,7 +234,7 @@ namespace GameEngine
 
 		//draws all source region
 		dstrect.x = x; dstrect.y = y;
-		SDL_QueryTexture(implementation->sdlSurface, NULL, NULL, &(dstrect.w), &(dstrect.h));
+		SDL_QueryTexture(implementation->sdlSurface, null, null, &(dstrect.w), &(dstrect.h));
 		SDL_RenderCopy(display->implementation->sdlRenderer, implementation->sdlSurface, null, &dstrect);
 	}
 
@@ -346,6 +310,15 @@ namespace GameEngine
 		int h;
 		SDL_QueryTexture(implementation->sdlSurface, null, null, null, &h);
 		return h;
+	}
+
+	void Image::draw_rectangle(Color color, float x, float y, float width, float height, bool filled)
+	{
+		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		if(filled)
+			boxRGBA(display->implementation->sdlRenderer, 0, 0, width, height, color.r, color.g, color.b, 0);
+		else
+			rectangleRGBA(display->implementation->sdlRenderer, 0, 0, width, height, color.r, color.g, color.b, 0);
 	}
 
 	//******************* EVENT
@@ -520,6 +493,7 @@ namespace GameEngine
 		dstrect.x = x; dstrect.y = y;
 		SDL_UpdateTexture(ttf_aux_tex, null, ttf_aux_surf->pixels, ttf_aux_surf->pitch);
 		SDL_RenderCopy(display->implementation->sdlRenderer, ttf_aux_tex, null, &dstrect);
+		SDL_FreeSurface(ttf_aux_surf);
 	}
 
 	int Font::getSize() const

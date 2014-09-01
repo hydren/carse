@@ -86,12 +86,8 @@ namespace GameEngine
 
 		public:
 
-		enum Shape
-		{
-			TRIANGLE, FILLED_TRIANGLE, RECTANGLE, FILLED_RECTANGLE, ROUNDED_RECTANGLE, FILLED_ROUNDED_RECTANGLE, ELLIPSE, FILLED_ELLIPSE, CIRCLE, FILLED_CIRCLE
-		};
 
-		Image(Shape shape, Color color, float arg1=-1, float arg2=-1, float arg3=-1);
+
 		Image(string filename);
 		~Image();
 
@@ -139,6 +135,9 @@ namespace GameEngine
 		 */
 		void blit(Image& img2, float x=0, float y=0, float from_x=0, float from_y=0, float h=-1, float w=-1);
 
+
+		static void draw_rectangle(Color c, float x, float y, float w, float h, bool filled=true);
+		//TODO add more primitives: TRIANGLE, FILLED_TRIANGLE, RECTANGLE, FILLED_RECTANGLE, ROUNDED_RECTANGLE, FILLED_ROUNDED_RECTANGLE, ELLIPSE, FILLED_ELLIPSE, CIRCLE, FILLED_CIRCLE
 	};
 
 	/**

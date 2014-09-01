@@ -211,42 +211,6 @@ namespace GameEngine
 			throw Exception("Could not load image \"" + filename + "\"" + IMG_GetError());
 	}
 
-	/**
-	 * Creates a colored shape. Depending on the shape, differents arguments are used.
-	 *
-	 * RECTANGLE				width, height, thickness
-	 * FILLED_RECTANGLE			width, height
-	 *
-	 * All of them must be int.
-	 * */
-	Image::Image(Shape shape, Color color, float arg1, float arg2, float arg3)
-	{
-		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		this->implementation = new Implementation;
-
-		switch(shape)
-		{
-			case Image::RECTANGLE:
-			{
-				float width = arg1;
-				float height = arg2;
-//				float thickness = arg3; //XXX needed to be used
-				this->implementation->sdlSurface = SDL_CreateRGBSurface(SDL_SRCALPHA, width, height, 32, 0, 0, 0, 0);
-				rectangleRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-			}break;
-			case Image::FILLED_RECTANGLE:
-			{
-				float width = arg1;
-				float height = arg2;
-				this->implementation->sdlSurface = SDL_CreateRGBSurface(SDL_SRCALPHA, width, height, 32, 0, 0, 0, 0);
-				boxRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-			}break;
-			//TODO finish other cases with other shapes
-
-			default: break;
-		}
-	}
-
 	Image::~Image()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
@@ -357,6 +321,20 @@ namespace GameEngine
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return this->implementation->sdlSurface->h;
+	}
+
+	void Image::draw_rectangle(Color c, float x, float y, float width, float height, bool filled)
+	{
+		SDL_Surface* aux = SDL_CreateRGBSurface(SDL_SRCALPHA, width, height, 32, 0, 0, 0, 0);
+		if(filled)
+			boxRGBA(aux, 0, 0, width, height, c.r, c.g, c.b, SDL_ALPHA_OPAQUE);
+
+		else
+			rectangleRGBA(aux, 0, 0, width, height, c.r, c.g, c.b, SDL_ALPHA_OPAQUE);
+
+		dstrect.x = x; dstrect.y = y;
+		SDL_BlitSurface(aux, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		SDL_FreeSurface(aux);
 	}
 
 	//******************* EVENT

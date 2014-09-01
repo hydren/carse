@@ -161,54 +161,6 @@ namespace GameEngine
 			throw Exception("AllegroAPI Constructor - Could not load image: " + filename);
 	}
 
-	/**
-	 * Creates a colored shape. Depending on the shape, differents arguments are used.
-	 *
-	 * RECTANGLE				width, height, thickness
-	 * FILLED_RECTANGLE			width, height
-	 *
-	 * All of them must be int.
-	 * */
-	Image::Image(Shape shape, Color color, float arg1, float arg2, float arg3)
-	{
-		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		this->implementation = new Implementation;
-		this->implementation->bitmap = null;
-
-		ALLEGRO_COLOR c =  al_map_rgb(color.r, color.g, color.b);
-		switch(shape)
-		{
-			case Image::RECTANGLE:
-			{
-				float width = arg1;
-				float height = arg2;
-				float thickness = arg3;
-
-				ALLEGRO_BITMAP* b = al_create_bitmap(width, height);
-				al_set_target_bitmap(b);
-				al_draw_rectangle(0, 0, width, height, c, thickness);
-				al_set_target_backbuffer(display->implementation->allegroDisplay);
-				this->implementation->bitmap = b;
-				break;
-			}
-			case Image::FILLED_RECTANGLE:
-			{
-				float width = arg1;
-				float height = arg2;
-
-				ALLEGRO_BITMAP* b = al_create_bitmap(width, height);
-				al_set_target_bitmap(b);
-				al_draw_filled_rectangle(0, 0, width, height, c);
-				al_set_target_backbuffer(display->implementation->allegroDisplay);
-				this->implementation->bitmap = b;
-				break;
-			}
-			//TODO finish other cases with other shapes
-
-			default: break;
-		}
-	}
-
 	Image::~Image()
 	{
 		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
@@ -266,6 +218,16 @@ namespace GameEngine
 	{
 		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		return al_get_bitmap_height(this->implementation->bitmap);
+	}
+
+	void Image::draw_rectangle(Color c, float x1, float y1, float x2, float y2, bool filled)
+	{
+		if(not al_is_system_installed()) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
+		ALLEGRO_COLOR ac =  al_map_rgb(c.r, c.g, c.b);
+		if(filled)
+			al_draw_filled_rectangle(x1, y1, x2, y2, ac);
+		else
+			al_draw_rectangle(x1, y1, x2, y2, ac, 1);
 	}
 
 	Event::Event()

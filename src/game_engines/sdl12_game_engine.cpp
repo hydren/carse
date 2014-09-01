@@ -209,7 +209,7 @@ namespace GameEngine
 		this->implementation = new Implementation;
 		this->implementation->sdlSurface = IMG_Load(filename.c_str() );
 		if ( this->implementation->sdlSurface == null)
-			throw Exception("Could not load image \"" + filename + "\"" + IMG_GetError());
+			throw Exception("Could not load image \"" + filename + "\": " + IMG_GetError());
 	}
 
 	Image::~Image()

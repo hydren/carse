@@ -159,7 +159,7 @@ namespace GameEngine
 		this->implementation = new Implementation;
 		this->implementation->bitmap = al_load_bitmap(filename.c_str());
 		if ( this->implementation->bitmap == null)
-			throw Exception("AllegroAPI Constructor - Could not load image: " + filename);
+			throw Exception("Could not load image: \"" + filename + "\" Error " + al_get_errno());
 	}
 
 	Image::~Image()

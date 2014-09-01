@@ -12,6 +12,8 @@
 
 namespace GameEngine
 {
+	extern const char* BACKEND_NAME;
+
 	//pre-declaring these classes to avoid annoying declaration order issues...
 	class Image;
 	class EventQueue;

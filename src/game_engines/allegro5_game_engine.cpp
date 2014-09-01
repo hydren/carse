@@ -12,6 +12,7 @@
 #include "../game_engine.hpp"
 
 /** GameEngine code based on Allegro 5.0 */
+const char* GameEngine::BACKEND_NAME = "Allegro 5.0";
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>

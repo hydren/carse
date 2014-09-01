@@ -13,6 +13,7 @@
 #include "../util.hpp"
 
 /** GameEngine code based on SDL 2.0 */
+const char* GameEngine::BACKEND_NAME = "SDL 2.0";
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>

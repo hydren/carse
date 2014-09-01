@@ -24,7 +24,9 @@
 const Uint32 sdlInitFlags = (SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 SDL_Rect srcrect;
 SDL_Rect dstrect;
-SDL_Surface* rotozoom_surface;
+SDL_Point center;
+SDL_Surface* ttf_aux_surf;
+SDL_Texture* ttf_aux_tex;
 const double toDegree = (180.0/Math::PI);
 
 SDL_Color create_SDL_Color(Uint8 r, Uint8 g, Uint8 b)
@@ -46,15 +48,13 @@ namespace GameEngine
 	/** * Definition of the "implementation" struct's (experimental) * */
 	struct Display::Implementation
 	{
-		SDL_Surface* sdlDisplaySurface;
-		SDL_Texture* sdlDisplayTexture;
 		SDL_Window* sdlWindow;
 		SDL_Renderer* sdlRenderer;
 	};
 
 	struct Image::Implementation
 	{
-		SDL_Surface* sdlSurface;
+		SDL_Texture* sdlSurface;
 	};
 
 	struct Event::Implementation
@@ -97,23 +97,6 @@ namespace GameEngine
 			std::cout << "Nao foi possivel inicializar a SDL TTF: " << TTF_GetError() << std::endl;
 			throw Exception(TTF_GetError());
 		}
-
-
-//		al_init();
-//		al_init_image_addon();
-//		al_init_font_addon();
-//		al_init_ttf_addon();
-//		al_init_primitives_addon();
-//
-//		if(!al_install_keyboard())
-//		{
-//			throw(Exception("Could not install keyboard"));
-//		}
-//
-//		if(!al_install_mouse())
-//		{
-//			throw(Exception("Could not install mouse"));
-//		}
 	}
 
 	void finalize()
@@ -167,35 +150,14 @@ namespace GameEngine
 			throw Exception(message);
 		}
 
-		this->implementation->sdlDisplayTexture = SDL_CreateTexture(implementation->sdlRenderer,SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
-		if(this->implementation->sdlDisplayTexture == null)
-		{
-			string message = string("Could not create display texture! Error ") + SDL_GetError();
-			throw Exception(message);
-		}
-
-		this->implementation->sdlDisplaySurface = SDL_CreateRGBSurface(0, width, height, 32,
-                0x00FF0000,
-                0x0000FF00,
-                0x000000FF,
-                0xFF000000);
-
-		if(this->implementation->sdlDisplaySurface == null)
-		{
-			string message = string("Could not create display! Error ") + SDL_GetError();
-			throw Exception(message);
-		}
-
-		if(icon != null)
-			SDL_SetWindowIcon(this->implementation->sdlWindow, icon->implementation->sdlSurface);
+//		if(icon != null) //FIXME
+//			SDL_SetWindowIcon(this->implementation->sdlWindow, icon->implementation->sdlSurface);
 	}
 
 	Display::~Display()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		SDL_DestroyTexture(this->implementation->sdlDisplayTexture);
 		SDL_DestroyRenderer(this->implementation->sdlRenderer);
-		SDL_FreeSurface(this->implementation->sdlDisplaySurface);
 		SDL_DestroyWindow(this->implementation->sdlWindow);
 		delete this->implementation;
 	}
@@ -203,13 +165,17 @@ namespace GameEngine
 	int Display::getWidth()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		return implementation->sdlDisplaySurface->w;
+		int w;
+		SDL_GetWindowSize(implementation->sdlWindow, &w, null);
+		return w;
 	}
 
 	int Display::getHeight()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		return implementation->sdlDisplaySurface->h;
+		int h;
+		SDL_GetWindowSize(implementation->sdlWindow, null, &h);
+		return h;
 	}
 
 	void Display::setTitle(const string& title)
@@ -221,41 +187,23 @@ namespace GameEngine
 	void Display::setIcon(Image* image)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		if(image != null)
-			SDL_SetWindowIcon(this->implementation->sdlWindow, image->implementation->sdlSurface);
+//		if(image != null) //FIXME
+//			SDL_SetWindowIcon(this->implementation->sdlWindow, image->implementation->sdlSurface);
 	}
 
 	void Display::refresh()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		if ( SDL_RenderClear(implementation->sdlRenderer) == -1 )
-		{
-			string msg = string("SDL Display clear error! ") + SDL_GetError();
-			cout << msg << endl;
-			throw Exception(msg);
-		}
-		if( SDL_UpdateTexture(implementation->sdlDisplayTexture, null, implementation->sdlDisplaySurface->pixels, implementation->sdlDisplaySurface->pitch) == -1)
-		{
-			string message = string("Failed to refresh the display (UpdateTexture). ") + SDL_GetError();
-			cout << message << endl;
-			throw Exception(message);
-		}
-
-		if( SDL_RenderCopy(implementation->sdlRenderer, implementation->sdlDisplayTexture, null, null) == -1)
-		{
-			string message = string("Failed to refresh the display (RenderCopy). ") + SDL_GetError();
-			cout << message << endl;
-			throw Exception(message);
-		}
 		SDL_RenderPresent(implementation->sdlRenderer);
 	}
 
 	void Display::clear()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		if ( SDL_FillRect(this->implementation->sdlDisplaySurface, null, 0) == -1 )
+		if ( (SDL_SetRenderDrawColor( implementation->sdlRenderer, 0, 0, 0, 0xFF) == -1)
+		  or (SDL_RenderClear(implementation->sdlRenderer) == -1))
 		{
-			string msg = string("SDL_FillRect error! ") + SDL_GetError();
+			string msg = string("SDL Display clear error! ") + SDL_GetError();
 			cout << msg << endl;
 			throw Exception(msg);
 		}
@@ -267,7 +215,7 @@ namespace GameEngine
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 		this->implementation = new Implementation;
-		this->implementation->sdlSurface = IMG_Load(filename.c_str() );
+		this->implementation->sdlSurface = IMG_LoadTexture(display->implementation->sdlRenderer, filename.c_str() );
 		if ( this->implementation->sdlSurface == null)
 			throw Exception("Could not load image \"" + filename + "\"" + IMG_GetError());
 	}
@@ -283,36 +231,36 @@ namespace GameEngine
 	Image::Image(Shape shape, Color color, float arg1, float arg2, float arg3)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		//XXX not the expected result. maybe isnt necessary...
+		//FIXME NOT WORKING! maybe isnt necessary...
 		this->implementation = new Implementation;
-
-		switch(shape)
-		{
-			case Image::RECTANGLE:
-			{
-				float width = arg1;
-				float height = arg2;
-//				float thickness = arg3; //XXX needed to be used
-				this->implementation->sdlSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
-//				rectangleRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-			}break;
-			case Image::FILLED_RECTANGLE:
-			{
-				float width = arg1;
-				float height = arg2;
-				this->implementation->sdlSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
-//				boxRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
-			}break;
-			//TODO finish other cases with other shapes
-
-			default: break;
-		}
+//
+//		switch(shape)
+//		{
+//			case Image::RECTANGLE:
+//			{
+//				float width = arg1;
+//				float height = arg2;
+////				float thickness = arg3; //XXX needed to be used
+//				this->implementation->sdlSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+////				rectangleRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
+//			}break;
+//			case Image::FILLED_RECTANGLE:
+//			{
+//				float width = arg1;
+//				float height = arg2;
+//				this->implementation->sdlSurface = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+////				boxRGBA(implementation->sdlSurface, 0, 0, width, height, color.r, color.g, color.b, 0);
+//			}break;
+//			//TODO finish other cases with other shapes
+//
+//			default: break;
+//		}
 	}
 
 	Image::~Image()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		SDL_FreeSurface(this->implementation->sdlSurface);
+		SDL_DestroyTexture(implementation->sdlSurface);
 		delete implementation;
 	}
 
@@ -322,8 +270,8 @@ namespace GameEngine
 
 		//draws all source region
 		dstrect.x = x; dstrect.y = y;
-
-		SDL_BlitSurface(this->implementation->sdlSurface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		SDL_QueryTexture(implementation->sdlSurface, NULL, NULL, &(dstrect.w), &(dstrect.h));
+		SDL_RenderCopy(display->implementation->sdlRenderer, implementation->sdlSurface, null, &dstrect);
 	}
 
 	void Image::draw(float x, float y, float from_x, float from_y, float w, float h)
@@ -334,91 +282,70 @@ namespace GameEngine
 		dstrect.x = x; dstrect.y = y;
 		srcrect.x = from_x; srcrect.y = from_y;
 		srcrect.w = w; srcrect.h = h;
-
-		SDL_BlitSurface(this->implementation->sdlSurface, &srcrect, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		SDL_QueryTexture(implementation->sdlSurface, NULL, NULL, &(dstrect.w), &(dstrect.h));
+		SDL_RenderCopy(display->implementation->sdlRenderer, implementation->sdlSurface, &srcrect, &dstrect);
 	}
 
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		rotozoom_surface = rotozoomSurface(implementation->sdlSurface, angle*toDegree, 1, 0);
 
-		int w1 = implementation->sdlSurface->w,
-			h1 = implementation->sdlSurface->h,
-			w2 = rotozoom_surface->w,
-			h2 = rotozoom_surface->h;
+		center.x = ax;
+		center.y = ay;
 
-		int ax2 = w2/2 + (ax - w1/2)*cos(angle) - (ay - h1/2)*sin(angle);
-		int ay2 = h2/2 + (ay - h1/2)*cos(angle) - (ax - w1/2)*sin(angle);
-
-		dstrect.x = x-ax2;
-		dstrect.y = y-ay2;
-
-		SDL_BlitSurface(rotozoom_surface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
-
-		SDL_FreeSurface(rotozoom_surface);
+		dstrect.x = x;
+		dstrect.y = y;
+		SDL_QueryTexture(implementation->sdlSurface, NULL, NULL, &(dstrect.w), &(dstrect.h));
+		SDL_RenderCopyEx(display->implementation->sdlRenderer, implementation->sdlSurface, null, &dstrect, -angle*toDegree, &center, SDL_FLIP_NONE);
 	}
 
-	//may cause a performace drop...
 	void Image::draw_rotated(float x, float y, float ax, float ay, float angle, float from_x, float from_y, float w, float h)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
 
-		//create a cropped surface from the original
-		SDL_Surface* cropped = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
+		center.x = ax;
+		center.y = ay;
+
+		dstrect.x = x; dstrect.y = y;
 		srcrect.x = from_x; srcrect.y = from_y;
 		srcrect.w = w; srcrect.h = h;
-		SDL_BlitSurface(implementation->sdlSurface, &srcrect, cropped, null);
-
-		//zoom the cropped fragment
-		rotozoom_surface = rotozoomSurface(cropped, angle*toDegree, 1, 0);
-
-		int w1 = implementation->sdlSurface->w,
-			h1 = implementation->sdlSurface->h,
-			w2 = rotozoom_surface->w,
-			h2 = rotozoom_surface->h;
-
-		int ax2 = w2/2 + (ax - w1/2)*cos(angle) - (ay - h1/2)*sin(angle);
-		int ay2 = h2/2 + (ay - h1/2)*cos(angle) - (ax - w1/2)*sin(angle);
-
-		dstrect.x = x-ax2;
-		dstrect.y = y-ay2;
-
-		//blit the rotated cropped fragment, leaving the original intact
-		SDL_BlitSurface(rotozoom_surface, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
-		SDL_FreeSurface(cropped);
-		SDL_FreeSurface(rotozoom_surface);
+		SDL_QueryTexture(implementation->sdlSurface, NULL, NULL, &(dstrect.w), &(dstrect.h));
+		SDL_RenderCopyEx(display->implementation->sdlRenderer, implementation->sdlSurface, &srcrect, &dstrect, -angle*toDegree, &center, SDL_FLIP_NONE);
 	}
 
 
 	void Image::blit(Image& img2, float x, float y, float from_x, float from_y, float h, float w)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		dstrect.x = x; dstrect.y = y;
-
-		 //draws all source region
-		if(w == -1 and h == -1)
-			SDL_BlitSurface(this->implementation->sdlSurface, null, img2.implementation->sdlSurface, &dstrect);
-
-		//draws selected region
-		else
-		{
-			srcrect.x = from_x; srcrect.y = from_y;
-			srcrect.w = w; srcrect.h = h;
-			SDL_BlitSurface(this->implementation->sdlSurface, &srcrect, img2.implementation->sdlSurface, &dstrect);
-		}
+		//FIXME set target to img2
+//		dstrect.x = x; dstrect.y = y;
+//
+//		 //draws all source region
+//		if(w == -1 and h == -1)
+//			SDL_BlitSurface(this->implementation->sdlSurface, null, img2.implementation->sdlSurface, &dstrect);
+//
+//		//draws selected region
+//		else
+//		{
+//			srcrect.x = from_x; srcrect.y = from_y;
+//			srcrect.w = w; srcrect.h = h;
+//			SDL_BlitSurface(this->implementation->sdlSurface, &srcrect, img2.implementation->sdlSurface, &dstrect);
+//		}
 	}
 
-	//XXX Does this work correctly?
 	float Image::getWidth()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		return this->implementation->sdlSurface->w;
+		int w;
+		SDL_QueryTexture(implementation->sdlSurface, null, null, &w, null);
+		return w;
 	}
 	float Image::getHeight()
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		return this->implementation->sdlSurface->h;
+		int h;
+		SDL_QueryTexture(implementation->sdlSurface, null, null, null, &h);
+		return h;
 	}
 
 	//******************* EVENT
@@ -582,17 +509,17 @@ namespace GameEngine
 	void Font::draw_text(string text, float x, float y, Color color)
 	{
 		if(checkInit()==false) throw Exception("Fatal error: attempt to use GameEngine library without initialization!");
-		SDL_Surface* renderedText = null;
 		if(this->implementation->isAntialiased)
-			renderedText = TTF_RenderText_Blended(this->implementation->sdlttfFont, text.c_str(), create_SDL_Color(color.r, color.g, color.b));
+			ttf_aux_surf = TTF_RenderText_Blended(this->implementation->sdlttfFont, text.c_str(), create_SDL_Color(color.r, color.g, color.b));
 		else
-			renderedText = TTF_RenderText_Solid(this->implementation->sdlttfFont, text.c_str(), create_SDL_Color(color.r, color.g, color.b));
+			ttf_aux_surf = TTF_RenderText_Solid(this->implementation->sdlttfFont, text.c_str(), create_SDL_Color(color.r, color.g, color.b));
 
-		if(renderedText == null)
+		if(ttf_aux_surf == null)
 			throw Exception(string("Error: rendered text creation failed! ") + TTF_GetError() + "\n\""+text+"\"");
 
 		dstrect.x = x; dstrect.y = y;
-		SDL_BlitSurface(renderedText, null, GameEngine::display->implementation->sdlDisplaySurface, &dstrect);
+		SDL_UpdateTexture(ttf_aux_tex, null, ttf_aux_surf->pixels, ttf_aux_surf->pitch);
+		SDL_RenderCopy(display->implementation->sdlRenderer, ttf_aux_tex, null, &dstrect);
 	}
 
 	int Font::getSize() const

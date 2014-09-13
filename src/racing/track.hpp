@@ -12,7 +12,8 @@
 
 /** The track is specified by stretches, and in between, it is interpolated.
  * Implement track drawing by drawing rectangles (primitives) with offsets.
- * examples: Top Gear series, Lotus Challenge series, Rad Racer series, Chase HQ series, F-Zero
+ * examples: Top Gear series, Lotus Challenge series, Rad Racer series, Chase HQ series, F-Zero,
+ * 8-bit Rally: https://itunes.apple.com/app/8-bit-rally/id441201921?mt=8
  */
 struct Track
 {

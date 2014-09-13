@@ -15,7 +15,7 @@
 #include "../game_engine.hpp"
 #include "vehicle.hpp"
 
-#define LOCK_ON
+//#define LOCK_ON
 
 using GameEngine::Image;
 using Math::toPixels;

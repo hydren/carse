@@ -55,7 +55,7 @@ struct Car
 
 	Tire *tireFrontLeft, *tireFrontRight, *tireRearLeft, *tireRearRight;
 
-	Car(b2World* world);
+	Car(b2World* world, float x=0, float y=0, float angle=0);
 
     ~Car() {
         delete tireFrontLeft;

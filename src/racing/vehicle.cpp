@@ -60,8 +60,8 @@ void Tire::updateDrive(float desiredSpeed) {
 	m_body->ApplyForce( m_currentTraction * force * currentForwardNormal, m_body->GetWorldCenter() , true);
 }
 
-Car::Car(b2World* world) {
-
+Car::Car(b2World* world, float x, float y, float angle) {
+//TODO adapt the code to specify position and angle
 	//create car body
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_dynamicBody;

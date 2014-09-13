@@ -13,9 +13,9 @@
 #include "../util.hpp"
 #include "../util/b2Math_ex.hpp"
 #include "../game_engine.hpp"
-#include "elements.hpp"
+#include "vehicle.hpp"
 
-//#define LOCK_ON
+#define LOCK_ON
 
 using GameEngine::Image;
 using Math::toPixels;

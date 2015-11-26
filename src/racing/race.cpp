@@ -45,7 +45,7 @@ Race::Race()
 	camera.h = GameEngine::display->getHeight();
 	camera.x = camera.y = 0;
 
-	car_sprite = new Image("car-delorean-dmc12.png");
+	car_sprite = new Image("car.png");
 	track_bg = new Image("simple_track.jpg");
 	eventQueue = new GameEngine::EventQueue;
 	world = new b2World(b2Vec2(0, 0));

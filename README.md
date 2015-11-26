@@ -1,5 +1,6 @@
-# ![Alt text](https://github.com/hydren/carse/blob/master/carse/carse-logo.jpg "Carse logo") carse
-Carse is a 2D car simulation engine.
+# carse
+
+carse is a 2D car simulation engine.
 
 The aim is to provide a Top Gear like racing game.
 

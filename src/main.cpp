@@ -6,14 +6,17 @@
  */
 
 #include <cstdlib>
-#include "util.hpp"
-#include "game_engine.hpp"
+#include <iostream>
+#include <stdexcept>
+#include "fgeal.hpp"
 #include "racing/race.hpp"
 
-#define VERSION "0.2.9"
+#define CARSE_VERSION "0.3.0"
 
 using GameEngine::Image;
 using GameEngine::Display;
+using std::cout; using std::endl;
+using std::exception;
 
 int main(int argc, char** argv)
 {
@@ -34,9 +37,9 @@ int main(int argc, char** argv)
 
 		delete GameEngine::display;
 	}
-	catch(Exception& e)
+	catch(exception& e)
 	{
-		cout << e.message() << endl;
+		cout << e.what() << endl;
 	}
 
 	return EXIT_SUCCESS;

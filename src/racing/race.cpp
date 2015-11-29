@@ -158,7 +158,12 @@ void Race::handlePhysics()
 	if(isKeyDownPressed)
 		forceFactor = -forceFactorAbs/2;
 	else if(isKeyUpPressed)
+	{
 		forceFactor = forceFactorAbs;
+		int i;
+		for(i=0; i<player->m_body->GetLinearVelocity().Length() / 50;i++)
+			forceFactor *= 1.5;
+	}
 
 	float angle = 0;
 	if(isKeyLeftPressed)

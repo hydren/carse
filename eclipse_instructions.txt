@@ -1,3 +1,3 @@
 When building carse in eclipse with fgeal project, edit the run configuration to add LD_LIBRARY_PATH=. at the "Environment" tab.
 Create a symbolic link (or copy manually every time) the libfgeal.so (or .a) file to project root folder.
-Remember to run a script to copy .so/.a files from fgeal project to its /libs folder (create folder if absent).
+Remember to run a script to copy .so/.a files from fgeal project to its /libs folder (create folder if absent) every time when switching backend engine on fgeal project.

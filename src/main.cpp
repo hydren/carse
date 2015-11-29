@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 		GameEngine::initialize();
 		atexit(GameEngine::finalize);
 
-		GameEngine::display = new Display(800, 600, string("carse ")+ CARSE_VERSION + " (" + GameEngine::BACKEND_NAME + ")");
+		GameEngine::display = new Display(800, 600, string("carse ")+ CARSE_VERSION);
 
 		Image loading_image("carse-logo.jpg");
 		loading_image.draw();

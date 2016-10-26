@@ -13,8 +13,8 @@
 
 #define CARSE_VERSION "0.3.0"
 
-using GameEngine::Image;
-using GameEngine::Display;
+using fgeal::Image;
+using fgeal::Display;
 using std::cout; using std::endl;
 using std::exception;
 
@@ -22,20 +22,20 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		GameEngine::initialize();
-		atexit(GameEngine::finalize);
+		fgeal::initialize();
+		atexit(fgeal::finalize);
 
-		GameEngine::display = new Display(800, 600, string("carse ")+ CARSE_VERSION);
+		fgeal::display = new Display(800, 600, string("carse ")+ CARSE_VERSION);
 
 		Image loading_image("carse-logo.jpg");
 		loading_image.draw();
-		GameEngine::display->refresh();
-		GameEngine::rest(0.5);
+		fgeal::display->refresh();
+		fgeal::rest(0.5);
 
 		Race race;
 		race.start();
 
-		delete GameEngine::display;
+		delete fgeal::display;
 	}
 	catch(exception& e)
 	{

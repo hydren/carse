@@ -17,7 +17,7 @@
 
 //#define LOCK_ON
 
-using GameEngine::Image;
+using fgeal::Image;
 using Math::convertToPixels;
 using std::cout; using std::endl;
 
@@ -32,8 +32,8 @@ double cameraAngle = 0;
 
 Image* car_sprite, *track_bg;
 
-GameEngine::EventQueue* eventQueue;
-GameEngine::Event* ev;
+fgeal::EventQueue* eventQueue;
+fgeal::Event* ev;
 
 bool isKeyUpPressed = false,
 	isKeyDownPressed = false,
@@ -42,13 +42,13 @@ bool isKeyUpPressed = false,
 
 Race::Race()
 {
-	camera.w = GameEngine::display->getWidth();
-	camera.h = GameEngine::display->getHeight();
+	camera.w = fgeal::display->getWidth();
+	camera.h = fgeal::display->getHeight();
 	camera.x = camera.y = 0;
 
 	car_sprite = new Image("car.png");
 	track_bg = new Image("simple_track.jpg");
-	eventQueue = new GameEngine::EventQueue;
+	eventQueue = new fgeal::EventQueue;
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
 }
@@ -76,48 +76,48 @@ void Race::handleInput()
 	{
 		ev = eventQueue->waitForEvent();
 
-		if(ev->getEventType() == GameEngine::Event::Type::DISPLAY_CLOSURE)
+		if(ev->getEventType() == fgeal::Event::Type::DISPLAY_CLOSURE)
 		{
 			running=false;
 		}
-		else if(ev->getEventType() == GameEngine::Event::Type::KEY_PRESS)
+		else if(ev->getEventType() == fgeal::Event::Type::KEY_PRESS)
 		{
 			switch(ev->getEventKeyCode())
 			{
-			case GameEngine::Event::Key::ARROW_UP:
+			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = true;
 				break;
-			case GameEngine::Event::Key::ARROW_DOWN:
+			case fgeal::Event::Key::ARROW_DOWN:
 				isKeyDownPressed = true;
 				break;
-			case GameEngine::Event::Key::ARROW_RIGHT:
+			case fgeal::Event::Key::ARROW_RIGHT:
 				isKeyRightPressed = true;
 				break;
-			case GameEngine::Event::Key::ARROW_LEFT:
+			case fgeal::Event::Key::ARROW_LEFT:
 				isKeyLeftPressed = true;
 				break;
-			case GameEngine::Event::Key::ESCAPE:
+			case fgeal::Event::Key::ESCAPE:
 				break;
-			case GameEngine::Event::Key::ENTER:
+			case fgeal::Event::Key::ENTER:
 				break;
 			default:
 				break;
 			}
 		}
-		else if(ev->getEventType() == GameEngine::Event::Type::KEY_RELEASE)
+		else if(ev->getEventType() == fgeal::Event::Type::KEY_RELEASE)
 		{
 			switch(ev->getEventKeyCode())
 			{
-			case GameEngine::Event::Key::ARROW_UP:
+			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = false;
 				break;
-			case GameEngine::Event::Key::ARROW_DOWN:
+			case fgeal::Event::Key::ARROW_DOWN:
 				isKeyDownPressed = false;
 				break;
-			case GameEngine::Event::Key::ARROW_RIGHT:
+			case fgeal::Event::Key::ARROW_RIGHT:
 				isKeyRightPressed = false;
 				break;
-			case GameEngine::Event::Key::ARROW_LEFT:
+			case fgeal::Event::Key::ARROW_LEFT:
 				isKeyLeftPressed = false;
 				break;
 			default:
@@ -130,7 +130,7 @@ void Race::handleInput()
 
 void Race::handleRender()
 {
-	GameEngine::display->clear();
+	fgeal::display->clear();
 
 #ifdef LOCK_ON
 
@@ -146,8 +146,8 @@ void Race::handleRender()
 
 #endif
 
-	GameEngine::rest(0.01);
-	GameEngine::display->refresh();
+	fgeal::rest(0.01);
+	fgeal::display->refresh();
 }
 
 void Race::handlePhysics()

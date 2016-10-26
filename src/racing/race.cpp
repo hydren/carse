@@ -18,8 +18,8 @@
 //#define LOCK_ON
 
 using fgeal::Image;
-using Math::convertToPixels;
-using std::cout; using std::endl;
+using std::cout;
+using std::endl;
 
 b2World* world;
 Car* player;
@@ -135,14 +135,14 @@ void Race::handleRender()
 #ifdef LOCK_ON
 
 	track_bg->draw_rotated(camera.w/2, camera.h/2, camera.x, camera.y, -cameraAngle);
-	car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle()-cameraAngle);
+	car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle()-cameraAngle);
 
 #endif
 
 #ifndef LOCK_ON
 
 	track_bg->draw(-camera.x, -camera.y);
-	car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, Math::PI - player->m_body->GetAngle());
+	car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle());
 
 #endif
 
@@ -167,9 +167,9 @@ void Race::handlePhysics()
 
 	float angle = 0;
 	if(isKeyLeftPressed)
-		angle = -Math::PI/4;
+		angle = -M_PI/4;
 	else if(isKeyRightPressed)
-		angle = Math::PI/4;
+		angle = M_PI/4;
 
 	player->update(forceFactor, angle);
 
@@ -183,7 +183,7 @@ void Race::handlePhysics()
 	camera.x = 0.1*convertToPixels(player->m_body->GetPosition().x) - camera.w/2;
 	camera.y = 0.1*convertToPixels(player->m_body->GetPosition().y) - camera.h/2;
 
-	float angleDiff = cameraAngle - (Math::PI - player->m_body->GetAngle());
+	float angleDiff = cameraAngle - (M_PI - player->m_body->GetAngle());
 	cameraAngle -= angleDiff/10;
 #endif
 

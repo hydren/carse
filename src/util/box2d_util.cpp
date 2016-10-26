@@ -13,3 +13,13 @@ b2Vec2 b2Unit(const b2Vec2& v)
 	u.Normalize();
 	return u;
 }
+
+float convertToMeters(float pixels)
+{
+	return 0.01f * pixels;
+}
+
+float convertToPixels(float meters)
+{
+	return 100.0f * meters;
+}

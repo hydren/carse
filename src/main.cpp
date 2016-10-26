@@ -5,18 +5,25 @@
  *      Author: felipe
  */
 
-#include <cstdlib>
 #include <iostream>
+#include <string>
 #include <stdexcept>
-#include "fgeal.hpp"
+
+#include <cstdlib>
+
 #include "racing/race.hpp"
+
+#include "fgeal.hpp"
 
 #define CARSE_VERSION "0.3.0"
 
+using std::cout;
+using std::endl;
+using std::string;
+using std::exception;
+
 using fgeal::Image;
 using fgeal::Display;
-using std::cout; using std::endl;
-using std::exception;
 
 int main(int argc, char** argv)
 {

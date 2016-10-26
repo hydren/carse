@@ -1,3 +1,4 @@
+# Build configurations folders
 /Linux SDL 1.2 Debug
 /Linux SDL 1.2 Release
 /Linux Allegro 5 Debug
@@ -12,3 +13,8 @@
 /Win32 SDL 2.0 Release/
 /Linux fgeal Debug/
 /Win32 fgeal Debug/
+
+# Eclipse cache
+language.settings.xml
+org.eclipse.cdt.managedbuilder.core.prefs
+org.eclipse.cdt.codan.core.prefs

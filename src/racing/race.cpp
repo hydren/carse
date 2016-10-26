@@ -12,7 +12,7 @@
 #include "fgeal.hpp"
 
 #include <iostream>
-#include "../util/b2Math_ex.hpp"
+#include "../util/box2d_util.hpp"
 #include "vehicle.hpp"
 
 //#define LOCK_ON

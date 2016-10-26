@@ -18,6 +18,7 @@
 //#define LOCK_ON
 
 using fgeal::Image;
+using fgeal::Sound;
 using std::cout;
 using std::endl;
 
@@ -31,6 +32,7 @@ Rect camera;
 double cameraAngle = 0;
 
 Image* car_sprite, *track_bg;
+Sound* car_sound_idle, *car_sound_high;;
 
 fgeal::EventQueue* eventQueue;
 fgeal::Event* ev;
@@ -48,6 +50,8 @@ Race::Race()
 
 	car_sprite = new Image("car.png");
 	track_bg = new Image("simple_track.jpg");
+	car_sound_idle = new Sound("engine_idle.ogg");
+	car_sound_high = new Sound("engine_high.ogg");
 	eventQueue = new fgeal::EventQueue;
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
@@ -61,6 +65,7 @@ Race::~Race()
 void Race::start()
 {
 	cout << "race start!" << endl;
+	car_sound_idle->loop();
 	do
 	{
 		handleInput();
@@ -86,6 +91,9 @@ void Race::handleInput()
 			{
 			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = true;
+				car_sound_idle->halt();
+				if(not car_sound_high->isPlaying())
+					car_sound_high->loop();
 				break;
 			case fgeal::Event::Key::ARROW_DOWN:
 				isKeyDownPressed = true;
@@ -110,6 +118,9 @@ void Race::handleInput()
 			{
 			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = false;
+				car_sound_high->halt();
+				if(not car_sound_idle->isPlaying())
+				car_sound_idle->loop();
 				break;
 			case fgeal::Event::Key::ARROW_DOWN:
 				isKeyDownPressed = false;

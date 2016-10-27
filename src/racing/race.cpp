@@ -6,16 +6,19 @@
  */
 
 #include "race.hpp"
+#include "vehicle.hpp"
 
-#include <cmath>
-#include <Box2D/Box2D.h>
 #include "fgeal.hpp"
 
 #include <iostream>
-#include "../util/box2d_util.hpp"
-#include "vehicle.hpp"
 
-//#define LOCK_ON
+#include <cmath>
+
+#include <Box2D/Box2D.h>
+
+#include "../util/box2d_util.hpp"
+
+//#define LOCK_ON  // only works with allegro fgeal adapter (due to a bug in the SDL adapters)
 
 using fgeal::Image;
 using fgeal::Sound;
@@ -32,7 +35,8 @@ Rect camera;
 double cameraAngle = 0;
 
 Image* car_sprite, *track_bg;
-Sound* car_sound_idle, *car_sound_high;;
+Sound* car_sound_idle, *car_sound_high;
+Sound* music_sample;
 
 fgeal::EventQueue* eventQueue;
 fgeal::Event* ev;
@@ -52,6 +56,7 @@ Race::Race()
 	track_bg = new Image("simple_track.jpg");
 	car_sound_idle = new Sound("engine_idle.ogg");
 	car_sound_high = new Sound("engine_high.ogg");
+	music_sample = new Sound("music_sample.ogg", true);
 	eventQueue = new fgeal::EventQueue;
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
@@ -65,6 +70,7 @@ Race::~Race()
 void Race::start()
 {
 	cout << "race start!" << endl;
+	music_sample->loop();
 	car_sound_idle->loop();
 	do
 	{
@@ -107,6 +113,12 @@ void Race::handleInput()
 			case fgeal::Event::Key::ESCAPE:
 				break;
 			case fgeal::Event::Key::ENTER:
+				break;
+			case fgeal::Event::Key::P:
+				if(music_sample->isPlaying())
+					music_sample->halt(true);
+				else
+					music_sample->loop();
 				break;
 			default:
 				break;

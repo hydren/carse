@@ -910,10 +910,16 @@
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1328881171;cdt.managedbuild.tool.gnu.cpp.compiler.input.1208627395">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1001751578;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1001751578.;cdt.managedbuild.tool.gnu.cpp.compiler.base.725569108;cdt.managedbuild.tool.gnu.cpp.compiler.input.1882031818">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1991966433;cdt.managedbuild.tool.gnu.cpp.compiler.input.1318439197">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.515577677;cdt.managedbuild.tool.gnu.c.compiler.input.1520551626">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.;cdt.managedbuild.tool.gnu.cross.c.compiler.1416036682;cdt.managedbuild.tool.gnu.c.compiler.input.1686468461">

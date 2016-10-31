@@ -149,7 +149,6 @@ void Race::handleInput()
 				break;
 			}
 		}
-
 	}
 }
 

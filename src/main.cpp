@@ -20,7 +20,6 @@
 using std::cout;
 using std::endl;
 using std::string;
-using std::exception;
 
 using fgeal::Image;
 using fgeal::Display;
@@ -32,7 +31,7 @@ int main(int argc, char** argv)
 		fgeal::initialize();
 		atexit(fgeal::finalize);
 
-		fgeal::display = new Display(800, 600, string("carse ")+ CARSE_VERSION);
+		Display display(800, 600, string("carse ")+ CARSE_VERSION);
 
 		Image loading_image("carse-logo.jpg");
 		loading_image.draw();
@@ -42,9 +41,9 @@ int main(int argc, char** argv)
 		Race race;
 		race.start();
 
-		delete fgeal::display;
+		fgeal::finalize();
 	}
-	catch(exception& e)
+	catch(const std::exception& e)
 	{
 		cout << e.what() << endl;
 	}

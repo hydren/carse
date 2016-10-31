@@ -64,6 +64,17 @@ Race::Race()
 Race::~Race()
 {
 	delete car_sprite;
+	delete track_bg;
+
+	delete car_sound_idle;
+	delete car_sound_high;
+	delete music_sample;
+
+	delete eventQueue;
+	delete ev;
+
+	delete world;
+	delete player;
 }
 
 void Race::start()

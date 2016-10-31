@@ -23,8 +23,8 @@ using fgeal::Sound;
 using std::cout;
 using std::endl;
 
-b2World* world;
-Car* player;
+b2World* world = null;
+Car* player = null;
 
 bool running = true;
 bool lockOn = false;  // only works with allegro fgeal adapter (due to a bug in the SDL adapters)
@@ -33,12 +33,11 @@ bool lockOn = false;  // only works with allegro fgeal adapter (due to a bug in 
 Rect camera;
 double cameraAngle = 0;
 
-Image* car_sprite, *track_bg;
-Sound* car_sound_idle, *car_sound_high;
-Sound* music_sample;
+Image* car_sprite = null, *track_bg = null;
+Sound* car_sound_idle = null, *car_sound_high = null;
+Sound* music_sample = null;
 
-fgeal::EventQueue* eventQueue;
-fgeal::Event* ev;
+fgeal::EventQueue* eventQueue = null;
 
 bool isKeyUpPressed = false,
 	isKeyDownPressed = false,
@@ -71,7 +70,6 @@ Race::~Race()
 	delete music_sample;
 
 	delete eventQueue;
-	delete ev;
 
 	delete world;
 	delete player;
@@ -93,6 +91,8 @@ void Race::start()
 
 void Race::handleInput()
 {
+	fgeal::Event* ev = null;
+
 	while(not eventQueue->isEmpty())
 	{
 		ev = eventQueue->waitForEvent();
@@ -160,6 +160,9 @@ void Race::handleInput()
 				break;
 			}
 		}
+
+		delete ev;
+		ev = null;
 	}
 }
 

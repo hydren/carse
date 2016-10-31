@@ -29,21 +29,22 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
-		atexit(fgeal::finalize);
 
-		Display display(800, 600, string("carse ")+ CARSE_VERSION);
+		// use scope to delete (lazy...)
+		{
+			Display display(800, 600, string("carse ")+ CARSE_VERSION);
+			Image loading_image("carse-logo.jpg");
+			loading_image.draw();
+			fgeal::display->refresh();
+			fgeal::rest(0.5);
 
-		Image loading_image("carse-logo.jpg");
-		loading_image.draw();
-		fgeal::display->refresh();
-		fgeal::rest(0.5);
-
-		Race race;
-		race.start();
+			Race race;
+			race.start();
+		}
 
 		fgeal::finalize();
 	}
-	catch(const std::exception& e)
+	catch(const fgeal::AdapterException& e)
 	{
 		cout << e.what() << endl;
 	}

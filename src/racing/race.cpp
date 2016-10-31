@@ -75,7 +75,7 @@ Race::~Race()
 	delete player;
 }
 
-void Race::start()
+void Race::run()
 {
 	cout << "race start!" << endl;
 	music_sample->loop();

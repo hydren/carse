@@ -24,24 +24,29 @@ using std::string;
 using fgeal::Image;
 using fgeal::Display;
 
+
+void runSplash()
+{
+	Image loading_image("carse-logo.jpg");
+	loading_image.draw();
+	fgeal::display->refresh();
+	fgeal::rest(0.5);
+}
+
+void runGameTest()
+{
+	Race race;
+	race.run();
+}
+
 int main(int argc, char** argv)
 {
 	try
 	{
 		fgeal::initialize();
-
-		// use scope to delete (lazy...)
-		{
-			Display display(800, 600, string("carse ")+ CARSE_VERSION);
-			Image loading_image("carse-logo.jpg");
-			loading_image.draw();
-			fgeal::display->refresh();
-			fgeal::rest(0.5);
-
-			Race race;
-			race.start();
-		}
-
+		new Display(800, 600, string("carse ")+ CARSE_VERSION);
+		runSplash();
+		runGameTest();
 		fgeal::finalize();
 	}
 	catch(const fgeal::AdapterException& e)

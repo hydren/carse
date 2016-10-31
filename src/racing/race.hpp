@@ -13,7 +13,7 @@ struct Race
 	Race();
 	~Race();
 
-	void start();
+	void run();
 
 	private:
 	void handleInput();

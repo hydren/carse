@@ -20,6 +20,7 @@
 
 using fgeal::Image;
 using fgeal::Sound;
+using fgeal::Music;
 using std::cout;
 using std::endl;
 
@@ -35,7 +36,7 @@ double cameraAngle = 0;
 
 Image* car_sprite = null, *track_bg = null;
 Sound* car_sound_idle = null, *car_sound_high = null;
-Sound* music_sample = null;
+Music* music_sample = null;
 
 fgeal::EventQueue* eventQueue = null;
 
@@ -54,7 +55,7 @@ Race::Race()
 	track_bg = new Image("simple_track.jpg");
 	car_sound_idle = new Sound("engine_idle.ogg");
 	car_sound_high = new Sound("engine_high.ogg");
-	music_sample = new Sound("music_sample.ogg", true);
+	music_sample = new Music("music_sample.ogg");
 	eventQueue = new fgeal::EventQueue;
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
@@ -107,7 +108,7 @@ void Race::handleInput()
 			{
 			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = true;
-				car_sound_idle->halt();
+				car_sound_idle->stop();
 				if(not car_sound_high->isPlaying())
 					car_sound_high->loop();
 				break;
@@ -126,9 +127,9 @@ void Race::handleInput()
 				break;
 			case fgeal::Event::Key::P:
 				if(music_sample->isPlaying())
-					music_sample->halt(true);
+					music_sample->pause();
 				else
-					music_sample->loop();
+					music_sample->resume();
 				break;
 			case fgeal::Event::Key::L:
 				lockOn = !lockOn;
@@ -143,7 +144,7 @@ void Race::handleInput()
 			{
 			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = false;
-				car_sound_high->halt();
+				car_sound_high->stop();
 				if(not car_sound_idle->isPlaying())
 				car_sound_idle->loop();
 				break;

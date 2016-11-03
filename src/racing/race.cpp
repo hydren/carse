@@ -13,22 +13,25 @@
 #include <iostream>
 
 #include <cmath>
+#include <cstdio>
 
 #include <Box2D/Box2D.h>
 
 #include "../util/box2d_util.hpp"
 
+using std::cout;
+using std::endl;
 using fgeal::Image;
 using fgeal::Sound;
 using fgeal::Music;
-using std::cout;
-using std::endl;
+using fgeal::Font;
 
 b2World* world = null;
 Car* player = null;
 
 bool running = true;
-bool lockOn = false;  // only works with allegro fgeal adapter (due to a bug in the SDL adapters)
+bool lockOn = false;  // glitches on SDL adapters
+bool showDebug = false; // crashes on allegro adapter
 
 //the race camera
 Rect camera;
@@ -37,6 +40,7 @@ double cameraAngle = 0;
 Image* car_sprite = null, *track_bg = null;
 Sound* car_sound_idle = null, *car_sound_high = null;
 Music* music_sample = null;
+Font* font, *font2 = null;
 
 fgeal::EventQueue* eventQueue = null;
 
@@ -44,6 +48,8 @@ bool isKeyUpPressed = false,
 	isKeyDownPressed = false,
 	isKeyRightPressed = false,
 	isKeyLeftPressed = false;
+
+char buffer[256];
 
 Race::Race()
 {
@@ -53,10 +59,16 @@ Race::Race()
 
 	car_sprite = new Image("car.png");
 	track_bg = new Image("simple_track.jpg");
+
 	car_sound_idle = new Sound("engine_idle.ogg");
 	car_sound_high = new Sound("engine_high.ogg");
 	music_sample = new Music("music_sample.ogg");
+
+	font = new Font("font.ttf");
+	font2 = new Font("font.ttf");
+
 	eventQueue = new fgeal::EventQueue;
+
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
 }
@@ -134,6 +146,9 @@ void Race::handleInput()
 			case fgeal::Event::Key::L:
 				lockOn = !lockOn;
 				break;
+			case fgeal::Event::Key::D:
+				showDebug = !showDebug;
+				break;
 			default:
 				break;
 			}
@@ -182,6 +197,14 @@ void Race::handleRender()
 		car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle());
 	}
 
+
+	if(showDebug)
+	{
+		font2->draw_text("Linear velocity: ", 25, 25, fgeal::Color::WHITE);
+		sprintf(buffer, "% 5.2f, % 5.2f, % 5.2f", player->m_body->GetLinearVelocity().x, player->m_body->GetLinearVelocity().y, player->m_body->GetLinearVelocity().Length());
+		font->draw_text(std::string(buffer), 50, 50, fgeal::Color::WHITE);
+	}
+
 	fgeal::rest(0.01);
 	fgeal::display->refresh();
 }
@@ -211,26 +234,14 @@ void Race::handlePhysics()
 
 	//update world
 	world->Step((1.0f / 60.0f), 10, 10);
-	cout << player->m_body->GetLinearVelocity().x << " " << player->m_body->GetLinearVelocity().y << " " << player->m_body->GetLinearVelocity().Length() << endl;
 
 	//update the camera
+	camera.x = 0.1*convertToPixels(player->m_body->GetPosition().x) - camera.w/2;
+	camera.y = 0.1*convertToPixels(player->m_body->GetPosition().y) - camera.h/2;
 
 	if(lockOn)
 	{
-		camera.x = 0.1*convertToPixels(player->m_body->GetPosition().x) - camera.w/2;
-		camera.y = 0.1*convertToPixels(player->m_body->GetPosition().y) - camera.h/2;
-
 		float angleDiff = cameraAngle - (M_PI - player->m_body->GetAngle());
 		cameraAngle -= angleDiff/10;
-	}
-	else
-	{
-		camera.x = 0.1*convertToPixels(player->m_body->GetPosition().x) - camera.w/2;
-		camera.y = 0.1*convertToPixels(player->m_body->GetPosition().y) - camera.h/2;
-		//prevent camera out of bounds
-//		if(camera.x < 0)
-//			camera.x = 0;
-//		if(camera.y < 0)
-//			camera.y = 0;
 	}
 }

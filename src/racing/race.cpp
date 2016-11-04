@@ -213,9 +213,9 @@ struct Race::Implementation
 
 		if(showDebug)
 		{
-			font2->draw_text("Linear velocity: ", 25, 25, fgeal::Color::WHITE);
+			font2->drawText("Linear velocity: ", 25, 25, fgeal::Color::WHITE);
 			sprintf(buffer, "% 5.2f, % 5.2f, % 5.2f", player->m_body->GetLinearVelocity().x, player->m_body->GetLinearVelocity().y, player->m_body->GetLinearVelocity().Length());
-			font->draw_text(std::string(buffer), 50, 50, fgeal::Color::WHITE);
+			font->drawText(std::string(buffer), 50, 50, fgeal::Color::WHITE);
 		}
 
 		fgeal::rest(0.01);

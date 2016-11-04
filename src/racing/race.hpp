@@ -10,17 +10,13 @@
 
 struct Race
 {
-	Race();
+	struct Implementation;
+	Implementation* self;
+
 	~Race();
 
-	void run();
-
-	private:
-	void handleInput();
-	void handleRender();
-	void handlePhysics();
+	void load();
+	void start();
 };
-
-
 
 #endif /* RACE_HPP_ */

@@ -36,7 +36,8 @@ void runSplash()
 void runGameTest()
 {
 	Race race;
-	race.run();
+	race.load();
+	race.start();
 }
 
 int main(int argc, char** argv)

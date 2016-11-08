@@ -201,13 +201,13 @@ struct Race::Implementation
 
 		if(lockOn)
 		{
-			track_bg->draw_rotated(camera.w/2, camera.h/2, camera.x, camera.y, -cameraAngle);
-			car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle()-cameraAngle);
+			track_bg->drawRotated(camera.w/2, camera.h/2, camera.x, camera.y, -cameraAngle);
+			car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle()-cameraAngle);
 		}
 		else
 		{
 			track_bg->draw(-camera.x, -camera.y);
-			car_sprite->draw_rotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle());
+			car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle());
 		}
 
 

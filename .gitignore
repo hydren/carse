@@ -1,12 +1,23 @@
-/Linux SDL 1.2 Debug
-/Linux SDL 1.2 Release
-/Linux Allegro 5 Debug
-/Linux Allegro 5 Release
-/Win32 SDL 1.2 Debug/
-/Win32 Allegro 5 Debug/
-/Win32 Allegro 5 Release/
-/Win32 SDL 1.2 Release/
-/Linux SDL 2.0 Debug
-/Clean Debug
-/Win32 SDL 2.0 Debug/
-/Win32 SDL 2.0 Release/
+# Build configurations folders
+/Debug/
+/Release/
+/linux-gcc-allegro5.0-debug/
+/linux-gcc-allegro5.0-release/
+/linux-gcc-sdl1.2-debug/
+/linux-gcc-sdl1.2-release/
+/linux-gcc-sdl2.0-debug/
+/linux-gcc-sdl2.0-release/
+/win32-mingw-allegro5.0-debug/
+/win32-mingw-allegro5.0-release/
+/win32-mingw-sdl1.2-debug/
+/win32-mingw-sdl1.2-release/
+/win32-mingw-sdl2.0-debug/
+/win32-mingw-sdl2.0-release/
+
+# Eclipse cache
+language.settings.xml
+org.eclipse.cdt.managedbuilder.core.prefs
+org.eclipse.cdt.codan.core.prefs
+
+# Other
+*.dll

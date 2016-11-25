@@ -8,7 +8,11 @@
 #ifndef TRACK_HPP_
 #define TRACK_HPP_
 
-#include "../util.hpp"
+#include <vector>
+#include <string>
+
+using std::vector;
+using std::string;
 
 /** The track is specified by stretches, and in between, it is interpolated.
  * Implement track drawing by drawing rectangles (primitives) with offsets.

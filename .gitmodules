@@ -1,0 +1,6 @@
+[submodule "src_libs/futil"]
+	path = src_libs/futil
+	url = https://github.com/hydren/futil.git
+[submodule "src_libs/fgeal"]
+	path = src_libs/fgeal
+	url = https://github.com/hydren/fgeal.git

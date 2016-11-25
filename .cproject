@@ -49,8 +49,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -98,8 +99,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -155,8 +157,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -211,8 +214,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -267,8 +271,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -324,8 +329,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -380,8 +386,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -435,8 +442,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -490,8 +498,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -546,8 +555,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -602,8 +612,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -658,8 +669,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -714,8 +726,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -770,8 +783,9 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_libs|src|header" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src_libs"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -840,16 +854,49 @@
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1328881171;cdt.managedbuild.tool.gnu.cpp.compiler.input.1208627395">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.1906601829;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.1906601829.;cdt.managedbuild.tool.gnu.c.compiler.base.2051436036;cdt.managedbuild.tool.gnu.c.compiler.input.1389868109">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.551054512;cdt.managedbuild.tool.gnu.c.compiler.input.1059702799">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.1168972581;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.1168972581.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.904855030;cdt.managedbuild.tool.gnu.cpp.compiler.input.2067451616">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.1617820608;cdt.managedbuild.tool.gnu.c.compiler.input.2059634800">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.668622021;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.668622021.;cdt.managedbuild.tool.gnu.c.compiler.base.147104744;cdt.managedbuild.tool.gnu.c.compiler.input.620542662">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.1906601829;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.1906601829.;cdt.managedbuild.tool.gnu.cpp.compiler.base.863685009;cdt.managedbuild.tool.gnu.cpp.compiler.input.1412464793">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.1943992401;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.1943992401.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.1665171378;cdt.managedbuild.tool.gnu.c.compiler.input.641371622">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1001751578;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1001751578.;cdt.managedbuild.tool.gnu.cpp.compiler.base.725569108;cdt.managedbuild.tool.gnu.cpp.compiler.input.1882031818">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1991966433;cdt.managedbuild.tool.gnu.cpp.compiler.input.1318439197">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.;cdt.managedbuild.tool.gnu.c.compiler.base.767636142;cdt.managedbuild.tool.gnu.c.compiler.input.1738937386">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.515577677;cdt.managedbuild.tool.gnu.c.compiler.input.1520551626">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.215207481;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.215207481.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.141530416;cdt.managedbuild.tool.gnu.c.compiler.input.206663805">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.;cdt.managedbuild.tool.gnu.cpp.compiler.base.1719364110;cdt.managedbuild.tool.gnu.cpp.compiler.input.1988205530">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.;cdt.managedbuild.tool.gnu.c.compiler.base.719546987;cdt.managedbuild.tool.gnu.c.compiler.input.631300548">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1399411251;cdt.managedbuild.tool.gnu.cpp.compiler.input.685053144">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1328881171;cdt.managedbuild.tool.gnu.cpp.compiler.input.1208627395">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.122582734;cdt.managedbuild.tool.gnu.c.compiler.input.324948774">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.;cdt.managedbuild.tool.gnu.cross.c.compiler.1416036682;cdt.managedbuild.tool.gnu.c.compiler.input.1686468461">
@@ -858,10 +905,49 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1001751578;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1001751578.;cdt.managedbuild.tool.gnu.c.compiler.base.1812892491;cdt.managedbuild.tool.gnu.c.compiler.input.713714821">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.;cdt.managedbuild.tool.gnu.c.compiler.base.830486480;cdt.managedbuild.tool.gnu.c.compiler.input.897420114">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.68756346;cdt.managedbuild.tool.gnu.cpp.compiler.input.998692528">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1450596869;cdt.managedbuild.tool.gnu.cpp.compiler.input.1455947717">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.;cdt.managedbuild.tool.gnu.cpp.compiler.base.655396232;cdt.managedbuild.tool.gnu.cpp.compiler.input.794873706">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.;cdt.managedbuild.tool.gnu.cpp.compiler.base.361455237;cdt.managedbuild.tool.gnu.cpp.compiler.input.375877229">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1991966433;cdt.managedbuild.tool.gnu.cpp.compiler.input.1318439197">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.965853032.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.515577677;cdt.managedbuild.tool.gnu.c.compiler.input.1520551626">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.215207481;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.215207481.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.1924721558;cdt.managedbuild.tool.gnu.cpp.compiler.input.2042418732">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.;cdt.managedbuild.tool.gnu.c.compiler.base.1833077980;cdt.managedbuild.tool.gnu.c.compiler.input.2070478174">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.;cdt.managedbuild.tool.gnu.cross.c.compiler.14888249;cdt.managedbuild.tool.gnu.c.compiler.input.769409143">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1399411251;cdt.managedbuild.tool.gnu.cpp.compiler.input.685053144">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.965423337;cdt.managedbuild.tool.gnu.cpp.compiler.input.675426417">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.;cdt.managedbuild.tool.gnu.cpp.compiler.base.1860201285;cdt.managedbuild.tool.gnu.cpp.compiler.input.199256097">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.668622021;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.668622021.;cdt.managedbuild.tool.gnu.cpp.compiler.base.1998777441;cdt.managedbuild.tool.gnu.cpp.compiler.input.665068727">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.1168972581;cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.1168972581.;cdt.managedbuild.tool.gnu.c.compiler.mingw.base.699587366;cdt.managedbuild.tool.gnu.c.compiler.input.1364553428">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.1943992401;cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.1943992401.;cdt.managedbuild.tool.gnu.cpp.compiler.mingw.base.164476567;cdt.managedbuild.tool.gnu.cpp.compiler.input.620837504">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

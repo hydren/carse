@@ -13,7 +13,7 @@
 
 #include "racing/race.hpp"
 
-#include "fgeal.hpp"
+#include "fgeal/fgeal.hpp"
 
 #define CARSE_VERSION "0.3.0"
 

@@ -8,7 +8,7 @@
 #include "race.hpp"
 #include "vehicle.hpp"
 
-#include "fgeal.hpp"
+#include "fgeal/fgeal.hpp"
 
 #include <iostream>
 

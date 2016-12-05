@@ -11,7 +11,7 @@
 
 #include <cstdlib>
 
-#include "racing/race.hpp"
+#include "carse_game.hpp"
 
 #include "fgeal/fgeal.hpp"
 
@@ -35,9 +35,8 @@ void runSplash()
 
 void runGameTest()
 {
-	Race race;
-	race.load();
-	race.start();
+	CarseGame game;
+	game.start();
 }
 
 int main(int argc, char** argv)

@@ -106,13 +106,25 @@ struct Race::Implementation
 		cout << "race start!" << endl;
 		music_sample->loop();
 		car_sound_idle->loop();
+		float time = 0, mean = 0; int n = 0;
 		do
 		{
+			//xxx debug
+			time = fgeal::uptime();
+
 			handleInput();
 			handlePhysics();
 			handleRender();
+
+			//xxx debug
+			time = (fgeal::uptime() - time);
+			mean += (time - mean)/++n;
+			if(n % 60 == 0) cout << time << endl;
 		}
 		while(running);
+
+		//xxx debug
+		cout << "MEAN: " << mean << endl;
 	}
 
 	void handleInput()

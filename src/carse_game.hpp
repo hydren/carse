@@ -11,9 +11,7 @@
 #include "fgeal/extra/game.hpp"
 #include "futil/general/language.hpp"
 
-using fgeal::Game;
-
-class CarseGame extends public Game
+class CarseGame extends public fgeal::Game
 {
 	public:
 	static const int RACE_STATE_ID, MENU_STATE_ID;

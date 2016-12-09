@@ -20,7 +20,7 @@
 
 #include "util/box2d_util.hpp"
 
-class RaceState extends public Game::State
+class RaceState extends public fgeal::Game::State
 {
 	public:
 	int getId() { return CarseGame::RACE_STATE_ID; }

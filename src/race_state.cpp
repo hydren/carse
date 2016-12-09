@@ -129,7 +129,6 @@ void RaceState::render()
 	}
 
 	fgeal::rest(0.01);
-	fgeal::display->refresh();
 }
 
 void RaceState::handlePhysics()

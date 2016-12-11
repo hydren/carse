@@ -52,17 +52,17 @@ RaceState::RaceState(CarseGame* game)
 
 RaceState::~RaceState()
 {
-	delete car_sprite;
-	delete track_bg;
+	if(car_sprite != null) delete car_sprite;
+	if(track_bg != null) delete track_bg;
 
-	delete car_sound_idle;
-	delete car_sound_high;
-	delete music_sample;
+	if(car_sound_idle != null) delete car_sound_idle;
+	if(car_sound_high != null) delete car_sound_high;
+	if(music_sample != null) delete music_sample;
 
-	delete eventQueue;
+	if(eventQueue != null) delete eventQueue;
 
-	delete world;
-	delete player;
+	if(world != null) delete world;
+	if(player != null) delete player;
 }
 
 void RaceState::initialize()

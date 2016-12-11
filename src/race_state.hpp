@@ -7,6 +7,7 @@
 
 #ifndef RACE_STATE_HPP_
 #define RACE_STATE_HPP_
+#include <ciso646>
 
 #include "carse_game.hpp"
 
@@ -53,6 +54,7 @@ class RaceState extends public fgeal::Game::State
 	~RaceState();
 
 	void initialize();
+
 	void onEnter();
 	void onLeave();
 

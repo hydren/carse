@@ -21,7 +21,7 @@
 
 #include "util/box2d_util.hpp"
 
-class RaceState extends public virtual fgeal::GenericGame::State
+class RaceState extends public fgeal::GenericGame::State
 {
 	public:
 	int getId() { return CarseGame::RACE_STATE_ID; }

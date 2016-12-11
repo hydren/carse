@@ -5,8 +5,8 @@
  *      Author: Felipe
  */
 
-#ifndef RACING_RACE_STATE_HPP_
-#define RACING_RACE_STATE_HPP_
+#ifndef RACE_STATE_HPP_
+#define RACE_STATE_HPP_
 
 #include "carse_game.hpp"
 
@@ -64,4 +64,4 @@ class RaceState extends public fgeal::Game::State
 	void handleInput();
 };
 
-#endif /* RACING_RACE_STATE_HPP_ */
+#endif /* RACE_STATE_HPP_ */

@@ -5,8 +5,9 @@
  *      Author: Felipe
  */
 
-#ifndef RACING_CARSE_GAME_HPP_
-#define RACING_CARSE_GAME_HPP_
+#ifndef CARSE_GAME_HPP_
+#define CARSE_GAME_HPP_
+#include <ciso646>
 
 #include "fgeal/extra/game.hpp"
 #include "futil/general/language.hpp"
@@ -20,4 +21,4 @@ class CarseGame extends public fgeal::Game
 	void initializeStatesList();
 };
 
-#endif /* RACING_CARSE_GAME_HPP_ */
+#endif /* CARSE_GAME_HPP_ */

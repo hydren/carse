@@ -19,8 +19,8 @@ using fgeal::Music;
 using fgeal::Font;
 using fgeal::EventQueue;
 
-RaceState::RaceState(CarseGame* game)
-: State(*game)
+RaceState::RaceState(fgeal::GenericGame& game)
+: State(game)
 {
 	lockOn = false;  // glitches on SDL adapters
 	showDebug = false; // crashes on allegro adapter

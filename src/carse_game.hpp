@@ -9,10 +9,10 @@
 #define CARSE_GAME_HPP_
 #include <ciso646>
 
-#include "fgeal/extra/game.hpp"
+#include "fgeal/extra/game_template.hpp"
 #include "futil/general/language.hpp"
 
-class CarseGame extends public fgeal::Game
+class CarseGame extends public fgeal::GenericGame
 {
 	public:
 	static const int RACE_STATE_ID, MENU_STATE_ID;

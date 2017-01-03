@@ -13,10 +13,12 @@
 
 using std::cout;
 using std::endl;
+using fgeal::Display;
 using fgeal::Image;
 using fgeal::Sound;
 using fgeal::Music;
 using fgeal::Font;
+using fgeal::Event;
 using fgeal::EventQueue;
 
 RaceState::RaceState(CarseGame* game)
@@ -44,8 +46,6 @@ RaceState::RaceState(CarseGame* game)
 	font = null;
 	font2 = null;
 
-	eventQueue = null;
-
 	world = null;
 	player = null;
 }
@@ -59,16 +59,14 @@ RaceState::~RaceState()
 	if(car_sound_high != null) delete car_sound_high;
 	if(music_sample != null) delete music_sample;
 
-	if(eventQueue != null) delete eventQueue;
-
 	if(world != null) delete world;
 	if(player != null) delete player;
 }
 
 void RaceState::initialize()
 {
-	camera.w = fgeal::display->getWidth();
-	camera.h = fgeal::display->getHeight();
+	camera.w = Display::getInstance().getWidth();
+	camera.h = Display::getInstance().getHeight();
 	camera.x = camera.y = 0;
 
 	car_sprite = new Image("car.png");
@@ -80,8 +78,6 @@ void RaceState::initialize()
 
 	font = new Font("font.ttf");
 	font2 = new Font("font.ttf");
-
-	eventQueue = new fgeal::EventQueue;
 
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
@@ -103,7 +99,7 @@ void RaceState::onLeave()
 
 void RaceState::render()
 {
-	fgeal::display->clear();
+	Display::getInstance().clear();
 
 	if(lockOn)
 	{
@@ -170,20 +166,19 @@ void RaceState::handlePhysics()
 
 void RaceState::handleInput()
 {
-	fgeal::Event* ev = null;
-
-	while(not eventQueue->isEmpty())
+	Event event;
+	EventQueue& eventQueue = EventQueue::getInstance();
+	while(not eventQueue.isEmpty())
 	{
-		ev = eventQueue->waitForEvent();
-
-		if(ev->getEventType() == fgeal::Event::Type::DISPLAY_CLOSURE)
+		eventQueue.waitForEvent(&event);
+		if(event.getEventType() == fgeal::Event::Type::DISPLAY_CLOSURE)
 		{
 			//game.enterState(CarseGame::MENU_STATE_ID);
 			game.running = false;
 		}
-		else if(ev->getEventType() == fgeal::Event::Type::KEY_PRESS)
+		else if(event.getEventType() == fgeal::Event::Type::KEY_PRESS)
 		{
-			switch(ev->getEventKeyCode())
+			switch(event.getEventKeyCode())
 			{
 			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = true;
@@ -220,9 +215,9 @@ void RaceState::handleInput()
 				break;
 			}
 		}
-		else if(ev->getEventType() == fgeal::Event::Type::KEY_RELEASE)
+		else if(event.getEventType() == fgeal::Event::Type::KEY_RELEASE)
 		{
-			switch(ev->getEventKeyCode())
+			switch(event.getEventKeyCode())
 			{
 			case fgeal::Event::Key::ARROW_UP:
 				isKeyUpPressed = false;
@@ -243,9 +238,6 @@ void RaceState::handleInput()
 				break;
 			}
 		}
-
-		delete ev;
-		ev = null;
 	}
 }
 

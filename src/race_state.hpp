@@ -42,8 +42,6 @@ class RaceState extends public fgeal::Game::State
 	fgeal::Music* music_sample;
 	fgeal::Font* font, *font2;
 
-	fgeal::EventQueue* eventQueue;
-
 	bool isKeyUpPressed, isKeyDownPressed,
 		 isKeyRightPressed, isKeyLeftPressed;
 

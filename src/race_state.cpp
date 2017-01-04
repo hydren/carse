@@ -115,13 +115,17 @@ void RaceState::render()
 
 	if(showDebug)
 	{
-		font2->drawText("Linear velocity: ", 25, 25, fgeal::Color::WHITE);
+		font2->drawText("Linear velocity:", 25, 25, fgeal::Color::WHITE);
 		sprintf(buffer, "% 5.2f, % 5.2f, % 5.2f", player->m_body->GetLinearVelocity().x, player->m_body->GetLinearVelocity().y, player->m_body->GetLinearVelocity().Length());
 		font->drawText(std::string(buffer), 50, 50, fgeal::Color::WHITE);
 
-		font2->drawText("Angle: ", 25, 25, fgeal::Color::WHITE);
+		font2->drawText("Angle:", 25, 75, fgeal::Color::WHITE);
 		sprintf(buffer, "% 5.2f", player->m_body->GetAngle());
-		font->drawText(std::string(buffer), 50, 75, fgeal::Color::WHITE);
+		font->drawText(std::string(buffer), 65, 75, fgeal::Color::WHITE);
+
+		font2->drawText("FPS:", 25, 100, fgeal::Color::WHITE);
+		sprintf(buffer, "%d", game.getFpsCount());
+		font->drawText(std::string(buffer), 55, 100, fgeal::Color::WHITE);
 	}
 
 	fgeal::rest(0.01);

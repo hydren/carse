@@ -121,7 +121,7 @@ Car::Car(b2World* world, float x, float y, float angle) {
 	frJoint = (b2RevoluteJoint*)world->CreateJoint( &jointDef );
 }
 
-void Car::update(float throtle, float desiredAngle) {
+void Car::update(float delta, float throtle, float desiredAngle) {
 
    	tireFrontLeft->updateFriction();
    	tireFrontRight->updateFriction();
@@ -135,7 +135,7 @@ void Car::update(float throtle, float desiredAngle) {
 
    	//control steering
    	float turnSpeedPerSec = 160 * DEGTORAD;//from lock to lock in 0.5 sec
-   	float turnPerTimeStep = turnSpeedPerSec / 60.0f;
+   	float turnPerTimeStep = turnSpeedPerSec * delta;
    	float angleNow = flJoint->GetJointAngle();
    	float angleToTurn = desiredAngle - angleNow;
    	angleToTurn = b2Clamp( angleToTurn, -turnPerTimeStep, turnPerTimeStep );

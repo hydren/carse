@@ -60,7 +60,7 @@ class RaceState extends public fgeal::Game::State
 	void render();
 
 	private:
-	void handlePhysics();
+	void handlePhysics(float delta);
 	void handleInput();
 };
 

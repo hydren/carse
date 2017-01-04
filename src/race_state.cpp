@@ -119,19 +119,23 @@ void RaceState::render()
 		sprintf(buffer, "% 5.2f, % 5.2f, % 5.2f", player->m_body->GetLinearVelocity().x, player->m_body->GetLinearVelocity().y, player->m_body->GetLinearVelocity().Length());
 		font->drawText(std::string(buffer), 50, 50, fgeal::Color::WHITE);
 
-		font2->drawText("Angle:", 25, 75, fgeal::Color::WHITE);
-		sprintf(buffer, "% 5.2f", player->m_body->GetAngle());
-		font->drawText(std::string(buffer), 65, 75, fgeal::Color::WHITE);
+		font2->drawText("Scalar velocity:", 25, 75, fgeal::Color::WHITE);
+		sprintf(buffer, "% 5.2f", sqrt(pow(player->m_body->GetLinearVelocity().x, 2) + pow(player->m_body->GetLinearVelocity().y, 2)));
+		font->drawText(std::string(buffer), 150, 75, fgeal::Color::WHITE);
 
-		font2->drawText("FPS:", 25, 100, fgeal::Color::WHITE);
+		font2->drawText("Angle:", 25, 100, fgeal::Color::WHITE);
+		sprintf(buffer, "% 5.2f", player->m_body->GetAngle());
+		font->drawText(std::string(buffer), 65, 100, fgeal::Color::WHITE);
+
+		font2->drawText("FPS:", 25, 125, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", game.getFpsCount());
-		font->drawText(std::string(buffer), 55, 100, fgeal::Color::WHITE);
+		font->drawText(std::string(buffer), 55, 125, fgeal::Color::WHITE);
 	}
 
 	fgeal::rest(0.01);
 }
 
-void RaceState::handlePhysics()
+void RaceState::handlePhysics(float delta)
 {
 	const double forceFactorAbs = 50;
 
@@ -152,10 +156,10 @@ void RaceState::handlePhysics()
 	else if(isKeyRightPressed)
 		angle = M_PI/4;
 
-	player->update(forceFactor, angle);
+	player->update(delta, forceFactor, angle);
 
 	//update world
-	world->Step((1.0f / 60.0f), 10, 10);
+	world->Step(delta, 10, 10);
 
 	//update the camera
 	camera.x = 0.1*convertToPixels(player->m_body->GetPosition().x) - camera.w/2;
@@ -248,5 +252,5 @@ void RaceState::handleInput()
 void RaceState::update(float delta)
 {
 	handleInput();
-	handlePhysics();
+	handlePhysics(delta);
 }

@@ -64,7 +64,7 @@ struct Car
         delete tireRearRight;
     }
 
-    void update(float throtle, float desiredAngle);
+    void update(float delta, float throtle, float desiredAngle);
 };
 
 

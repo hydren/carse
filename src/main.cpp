@@ -11,7 +11,7 @@
 
 #include <cstdlib>
 
-#include "racing/race.hpp"
+#include "carse_game.hpp"
 
 #include "fgeal/fgeal.hpp"
 
@@ -29,15 +29,14 @@ void runSplash()
 {
 	Image loading_image("carse-logo.jpg");
 	loading_image.draw();
-	fgeal::display->refresh();
+	Display::getInstance().refresh();
 	fgeal::rest(0.5);
 }
 
 void runGameTest()
 {
-	Race race;
-	race.load();
-	race.start();
+	CarseGame game;
+	game.start();
 }
 
 int main(int argc, char** argv)
@@ -45,7 +44,7 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
-		new Display(800, 600, string("carse ")+ CARSE_VERSION + " (fgeal " + fgeal::VERSION + "/" + fgeal::BACKEND_NAME + " backend)");
+		Display::create(800, 600, string("carse ")+ CARSE_VERSION + " (fgeal " + fgeal::VERSION + "/" + fgeal::BACKEND_NAME + " backend)");
 		runSplash();
 		runGameTest();
 		fgeal::finalize();
@@ -57,5 +56,3 @@ int main(int argc, char** argv)
 
 	return EXIT_SUCCESS;
 }
-
-

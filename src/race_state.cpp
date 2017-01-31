@@ -112,6 +112,7 @@ void RaceState::render()
 		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle());
 	}
 
+	font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getSize(), fgeal::Color::CREAM);
 
 	if(showDebug)
 	{
@@ -188,35 +189,35 @@ void RaceState::handleInput()
 		{
 			switch(event.getEventKeyCode())
 			{
-			case fgeal::Event::Key::ARROW_UP:
+			case fgeal::Keyboard::Key::ARROW_UP:
 				isKeyUpPressed = true;
 				car_sound_idle->stop();
 				if(not car_sound_high->isPlaying())
 					car_sound_high->loop();
 				break;
-			case fgeal::Event::Key::ARROW_DOWN:
+			case fgeal::Keyboard::Key::ARROW_DOWN:
 				isKeyDownPressed = true;
 				break;
-			case fgeal::Event::Key::ARROW_RIGHT:
+			case fgeal::Keyboard::Key::ARROW_RIGHT:
 				isKeyRightPressed = true;
 				break;
-			case fgeal::Event::Key::ARROW_LEFT:
+			case fgeal::Keyboard::Key::ARROW_LEFT:
 				isKeyLeftPressed = true;
 				break;
-			case fgeal::Event::Key::ESCAPE:
+			case fgeal::Keyboard::Key::ESCAPE:
 				break;
-			case fgeal::Event::Key::ENTER:
+			case fgeal::Keyboard::Key::ENTER:
 				break;
-			case fgeal::Event::Key::P:
+			case fgeal::Keyboard::Key::P:
 				if(music_sample->isPlaying())
 					music_sample->pause();
 				else
 					music_sample->resume();
 				break;
-			case fgeal::Event::Key::L:
+			case fgeal::Keyboard::Key::L:
 				lockOn = !lockOn;
 				break;
-			case fgeal::Event::Key::D:
+			case fgeal::Keyboard::Key::D:
 				showDebug = !showDebug;
 				break;
 			default:
@@ -227,19 +228,19 @@ void RaceState::handleInput()
 		{
 			switch(event.getEventKeyCode())
 			{
-			case fgeal::Event::Key::ARROW_UP:
+			case fgeal::Keyboard::Key::ARROW_UP:
 				isKeyUpPressed = false;
 				car_sound_high->stop();
 				if(not car_sound_idle->isPlaying())
 				car_sound_idle->loop();
 				break;
-			case fgeal::Event::Key::ARROW_DOWN:
+			case fgeal::Keyboard::Key::ARROW_DOWN:
 				isKeyDownPressed = false;
 				break;
-			case fgeal::Event::Key::ARROW_RIGHT:
+			case fgeal::Keyboard::Key::ARROW_RIGHT:
 				isKeyRightPressed = false;
 				break;
-			case fgeal::Event::Key::ARROW_LEFT:
+			case fgeal::Keyboard::Key::ARROW_LEFT:
 				isKeyLeftPressed = false;
 				break;
 			default:

@@ -44,7 +44,7 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
-		Display::create(800, 600, string("carse ")+ CARSE_VERSION + " (fgeal " + fgeal::VERSION + "/" + fgeal::BACKEND_NAME + " backend)");
+		Display::create(800, 600, string("carse ")+ CARSE_VERSION + " alpha");
 		runSplash();
 		runGameTest();
 		fgeal::finalize();

@@ -103,13 +103,13 @@ void RaceState::render()
 
 	if(lockOn)
 	{
-		track_bg->drawRotated(camera.w/2, camera.h/2, camera.x, camera.y, -cameraAngle);
-		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle()-cameraAngle);
+		track_bg->drawRotated(camera.w/2, camera.h/2, -cameraAngle, camera.x, camera.y);
+		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle()-cameraAngle, 23, 48);
 	}
 	else
 	{
 		track_bg->draw(-camera.x, -camera.y);
-		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, 23, 48, M_PI - player->m_body->GetAngle());
+		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle(), 23, 48);
 	}
 
 	font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getSize(), fgeal::Color::CREAM);

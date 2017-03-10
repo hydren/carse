@@ -23,13 +23,16 @@ using std::string;
 
 using fgeal::Image;
 using fgeal::Display;
+using fgeal::Color;
 
 
 void runSplash()
 {
-	Image loading_image("carse-logo.jpg");
-	loading_image.draw();
-	Display::getInstance().refresh();
+	Display& display = Display::getInstance();
+	Image logoImage("carse_logo.png");
+	Image::drawRectangle(Color::WHITE, 0, 0, display.getWidth(), display.getHeight());
+	logoImage.draw(0.5*display.getWidth() - 0.5*logoImage.getWidth(), 0.5*display.getHeight() - 0.5*logoImage.getHeight());
+	display.refresh();
 	fgeal::rest(0.5);
 }
 

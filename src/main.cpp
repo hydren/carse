@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
-		Display::create(800, 600, string("carse ")+ CARSE_VERSION + " alpha");
+		Display::create(1024, 768, string("carse ")+ CARSE_VERSION + " alpha");
 		runSplash();
 		runGameTest();
 		fgeal::finalize();

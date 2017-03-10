@@ -9,6 +9,8 @@
 #define RACE_STATE_HPP_
 #include <ciso646>
 
+#include <vector>
+
 #include "carse_game.hpp"
 #include "fgeal/fgeal.hpp"
 #include "futil/general/language.hpp"
@@ -22,6 +24,29 @@ class RaceState extends public fgeal::Game::State
 	fgeal::Font* font, *font2;
 
 	char buffer[256];
+
+	float roadSegmentSize, roadWidth;
+	float cameraDepth;
+
+	struct Segment
+	{
+		RaceState& state;
+
+		Segment& operator= (const Segment& s);
+
+		float x, y, z; // 3d center of line (delta coordinates)
+		float X, Y, W; // screen coordinate
+		float scale;
+
+		Segment(RaceState& state);
+
+		// from "world" to screen coordinates
+		void project(int camX, int camY, int camZ);
+	};
+
+	std::vector<Segment> lines;
+
+	float position;
 
 	public:
 	RaceState(CarseGame* game);

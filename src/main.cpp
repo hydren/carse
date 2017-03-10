@@ -15,7 +15,7 @@
 
 #include "fgeal/fgeal.hpp"
 
-#define CARSE_VERSION "0.3.0"
+#define CARSE_VERSION "0.4.0-dev"
 
 using std::cout;
 using std::endl;

@@ -8,6 +8,7 @@
 #include "race_state.hpp"
 
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 
@@ -25,6 +26,7 @@ RaceState::RaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
+  accelPower(9000.0f),
   position(0), posX(0), speed(0)
 {}
 
@@ -199,12 +201,16 @@ void RaceState::handlePhysics(float delta)
 {
 	const unsigned N = lines.size();
 
-	position += speed*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += accelPower*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= accelPower*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += std::min(speed, 5000.0f)*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= std::min(speed, 5000.0f)*delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += 5000*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= 5000*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += 5000*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= 5000*delta;
+	const float rollingFriction = 0.02 * 1500 * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
+			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
+	speed -= (rollingFriction + airFriction)*delta;
+
+	position += speed*delta;
 
 	while(position >= N*roadSegmentLength) position -= N*roadSegmentLength;
 	while(position < 0) position += N*roadSegmentLength;

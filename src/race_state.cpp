@@ -201,6 +201,8 @@ void RaceState::handlePhysics(float delta)
 {
 	const unsigned N = lines.size();
 
+	posX -= lines[((int)(position/roadSegmentLength))%N].curve * speed * 0.5 * delta;
+
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += accelPower*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= accelPower*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += std::min(speed, 5000.0f)*delta;
@@ -208,6 +210,7 @@ void RaceState::handlePhysics(float delta)
 
 	const float rollingFriction = 0.02 * 1500 * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
 			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
+
 	speed -= (rollingFriction + airFriction)*delta;
 
 	position += speed*delta;

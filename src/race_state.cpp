@@ -46,6 +46,7 @@ void RaceState::onEnter()
 	{
 		Segment line(*this);
 		line.z = i*roadSegmentLength;
+		if(i > 300 && i < 700) line.curve = 0.5;
 		lines.push_back(line);
 	}
 
@@ -59,7 +60,7 @@ void RaceState::onLeave()
 }
 
 RaceState::Segment::Segment(RaceState& state) // @suppress("Class members should be properly initialized")
-: state(state) {x=y=z=0;}
+: state(state) {curve=x=y=z=0;}
 
 RaceState::Segment& RaceState::Segment::operator= (const Segment& s)
 {
@@ -95,11 +96,14 @@ void RaceState::render()
 	display.clear();
 
 	unsigned N = lines.size(), fromPos = position/roadSegmentLength;
+	float x = 0, dx = 0;
 
 	for(unsigned n = fromPos+1; n < fromPos+300; n++)
 	{
 		Segment& l = lines[n%N];
-		l.project(posX, 1500, position);
+		l.project(posX - x, 1500, position);
+		x += dx;
+		dx += l.curve;
 
 		Color grass  = (n/3)%2? Color(16, 200, 16) : Color(  0, 154,   0);
 		Color rumble = (n/3)%2? Color(255,255,255) : Color(  0,   0,   0);

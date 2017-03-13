@@ -36,7 +36,7 @@ class RaceState extends public fgeal::Game::State
 
 		float x, y, z; // 3d center of line (delta coordinates)
 		float X, Y, W; // screen coordinate
-		float scale;
+		float scale, curve;
 
 		Segment(RaceState& state);
 

@@ -25,7 +25,7 @@ class RaceState extends public fgeal::Game::State
 
 	char buffer[256];
 
-	float roadSegmentSize, roadWidth;
+	float roadSegmentLength, roadWidth;
 	float cameraDepth;
 
 	struct Segment

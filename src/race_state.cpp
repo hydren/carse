@@ -25,7 +25,7 @@ RaceState::RaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
-  position(0), posX(0)
+  position(0), posX(0), speed(0)
 {}
 
 RaceState::~RaceState()
@@ -55,6 +55,7 @@ void RaceState::onEnter()
 
 	position = 0;
 	posX = 0;
+	speed = 0;
 }
 
 void RaceState::onLeave()
@@ -150,6 +151,10 @@ void RaceState::render()
 		font2->drawText("Position:", 25, 50, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", position);
 		font->drawText(std::string(buffer), 90, 50, fgeal::Color::WHITE);
+
+		font2->drawText("Speed:", 25, 75, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fkm/h", speed/120);
+		font->drawText(std::string(buffer), 90, 75, fgeal::Color::WHITE);
 	}
 
 	fgeal::rest(0.01);
@@ -194,8 +199,10 @@ void RaceState::handlePhysics(float delta)
 {
 	const unsigned N = lines.size();
 
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   position += 5000*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) position -= 5000*delta;
+	position += speed*delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += 5000*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= 5000*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += 5000*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= 5000*delta;
 

@@ -25,7 +25,7 @@ RaceState::RaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
-  position(0)
+  position(0), posX(0)
 {}
 
 RaceState::~RaceState()
@@ -50,6 +50,7 @@ void RaceState::onEnter()
 	}
 
 	position = 0;
+	posX = 0;
 }
 
 void RaceState::onLeave()
@@ -98,7 +99,7 @@ void RaceState::render()
 	for(unsigned n = fromPos+1; n < fromPos+300; n++)
 	{
 		Segment& l = lines[n%N];
-		l.project(0, 1500, position);
+		l.project(posX, 1500, position);
 
 		Color grass  = (n/3)%2? Color(16, 200, 16) : Color(  0, 154,   0);
 		Color rumble = (n/3)%2? Color(255,255,255) : Color(  0,   0,   0);
@@ -164,4 +165,6 @@ void RaceState::handlePhysics(float delta)
 {
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   position += 5000*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) position -= 5000*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += 5000*delta;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= 5000*delta;
 }

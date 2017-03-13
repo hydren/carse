@@ -46,7 +46,7 @@ class RaceState extends public fgeal::Game::State
 
 	std::vector<Segment> lines;
 
-	float position;
+	float position, posX;
 
 	public:
 	RaceState(CarseGame* game);

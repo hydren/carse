@@ -127,7 +127,19 @@ void RaceState::render()
 	}
 
 	const float scale = 5.0;
-	car->drawScaledRegion(0.5*(display.getWidth() - scale*car->getWidth()), display.getHeight()-0.5*scale*car->getHeight(), scale, scale, Image::FLIP_NONE, 0, 0, 80, 40);
+	float spriteOffset = 0;
+	Image::FlipMode flip = Image::FLIP_NONE;
+
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
+		spriteOffset = 40;
+
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
+	{
+		spriteOffset = 40;
+		flip = Image::FLIP_HORIZONTAL;
+	}
+
+	car->drawScaledRegion(0.5*(display.getWidth() - scale*car->getWidth()), display.getHeight()-0.5*scale*car->getHeight(), scale, scale, flip, 0, spriteOffset, 80, 40);
 
 	// DEBUG
 	{

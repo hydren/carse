@@ -209,9 +209,10 @@ void RaceState::handlePhysics(float delta)
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= std::min(speed, 5000.0f)*delta;
 
 	const float rollingFriction = 0.02 * 1500 * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
-			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
+			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81,
+				turnFriction = Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT) or Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)? 2000 : 0;
 
-	speed -= (rollingFriction + airFriction)*delta;
+	speed -= (rollingFriction + airFriction + turnFriction)*delta;
 
 	position += speed*delta;
 

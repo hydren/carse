@@ -23,7 +23,7 @@ using fgeal::EventQueue;
 
 RaceState::RaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null),
+  font(null), font2(null), bg(null), car(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
   position(0), posX(0)
 {}
@@ -35,6 +35,8 @@ void RaceState::initialize()
 {
 	font = new Font("font.ttf");
 	font2 = new Font("font.ttf");
+	bg = new Image("bg.jpg");
+	car = new Image("car.png");
 }
 
 void RaceState::onEnter()
@@ -96,6 +98,8 @@ void RaceState::render()
 
 	display.clear();
 
+	bg->draw();
+
 	const unsigned N = lines.size(), fromPos = position/roadSegmentLength;
 	float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
@@ -121,6 +125,9 @@ void RaceState::render()
 		drawQuad(rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
 		drawQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
 	}
+
+	const float scale = 5.0;
+	car->drawScaledRegion(0.5*(display.getWidth() - scale*car->getWidth()), display.getHeight()-0.5*scale*car->getHeight(), scale, scale, Image::FLIP_NONE, 0, 0, 80, 40);
 
 	// DEBUG
 	{

@@ -22,6 +22,7 @@ class RaceState extends public fgeal::Game::State
 
 	private:
 	fgeal::Font* font, *font2;
+	fgeal::Image* bg, *car;
 
 	char buffer[256];
 

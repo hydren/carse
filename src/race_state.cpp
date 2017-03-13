@@ -96,7 +96,7 @@ void RaceState::render()
 
 	display.clear();
 
-	unsigned N = lines.size(), fromPos = position/roadSegmentLength;
+	const unsigned N = lines.size(), fromPos = position/roadSegmentLength;
 	float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
 	float maxY = display.getHeight();
@@ -104,7 +104,7 @@ void RaceState::render()
 	for(unsigned n = fromPos+1; n < fromPos+300; n++)
 	{
 		Segment& l = lines[n%N];
-		l.project(posX - x, camHeight, position);
+		l.project(posX - x, camHeight, position - (n>N?n*roadSegmentLength:0));
 		x += dx;
 		dx += l.curve;
 
@@ -173,8 +173,14 @@ void RaceState::handleInput()
 
 void RaceState::handlePhysics(float delta)
 {
+	const unsigned N = lines.size();
+
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   position += 5000*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) position -= 5000*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += 5000*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= 5000*delta;
+
+	while(position >= N*roadSegmentLength) position -= N*roadSegmentLength;
+	while(position < 0) position += N*roadSegmentLength;
+
 }

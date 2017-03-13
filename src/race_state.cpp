@@ -116,6 +116,10 @@ void RaceState::render()
 		font2->drawText("FPS:", 25, 25, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", game.getFpsCount());
 		font->drawText(std::string(buffer), 55, 25, fgeal::Color::WHITE);
+
+		font2->drawText("Position:", 25, 50, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm", position);
+		font->drawText(std::string(buffer), 90, 50, fgeal::Color::WHITE);
 	}
 
 	fgeal::rest(0.01);
@@ -145,6 +149,9 @@ void RaceState::handleInput()
 			{
 				case Keyboard::Key::ESCAPE:
 					game.running = false;
+					break;
+				case Keyboard::Key::R:
+					position = 0;
 					break;
 				default:
 					break;

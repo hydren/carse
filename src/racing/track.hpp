@@ -11,9 +11,6 @@
 #include <vector>
 #include <string>
 
-using std::vector;
-using std::string;
-
 /** The track is specified by stretches, and in between, it is interpolated.
  * Implement track drawing by drawing rectangles (primitives) with offsets.
  * examples: Top Gear series, Lotus Challenge series, Rad Racer series, Chase HQ series, F-Zero,
@@ -23,21 +20,23 @@ struct Track
 {
 	struct Stretch
 	{
-		float trackAngleDelta;
-		float trackHeightDelta;
-		int trackType;
-		int grassType;
+		float stretchLength;
+		float angleDelta;
+		float heightDelta;
+		int roadTypeID;
+		int grassTypeID;
 	};
 
-	vector<Stretch> trackStretches; //stretches to interpolate
-	string name;
+	//stretches to interpolate
+	std::vector<Stretch> stretches;
 
-	float length() { return estimatedTrackLength; }
+	//general info
+	std::string name;
+
+	float getLength() { return length; }
 
 	protected:
-	float estimatedTrackLength; //read-only
+	float length; //needs to be updated when stretches changes
 };
-
-
 
 #endif /* TRACK_HPP_ */

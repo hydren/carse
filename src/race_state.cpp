@@ -27,7 +27,7 @@ RaceState::RaceState(CarseGame* game)
   font(null), font2(null), bg(null), car(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
   accelPower(9000.0f),
-  position(0), posX(0), speed(0)
+  position(0), posX(0), speed(0), strafeSpeed(0)
 {}
 
 RaceState::~RaceState()
@@ -50,7 +50,9 @@ void RaceState::onEnter()
 	{
 		Segment line(*this);
 		line.z = i*roadSegmentLength;
-		if(i > 300 && i < 700) line.curve = 0.5;
+		if(i > 300 && i < 500) line.curve = 0.3;
+		if(i > 500 && i < 700) line.curve = -0.3;
+		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
 		lines.push_back(line);
 	}
@@ -58,6 +60,7 @@ void RaceState::onEnter()
 	position = 0;
 	posX = 0;
 	speed = 0;
+	strafeSpeed = 0;
 }
 
 void RaceState::onLeave()
@@ -133,14 +136,13 @@ void RaceState::render()
 	float spriteOffset = 0;
 	Image::FlipMode flip = Image::FLIP_NONE;
 
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
+	if(fabs(strafeSpeed) > 10000)
+		spriteOffset = 80;
+	else if(fabs(strafeSpeed) > 1000)
 		spriteOffset = 40;
 
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
-	{
-		spriteOffset = 40;
+	if(strafeSpeed < 0)
 		flip = Image::FLIP_HORIZONTAL;
-	}
 
 	car->drawScaledRegion(0.5*(display.getWidth() - scale*car->getWidth()), display.getHeight()-0.5*scale*car->getHeight(), scale, scale, flip, 0, spriteOffset, 80, 40);
 
@@ -157,6 +159,10 @@ void RaceState::render()
 		font2->drawText("Speed:", 25, 75, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", speed/120);
 		font->drawText(std::string(buffer), 90, 75, fgeal::Color::WHITE);
+
+		font2->drawText("Strafe speed:", 25, 100, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fkm/h", strafeSpeed/120);
+		font->drawText(std::string(buffer), 180, 100, fgeal::Color::WHITE);
 	}
 
 	fgeal::rest(0.01);
@@ -201,12 +207,28 @@ void RaceState::handlePhysics(float delta)
 {
 	const unsigned N = lines.size();
 
-	posX -= lines[((int)(position/roadSegmentLength))%N].curve * speed * 0.5 * delta;
+	const float curve = lines[((int)(position/roadSegmentLength))%N].curve;
+	posX -= atan(curve) * speed * 0.5 * delta;
 
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += accelPower*delta;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= accelPower*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))  posX += std::min(speed, 5000.0f)*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)) posX -= std::min(speed, 5000.0f)*delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
+	{
+		if(strafeSpeed < 0) strafeSpeed *= 1/(1+5*delta);
+		strafeSpeed += speed*delta;
+	}
+	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
+	{
+		if(strafeSpeed > 0) strafeSpeed *= 1/(1+5*delta);
+		strafeSpeed -= speed*delta;
+	}
+	else strafeSpeed *= 1/(1+5*delta);
+
+	if(strafeSpeed >  15000.f) strafeSpeed = 15000.f;
+	if(strafeSpeed < -15000.f) strafeSpeed = -15000.f;
+
+	posX += strafeSpeed*delta;
 
 	const float rollingFriction = 0.02 * 1500 * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
 			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81,

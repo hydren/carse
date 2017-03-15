@@ -23,6 +23,8 @@ class RaceState extends public fgeal::Game::State
 	private:
 	fgeal::Font* font, *font2;
 	fgeal::Image* bg, *car;
+	fgeal::Music* music;
+	fgeal::Sound* soundEngineIdle, *soundEngineHigh;
 
 	char buffer[256];
 

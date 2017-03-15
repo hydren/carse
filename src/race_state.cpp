@@ -21,17 +21,28 @@ using fgeal::Color;
 using fgeal::Keyboard;
 using fgeal::Event;
 using fgeal::EventQueue;
+using fgeal::Sound;
+using fgeal::Music;
 
 RaceState::RaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null),
+  music(null), soundEngineIdle(null), soundEngineHigh(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
   accelPower(9000.0f),
   position(0), posX(0), speed(0), strafeSpeed(0)
 {}
 
 RaceState::~RaceState()
-{}
+{
+	delete font;
+	delete font2;
+	delete bg;
+	delete car;
+	delete music;
+	delete soundEngineIdle;
+	delete soundEngineHigh;
+}
 
 void RaceState::initialize()
 {
@@ -39,6 +50,9 @@ void RaceState::initialize()
 	font2 = new Font("font.ttf");
 	bg = new Image("bg.jpg");
 	car = new Image("car.png");
+	music = new Music("music_sample.ogg");
+	soundEngineIdle = new Sound("engine_idle.ogg");
+	soundEngineHigh = new Sound("engine_high.ogg");
 }
 
 void RaceState::onEnter()
@@ -61,6 +75,9 @@ void RaceState::onEnter()
 	posX = 0;
 	speed = 0;
 	strafeSpeed = 0;
+
+	music->loop();
+	soundEngineIdle->loop();
 }
 
 void RaceState::onLeave()
@@ -195,6 +212,27 @@ void RaceState::handleInput()
 					break;
 				case Keyboard::Key::R:
 					position = 0;
+					posX = 0;
+					speed = 0;
+					strafeSpeed = 0;
+					break;
+				case Keyboard::Key::ARROW_UP:
+				case Keyboard::Key::ARROW_DOWN:
+					soundEngineIdle->stop();
+					soundEngineHigh->loop();
+					break;
+				default:
+					break;
+			}
+		}
+		else if(event.getEventType() == Event::Type::KEY_RELEASE)
+		{
+			switch(event.getEventKeyCode())
+			{
+				case Keyboard::Key::ARROW_UP:
+				case Keyboard::Key::ARROW_DOWN:
+					soundEngineHigh->stop();
+					soundEngineIdle->loop();
 					break;
 				default:
 					break;

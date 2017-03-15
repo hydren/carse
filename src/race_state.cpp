@@ -132,7 +132,7 @@ void RaceState::render()
 		drawQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
 	}
 
-	const float scale = 5.0;
+	const float scale = display.getWidth() * 0.0048828125;
 	float spriteOffset = 0;
 	Image::FlipMode flip = Image::FLIP_NONE;
 

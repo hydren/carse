@@ -29,8 +29,8 @@ RaceState::RaceState(CarseGame* game)
   font(null), font2(null), bg(null), car(null),
   music(null), soundEngineIdle(null), soundEngineHigh(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
-  accelPower(9000.0f),
-  position(0), posX(0), speed(0), strafeSpeed(0)
+  position(0), posX(0), speed(0), strafeSpeed(0),
+  carWeight(1500)
 {}
 
 RaceState::~RaceState()
@@ -53,6 +53,22 @@ void RaceState::initialize()
 	music = new Music("music_sample.ogg");
 	soundEngineIdle = new Sound("engine_idle.ogg");
 	soundEngineHigh = new Sound("engine_high.ogg");
+
+	engine.gearCount = 5;
+	engine.gearRatio = new float[engine.gearCount];
+	engine.gearRatio[0] = 3.69f;  // differential
+	engine.gearRatio[1] = 3.214f; // 1st gear
+	engine.gearRatio[2] = 1.925f; // 2nd gear
+	engine.gearRatio[3] = 1.302f; // 3th gear
+	engine.gearRatio[4] = 1.000f; // 4th gear
+	engine.gearRatio[5] = 0.752;  // 5th gear
+	engine.reverseGearRatio = 3.369f;
+	engine.maxRpm = 7000;
+	engine.torque = 500;
+	engine.wheelRadius = 0.34;
+
+	engine.gear = 1;
+	engine.rpm = 100;
 }
 
 void RaceState::onEnter()
@@ -180,6 +196,18 @@ void RaceState::render()
 		font2->drawText("Strafe speed:", 25, 100, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", strafeSpeed/120);
 		font->drawText(std::string(buffer), 180, 100, fgeal::Color::WHITE);
+
+		font2->drawText("RPM:", 25, display.getHeight()-100, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.f", engine.rpm);
+		font->drawText(std::string(buffer), 55, display.getHeight()-100, fgeal::Color::WHITE);
+
+		font2->drawText("Gear:", 25, display.getHeight()-100+25, fgeal::Color::WHITE);
+		sprintf(buffer, "%d", engine.gear);
+		font->drawText(std::string(buffer), 60, display.getHeight()-100+25, fgeal::Color::WHITE);
+
+		font2->drawText("Drive force:", 25, display.getHeight()-100+50, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", engine.getDriveForce());
+		font->drawText(std::string(buffer), 180, display.getHeight()-100+50, fgeal::Color::WHITE);
 	}
 
 	fgeal::rest(0.01);
@@ -221,6 +249,14 @@ void RaceState::handleInput()
 					soundEngineIdle->stop();
 					soundEngineHigh->loop();
 					break;
+				case Keyboard::Key::LEFT_SHIFT:
+					if(engine.gear < engine.gearCount)
+						engine.gear++;
+					break;
+				case Keyboard::Key::LEFT_CONTROL:
+					if(engine.gear > 1)
+						engine.gear--;
+					break;
 				default:
 					break;
 			}
@@ -248,8 +284,12 @@ void RaceState::handlePhysics(float delta)
 	const float curve = lines[((int)(position/roadSegmentLength))%N].curve;
 	posX -= atan(curve) * speed * 0.5 * delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += accelPower*delta;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= accelPower*delta;
+	engine.rpm = (speed/engine.wheelRadius) * engine.gearRatio[engine.gear] * engine.gearRatio[0] * (30.0f/M_PI) * 0.002;
+	if(engine.rpm < 1000)
+		engine.rpm = 1000;
+
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += (engine.getDriveForce() * delta)/carWeight;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= (engine.getDriveForce() * delta)/carWeight;
 
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
 	{
@@ -268,7 +308,7 @@ void RaceState::handlePhysics(float delta)
 
 	posX += strafeSpeed*delta;
 
-	const float rollingFriction = 0.02 * 1500 * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
+	const float rollingFriction = 0.02 * carWeight * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
 			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81,
 				turnFriction = Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT) or Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)? 2000 : 0;
 
@@ -278,5 +318,9 @@ void RaceState::handlePhysics(float delta)
 
 	while(position >= N*roadSegmentLength) position -= N*roadSegmentLength;
 	while(position < 0) position += N*roadSegmentLength;
+}
 
+float RaceState::Engine::getDriveForce()
+{
+	return (rpm < maxRpm? torque : 0) * gearRatio[gear] * gearRatio[0] * 0.765 * wheelRadius * 5000.0;
 }

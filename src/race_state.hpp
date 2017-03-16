@@ -49,8 +49,22 @@ class RaceState extends public fgeal::Game::State
 
 	std::vector<Segment> lines;
 
-	float accelPower;
 	float position, posX, speed, strafeSpeed;
+
+	struct Engine
+	{
+		float torque;
+		float rpm, maxRpm;
+		int gear, gearCount;
+		float *gearRatio, reverseGearRatio;
+		float wheelRadius;
+
+		float getDriveForce();
+	};
+
+	Engine engine;
+
+	float carWeight;
 
 	public:
 	RaceState(CarseGame* game);

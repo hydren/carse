@@ -27,7 +27,7 @@ using fgeal::Music;
 RaceState::RaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null),
-  music(null), soundEngineIdle(null), soundEngineHigh(null),
+  music(null), soundEngine(null), soundEngineCount(6),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   carWeight(1500)
@@ -40,8 +40,8 @@ RaceState::~RaceState()
 	delete bg;
 	delete car;
 	delete music;
-	delete soundEngineIdle;
-	delete soundEngineHigh;
+	for(unsigned i = 0; i < soundEngineCount; i++) delete soundEngine[i];
+	delete[] soundEngine;
 }
 
 void RaceState::initialize()
@@ -51,8 +51,13 @@ void RaceState::initialize()
 	bg = new Image("bg.jpg");
 	car = new Image("car.png");
 	music = new Music("music_sample.ogg");
-	soundEngineIdle = new Sound("engine_idle.ogg");
-	soundEngineHigh = new Sound("engine_high.ogg");
+	soundEngine = new Sound*[soundEngineCount];
+	soundEngine[0] = new Sound("rev_idle_300zx.ogg");
+	soundEngine[1] = new Sound("rev_low_300zx.ogg");
+	soundEngine[2] = new Sound("rev_midlow_300zx.ogg");
+	soundEngine[3] = new Sound("rev_midhigh_300zx.ogg");
+	soundEngine[4] = new Sound("rev_high_300zx.ogg");
+	soundEngine[5] = new Sound("rev_over_300zx.ogg");
 
 	engine.gearCount = 5;
 	engine.gearRatio = new float[engine.gearCount];
@@ -93,7 +98,7 @@ void RaceState::onEnter()
 	strafeSpeed = 0;
 
 	music->loop();
-	soundEngineIdle->loop();
+	soundEngine[0]->loop();
 }
 
 void RaceState::onLeave()
@@ -244,11 +249,6 @@ void RaceState::handleInput()
 					speed = 0;
 					strafeSpeed = 0;
 					break;
-				case Keyboard::Key::ARROW_UP:
-				case Keyboard::Key::ARROW_DOWN:
-					soundEngineIdle->stop();
-					soundEngineHigh->loop();
-					break;
 				case Keyboard::Key::LEFT_SHIFT:
 					if(engine.gear < engine.gearCount)
 						engine.gear++;
@@ -256,19 +256,6 @@ void RaceState::handleInput()
 				case Keyboard::Key::LEFT_CONTROL:
 					if(engine.gear > 1)
 						engine.gear--;
-					break;
-				default:
-					break;
-			}
-		}
-		else if(event.getEventType() == Event::Type::KEY_RELEASE)
-		{
-			switch(event.getEventKeyCode())
-			{
-				case Keyboard::Key::ARROW_UP:
-				case Keyboard::Key::ARROW_DOWN:
-					soundEngineHigh->stop();
-					soundEngineIdle->loop();
 					break;
 				default:
 					break;
@@ -318,6 +305,23 @@ void RaceState::handlePhysics(float delta)
 
 	while(position >= N*roadSegmentLength) position -= N*roadSegmentLength;
 	while(position < 0) position += N*roadSegmentLength;
+
+	bool rangeTouched = false;
+	const unsigned soundRange = engine.maxRpm / (soundEngineCount-1);
+	for(unsigned i = 0; i < soundEngineCount; i++)
+	{
+		if((engine.rpm > i*soundRange and engine.rpm < (i+1)*soundRange)
+		   or (i == soundEngineCount-1 and not rangeTouched))
+		{
+			if(not rangeTouched)
+			{
+				rangeTouched = true;
+				if(not soundEngine[i]->isPlaying())
+					soundEngine[i]->loop();
+			}
+		}
+		else soundEngine[i]->stop();
+	}
 }
 
 float RaceState::Engine::getDriveForce()

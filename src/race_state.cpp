@@ -321,6 +321,15 @@ void RaceState::handlePhysics(float delta)
 			}
 		}
 		else soundEngine[i]->stop();
+		// this code should pitch engine sound
+//		if(i < soundEngineCount-1)
+//		{
+//			float diff = engine.rpm - (float) i*soundRange;
+//			cout << diff;
+//			diff /= (float) soundRange;
+//			cout << diff << endl;
+//			soundEngine[i]->setSpeed(1 + 0.25*diff);
+//		}
 	}
 }
 

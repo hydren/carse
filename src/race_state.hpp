@@ -10,6 +10,7 @@
 #include <ciso646>
 
 #include <vector>
+#include <utility>
 
 #include "carse_game.hpp"
 #include "fgeal/fgeal.hpp"
@@ -24,8 +25,8 @@ class RaceState extends public fgeal::Game::State
 	fgeal::Font* font, *font2;
 	fgeal::Image* bg, *car;
 	fgeal::Music* music;
-	fgeal::Sound** soundEngine;
-	unsigned soundEngineCount;
+
+	std::vector< std::pair<short, fgeal::Sound*> > soundEngine;
 
 	char buffer[256];
 

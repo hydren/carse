@@ -26,8 +26,7 @@ using fgeal::Music;
 
 RaceState::RaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), bg(null), car(null),
-  music(null), soundEngine(null), soundEngineCount(6),
+  font(null), font2(null), bg(null), car(null), music(null),
   roadSegmentLength(200), roadWidth(2000), cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   carWeight(1500)
@@ -40,8 +39,7 @@ RaceState::~RaceState()
 	delete bg;
 	delete car;
 	delete music;
-	for(unsigned i = 0; i < soundEngineCount; i++) delete soundEngine[i];
-	delete[] soundEngine;
+	for(unsigned i = 0; i < soundEngine.size(); i++) delete soundEngine[i].second;
 }
 
 void RaceState::initialize()
@@ -51,13 +49,13 @@ void RaceState::initialize()
 	bg = new Image("bg.jpg");
 	car = new Image("car.png");
 	music = new Music("music_sample.ogg");
-	soundEngine = new Sound*[soundEngineCount];
-	soundEngine[0] = new Sound("rev_idle_300zx.ogg");
-	soundEngine[1] = new Sound("rev_low_300zx.ogg");
-	soundEngine[2] = new Sound("rev_midlow_300zx.ogg");
-	soundEngine[3] = new Sound("rev_midhigh_300zx.ogg");
-	soundEngine[4] = new Sound("rev_high_300zx.ogg");
-	soundEngine[5] = new Sound("rev_over_300zx.ogg");
+
+	soundEngine.push_back(std::make_pair(0   , new Sound("rev_idle_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(1100, new Sound("rev_low_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(2000, new Sound("rev_midlow_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(4500, new Sound("rev_midhigh_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(6000, new Sound("rev_high_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(6950, new Sound("rev_over_300zx.ogg")));
 
 	engine.gearCount = 5;
 	engine.gearRatio = new float[engine.gearCount];
@@ -98,7 +96,7 @@ void RaceState::onEnter()
 	strafeSpeed = 0;
 
 	music->loop();
-	soundEngine[0]->loop();
+	soundEngine[0].second->loop();
 }
 
 void RaceState::onLeave()
@@ -213,6 +211,18 @@ void RaceState::render()
 		font2->drawText("Drive force:", 25, display.getHeight()-100+50, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", engine.getDriveForce());
 		font->drawText(std::string(buffer), 180, display.getHeight()-100+50, fgeal::Color::WHITE);
+
+		unsigned currentRangeIndex = 0;
+		for(unsigned i = 0; i < soundEngine.size(); i++)
+			if(engine.rpm > soundEngine[i].first)
+				currentRangeIndex = i;
+
+		for(unsigned i = 0; i < soundEngine.size(); i++)
+		{
+			const std::string format = std::string(soundEngine[i].second->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
+			sprintf(buffer, format.c_str(), i, soundEngine[i].second->getVolume(), soundEngine[i].second->getPlaybackSpeed());
+			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getSize(), fgeal::Color::WHITE);
+		}
 	}
 
 	fgeal::rest(0.01);
@@ -264,6 +274,11 @@ void RaceState::handleInput()
 	}
 }
 
+float calculatePitch(float rpmDiff, float maxRpm)
+{
+	return 1 + 0.5*rpmDiff/maxRpm;
+}
+
 void RaceState::handlePhysics(float delta)
 {
 	const unsigned N = lines.size();
@@ -306,30 +321,51 @@ void RaceState::handlePhysics(float delta)
 	while(position >= N*roadSegmentLength) position -= N*roadSegmentLength;
 	while(position < 0) position += N*roadSegmentLength;
 
-	bool rangeTouched = false;
-	const unsigned soundRange = engine.maxRpm / (soundEngineCount-1);
-	for(unsigned i = 0; i < soundEngineCount; i++)
+	if(soundEngine.size() > 0 and engine.rpm > 0) // its no use if there is no engine sound or rpm is too low
 	{
-		if((engine.rpm > i*soundRange and engine.rpm < (i+1)*soundRange)
-		   or (i == soundEngineCount-1 and not rangeTouched))
+		unsigned currentRangeIndex = 0;
+		for(unsigned i = 0; i < soundEngine.size(); i++)
+			if(engine.rpm > soundEngine[i].first)
+				currentRangeIndex = i;
+
+		fgeal::Sound* currentSoundEngine = soundEngine[currentRangeIndex].second;
+		const float lowerRpmCurrent = soundEngine[currentRangeIndex].first;
+		const float upperRpmCurrent = currentRangeIndex+1 < soundEngine.size()? soundEngine[currentRangeIndex+1].first : engine.maxRpm;
+		const float rangeSizeCurrent = upperRpmCurrent - lowerRpmCurrent;
+
+		currentSoundEngine->setVolume(1.0f);
+		if(currentRangeIndex+1 < soundEngine.size())
+			currentSoundEngine->setPlaybackSpeed(calculatePitch(engine.rpm - lowerRpmCurrent, engine.maxRpm));
+
+		if(not currentSoundEngine->isPlaying())
+			currentSoundEngine->loop();
+
+		for(unsigned i = 0; i < soundEngine.size(); i++)
 		{
-			if(not rangeTouched)
+			if(i == currentRangeIndex) continue;
+
+			else if(i + 1 == currentRangeIndex and engine.rpm - lowerRpmCurrent < 0.25*rangeSizeCurrent and currentRangeIndex > 0)  // preceding range
 			{
-				rangeTouched = true;
-				if(not soundEngine[i]->isPlaying())
-					soundEngine[i]->loop();
+//				soundEngine[i].second->setVolume(1.0 - 4*(engine.rpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade out
+				soundEngine[i].second->setVolume(sqrt(1-16*pow((engine.rpm - lowerRpmCurrent)/rangeSizeCurrent, 2))); // quadratic fade out
+
+				soundEngine[i].second->setPlaybackSpeed(calculatePitch(engine.rpm - soundEngine[i].first, engine.maxRpm));
+				if(not soundEngine[i].second->isPlaying())
+					soundEngine[i].second->loop();
 			}
+
+			else if(i == currentRangeIndex + 1 and engine.rpm - lowerRpmCurrent > 0.75*rangeSizeCurrent and currentRangeIndex < soundEngine.size()-2)  // succeeding range
+			{
+//				soundEngine[i].second->setVolume(-3 + 4*(engine.rpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade in
+				soundEngine[i].second->setVolume(sqrt(1-pow(4*((engine.rpm - lowerRpmCurrent)/rangeSizeCurrent)-4, 2)) ); // quadratic fade in
+
+				soundEngine[i].second->setPlaybackSpeed(calculatePitch(engine.rpm - soundEngine[i].first, engine.maxRpm));
+				if(not soundEngine[i].second->isPlaying())
+					soundEngine[i].second->loop();
+			}
+
+			else soundEngine[i].second->stop();
 		}
-		else soundEngine[i]->stop();
-		// this code should pitch engine sound
-//		if(i < soundEngineCount-1)
-//		{
-//			float diff = engine.rpm - (float) i*soundRange;
-//			cout << diff;
-//			diff /= (float) soundRange;
-//			cout << diff << endl;
-//			soundEngine[i]->setSpeed(1 + 0.25*diff);
-//		}
 	}
 }
 

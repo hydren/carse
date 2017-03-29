@@ -11,7 +11,7 @@
 
 #include <vector>
 
-struct RaceState;  //fwd_decl
+struct Pseudo3DRaceState;  //fwd_decl
 
 struct Course
 {
@@ -31,14 +31,14 @@ struct Course
 		void project(int camX, int camY, int camZ);
 	};
 
-	RaceState& state;
+	Pseudo3DRaceState& state;
 
 	float roadSegmentLength, roadWidth;
 	float cameraDepth;
 
 	std::vector<Segment> lines;
 
-	Course(RaceState& state);
+	Course(Pseudo3DRaceState& state);
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

@@ -34,6 +34,6 @@ void Course::Segment::project(int camX, int camY, int camZ)
 	W = scale * course.roadWidth * display.getWidth()/2;
 }
 
-Course::Course(RaceState& state) // xxx @suppress("Class members should be properly initialized")
+Course::Course(Pseudo3DRaceState& state) // xxx @suppress("Class members should be properly initialized")
 : state(state)
 {}

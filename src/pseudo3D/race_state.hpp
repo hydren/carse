@@ -20,7 +20,7 @@
 #include "course.hpp"
 #include "vehicle.hpp"
 
-class RaceState extends public fgeal::Game::State
+class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	public:
 	int getId() { return CarseGame::RACE_STATE_ID; }
@@ -37,8 +37,8 @@ class RaceState extends public fgeal::Game::State
 	Vehicle vehicle;
 
 	public:
-	RaceState(CarseGame* game);
-	~RaceState();
+	Pseudo3DRaceState(CarseGame* game);
+	~Pseudo3DRaceState();
 
 	void initialize();
 

@@ -7,9 +7,7 @@
 
 #include "carse_game.hpp"
 
-#ifdef PSEUDO_3D_MODE
-	#include "pseudo3D/race_state.hpp"
-#endif
+#include "pseudo3D/race_state.hpp"
 
 const int CarseGame::RACE_STATE_ID = 0, CarseGame::MENU_STATE_ID = 1;
 
@@ -21,5 +19,7 @@ CarseGame::CarseGame()
 
 void CarseGame::initializeStatesList()
 {
-	this->addState(new RaceState(this));
+	#ifdef PSEUDO_3D_MODE
+		this->addState(new Pseudo3DRaceState(this));
+	#endif
 }

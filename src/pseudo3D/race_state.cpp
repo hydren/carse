@@ -41,7 +41,7 @@ float calculatePitch(float rpmDiff, float maxRpm)
 
 // -------------------------------------------------------------------------------
 
-RaceState::RaceState(CarseGame* game)
+Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null), music(null),
   position(0), posX(0), speed(0), strafeSpeed(0),
@@ -66,7 +66,7 @@ RaceState::RaceState(CarseGame* game)
 	vehicle.engine.wheelRadius = 0.34;
 }
 
-RaceState::~RaceState()
+Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	delete font;
 	delete font2;
@@ -76,7 +76,7 @@ RaceState::~RaceState()
 	for(unsigned i = 0; i < soundEngine.size(); i++) delete soundEngine[i].second;
 }
 
-void RaceState::initialize()
+void Pseudo3DRaceState::initialize()
 {
 	font = new Font("font.ttf");
 	font2 = new Font("font.ttf");
@@ -104,7 +104,7 @@ void RaceState::initialize()
 	}
 }
 
-void RaceState::onEnter()
+void Pseudo3DRaceState::onEnter()
 {
 	cout << "race start!" << endl;
 
@@ -120,7 +120,7 @@ void RaceState::onEnter()
 	soundEngine[0].second->loop();
 }
 
-void RaceState::onLeave()
+void Pseudo3DRaceState::onLeave()
 {
 	cout << "race end!" << endl;
 	for(unsigned i = 0; i < soundEngine.size(); i++)
@@ -128,7 +128,7 @@ void RaceState::onLeave()
 	music->stop();
 }
 
-void RaceState::render()
+void Pseudo3DRaceState::render()
 {
 	fgeal::Display& display = fgeal::Display::getInstance();
 
@@ -224,13 +224,13 @@ void RaceState::render()
 	fgeal::rest(0.01);
 }
 
-void RaceState::update(float delta)
+void Pseudo3DRaceState::update(float delta)
 {
 	handleInput();
 	handlePhysics(delta);
 }
 
-void RaceState::handleInput()
+void Pseudo3DRaceState::handleInput()
 {
 	Event event;
 	EventQueue& eventQueue = EventQueue::getInstance();
@@ -270,7 +270,7 @@ void RaceState::handleInput()
 	}
 }
 
-void RaceState::handlePhysics(float delta)
+void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const unsigned N = course.lines.size();
 

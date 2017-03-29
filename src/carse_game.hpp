@@ -12,6 +12,9 @@
 #include "fgeal/extra/game.hpp"
 #include "futil/general/language.hpp"
 
+#define PSEUDO_3D_MODE
+//#define TOPDOWN_MODE
+
 class CarseGame extends public fgeal::Game
 {
 	public:

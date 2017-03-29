@@ -1,0 +1,44 @@
+/*
+ * course.hpp
+ *
+ *  Created on: 29 de mar de 2017
+ *      Author: carlosfaruolo
+ */
+
+#ifndef PSEUDO3D_COURSE_HPP_
+#define PSEUDO3D_COURSE_HPP_
+#include <ciso646>
+
+#include <vector>
+
+struct Pseudo3DRaceState;  //fwd_decl
+
+struct Course
+{
+	struct Segment
+	{
+		Course& course;
+
+		float x, y, z; // 3d center of line (delta coordinates)
+		float X, Y, W; // screen coordinate
+		float scale, curve;
+
+		Segment(Course& state);
+
+		Segment& operator= (const Segment& s);
+
+		// from "world" to screen coordinates
+		void project(int camX, int camY, int camZ);
+	};
+
+	Pseudo3DRaceState& state;
+
+	float roadSegmentLength, roadWidth;
+	float cameraDepth;
+
+	std::vector<Segment> lines;
+
+	Course(Pseudo3DRaceState& state);
+};
+
+#endif /* PSEUDO3D_COURSE_HPP_ */

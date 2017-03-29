@@ -21,11 +21,11 @@ using fgeal::Font;
 using fgeal::Event;
 using fgeal::EventQueue;
 
-RaceState::RaceState(CarseGame* game)
+TopDownRaceState::TopDownRaceState(CarseGame* game)
 : State(*game)
 {
-	lockOn = false;  // glitches on SDL adapters
-	showDebug = false; // crashes on allegro adapter
+	lockOn = false;
+	showDebug = false;
 
 	cameraAngle = 0;
 
@@ -50,7 +50,7 @@ RaceState::RaceState(CarseGame* game)
 	player = null;
 }
 
-RaceState::~RaceState()
+TopDownRaceState::~TopDownRaceState()
 {
 	if(car_sprite != null) delete car_sprite;
 	if(track_bg != null) delete track_bg;
@@ -63,14 +63,14 @@ RaceState::~RaceState()
 	if(player != null) delete player;
 }
 
-void RaceState::initialize()
+void TopDownRaceState::initialize()
 {
 	camera.w = Display::getInstance().getWidth();
 	camera.h = Display::getInstance().getHeight();
 	camera.x = camera.y = 0;
 
-	car_sprite = new Image("car.png");
-	track_bg = new Image("simple_track.jpg");
+	car_sprite = new Image("topdown_car.png");
+	track_bg = new Image("topdown_simple_track.jpg");
 
 	car_sound_idle = new Sound("engine_idle.ogg");
 	car_sound_high = new Sound("engine_high.ogg");
@@ -83,21 +83,21 @@ void RaceState::initialize()
 	player = new Car(world);
 }
 
-void RaceState::onEnter()
+void TopDownRaceState::onEnter()
 {
 	cout << "race start!" << endl;
 	music_sample->loop();
 	car_sound_idle->loop();
 }
 
-void RaceState::onLeave()
+void TopDownRaceState::onLeave()
 {
 	cout << "race end!" << endl;
 	music_sample->stop();
 	car_sound_idle->stop();
 }
 
-void RaceState::render()
+void TopDownRaceState::render()
 {
 	Display::getInstance().clear();
 
@@ -136,7 +136,7 @@ void RaceState::render()
 	fgeal::rest(0.01);
 }
 
-void RaceState::handlePhysics(float delta)
+void TopDownRaceState::handlePhysics(float delta)
 {
 	const double forceFactorAbs = 50;
 
@@ -173,7 +173,7 @@ void RaceState::handlePhysics(float delta)
 	}
 }
 
-void RaceState::handleInput()
+void TopDownRaceState::handleInput()
 {
 	Event event;
 	EventQueue& eventQueue = EventQueue::getInstance();
@@ -250,7 +250,7 @@ void RaceState::handleInput()
 	}
 }
 
-void RaceState::update(float delta)
+void TopDownRaceState::update(float delta)
 {
 	handleInput();
 	handlePhysics(delta);

@@ -5,8 +5,8 @@
  *      Author: Felipe
  */
 
-#ifndef RACE_STATE_HPP_
-#define RACE_STATE_HPP_
+#ifndef TOPDOWN_RACE_STATE_HPP_
+#define TOPDOWN_RACE_STATE_HPP_
 #include <ciso646>
 
 #include "carse_game.hpp"
@@ -21,7 +21,7 @@
 
 #include "util/box2d_util.hpp"
 
-class RaceState extends public fgeal::Game::State
+class TopDownRaceState extends public fgeal::Game::State
 {
 	public:
 	int getId() { return CarseGame::RACE_STATE_ID; }
@@ -30,8 +30,8 @@ class RaceState extends public fgeal::Game::State
 	b2World* world;
 	Car* player;
 
-	bool lockOn;  // glitches on SDL adapters
-	bool showDebug; // crashes on allegro adapter
+	bool lockOn;
+	bool showDebug;
 
 	//the race camera
 	Rect camera;
@@ -48,8 +48,8 @@ class RaceState extends public fgeal::Game::State
 	char buffer[256];
 
 	public:
-	RaceState(CarseGame* game);
-	~RaceState();
+	TopDownRaceState(CarseGame* game);
+	~TopDownRaceState();
 
 	void initialize();
 
@@ -64,4 +64,4 @@ class RaceState extends public fgeal::Game::State
 	void handleInput();
 };
 
-#endif /* RACE_STATE_HPP_ */
+#endif /* TOPDOWN_RACE_STATE_HPP_ */

@@ -7,7 +7,9 @@
 
 #include "carse_game.hpp"
 
-#include "race_state.hpp"
+#ifdef PSEUDO_3D_MODE
+	#include "pseudo3D/race_state.hpp"
+#endif
 
 const int CarseGame::RACE_STATE_ID = 0, CarseGame::MENU_STATE_ID = 1;
 

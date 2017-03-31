@@ -41,6 +41,8 @@ float calculatePitch(float rpmDiff, float maxRpm)
 
 // -------------------------------------------------------------------------------
 
+int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
+
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null), music(null),

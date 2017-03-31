@@ -7,9 +7,10 @@
 
 #include "menu_state.hpp"
 
-int getId() { return CarseGame::MENU_STATE_ID; }
+int MenuState::getId() { return CarseGame::MENU_STATE_ID; }
 
 MenuState::MenuState(CarseGame* game)
+: State(*game)
 {}
 
 MenuState::~MenuState()

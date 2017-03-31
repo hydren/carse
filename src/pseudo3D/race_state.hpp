@@ -22,10 +22,6 @@
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
-	public:
-	int getId() { return CarseGame::RACE_STATE_ID; }
-
-	private:
 	fgeal::Font* font, *font2;
 	fgeal::Image* bg, *car;
 	fgeal::Music* music;
@@ -37,6 +33,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Vehicle vehicle;
 
 	public:
+	int getId();
+
 	Pseudo3DRaceState(CarseGame* game);
 	~Pseudo3DRaceState();
 

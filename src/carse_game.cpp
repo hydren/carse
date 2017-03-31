@@ -10,7 +10,7 @@
 #include "pseudo3D/race_state.hpp"
 #include "topdown/race_state.hpp"
 
-const int CarseGame::RACE_STATE_ID = 0, CarseGame::MENU_STATE_ID = 1;
+const int CarseGame::RACE_STATE_ID = 0, CarseGame::MAIN_MENU_STATE_ID = 1;
 
 CarseGame::CarseGame()
 : Game("Carse", null, 800, 600)

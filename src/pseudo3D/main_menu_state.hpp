@@ -5,8 +5,8 @@
  *      Author: carlosfaruolo
  */
 
-#ifndef PSEUDO3D_MENU_STATE_HPP_
-#define PSEUDO3D_MENU_STATE_HPP_
+#ifndef PSEUDO3D_MAIN_MENU_STATE_HPP_
+#define PSEUDO3D_MAIN_MENU_STATE_HPP_
 #include <ciso646>
 
 #include "carse_game.hpp"
@@ -14,13 +14,13 @@
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
 
-class MenuState extends public fgeal::Game::State
+class MainMenuState extends public fgeal::Game::State
 {
 	public:
 	int getId();
 
-	MenuState(CarseGame* game);
-	~MenuState();
+	MainMenuState(CarseGame* game);
+	~MainMenuState();
 
 	void initialize();
 	void onEnter();
@@ -33,4 +33,4 @@ class MenuState extends public fgeal::Game::State
 	void handleInput();
 };
 
-#endif /* PSEUDO3D_MENU_STATE_HPP_ */
+#endif /* PSEUDO3D_MAIN_MENU_STATE_HPP_ */

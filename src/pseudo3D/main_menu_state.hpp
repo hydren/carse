@@ -16,6 +16,8 @@
 
 class MainMenuState extends public fgeal::Game::State
 {
+	fgeal::Font* fontMain;
+
 	public:
 	int getId();
 

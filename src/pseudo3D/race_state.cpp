@@ -292,6 +292,12 @@ void Pseudo3DRaceState::handleInput()
 				case Keyboard::Key::T:
 					autoTransmission = !autoTransmission;
 					break;
+				case Keyboard::Key::M:
+					if(music->isPlaying())
+						music->pause();
+					else
+						music->resume();
+					break;
 				case Keyboard::Key::LEFT_SHIFT:
 					if(vehicle.engine.gear < vehicle.engine.gearCount)
 						vehicle.engine.gear++;

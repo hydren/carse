@@ -43,6 +43,8 @@ class Menu
 	/// Set to true to delete the passed font when deleting this menu
 	bool manageFontDeletion;
 
+	enum LayoutMode { PACK_ENTRIES, STRETCH_SPACING } layoutMode;
+
 	Menu(const Rectangle bounds, fgeal::Font* font, const fgeal::Color color, const std::string title="");
 	~Menu();
 

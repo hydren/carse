@@ -56,6 +56,7 @@ class Menu
 	Entry& operator [] (int index);
 
 	Entry& getSelectedEntry();
+	unsigned getSelectedIndex();
 	unsigned getNumberOfEntries();
 	void setSelectedEntry(const Entry& entry);
 

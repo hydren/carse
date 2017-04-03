@@ -76,6 +76,11 @@ Menu::Entry& Menu::getSelectedEntry()
 	return entries[selectedIndex];
 }
 
+unsigned Menu::getSelectedIndex()
+{
+	return selectedIndex;
+}
+
 unsigned Menu::getNumberOfEntries()
 {
 	return entries.size();

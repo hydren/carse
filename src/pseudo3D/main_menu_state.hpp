@@ -10,6 +10,7 @@
 #include <ciso646>
 
 #include "carse_game.hpp"
+#include "gui/menu.hpp"
 
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
@@ -17,6 +18,7 @@
 class MainMenuState extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain;
+	Menu* menu;
 
 	public:
 	int getId();
@@ -33,6 +35,7 @@ class MainMenuState extends public fgeal::Game::State
 
 	private:
 	void handleInput();
+	void onMenuSelect();
 };
 
 #endif /* PSEUDO3D_MAIN_MENU_STATE_HPP_ */

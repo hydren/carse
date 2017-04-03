@@ -7,6 +7,7 @@
 
 #include <pseudo3D/main_menu_state.hpp>
 
+using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
 using fgeal::Keyboard;
@@ -18,7 +19,8 @@ int MainMenuState::getId() { return CarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
-  fontMain(null)
+  fontMain(null),
+  menu(null)
 {}
 
 MainMenuState::~MainMenuState()
@@ -28,12 +30,20 @@ MainMenuState::~MainMenuState()
 
 void MainMenuState::initialize()
 {
+	Display& display = Display::getInstance();
+	Rectangle menuBounds = {0.125f*display.getWidth(), 0.5f*display.getHeight(), 0.4f*display.getWidth(), 0.4f*display.getHeight()};
 	fontMain = new Font("font.ttf", 32);
+	menu = new Menu(menuBounds, new Font("font.ttf", 18), Color::WHITE);
+	menu->manageFontDeletion = true;
+	menu->bgColor = Color::AZURE;
+	menu->selectedColor = Color::NAVY;
+	menu->addEntry("Start course");
+	menu->addEntry("Exit");
 }
 
 void MainMenuState::onEnter()
 {
-	// todo
+	menu->setSelectedIndex(0);
 }
 
 void MainMenuState::onLeave()
@@ -43,9 +53,10 @@ void MainMenuState::onLeave()
 
 void MainMenuState::render()
 {
-	fgeal::Display& display = fgeal::Display::getInstance();
+	Display& display = Display::getInstance();
 	display.clear();
-	fontMain->drawText("Press enter to start!", 84, 25, Color::AZURE);
+	menu->draw();
+	fontMain->drawText("Carse Project", 84, 25, Color::WHITE);
 }
 
 void MainMenuState::update(float delta)
@@ -57,7 +68,6 @@ void MainMenuState::handleInput()
 {
 	Event event;
 	EventQueue& eventQueue = EventQueue::getInstance();
-
 	while(eventQueue.hasEvents())
 	{
 		eventQueue.getNextEvent(&event);
@@ -73,11 +83,31 @@ void MainMenuState::handleInput()
 					game.running = false;
 					break;
 				case Keyboard::Key::ENTER:
-					game.enterState(CarseGame::RACE_STATE_ID);
+					this->onMenuSelect();
+					break;
+				case Keyboard::Key::ARROW_UP:
+					menu->cursorUp();
+					break;
+				case Keyboard::Key::ARROW_DOWN:
+					menu->cursorDown();
 					break;
 				default:
 					break;
 			}
 		}
+	}
+}
+
+void MainMenuState::onMenuSelect()
+{
+	switch(menu->getSelectedIndex())
+	{
+		case 0:
+			game.enterState(CarseGame::RACE_STATE_ID);
+			break;
+		case 1:
+			game.running = false;
+			break;
+		default: break;
 	}
 }

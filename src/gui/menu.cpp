@@ -18,7 +18,8 @@ Menu::Menu(Rectangle bounds, fgeal::Font* font, fgeal::Color color, string title
    bgColor(fgeal::Color::BLACK),
    fontColor(color),
    selectedColor(fgeal::Color(255-color.r, 255-color.g, 255-color.b)),
-   manageFontDeletion(false), layoutMode(PACK_ENTRIES)
+   layoutMode(PACK_ENTRIES), entrySpacing(0.1), entrySpacingIsRelative(true),
+   manageFontDeletion(false)
 {}
 
 Menu::~Menu()
@@ -131,7 +132,7 @@ void Menu::draw()
 	fgeal::Image::drawRectangle(selectedColor, bounds.x, bounds.y, bounds.w, bounds.h);
 	fgeal::Image::drawRectangle(bgColor, bounds.x+2, bounds.y+2, bounds.w-4, bounds.h-4);
 
-	float distanceBetween = font->getSize() * 1.25f;
+	float distanceBetween = entrySpacingIsRelative? font->getSize() * (1+entrySpacing) : entrySpacing;
 
 	if(layoutMode == STRETCH_SPACING)
 		distanceBetween = (bounds.h-font->getSize()) / ((float) entries.size() + (title.empty()?0:1));

@@ -40,10 +40,12 @@ class Menu
 	Rectangle bounds;
 	fgeal::Color bgColor, fontColor, selectedColor;
 
+	enum LayoutMode { PACK_ENTRIES, STRETCH_SPACING } layoutMode;
+	float entrySpacing; // the spacing between entries
+	bool entrySpacingIsRelative; // if true, 'entrySpacing' is a fraction relative to the font's size
+
 	/// Set to true to delete the passed font when deleting this menu
 	bool manageFontDeletion;
-
-	enum LayoutMode { PACK_ENTRIES, STRETCH_SPACING } layoutMode;
 
 	Menu(const Rectangle bounds, fgeal::Font* font, const fgeal::Color color, const std::string title="");
 	~Menu();

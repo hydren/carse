@@ -31,6 +31,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Course course;
 	Vehicle vehicle;
+	bool autoTransmission;
 
 	public:
 	int getId();

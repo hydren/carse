@@ -70,6 +70,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 	vehicle.engine.maxRpm = 7000;
 	vehicle.engine.torque = 500;
 	vehicle.engine.wheelRadius = 0.34;
+	autoTransmission = true;
 }
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
@@ -235,7 +236,7 @@ void Pseudo3DRaceState::render()
 
 		font2->drawText("Gear:", 25, display.getHeight()-100+25, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", vehicle.engine.gear);
-		font->drawText(std::string(buffer), 60, display.getHeight()-100+25, fgeal::Color::WHITE);
+		font->drawText(std::string(buffer)+(autoTransmission? " (auto)":""), 60, display.getHeight()-100+25, fgeal::Color::WHITE);
 
 		font2->drawText("Drive force:", 25, display.getHeight()-100+50, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
@@ -288,6 +289,9 @@ void Pseudo3DRaceState::handleInput()
 					speed = 0;
 					strafeSpeed = 0;
 					break;
+				case Keyboard::Key::T:
+					autoTransmission = !autoTransmission;
+					break;
 				case Keyboard::Key::LEFT_SHIFT:
 					if(vehicle.engine.gear < vehicle.engine.gearCount)
 						vehicle.engine.gear++;
@@ -313,6 +317,17 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	vehicle.engine.rpm = (speed/vehicle.engine.wheelRadius) * vehicle.engine.gearRatio[vehicle.engine.gear] * vehicle.engine.gearRatio[0] * (30.0f/M_PI) * 0.002;
 	if(vehicle.engine.rpm < 1000)
 		vehicle.engine.rpm = 1000;
+
+	if(autoTransmission)
+	{
+		if(vehicle.engine.gear < vehicle.engine.gearCount
+		and vehicle.engine.rpm > 0.95f*vehicle.engine.maxRpm)
+			vehicle.engine.gear++;
+
+		if(vehicle.engine.gear > 1
+		and vehicle.engine.rpm < 0.57f*vehicle.engine.maxRpm)
+			vehicle.engine.gear--;
+	}
 
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += (vehicle.engine.getDriveForce() * delta)/vehicle.mass;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= (vehicle.engine.getDriveForce() * delta)/vehicle.mass;

@@ -35,6 +35,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	public:
 	int getId();
 
+	bool useDebugCourse; // xxx debug
+
 	Pseudo3DRaceState(CarseGame* game);
 	~Pseudo3DRaceState();
 

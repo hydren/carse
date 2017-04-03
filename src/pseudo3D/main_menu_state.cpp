@@ -6,6 +6,7 @@
  */
 
 #include <pseudo3D/main_menu_state.hpp>
+#include <pseudo3D/race_state.hpp>
 
 using fgeal::Display;
 using fgeal::Event;
@@ -37,7 +38,8 @@ void MainMenuState::initialize()
 	menu->manageFontDeletion = true;
 	menu->bgColor = Color::AZURE;
 	menu->selectedColor = Color::NAVY;
-	menu->addEntry("Start course");
+	menu->addEntry("Start debug course");
+	menu->addEntry("Start random course");
 	menu->addEntry("Exit");
 }
 
@@ -103,9 +105,14 @@ void MainMenuState::onMenuSelect()
 	switch(menu->getSelectedIndex())
 	{
 		case 0:
+			static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID))->useDebugCourse = true;
 			game.enterState(CarseGame::RACE_STATE_ID);
 			break;
 		case 1:
+			static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID))->useDebugCourse = false;
+			game.enterState(CarseGame::RACE_STATE_ID);
+			break;
+		case 2:
 			game.running = false;
 			break;
 		default: break;

@@ -11,10 +11,25 @@
 
 #include "motor.hpp"
 
+#include "util/properties.hpp"
+
+#include <map>
+#include <string>
+
 struct Vehicle
 {
+	std::string name, sheetFilename;
+
+	std::map<short, std::string> soundsFilenames;
+
 	Engine engine;
 	float mass;
+
+	// creates a empty vehicle object
+	Vehicle();
+
+	// creates a vehicle with definitions taken from the given properties
+	Vehicle(const util::Properties& properties);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

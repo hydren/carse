@@ -47,16 +47,10 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), car(null), music(null),
+  cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
-  course(*this),
-
-  // xxx debug
-  useDebugCourse(true)
+  course(Course::createDebugCourse(200, 2000))
 {
-	course.roadSegmentLength = 200;
-	course.roadWidth = 2000;
-	course.cameraDepth = 0.84;
-
 	vehicle.mass = 1500;
 	vehicle.engine.gearCount = 5;
 	vehicle.engine.gearRatio = new float[vehicle.engine.gearCount];
@@ -99,49 +93,19 @@ void Pseudo3DRaceState::initialize()
 	soundEngine.push_back(std::make_pair(6950, new Sound("rev_over_300zx.ogg")));
 }
 
+void Pseudo3DRaceState::setVehicle(const Vehicle& v)
+{
+	vehicle = v;
+}
+
+void Pseudo3DRaceState::setCourse(const Course& c)
+{
+	course = c;
+	course.updateReferences();
+}
+
 void Pseudo3DRaceState::onEnter()
 {
-	course.lines.clear();
-	if(useDebugCourse)
-	{
-		// generating hardcoded course
-		for(unsigned i = 0; i < 1600; i++)
-		{
-			Course::Segment line(course);
-			line.z = i*course.roadSegmentLength;
-			if(i > 300 && i < 500) line.curve = 0.3;
-			if(i > 500 && i < 700) line.curve = -0.3;
-			if(i > 900 && i < 1300) line.curve = -2.2;
-			if(i > 750) line.y = sin(i/30.0)*1500;
-			course.lines.push_back(line);
-		}
-	}
-	else
-	{
-		srand(time(null));
-		float currentCurve = 0;
-
-		// generating random course
-		for(unsigned i = 0; i < 6400; i++)
-		{
-			Course::Segment line(course);
-			line.z = i*course.roadSegmentLength;
-
-			if(currentCurve == 0 and rand() % 50 == 0)
-				currentCurve = (rand()%60 - 30)*0.1;
-
-			else if(currentCurve != 0 and rand() % 100 == 0)
-				currentCurve = 0;
-
-			line.curve = currentCurve;
-
-			if(i > 750 and i < 1350) line.y = sin(i/30.0)*1500;
-			course.lines.push_back(line);
-		}
-	}
-
-	cout << "race start!" << endl;
-
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
 
@@ -152,11 +116,14 @@ void Pseudo3DRaceState::onEnter()
 
 	music->loop();
 	soundEngine[0].second->loop();
+
+	cout << "race start!" << endl;
 }
 
 void Pseudo3DRaceState::onLeave()
 {
 	cout << "race end!" << endl;
+
 	for(unsigned i = 0; i < soundEngine.size(); i++)
 		soundEngine[i].second->stop();
 	music->stop();
@@ -178,7 +145,7 @@ void Pseudo3DRaceState::render()
 	for(unsigned n = fromPos+1; n < fromPos+300; n++)
 	{
 		Course::Segment& l = course.lines[n%N];
-		l.project(posX - x, camHeight, position - (n>N?n*course.roadSegmentLength:0));
+		l.project(posX - x, camHeight, position - (n>N?n*course.roadSegmentLength:0), cameraDepth);
 		x += dx;
 		dx += l.curve;
 

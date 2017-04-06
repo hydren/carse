@@ -17,28 +17,30 @@ struct Course
 {
 	struct Segment
 	{
-		Course& course;
+		Course* course;
 
 		float x, y, z; // 3d center of line (delta coordinates)
 		float X, Y, W; // screen coordinate
 		float scale, curve;
 
-		Segment(Course& state);
-
-		Segment& operator= (const Segment& s);
+		Segment(Course* state);
 
 		// from "world" to screen coordinates
-		void project(int camX, int camY, int camZ);
+		void project(int camX, int camY, int camZ, float camDepth);
 	};
 
-	Pseudo3DRaceState& state;
-
-	float roadSegmentLength, roadWidth;
-	float cameraDepth;
-
 	std::vector<Segment> lines;
+	float roadSegmentLength, roadWidth;
 
-	Course(Pseudo3DRaceState& state);
+	Course(float segmentLength, float roadWidth);
+
+	void updateReferences();
+
+	/** Get a copy of the debug course. */
+	static Course createDebugCourse(float segmentLength, float roadWidth);
+
+	/** Creates an random course, with given length and curveness factor. */
+	static Course createRandomCourse(float segmentLength, float roadWidth, float length, float curveness);
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

@@ -26,6 +26,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Image* bg, *car;
 	fgeal::Music* music;
 
+	float cameraDepth;
+
 	std::vector< std::pair<short, fgeal::Sound*> > soundEngine;
 	float position, posX, speed, strafeSpeed;
 
@@ -35,8 +37,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	public:
 	int getId();
-
-	bool useDebugCourse; // xxx debug
 
 	Pseudo3DRaceState(CarseGame* game);
 	~Pseudo3DRaceState();
@@ -52,6 +52,10 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	private:
 	void handlePhysics(float delta);
 	void handleInput();
+
+	public://menu accessed methods
+	void setVehicle(const Vehicle& v);
+	void setCourse(const Course& c);
 };
 
 

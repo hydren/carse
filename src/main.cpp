@@ -31,7 +31,7 @@ using fgeal::Color;
 void runSplash()
 {
 	Display& display = Display::getInstance();
-	Image logoImage("carse_logo.png");
+	Image logoImage("assets/carse_logo.png");
 	Image::drawRectangle(Color::WHITE, 0, 0, display.getWidth(), display.getHeight());
 	logoImage.draw(0.5*display.getWidth() - 0.5*logoImage.getWidth(), 0.5*display.getHeight() - 0.5*logoImage.getHeight());
 	display.refresh();

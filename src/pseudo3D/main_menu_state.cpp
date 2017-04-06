@@ -37,8 +37,8 @@ void MainMenuState::initialize()
 {
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.125f*display.getWidth(), 0.5f*display.getHeight(), 0.4f*display.getWidth(), 0.4f*display.getHeight()};
-	fontMain = new Font("font.ttf", 32);
-	menu = new Menu(menuBounds, new Font("font.ttf", 18), Color::WHITE);
+	fontMain = new Font("assets/font.ttf", 32);
+	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
 	menu->manageFontDeletion = true;
 	menu->bgColor = Color::AZURE;
 	menu->selectedColor = Color::NAVY;

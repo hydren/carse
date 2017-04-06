@@ -79,18 +79,18 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 
 void Pseudo3DRaceState::initialize()
 {
-	font = new Font("font.ttf");
-	font2 = new Font("font.ttf");
-	bg = new Image("bg.jpg");
-	car = new Image("car.png");
-	music = new Music("music_sample.ogg");
+	font = new Font("assets/font.ttf");
+	font2 = new Font("assets/font.ttf");
+	bg = new Image("assets/bg.jpg");
+	car = new Image("assets/car.png");
+	music = new Music("assets/music_sample.ogg");
 
-	soundEngine.push_back(std::make_pair(0   , new Sound("rev_idle_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(1100, new Sound("rev_low_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(2000, new Sound("rev_midlow_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(4500, new Sound("rev_midhigh_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(6000, new Sound("rev_high_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(6950, new Sound("rev_over_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(0   , new Sound("assets/rev_idle_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(1100, new Sound("assets/rev_low_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(2000, new Sound("assets/rev_midlow_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(4500, new Sound("assets/rev_midhigh_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(6000, new Sound("assets/rev_high_300zx.ogg")));
+	soundEngine.push_back(std::make_pair(6950, new Sound("assets/rev_over_300zx.ogg")));
 }
 
 void Pseudo3DRaceState::setVehicle(const Vehicle& v)

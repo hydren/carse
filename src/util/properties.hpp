@@ -1,18 +1,18 @@
 /*
- * fileio.hpp
+ * properties.hpp
  *
  *  Created on: 5 de abr de 2017
  *      Author: carlosfaruolo
  */
 
-#ifndef UTIL_FILEIO_HPP_
-#define UTIL_FILEIO_HPP_
+#ifndef UTIL_PROPERTIES_HPP_
+#define UTIL_PROPERTIES_HPP_
 #include <ciso646>
 
 #include <string>
 #include <map>
 
-namespace fileio
+namespace util
 {
 	class Properties
 	{
@@ -44,4 +44,4 @@ namespace fileio
 	};
 }
 
-#endif /* UTIL_FILEIO_HPP_ */
+#endif /* UTIL_PROPERTIES_HPP_ */

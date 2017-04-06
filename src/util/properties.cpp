@@ -1,21 +1,20 @@
 /*
- * fileio.cpp
+ * properties.cpp
  *
  *  Created on: 5 de abr de 2017
  *      Author: carlosfaruolo
  */
 
-#include "fileio.hpp"
+#include "properties.hpp"
+using util::Properties;
 
 #include "futil/string/actions.hpp"
 #include "futil/string/split.hpp"
 
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
-#include <map>
-#include <stdexcept>
 
-using fileio::Properties;
 using std::map;
 using std::string;
 using std::vector;

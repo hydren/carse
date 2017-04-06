@@ -25,13 +25,13 @@ namespace util
 		std::string& operator[](const std::string& key);
 
 		/** Searches for the property with the specified key in this properties object and returns it. If the key is not found, an empty string is returned. */
-		std::string get(const std::string& key);
+		std::string get(const std::string& key) const;
 
 		/** Same as calling operator[key] = value, but returns the previous value of the specified key in this property list, or an empty string if it did not have one. */
 		std::string put(const std::string& key, const std::string& value);
 
 		/** Tests if the specified string is a key in this properties object. */
-		bool containsKey(const std::string& key);
+		bool containsKey(const std::string& key) const;
 
 		/** Clears this properties object so that it contains no keys. */
 		void clear();

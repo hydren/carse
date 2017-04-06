@@ -24,7 +24,7 @@ std::string& Properties::operator[](const std::string& key)
 	return data[key];
 }
 
-std::string Properties::get(const std::string& key)
+std::string Properties::get(const std::string& key) const
 {
 	map<string, string>::const_iterator lb = data.lower_bound(key);
 	if((lb != data.end() and not data.key_comp()(key, lb->first)))
@@ -40,7 +40,7 @@ std::string Properties::put(const std::string& key, const std::string& value)
 	return oldValue;
 }
 
-bool Properties::containsKey(const std::string& key)
+bool Properties::containsKey(const std::string& key) const
 {
 	map<string, string>::const_iterator lb = data.lower_bound(key);
 	return (lb != data.end() and not data.key_comp()(key, lb->first));

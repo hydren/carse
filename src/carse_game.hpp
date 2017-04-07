@@ -18,7 +18,7 @@
 class CarseGame extends public fgeal::Game
 {
 	public:
-	static const int RACE_STATE_ID, MAIN_MENU_STATE_ID;
+	static const int RACE_STATE_ID, MAIN_MENU_STATE_ID, CHOOSE_VEHICLE_STATE_ID;
 
 	CarseGame();
 	void initializeStatesList();

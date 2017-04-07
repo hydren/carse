@@ -8,15 +8,6 @@
 #include "main_menu_state.hpp"
 
 #include "race_state.hpp"
-#include "util/properties.hpp"
-
-#include "futil/string/actions.hpp"
-
-//xxx debug
-#include <iostream>
-using std::cout; using std::endl;
-
-#include <vector>
 
 using fgeal::Display;
 using fgeal::Event;
@@ -24,8 +15,6 @@ using fgeal::EventQueue;
 using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
-using std::vector;
-using std::string;
 
 int MainMenuState::getId() { return CarseGame::MAIN_MENU_STATE_ID; }
 
@@ -38,6 +27,7 @@ MainMenuState::MainMenuState(CarseGame* game)
 MainMenuState::~MainMenuState()
 {
 	if(fontMain != null) delete fontMain;
+	if(menu != null) delete menu;
 }
 
 void MainMenuState::initialize()
@@ -52,21 +42,6 @@ void MainMenuState::initialize()
 	menu->addEntry("Start debug course");
 	menu->addEntry("Start random course");
 	menu->addEntry("Exit");
-
-	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
-	for(unsigned i = 0; i < vehicleFiles.size(); i++)
-	{
-		string filename = vehicleFiles[i];
-		if(ends_with(filename, ".properties"))
-		{
-			util::Properties prop;
-			prop.load(filename);
-			vehicles.push_back(Vehicle(prop));
-
-			Vehicle& v = vehicles.back();
-			cout << "read vehicle " << v.name << endl;
-		}
-	}
 }
 
 void MainMenuState::onEnter()
@@ -133,8 +108,7 @@ void MainMenuState::onMenuSelect()
 		const bool isDebug = (menu->getSelectedIndex() == 0);
 		Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
 		raceState->setCourse(isDebug? Course::createDebugCourse(200, 2000) : Course::createRandomCourse(200, 2000, 6400, 2.0));
-		raceState->setVehicle(vehicles.back());
-		game.enterState(CarseGame::RACE_STATE_ID);
+		game.enterState(CarseGame::CHOOSE_VEHICLE_STATE_ID);
 	}
 
 	else if(menu->getSelectedIndex() == 2)

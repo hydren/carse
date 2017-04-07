@@ -7,6 +7,8 @@
 
 #include "vehicle.hpp"
 
+#include "futil/string/more_operators.hpp"
+
 #include <cstdlib>
 
 using util::Properties;
@@ -34,31 +36,6 @@ Vehicle::Vehicle(const Properties& prop)
 	if(prop.containsKey(key))
 		mass = atof(prop.get(key).c_str());
 
-	key = "gear_count";
-	engine.gearCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 6;
-
-	engine.gearRatio = new float[engine.gearCount];
-
-	key = "gear_ratios";
-	if(prop.containsKey(key))
-	{
-		string ratiosTxt = prop.get(key);
-		if(ratiosTxt == "default")
-		{
-			//todo use default ratios
-		}
-		else
-		{
-			//todo split values and set ratios
-		}
-	}
-
-	key = "gear_differential_ratio";
-	engine.gearRatio[0] = prop.containsKey(key)? atof(prop.get(key).c_str()) : 0.4; // fixme choose reasonable default value
-
-	key = "gear_reverse_ratio";
-	engine.reverseGearRatio = prop.containsKey(key)? atof(prop.get(key).c_str()) : 0.4; // fixme choose reasonable default value
-
 	key = "engine_maximum_rpm";
 	engine.maxRpm = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 7000;
 
@@ -70,6 +47,36 @@ Vehicle::Vehicle(const Properties& prop)
 
 	// todo read more data from properties
 
+	key = "gear_count";
+	engine.gearCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 6;
+
+	engine.gearRatio = new float[engine.gearCount+1];
+
+	key = "gear_ratios";
+	if(prop.containsKey(key))
+	{
+		string ratiosTxt = prop.get(key);
+		if(ratiosTxt == "default")
+		{
+			//todo use default ratios
+		}
+		else if(ratiosTxt == "custom")
+		{
+			key = "gear_differential_ratio";
+			if(prop.containsKey(key)) engine.gearRatio[0] = atof(prop.get(key).c_str());
+
+			key = "gear_reverse_ratio";
+			if(prop.containsKey(key)) engine.reverseGearRatio = atof(prop.get(key).c_str());
+
+			for(int g = 1; g <= engine.gearCount; g++)
+			{
+				key = string("gear_") + g + "_ratio";
+				if(prop.containsKey(key))
+					engine.gearRatio[g] = atof(prop.get(key).c_str());
+			}
+		}
+	}
+
 	if(prop.containsKey("sound") and prop.get("sound") != "no")
 	{
 		string soundOption = prop.get("sound");
@@ -78,11 +85,36 @@ Vehicle::Vehicle(const Properties& prop)
 
 		else if(soundOption == "default")
 		{
-			//todo
+			soundsFilenames[0] = "assets/engine_idle.ogg";
+			soundsFilenames[engine.maxRpm/2] = "engine_high.ogg";
 		}
+		// todo create engine sound classes: crossplane_v8, inline_6, flat_4, etc
 		else if(soundOption == "custom")
 		{
-			//todo
+			int i = 0;
+			key = "sound0";
+			while(prop.containsKey(key))
+			{
+				string filename = prop.get(key);
+
+				// now try to read _rpm property
+				key += "_rpm";
+				short rpm = -1;
+				if(prop.containsKey(key))
+					rpm = atoi(prop.get(key).c_str());
+
+				// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
+				if(rpm < 0)
+				{
+					if(i == 0) rpm = 0;
+					else       rpm = (engine.maxRpm - soundsFilenames.rbegin()->first)/2;
+				}
+
+				// save filename for given rpm
+				soundsFilenames[rpm] = filename;
+				i += 1;
+				key = string("sound") + i;
+			}
 		}
 	}
 }

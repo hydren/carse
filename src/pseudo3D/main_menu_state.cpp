@@ -10,7 +10,13 @@
 #include "race_state.hpp"
 #include "util/properties.hpp"
 
+#include "futil/string/actions.hpp"
+
+//xxx debug
 #include <iostream>
+using std::cout; using std::endl;
+
+#include <vector>
 
 using fgeal::Display;
 using fgeal::Event;
@@ -18,7 +24,8 @@ using fgeal::EventQueue;
 using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
-
+using std::vector;
+using std::string;
 
 int MainMenuState::getId() { return CarseGame::MAIN_MENU_STATE_ID; }
 
@@ -45,6 +52,22 @@ void MainMenuState::initialize()
 	menu->addEntry("Start debug course");
 	menu->addEntry("Start random course");
 	menu->addEntry("Exit");
+
+	vector<Vehicle> vehicles;
+	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
+	for(unsigned i = 0; i < vehicleFiles.size(); i++)
+	{
+		string filename = vehicleFiles[i];
+		if(ends_with(filename, ".properties"))
+		{
+			util::Properties prop;
+			prop.load(filename);
+			vehicles.push_back(Vehicle(prop));
+
+			Vehicle& v = vehicles.back();
+			cout << "read vehicle " << v.name << endl;
+		}
+	}
 }
 
 void MainMenuState::onEnter()

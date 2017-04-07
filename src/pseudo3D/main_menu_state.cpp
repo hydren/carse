@@ -53,7 +53,6 @@ void MainMenuState::initialize()
 	menu->addEntry("Start random course");
 	menu->addEntry("Exit");
 
-	vector<Vehicle> vehicles;
 	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
 	for(unsigned i = 0; i < vehicleFiles.size(); i++)
 	{
@@ -134,6 +133,7 @@ void MainMenuState::onMenuSelect()
 		const bool isDebug = (menu->getSelectedIndex() == 0);
 		Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
 		raceState->setCourse(isDebug? Course::createDebugCourse(200, 2000) : Course::createRandomCourse(200, 2000, 6400, 2.0));
+		raceState->setVehicle(vehicles.back());
 		game.enterState(CarseGame::RACE_STATE_ID);
 	}
 

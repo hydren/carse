@@ -9,8 +9,11 @@
 #define PSEUDO3D_MAIN_MENU_STATE_HPP_
 #include <ciso646>
 
+#include <vector>
+
 #include "carse_game.hpp"
 #include "gui/menu.hpp"
+#include "vehicle.hpp"
 
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
@@ -19,6 +22,8 @@ class MainMenuState extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain;
 	Menu* menu;
+
+	std::vector<Vehicle> vehicles;
 
 	public:
 	int getId();

@@ -18,6 +18,9 @@ using std::endl;
 #include <cmath>
 #include <ctime>
 
+using std::string;
+using std::map;
+
 using fgeal::Display;
 using fgeal::Image;
 using fgeal::Font;
@@ -49,23 +52,9 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), bg(null), car(null), music(null),
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
-  course(Course::createDebugCourse(200, 2000))
-{
-	vehicle.mass = 1500;
-	vehicle.engine.gearCount = 5;
-	vehicle.engine.gearRatio = new float[vehicle.engine.gearCount];
-	vehicle.engine.gearRatio[0] = 3.69f;  // differential
-	vehicle.engine.gearRatio[1] = 3.214f; // 1st gear
-	vehicle.engine.gearRatio[2] = 1.925f; // 2nd gear
-	vehicle.engine.gearRatio[3] = 1.302f; // 3th gear
-	vehicle.engine.gearRatio[4] = 1.000f; // 4th gear
-	vehicle.engine.gearRatio[5] = 0.752;  // 5th gear
-	vehicle.engine.reverseGearRatio = 3.369f;
-	vehicle.engine.maxRpm = 7000;
-	vehicle.engine.torque = 500;
-	vehicle.engine.wheelRadius = 0.34;
-	autoTransmission = true;
-}
+  course(Course::createDebugCourse(200, 2000)),
+  autoTransmission(true)
+{}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
@@ -82,15 +71,7 @@ void Pseudo3DRaceState::initialize()
 	font = new Font("assets/font.ttf");
 	font2 = new Font("assets/font.ttf");
 	bg = new Image("assets/bg.jpg");
-	car = new Image("assets/car.png");
 	music = new Music("assets/music_sample.ogg");
-
-	soundEngine.push_back(std::make_pair(0   , new Sound("assets/rev_idle_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(1100, new Sound("assets/rev_low_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(2000, new Sound("assets/rev_midlow_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(4500, new Sound("assets/rev_midhigh_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(6000, new Sound("assets/rev_high_300zx.ogg")));
-	soundEngine.push_back(std::make_pair(6950, new Sound("assets/rev_over_300zx.ogg")));
 }
 
 void Pseudo3DRaceState::setVehicle(const Vehicle& v)
@@ -106,6 +87,21 @@ void Pseudo3DRaceState::setCourse(const Course& c)
 
 void Pseudo3DRaceState::onEnter()
 {
+	if(car != null)
+		delete car;
+	car = new Image(vehicle.sheetFilename);
+
+	for(unsigned i = 0; i < soundEngine.size(); i++)
+		delete soundEngine[i].second;
+	soundEngine.clear();
+
+	for(map<short, string>::iterator i = vehicle.soundsFilenames.begin(); i != vehicle.soundsFilenames.end(); ++i)
+	{
+		short rpm = i->first;
+		string filename = i->second;
+		soundEngine.push_back(std::make_pair(rpm, new Sound(filename)));
+	}
+
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
 

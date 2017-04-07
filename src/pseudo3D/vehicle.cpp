@@ -30,37 +30,41 @@ Vehicle::Vehicle(const Properties& prop)
 	name = prop.containsKey(key)? prop.get(key) : "unnamed";
 
 	key = "sprite_sheet_file";
-	sheetFilename = prop.containsKey(key)? prop.get(key) : "car.png";
+	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
 
 	key = "vehicle_mass";
 	if(prop.containsKey(key))
 		mass = atof(prop.get(key).c_str());
 
+	mass = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 1250;
+
 	key = "engine_maximum_rpm";
-	engine.maxRpm = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 7000;
+	engine.maxRpm = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 7000;
 
 	key = "engine_torque";
-	engine.torque = prop.containsKey(key)? atof(prop.get(key).c_str()) : 500;
+	engine.torque = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 500;
 
 	key = "wheel_radius";
-	engine.wheelRadius = prop.containsKey(key)? atof(prop.get(key).c_str()) : 0.34;
+	engine.wheelRadius = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 0.34;
 
 	// todo read more data from properties
 
 	key = "gear_count";
-	engine.gearCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 6;
+	engine.gearCount = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 6;
 
 	engine.gearRatio = new float[engine.gearCount+1];
+
+	// first, set default ratios, then override
+	engine.reverseGearRatio = 3.25;
+	engine.gearRatio[0] = 3.0;
+	for(int g = 1; g <= engine.gearCount; g++)
+		engine.gearRatio[g] = 3.0 + 2.0*((g - 1.0)/(1.0 - engine.gearCount)); // generic gear ratio
 
 	key = "gear_ratios";
 	if(prop.containsKey(key))
 	{
 		string ratiosTxt = prop.get(key);
-		if(ratiosTxt == "default")
-		{
-			//todo use default ratios
-		}
-		else if(ratiosTxt == "custom")
+		if(ratiosTxt == "custom")
 		{
 			key = "gear_differential_ratio";
 			if(prop.containsKey(key)) engine.gearRatio[0] = atof(prop.get(key).c_str());
@@ -77,18 +81,18 @@ Vehicle::Vehicle(const Properties& prop)
 		}
 	}
 
-	if(prop.containsKey("sound") and prop.get("sound") != "no")
+	// first set default sounds
+	soundsFilenames[0] = "assets/engine_idle.ogg";
+	soundsFilenames[engine.maxRpm/2] = "assets/engine_high.ogg";
+
+	if(prop.containsKey("sound") and prop.get("sound") != "default")
 	{
 		string soundOption = prop.get("sound");
 		if(soundOption == "no")
 			soundsFilenames.clear();
 
-		else if(soundOption == "default")
-		{
-			soundsFilenames[0] = "assets/engine_idle.ogg";
-			soundsFilenames[engine.maxRpm/2] = "engine_high.ogg";
-		}
 		// todo create engine sound classes: crossplane_v8, inline_6, flat_4, etc
+
 		else if(soundOption == "custom")
 		{
 			int i = 0;

@@ -21,6 +21,7 @@ struct Vehicle
 	std::string name, sheetFilename;
 
 	std::map<short, std::string> soundsFilenames;
+	bool isLastSoundRedline;
 
 	Engine engine;
 	float mass;

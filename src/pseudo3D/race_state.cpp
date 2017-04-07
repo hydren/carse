@@ -342,7 +342,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		const float rangeSizeCurrent = upperRpmCurrent - lowerRpmCurrent;
 
 		currentSoundEngine->setVolume(1.0f);
-		if(currentRangeIndex+1 < soundEngine.size())
+		if(currentRangeIndex+1 < soundEngine.size() or not vehicle.isLastSoundRedline)
 			currentSoundEngine->setPlaybackSpeed(calculatePitch(vehicle.engine.rpm - lowerRpmCurrent, vehicle.engine.maxRpm));
 
 		if(not currentSoundEngine->isPlaying())

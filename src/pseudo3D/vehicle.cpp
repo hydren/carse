@@ -18,6 +18,7 @@ using std::string;
 Vehicle::Vehicle()
 : name(), sheetFilename(),
   soundsFilenames(),
+  isLastSoundRedline(false),
   engine(),
   mass(1250)
 {}
@@ -85,9 +86,11 @@ Vehicle::Vehicle(const Properties& prop)
 	soundsFilenames[0] = "assets/engine_idle.ogg";
 	soundsFilenames[engine.maxRpm/2] = "assets/engine_high.ogg";
 
-	if(prop.containsKey("sound") and prop.get("sound") != "default")
+	key = "sound";
+	if(prop.containsKey(key) and prop.get(key) != "default")
 	{
-		string soundOption = prop.get("sound");
+		string soundOption = prop.get(key);
+		soundsFilenames.clear();
 		if(soundOption == "no")
 			soundsFilenames.clear();
 
@@ -95,6 +98,10 @@ Vehicle::Vehicle(const Properties& prop)
 
 		else if(soundOption == "custom")
 		{
+			key = "sound_redline_last";
+			if(prop.containsKey(key) and prop.get(key) == "true")
+				isLastSoundRedline = true;
+
 			int i = 0;
 			key = "sound0";
 			while(prop.containsKey(key))

@@ -23,7 +23,7 @@
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	fgeal::Font* font, *font2;
-	fgeal::Image* bg, *car;
+	fgeal::Image* bg, *sheetVehicle;
 	fgeal::Music* music;
 
 	float cameraDepth;

@@ -49,7 +49,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), bg(null), car(null), music(null),
+  font(null), font2(null), bg(null), sheetVehicle(null), music(null),
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
@@ -61,7 +61,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	delete font;
 	delete font2;
 	delete bg;
-	delete car;
+	delete sheetVehicle;
 	delete music;
 	for(unsigned i = 0; i < soundEngine.size(); i++) delete soundEngine[i].second;
 }
@@ -87,9 +87,9 @@ void Pseudo3DRaceState::setCourse(const Course& c)
 
 void Pseudo3DRaceState::onEnter()
 {
-	if(car != null)
-		delete car;
-	car = new Image(vehicle.sheetFilename);
+	if(sheetVehicle != null)
+		delete sheetVehicle;
+	sheetVehicle = new Image(vehicle.sheetFilename);
 
 	for(unsigned i = 0; i < soundEngine.size(); i++)
 		delete soundEngine[i].second;
@@ -171,7 +171,7 @@ void Pseudo3DRaceState::render()
 	if(strafeSpeed < 0)
 		flip = Image::FLIP_HORIZONTAL;
 
-	car->drawScaledRegion(0.5*(display.getWidth() - scale*car->getWidth()), display.getHeight()-0.5*scale*car->getHeight(), scale, scale, flip, 0, spriteOffset, 80, 40);
+	sheetVehicle->drawScaledRegion(0.5*(display.getWidth() - scale*sheetVehicle->getWidth()), display.getHeight()-0.5*scale*sheetVehicle->getHeight(), scale, scale, flip, 0, spriteOffset, 80, 40);
 
 	char buffer[512];
 

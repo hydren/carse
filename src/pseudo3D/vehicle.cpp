@@ -40,7 +40,7 @@ Vehicle::Vehicle(const Properties& prop)
 	engine.maxRpm = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 7000;
 
 	key = "engine_torque";
-	engine.torque = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 500;
+	engine.torque = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 750;
 
 	key = "wheel_radius";
 	engine.wheelRadius = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 0.34;
@@ -81,7 +81,7 @@ Vehicle::Vehicle(const Properties& prop)
 
 	// first set default sounds
 	soundsFilenames[0] = "assets/engine_idle.ogg";
-	soundsFilenames[engine.maxRpm/2] = "assets/engine_high.ogg";
+	soundsFilenames[1250] = "assets/engine_high.ogg";
 	isLastSoundRedline = false;
 
 	key = "sound";

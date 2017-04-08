@@ -16,10 +16,7 @@ using std::map;
 using std::string;
 
 Vehicle::Vehicle()
-: name(), sheetFilename(),
-  soundsFilenames(),
-  isLastSoundRedline(false),
-  engine(),
+: isLastSoundRedline(false),
   mass(1250)
 {}
 
@@ -85,6 +82,7 @@ Vehicle::Vehicle(const Properties& prop)
 	// first set default sounds
 	soundsFilenames[0] = "assets/engine_idle.ogg";
 	soundsFilenames[engine.maxRpm/2] = "assets/engine_high.ogg";
+	isLastSoundRedline = false;
 
 	key = "sound";
 	if(prop.containsKey(key) and prop.get(key) != "default")

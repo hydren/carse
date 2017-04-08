@@ -18,6 +18,7 @@ struct Engine
 	float wheelRadius;
 
 	float getDriveForce();
+	float getTorque();
 };
 
 #endif /* MOTOR_HPP_ */

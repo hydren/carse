@@ -181,7 +181,7 @@ void Pseudo3DRaceState::render()
 	const float scale = display.getWidth() * 0.0048828125;
 	unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(strafeSpeed)/9000.0 + (10-vehicle.spriteStateCount)/9.0;
 	if(animationIndex > vehicle.spriteStateCount-1)  animationIndex = vehicle.spriteStateCount-1;
-	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 	spritesVehicle[animationIndex]->scale.x = scale;
 	spritesVehicle[animationIndex]->scale.y = scale;
 	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);

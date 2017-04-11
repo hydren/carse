@@ -15,8 +15,11 @@ using util::Properties;
 using std::map;
 using std::string;
 
+static const unsigned DEFAULT_SPRITE_WIDTH = 96;
+static const unsigned DEFAULT_SPRITE_HEIGHT = 60;
+
 Vehicle::Vehicle()
-: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1),
+: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
   isLastSoundRedline(false),
   mass(1250)
 {}
@@ -35,13 +38,18 @@ Vehicle::Vehicle(const Properties& prop)
 	spriteStateCount = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 1;
 
 	key = "sprite_frame_width";
-	spriteWidth = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 96;
+	spriteWidth = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
 
 	key = "sprite_frame_height";
-	spriteHeight = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 60;
+	spriteHeight = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
 
 	key = "sprite_frame_duration";
 	spriteFrameDuration = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : -1;
+
+	key = "sprite_scale";
+	spriteScale = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT/spriteHeight;
+	spriteScale *= 40.0/DEFAULT_SPRITE_HEIGHT; // internal adjustment
+
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
 	{

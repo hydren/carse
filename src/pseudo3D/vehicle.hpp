@@ -24,6 +24,7 @@ struct Vehicle
 	unsigned spriteStateCount, spriteWidth, spriteHeight;
 	float spriteFrameDuration;
 	std::vector<unsigned> spriteStateFrameCount;
+	float spriteScale;
 
 	std::map<short, std::string> soundsFilenames;
 	bool isLastSoundRedline;

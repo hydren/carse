@@ -14,7 +14,7 @@ struct Engine
 	float torque;
 	float rpm, maxRpm;
 	int gear, gearCount;
-	float *gearRatio, reverseGearRatio;
+	float *gearRatio, reverseGearRatio; // fixme this leaks :)
 	float wheelRadius;
 
 	float getDriveForce();

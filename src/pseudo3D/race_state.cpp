@@ -41,7 +41,7 @@ void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, 
 //calculates engine sound pitch for given RPM and max RPM
 float calculatePitch(float rpmDiff, float maxRpm)
 {
-	return 1 + 0.5*rpmDiff/maxRpm;
+	return exp(rpmDiff/maxRpm);
 }
 
 // -------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ void Pseudo3DRaceState::render()
 		drawQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
 	}
 
-	const float scale = display.getWidth() * 0.0048828125;
+	const float scale = display.getWidth() * 0.0048828125f * (3200.0f/(vehicle.spriteWidth*vehicle.spriteHeight));
 	unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(strafeSpeed)/9000.0 + (10-vehicle.spriteStateCount)/9.0;
 	if(animationIndex > vehicle.spriteStateCount-1)  animationIndex = vehicle.spriteStateCount-1;
 	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;

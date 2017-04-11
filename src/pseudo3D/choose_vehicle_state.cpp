@@ -98,11 +98,12 @@ void ChooseVehicleState::render()
 	menu->draw();
 	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
 
-	const float scale = display.getWidth() * 0.0048828125;
-	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
-	sheetVehicle->drawScaledRegion(0.5*display.getWidth(), 0.25*display.getHeight(), scale, scale, Image::FLIP_NONE, 0, 40, 80, 40);
-
 	const Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	const float scale = display.getWidth() * 0.0048828125f * (3200.0f/(vehicle.spriteWidth*vehicle.spriteHeight));
+	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
+	const float offsetY = vehicle.spriteHeight * (vehicle.spriteStateCount/2);
+	sheetVehicle->drawScaledRegion(0.5*display.getWidth(), 0.25*display.getHeight(), scale, scale, Image::FLIP_NONE, 0, offsetY, vehicle.spriteWidth, vehicle.spriteHeight);
+
 	fontInfo->drawText(string("Torque: ")+vehicle.engine.torque + "Nm", 0.525*display.getWidth(), 0.525*display.getHeight(), Color::WHITE);
 	fontInfo->drawText(string("Gears: ")+vehicle.engine.gearCount, 0.525*display.getWidth(), 0.525*display.getHeight()+12, Color::WHITE);
 	fontInfo->drawText(string("Weight: ")+vehicle.mass + "kg", 0.525*display.getWidth(), 0.525*display.getHeight()+24, Color::WHITE);

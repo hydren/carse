@@ -17,7 +17,7 @@
 
 class MainMenuState extends public fgeal::Game::State
 {
-	fgeal::Font* fontMain;
+	fgeal::Font* fontMain, *fontDev;
 	Menu* menu;
 
 	public:

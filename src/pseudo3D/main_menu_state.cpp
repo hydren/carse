@@ -9,6 +9,8 @@
 
 #include "race_state.hpp"
 
+#include "futil/string/more_operators.hpp"
+
 using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
@@ -16,17 +18,20 @@ using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
 
+using std::string;
+
 int MainMenuState::getId() { return CarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
-  fontMain(null),
+  fontMain(null), fontDev(null),
   menu(null)
 {}
 
 MainMenuState::~MainMenuState()
 {
 	if(fontMain != null) delete fontMain;
+	if(fontDev != null) delete fontDev;
 	if(menu != null) delete menu;
 }
 
@@ -35,6 +40,7 @@ void MainMenuState::initialize()
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.125f*display.getWidth(), 0.5f*display.getHeight(), 0.4f*display.getWidth(), 0.4f*display.getHeight()};
 	fontMain = new Font("assets/font.ttf", 32);
+	fontDev = new Font("assets/font.ttf", 12);
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
 	menu->manageFontDeletion = true;
 	menu->bgColor = Color::AZURE;
@@ -60,6 +66,7 @@ void MainMenuState::render()
 	display.clear();
 	menu->draw();
 	fontMain->drawText("Carse Project", 84, 25, Color::WHITE);
+	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - fontDev->getSize(), Color::CREAM);
 }
 
 void MainMenuState::update(float delta)

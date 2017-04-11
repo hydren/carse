@@ -14,11 +14,16 @@
 #include "util/properties.hpp"
 
 #include <map>
+#include <vector>
 #include <string>
 
 struct Vehicle
 {
 	std::string name, sheetFilename;
+
+	unsigned spriteStateCount, spriteWidth, spriteHeight;
+	float spriteFrameDuration;
+	std::vector<unsigned> spriteStateFrameCount;
 
 	std::map<short, std::string> soundsFilenames;
 	bool isLastSoundRedline;

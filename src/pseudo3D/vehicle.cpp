@@ -16,7 +16,8 @@ using std::map;
 using std::string;
 
 Vehicle::Vehicle()
-: isLastSoundRedline(false),
+: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1),
+  isLastSoundRedline(false),
   mass(1250)
 {}
 
@@ -29,6 +30,24 @@ Vehicle::Vehicle(const Properties& prop)
 
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
+
+	key = "sprite_state_count";
+	spriteStateCount = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 1;
+
+	key = "sprite_frame_width";
+	spriteWidth = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 96;
+
+	key = "sprite_frame_height";
+	spriteHeight = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 60;
+
+	key = "sprite_frame_duration";
+	spriteFrameDuration = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : -1;
+
+	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
+	{
+		key = string("sprite_state")+stateNumber+"_frame_count";
+		spriteStateFrameCount.push_back(prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 1);
+	}
 
 	key = "vehicle_mass";
 	if(prop.containsKey(key))

@@ -16,6 +16,7 @@
 
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
+#include "fgeal/extra/sprite.hpp"
 
 #include "course.hpp"
 #include "vehicle.hpp"
@@ -23,8 +24,10 @@
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	fgeal::Font* font, *font2;
-	fgeal::Image* bg, *sheetVehicle;
+	fgeal::Image* bg;
 	fgeal::Music* music;
+
+	std::vector<fgeal::Sprite*> spritesVehicle;
 
 	float cameraDepth;
 

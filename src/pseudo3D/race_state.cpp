@@ -30,6 +30,7 @@ using fgeal::Event;
 using fgeal::EventQueue;
 using fgeal::Sound;
 using fgeal::Music;
+using fgeal::Sprite;
 
 //custom call to draw quad
 void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
@@ -49,7 +50,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), bg(null), sheetVehicle(null), music(null),
+  font(null), font2(null), bg(null), music(null),
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
@@ -61,9 +62,10 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	delete font;
 	delete font2;
 	delete bg;
-	delete sheetVehicle;
 	delete music;
 	for(unsigned i = 0; i < soundEngine.size(); i++) delete soundEngine[i].second;
+	for(unsigned i = 0; i < spritesVehicle.size(); i++)
+		delete spritesVehicle[i];
 }
 
 void Pseudo3DRaceState::initialize()
@@ -87,9 +89,26 @@ void Pseudo3DRaceState::setCourse(const Course& c)
 
 void Pseudo3DRaceState::onEnter()
 {
-	if(sheetVehicle != null)
-		delete sheetVehicle;
-	sheetVehicle = new Image(vehicle.sheetFilename);
+	if(not spritesVehicle.empty())
+	{
+		for(unsigned i = 0; i < spritesVehicle.size(); i++)
+			delete spritesVehicle[i];
+
+		spritesVehicle.clear();
+	}
+
+	for(unsigned i = 0; i < vehicle.spriteStateCount; i++)
+	{
+		Image* sheet = new Image(vehicle.sheetFilename);
+
+		if(sheet->getWidth() < static_cast<int>(vehicle.spriteWidth))
+			throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
+
+		Sprite* sprite = new Sprite(sheet, vehicle.spriteWidth, vehicle.spriteHeight,
+									vehicle.spriteFrameDuration, vehicle.spriteStateFrameCount[i],
+									0, i*vehicle.spriteHeight, true);
+		spritesVehicle.push_back(sprite);
+	}
 
 	for(unsigned i = 0; i < soundEngine.size(); i++)
 		delete soundEngine[i].second;
@@ -160,18 +179,12 @@ void Pseudo3DRaceState::render()
 	}
 
 	const float scale = display.getWidth() * 0.0048828125;
-	float spriteOffset = 0;
-	Image::FlipMode flip = Image::FLIP_NONE;
-
-	if(fabs(strafeSpeed) > 10000)
-		spriteOffset = 80;
-	else if(fabs(strafeSpeed) > 1000)
-		spriteOffset = 40;
-
-	if(strafeSpeed < 0)
-		flip = Image::FLIP_HORIZONTAL;
-
-	sheetVehicle->drawScaledRegion(0.5*(display.getWidth() - scale*sheetVehicle->getWidth()), display.getHeight()-0.5*scale*sheetVehicle->getHeight(), scale, scale, flip, 0, spriteOffset, 80, 40);
+	unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(strafeSpeed)/9000.0 + (10-vehicle.spriteStateCount)/9.0;
+	if(animationIndex > vehicle.spriteStateCount-1)  animationIndex = vehicle.spriteStateCount-1;
+	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+	spritesVehicle[animationIndex]->scale.x = scale;
+	spritesVehicle[animationIndex]->scale.y = scale;
+	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
 
 	char buffer[512];
 

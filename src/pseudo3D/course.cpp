@@ -68,8 +68,13 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 		Course::Segment line(&course);
 		line.z = i*course.roadSegmentLength;
 
-		if(currentCurve == 0 and rand() % 50 == 0)
-			currentCurve = random_decimal_between(-curveness, curveness);
+		if(currentCurve == 0)
+		{
+			if(rand() % 500 == 0)
+				currentCurve = random_decimal_between(-5*curveness, 5*curveness);
+			else if(rand() % 50 == 0)
+				currentCurve = random_decimal_between(-curveness, curveness);
+		}
 
 		else if(currentCurve != 0 and rand() % 100 == 0)
 			currentCurve = 0;

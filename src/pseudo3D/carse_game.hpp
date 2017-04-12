@@ -12,16 +12,15 @@
 #include "fgeal/extra/game.hpp"
 #include "futil/general/language.hpp"
 
-#define PSEUDO_3D_MODE
-//#define TOPDOWN_MODE
-
-class CarseGame extends public fgeal::Game
+class Pseudo3DCarseGame extends public fgeal::Game
 {
 	public:
 	static const int RACE_STATE_ID, MAIN_MENU_STATE_ID, CHOOSE_VEHICLE_STATE_ID;
 
-	CarseGame();
+	Pseudo3DCarseGame();
 	void initializeStatesList();
 };
+
+typedef Pseudo3DCarseGame CarseGame;
 
 #endif /* CARSE_GAME_HPP_ */

@@ -7,6 +7,8 @@
 
 #include "race_state.hpp"
 
+#include "box2d_util.hpp"
+
 #include <iostream>
 #include <cmath>
 #include <cstdio>
@@ -20,6 +22,9 @@ using fgeal::Music;
 using fgeal::Font;
 using fgeal::Event;
 using fgeal::EventQueue;
+
+using util::toPixels;
+using util::toMeters;
 
 TopDownRaceState::TopDownRaceState(CarseGame* game)
 : State(*game)
@@ -69,15 +74,15 @@ void TopDownRaceState::initialize()
 	camera.h = Display::getInstance().getHeight();
 	camera.x = camera.y = 0;
 
-	car_sprite = new Image("topdown_car.png");
-	track_bg = new Image("topdown_simple_track.jpg");
+	car_sprite = new Image("assets/topdown_car.png");
+	track_bg = new Image("assets/topdown_simple_track.jpg");
 
-	car_sound_idle = new Sound("engine_idle.ogg");
-	car_sound_high = new Sound("engine_high.ogg");
-	music_sample = new Music("music_sample.ogg");
+	car_sound_idle = new Sound("assets/sound/engine/default_engine_idle.ogg");
+	car_sound_high = new Sound("assets/sound/engine/default_engine_rev.ogg");
+	music_sample = new Music("assets/music_sample.ogg");
 
-	font = new Font("font.ttf");
-	font2 = new Font("font.ttf");
+	font = new Font("assets/font.ttf");
+	font2 = new Font("assets/font.ttf");
 
 	world = new b2World(b2Vec2(0, 0));
 	player = new Car(world);
@@ -104,12 +109,12 @@ void TopDownRaceState::render()
 	if(lockOn)
 	{
 		track_bg->drawRotated(camera.w/2, camera.h/2, -cameraAngle, camera.x, camera.y);
-		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle()-cameraAngle, 23, 48);
+		car_sprite->drawRotated(0.1*toPixels(player->m_body->GetPosition().x)-camera.x, 0.1*toPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle()-cameraAngle, 23, 48);
 	}
 	else
 	{
 		track_bg->draw(-camera.x, -camera.y);
-		car_sprite->drawRotated(0.1*convertToPixels(player->m_body->GetPosition().x)-camera.x, 0.1*convertToPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle(), 23, 48);
+		car_sprite->drawRotated(0.1*toPixels(player->m_body->GetPosition().x)-camera.x, 0.1*toPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle(), 23, 48);
 	}
 
 	font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getSize(), fgeal::Color::CREAM);
@@ -163,8 +168,8 @@ void TopDownRaceState::handlePhysics(float delta)
 	world->Step(delta, 10, 10);
 
 	//update the camera
-	camera.x = 0.1*convertToPixels(player->m_body->GetPosition().x) - camera.w/2;
-	camera.y = 0.1*convertToPixels(player->m_body->GetPosition().y) - camera.h/2;
+	camera.x = 0.1*toPixels(player->m_body->GetPosition().x) - camera.w/2;
+	camera.y = 0.1*toPixels(player->m_body->GetPosition().y) - camera.h/2;
 
 	if(lockOn)
 	{

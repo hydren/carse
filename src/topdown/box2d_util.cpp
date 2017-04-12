@@ -7,19 +7,19 @@
 
 #include "box2d_util.hpp"
 
-b2Vec2 b2Unit(const b2Vec2& v)
+b2Vec2 util::b2Unit(const b2Vec2& v)
 {
 	b2Vec2 u (v.x, v.y);
 	u.Normalize();
 	return u;
 }
 
-float convertToMeters(float pixels)
+float util::toMeters(float pixels)
 {
 	return 0.01f * pixels;
 }
 
-float convertToPixels(float meters)
+float util::toPixels(float meters)
 {
 	return 100.0f * meters;
 }

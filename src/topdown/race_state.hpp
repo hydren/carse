@@ -16,10 +16,11 @@
 #include "fgeal/fgeal.hpp"
 
 #include "futil/general/language.hpp"
+#include "futil/math/rect.hpp"
 
 #include <Box2D/Box2D.h>
 
-#include "util/box2d_util.hpp"
+#include "box2d_util.hpp"
 
 class TopDownRaceState extends public fgeal::Game::State
 {

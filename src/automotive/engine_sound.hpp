@@ -24,23 +24,39 @@ struct EngineSoundProfile
 		std::string filename;
 	};
 
+	// information about each sound for each range
 	std::vector<RangeProfile> ranges;
+
+	// read-only. the intended max rpm for this engine sound profile
+	short intendedMaxRpm;
+
+	// if true, treat the last range as a redline range, in other words, this sound won't be pitched at all.
 	bool treatLastRangeAsRedline;
 
 	EngineSoundProfile();
 
-	// load a sound profile from properties. use 'forceCustomOnly' only when loading built-in profiles.
-	static EngineSoundProfile loadFromProperties(const util::Properties& prop, short maxRpm, bool forceCustomOnly=false);
+	// returns true if the given properties requests a preset profile instead of specifying a custom profile.
+	static bool requestsPresetProfile(const util::Properties& prop);
+
+	// load a custom sound profile from properties. if a non-custom (preset) profile is specified, a std::logic_error is thrown.
+	static EngineSoundProfile loadFromProperties(const util::Properties& prop);
 };
 
 class EngineSoundSimulator
 {
+	// the engine sound profile
 	EngineSoundProfile profile;
-	std::vector<fgeal::Sound*> sound;
+
+	// a set of actual sound data. each index in this corresponds to each index on the profile's ranges
+	std::vector<fgeal::Sound*> soundData;
 
 	public:
 	void setProfile(const EngineSoundProfile& profile);
+
+	// updates the current playing sound. if no sound is being played, it begins playing.
 	void updateSound(float currentRpm);
+
+	void haltSound();
 
 	~EngineSoundSimulator();
 };

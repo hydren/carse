@@ -36,9 +36,15 @@ EngineSoundSimulator::~EngineSoundSimulator()
 }
 
 //static
-bool EngineSoundProfile::requestsPresetProfile(const util::Properties& prop)
+bool EngineSoundProfile::requestsPresetProfile(const Properties& prop)
 {
 	return prop.containsKey(KEY_SOUND) and prop.get(KEY_SOUND) != "custom" and prop.get(KEY_SOUND) != "no";
+}
+
+//static
+string EngineSoundProfile::getSoundDefinitionFromProperties(const Properties& prop)
+{
+	return prop.get(KEY_SOUND);
 }
 
 //static

@@ -38,6 +38,9 @@ struct EngineSoundProfile
 	// returns true if the given properties requests a preset profile instead of specifying a custom profile.
 	static bool requestsPresetProfile(const util::Properties& prop);
 
+	// peeks the given properties object and returns the specified sound definition.
+	static std::string getSoundDefinitionFromProperties(const util::Properties& prop);
+
 	// load a custom sound profile from properties. if a non-custom (preset) profile is specified, a std::logic_error is thrown.
 	static EngineSoundProfile loadFromProperties(const util::Properties& prop);
 };

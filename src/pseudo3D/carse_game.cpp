@@ -54,7 +54,7 @@ void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
 {
 	Properties prop;
 
-	vector<string> presetFiles = fgeal::getFilenamesWithinDirectory("assets/sound/engine");
+	vector<string> pendingPresetFiles, presetFiles = fgeal::getFilenamesWithinDirectory("assets/sound/engine");
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
 		string filename = presetFiles[i];
@@ -63,19 +63,56 @@ void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
 			util::Properties prop;
 			prop.load(filename);
 
-			string presetName = filename.substr(0, filename.find_last_of("."));
+			const string
+				filenameWithoutPath = filename.substr(filename.find_last_of("/\\")+1),
+				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
+				presetName = filenameWithoutExtension;
 
 			if(EngineSoundProfile::requestsPresetProfile(prop))
 			{
-				// todo
-			}
-			else
-			{
-				string presetName = filename.substr(0, filename.find_last_of("."));
-				builtinEngineSoundPresets[presetName] = EngineSoundProfile::loadFromProperties(prop);
+				pendingPresetFiles.push_back(filename);
+				cout << "read preset sound profile: " << presetName << " (alias)" << endl;
 			}
 
-			cout << "read preset sound profile: " << presetName << endl;
+			else
+			{
+				builtinEngineSoundPresets[presetName] = EngineSoundProfile::loadFromProperties(prop);
+				cout << "read preset sound profile: " << presetName << endl;
+			}
 		}
+	}
+
+	unsigned previousCount = pendingPresetFiles.size();
+	while(not pendingPresetFiles.empty())
+	{
+		for(unsigned i = 0; i < pendingPresetFiles.size(); i++)
+		{
+			string filename = pendingPresetFiles[i];
+			util::Properties prop;
+			prop.load(filename);
+
+			const string
+				basePresetName = EngineSoundProfile::getSoundDefinitionFromProperties(prop),
+				filenameWithoutPath = filename.substr(filename.find_last_of("/\\")+1),
+				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
+				presetName = filenameWithoutExtension;
+
+			if(builtinEngineSoundPresets.find(basePresetName) != builtinEngineSoundPresets.end())
+			{
+				builtinEngineSoundPresets[presetName] = builtinEngineSoundPresets[basePresetName];
+				cout << "copied preset sound profile \"" << presetName << "\" from \"" << basePresetName << "\"" << endl;
+				pendingPresetFiles.erase(pendingPresetFiles.begin() + i);
+				i--;
+			}
+		}
+		if(pendingPresetFiles.size() == previousCount)
+		{
+			cout << "circular dependency or unresolved reference detected when loading preset sound profiles. skipping resolution." << endl;
+			cout << "the following preset sound profiles could not be loaded: " << endl;
+			for(unsigned i = 0; i < pendingPresetFiles.size(); i++)
+				cout << pendingPresetFiles[i] << endl;
+			break;
+		}
+		else previousCount = pendingPresetFiles.size();
 	}
 }

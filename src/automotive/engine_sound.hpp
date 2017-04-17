@@ -53,6 +53,14 @@ class EngineSoundSimulator
 	public:
 	void setProfile(const EngineSoundProfile& profile);
 
+	unsigned getCurrentRangeIndex(float currentRpm);
+
+	// use this for debug purposes
+	std::vector<fgeal::Sound*>& getSoundData();
+
+	// plays an idle engine sound
+	void playIdle();
+
 	// updates the current playing sound. if no sound is being played, it begins playing.
 	void updateSound(float currentRpm);
 

@@ -9,10 +9,14 @@
 
 #include "futil/string/more_operators.hpp"
 
+#include <cmath>
+#include <cstdlib>
+
 #include <stdexcept>
 
 using util::Properties;
 using std::string;
+using std::vector;
 using fgeal::Sound;
 
 const string
@@ -24,6 +28,12 @@ const string
 EngineSoundProfile::EngineSoundProfile()
 : ranges(), intendedMaxRpm(7000), treatLastRangeAsRedline(false)
 {}
+
+EngineSoundSimulator::~EngineSoundSimulator()
+{
+	for(unsigned i = 0; i < soundData.size(); i++)
+		delete soundData[i];
+}
 
 //static
 bool EngineSoundProfile::requestsPresetProfile(const util::Properties& prop)
@@ -70,20 +80,18 @@ EngineSoundProfile EngineSoundProfile::loadFromProperties(const Properties& prop
 				if(rpm < 0)
 				{
 					if(i == 0) rpm = 0;
-					else       rpm = (intendedMaxRpm - profile.ranges.rbegin()->rpm)/2;
+					else       rpm = (profile.intendedMaxRpm - profile.ranges.rbegin()->rpm)/2;
 				}
 
 				// save filename for given rpm
-				profile.ranges[rpm] = filename;
+
+				RangeProfile range = {rpm, filename};
+				profile.ranges.push_back(range);
 				i += 1;
 				key = KEY_SOUND_PREFIX + i;
 			}
 		}
-		else
-		{
-			// todo create engine sound classes: default, crossplane_v8, inline_6, flat_4, etc
-			throw std::logic_error("properties specify a preset profile instead of a custom one");
-		}
+		else throw std::logic_error("properties specify a preset profile instead of a custom one");
 	}
 
 	return profile;
@@ -101,10 +109,32 @@ void EngineSoundSimulator::setProfile(const EngineSoundProfile& profile)
 		this->soundData.push_back(new Sound(profile.ranges[i].filename));
 }
 
+unsigned EngineSoundSimulator::getCurrentRangeIndex(float currentRpm)
+{
+	// establish the current range index
+	unsigned currentRangeIndex = 0;
+	for(unsigned i = 0; i < soundData.size(); i++)
+		if(currentRpm > profile.ranges[i].rpm)
+			currentRangeIndex = i;
+
+	return currentRangeIndex;
+}
+
+vector<Sound*>& EngineSoundSimulator::getSoundData()
+{
+	return soundData;
+}
+
 //calculates engine sound pitch for given RPM and max RPM
-float calculatePitch(float rpmDiff, float maxRpm)
+static float calculatePitch(float rpmDiff, float maxRpm)
 {
 	return exp(rpmDiff/maxRpm);
+}
+
+void EngineSoundSimulator::playIdle()
+{
+	if(not profile.ranges.empty())
+		updateSound(profile.ranges[0].rpm+1);
 }
 
 void EngineSoundSimulator::updateSound(float currentRpm)
@@ -113,10 +143,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 	if(soundCount > 0 and currentRpm > 0) // its no use if there is no engine sound or rpm is too low
 	{
 		// establish the current range index
-		unsigned currentRangeIndex = 0;
-		for(unsigned i = 0; i < soundCount; i++)
-			if(currentRpm > profile.ranges[i].rpm)
-				currentRangeIndex = i;
+		const unsigned currentRangeIndex = this->getCurrentRangeIndex(currentRpm);
 
 		// some aliases
 		Sound& currentSound = *soundData[currentRangeIndex];

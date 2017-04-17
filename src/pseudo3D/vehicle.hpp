@@ -10,6 +10,7 @@
 #include <ciso646>
 
 #include "motor.hpp"
+#include "automotive/engine_sound.hpp"
 
 #include "util/properties.hpp"
 
@@ -26,8 +27,7 @@ struct Vehicle
 	std::vector<unsigned> spriteStateFrameCount;
 	float spriteScale;
 
-	std::map<short, std::string> soundsFilenames;
-	bool isLastSoundRedline;
+	EngineSoundProfile engineSoundProfile;
 
 	Engine engine;
 	float mass;

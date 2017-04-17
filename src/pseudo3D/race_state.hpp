@@ -20,6 +20,7 @@
 
 #include "course.hpp"
 #include "vehicle.hpp"
+#include "automotive/engine_sound.hpp"
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
@@ -31,7 +32,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	float cameraDepth;
 
-	std::vector< std::pair<short, fgeal::Sound*> > soundEngine;
+	EngineSoundSimulator engineSound;
 	float position, posX, speed, strafeSpeed;
 
 	Course course;

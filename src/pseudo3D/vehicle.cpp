@@ -20,7 +20,6 @@ static const unsigned DEFAULT_SPRITE_HEIGHT = 60;
 
 Vehicle::Vehicle()
 : spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
-  isLastSoundRedline(false),
   mass(1250)
 {}
 
@@ -106,51 +105,12 @@ Vehicle::Vehicle(const Properties& prop)
 		}
 	}
 
-	// first set default sounds
-	soundsFilenames[0] = "assets/engine_idle.ogg";
-	soundsFilenames[engine.maxRpm/2] = "assets/engine_high.ogg";
-	isLastSoundRedline = false;
-
 	key = "sound";
-	if(prop.containsKey(key) and prop.get(key) != "default")
+	if(EngineSoundProfile::requestsPresetProfile(prop))
 	{
-		string soundOption = prop.get(key);
-		soundsFilenames.clear();
-		if(soundOption == "no")
-			soundsFilenames.clear();
-
-		// todo create engine sound classes: crossplane_v8, inline_6, flat_4, etc
-
-		else if(soundOption == "custom")
-		{
-			key = "sound_redline_last";
-			if(prop.containsKey(key) and prop.get(key) == "true")
-				isLastSoundRedline = true;
-
-			int i = 0;
-			key = "sound0";
-			while(prop.containsKey(key))
-			{
-				string filename = prop.get(key);
-
-				// now try to read _rpm property
-				key += "_rpm";
-				short rpm = -1;
-				if(prop.containsKey(key))
-					rpm = atoi(prop.get(key).c_str());
-
-				// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
-				if(rpm < 0)
-				{
-					if(i == 0) rpm = 0;
-					else       rpm = (engine.maxRpm - soundsFilenames.rbegin()->first)/2;
-				}
-
-				// save filename for given rpm
-				soundsFilenames[rpm] = filename;
-				i += 1;
-				key = string("sound") + i;
-			}
-		}
+		// todo create engine sound classes: default, crossplane_v8, inline_6, flat_4, etc
 	}
+	else
+		engineSoundProfile = EngineSoundProfile::loadFromProperties(prop);
+
 }

@@ -11,6 +11,8 @@
 
 #include "fgeal/extra/game.hpp"
 #include "futil/general/language.hpp"
+
+#include "automotive/engine_sound.hpp"
 #include "util/properties.hpp"
 
 #include <map>
@@ -24,13 +26,10 @@ class Pseudo3DCarseGame extends public fgeal::Game
 	void initializeStatesList();
 
 	// gets one of the built-in engine sound presets, by name
-	std::map<short, std::string>& getEngineSoundPreset(const std::string presetName);
-
-	// loads an engine sound preset from properties
-	std::map<short, std::string> loadEngineSoundPreset(const util::Properties& prop);
+	EngineSoundProfile& getEngineSoundPreset(const std::string presetName);
 
 	private:
-	std::map<std::string, std::map<short, std::string> > builtinEngineSoundPresets;
+	std::map<std::string, EngineSoundProfile> builtinEngineSoundPresets;
 
 	// intended to run on startup, loads all engine sound presets in assets/sound/engine/
 	void loadBuiltinEngineSoundPresets();

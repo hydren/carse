@@ -49,6 +49,7 @@ ChooseVehicleState::~ChooseVehicleState()
 
 void ChooseVehicleState::initialize()
 {
+	CarseGame& carseGame = static_cast<CarseGame&>(game);
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font.ttf", 24);
@@ -62,7 +63,7 @@ void ChooseVehicleState::initialize()
 		{
 			util::Properties prop;
 			prop.load(filename);
-			vehicles.push_back(Vehicle(prop));
+			vehicles.push_back(Vehicle(prop, carseGame));
 
 			Vehicle& v = vehicles.back();
 			cout << "read vehicle " << v.name << endl;

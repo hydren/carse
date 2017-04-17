@@ -116,3 +116,11 @@ void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
 		else previousCount = pendingPresetFiles.size();
 	}
 }
+
+EngineSoundProfile& Pseudo3DCarseGame::getEngineSoundPreset(const std::string presetName)
+{
+	if(builtinEngineSoundPresets.find(presetName) != builtinEngineSoundPresets.end())
+		return builtinEngineSoundPresets[presetName];
+	else
+		return builtinEngineSoundPresets["default"];
+}

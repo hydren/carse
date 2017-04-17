@@ -14,6 +14,8 @@
 
 #include "util/properties.hpp"
 
+#include "carse_game.hpp"
+
 #include <map>
 #include <vector>
 #include <string>
@@ -36,7 +38,7 @@ struct Vehicle
 	Vehicle();
 
 	// creates a vehicle with definitions taken from the given properties
-	Vehicle(const util::Properties& properties);
+	Vehicle(const util::Properties& properties, CarseGame& game);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

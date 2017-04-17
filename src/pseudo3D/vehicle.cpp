@@ -23,7 +23,7 @@ Vehicle::Vehicle()
   mass(1250)
 {}
 
-Vehicle::Vehicle(const Properties& prop)
+Vehicle::Vehicle(const Properties& prop, CarseGame& game)
 {
 	string key;
 
@@ -105,12 +105,8 @@ Vehicle::Vehicle(const Properties& prop)
 		}
 	}
 
-	key = "sound";
 	if(EngineSoundProfile::requestsPresetProfile(prop))
-	{
-		// todo create engine sound classes: default, crossplane_v8, inline_6, flat_4, etc
-	}
+		engineSoundProfile = game.getEngineSoundPreset(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
 	else
 		engineSoundProfile = EngineSoundProfile::loadFromProperties(prop);
-
 }

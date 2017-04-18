@@ -106,7 +106,7 @@ Vehicle::Vehicle(const Properties& prop, CarseGame& game)
 	}
 
 	if(EngineSoundProfile::requestsPresetProfile(prop))
-		engineSoundProfile = game.getEngineSoundPreset(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
+		engineSoundProfile = game.getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
 	else
 		engineSoundProfile = EngineSoundProfile::loadFromProperties(prop);
 }

@@ -41,7 +41,7 @@ Pseudo3DCarseGame::Pseudo3DCarseGame()
 
 void Pseudo3DCarseGame::initializeStatesList()
 {
-	this->loadBuiltinEngineSoundPresets();
+	this->loadPresetEngineSoundProfiles();
 
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
@@ -50,10 +50,11 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->setInitialState(MAIN_MENU_STATE_ID);
 }
 
-void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
+void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 {
 	Properties prop;
 
+	cout << "reading preset engine sound profiles..." << endl;
 	vector<string> pendingPresetFiles, presetFiles = fgeal::getFilenamesWithinDirectory("assets/sound/engine");
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
@@ -71,13 +72,13 @@ void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
 			if(EngineSoundProfile::requestsPresetProfile(prop))
 			{
 				pendingPresetFiles.push_back(filename);
-				cout << "read preset sound profile: " << presetName << " (alias)" << endl;
+				cout << "read profile: " << presetName << " (alias)" << endl;
 			}
 
 			else
 			{
-				builtinEngineSoundPresets[presetName] = EngineSoundProfile::loadFromProperties(prop);
-				cout << "read preset sound profile: " << presetName << endl;
+				presetEngineSoundProfiles[presetName] = EngineSoundProfile::loadFromProperties(prop);
+				cout << "read profile: " << presetName << endl;
 			}
 		}
 	}
@@ -97,18 +98,18 @@ void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
 				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
 				presetName = filenameWithoutExtension;
 
-			if(builtinEngineSoundPresets.find(basePresetName) != builtinEngineSoundPresets.end())
+			if(presetEngineSoundProfiles.find(basePresetName) != presetEngineSoundProfiles.end())
 			{
-				builtinEngineSoundPresets[presetName] = builtinEngineSoundPresets[basePresetName];
-				cout << "copied preset sound profile \"" << presetName << "\" from \"" << basePresetName << "\"" << endl;
+				presetEngineSoundProfiles[presetName] = presetEngineSoundProfiles[basePresetName];
+				cout << "copied profile \"" << presetName << "\" from \"" << basePresetName << "\"" << endl;
 				pendingPresetFiles.erase(pendingPresetFiles.begin() + i);
 				i--;
 			}
 		}
 		if(pendingPresetFiles.size() == previousCount)
 		{
-			cout << "circular dependency or unresolved reference detected when loading preset sound profiles. skipping resolution." << endl;
-			cout << "the following preset sound profiles could not be loaded: " << endl;
+			cout << "circular dependency or unresolved reference detected when loading preset engine sound profiles. skipping resolution." << endl;
+			cout << "the following preset engine sound profiles could not be loaded: " << endl;
 			for(unsigned i = 0; i < pendingPresetFiles.size(); i++)
 				cout << pendingPresetFiles[i] << endl;
 			break;
@@ -117,10 +118,10 @@ void Pseudo3DCarseGame::loadBuiltinEngineSoundPresets()
 	}
 }
 
-EngineSoundProfile& Pseudo3DCarseGame::getEngineSoundPreset(const std::string presetName)
+EngineSoundProfile& Pseudo3DCarseGame::getPresetEngineSoundProfile(const std::string presetName)
 {
-	if(builtinEngineSoundPresets.find(presetName) != builtinEngineSoundPresets.end())
-		return builtinEngineSoundPresets[presetName];
+	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
+		return presetEngineSoundProfiles[presetName];
 	else
-		return builtinEngineSoundPresets["default"];
+		return presetEngineSoundProfiles["default"];
 }

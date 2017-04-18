@@ -26,13 +26,13 @@ class Pseudo3DCarseGame extends public fgeal::Game
 	void initializeStatesList();
 
 	// gets one of the built-in engine sound presets, by name
-	EngineSoundProfile& getEngineSoundPreset(const std::string presetName);
+	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
 
 	private:
-	std::map<std::string, EngineSoundProfile> builtinEngineSoundPresets;
+	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 
 	// intended to run on startup, loads all engine sound presets in assets/sound/engine/
-	void loadBuiltinEngineSoundPresets();
+	void loadPresetEngineSoundProfiles();
 };
 
 typedef Pseudo3DCarseGame CarseGame;

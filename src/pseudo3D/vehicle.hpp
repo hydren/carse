@@ -10,8 +10,11 @@
 #include <ciso646>
 
 #include "motor.hpp"
+#include "automotive/engine_sound.hpp"
 
 #include "util/properties.hpp"
+
+#include "carse_game.hpp"
 
 #include <map>
 #include <vector>
@@ -26,8 +29,7 @@ struct Vehicle
 	std::vector<unsigned> spriteStateFrameCount;
 	float spriteScale;
 
-	std::map<short, std::string> soundsFilenames;
-	bool isLastSoundRedline;
+	EngineSoundProfile engineSoundProfile;
 
 	Engine engine;
 	float mass;
@@ -36,7 +38,7 @@ struct Vehicle
 	Vehicle();
 
 	// creates a vehicle with definitions taken from the given properties
-	Vehicle(const util::Properties& properties);
+	Vehicle(const util::Properties& properties, CarseGame& game);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

@@ -78,6 +78,8 @@ void Properties::load(const std::string& filename)
 
 		data[key] = value;
 	}
+
+	stream.close();
 }
 
 void Properties::store(const std::string& filename)

@@ -186,7 +186,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 			}
 
 			// succeeding range
-			else if(i == currentRangeIndex + 1 and currentRpm - lowerRpmCurrent > 0.75*rangeSizeCurrent and currentRangeIndex < soundData.size()-2)
+			else if(i == currentRangeIndex + 1 and currentRpm - lowerRpmCurrent > 0.75*rangeSizeCurrent and (currentRangeIndex < soundData.size()-2 or not profile.treatLastRangeAsRedline))
 			{
 //				snd.setVolume(-3.0 + 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade in
 				rangeSound.setVolume(sqrt(1-pow(4*((currentRpm - lowerRpmCurrent)/rangeSizeCurrent)-4, 2)) ); // quadratic fade in

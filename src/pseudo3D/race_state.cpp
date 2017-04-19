@@ -103,7 +103,7 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.push_back(sprite);
 	}
 
-	engineSound.setProfile(vehicle.engineSoundProfile);
+	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
@@ -201,7 +201,7 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
 		font->drawText(std::string(buffer), 180, display.getHeight()-100+50, fgeal::Color::WHITE);
 
-		unsigned currentRangeIndex = engineSound.getCurrentRangeIndex(vehicle.engine.rpm);
+		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.engine.rpm);
 
 		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)
 		{

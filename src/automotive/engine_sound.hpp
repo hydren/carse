@@ -22,18 +22,11 @@ struct EngineSoundProfile
 	{
 		short rpm;
 		std::string filename;
+		bool isRedline; // if true, treat the this range as a redline range (and the rpm field will be ignored)
 	};
 
 	// information about each sound for each range
 	std::vector<RangeProfile> ranges;
-
-	// read-only. the intended max rpm for this engine sound profile
-	short intendedMaxRpm;
-
-	// if true, treat the last range as a redline range, in other words, this sound won't be pitched at all.
-	bool treatLastRangeAsRedline;
-
-	EngineSoundProfile();
 
 	// returns true if the given properties requests a preset profile instead of specifying a custom profile.
 	static bool requestsPresetProfile(const util::Properties& prop);
@@ -53,10 +46,21 @@ class EngineSoundSimulator
 	// a set of actual sound data. each index in this corresponds to each index on the profile's ranges
 	std::vector<fgeal::Sound*> soundData;
 
-	public:
-	void setProfile(const EngineSoundProfile& profile);
+	// the maximum RPM expected to be simulated. this must be the maximum value expected to be passed to EngineSoundSimulator::updateSound().
+	short simulatedMaximumRpm;
 
-	unsigned getCurrentRangeIndex(float currentRpm);
+	//calculates engine sound pitch for given RPM and max RPM
+	float calculatePitch(float rpmDiff);
+
+	public:
+	// changes the current profile.
+	void setProfile(const EngineSoundProfile& profile, short simulatedMaximumRpm);
+
+	// changes the simulated maximum rpm (i.e. vehicle changed but profile is the same)
+	void setSimulatedMaximumRpm(short rpm);
+
+	// gets the range index for the given RPM value
+	unsigned getRangeIndex(float currentRpm);
 
 	// use this for debug purposes
 	std::vector<fgeal::Sound*>& getSoundData();

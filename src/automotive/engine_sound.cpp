@@ -13,6 +13,7 @@
 #include <cstdlib>
 
 #include <stdexcept>
+#include <algorithm>
 
 using util::Properties;
 using std::string;
@@ -35,6 +36,11 @@ bool EngineSoundProfile::requestsPresetProfile(const Properties& prop)
 string EngineSoundProfile::getSoundDefinitionFromProperties(const Properties& prop)
 {
 	return prop.get(KEY_SOUND);
+}
+
+static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)
+{
+	return p1.isRedline? false : p2.isRedline? true : p1.rpm < p2.rpm;
 }
 
 //static
@@ -89,7 +95,7 @@ EngineSoundProfile EngineSoundProfile::loadFromProperties(const Properties& prop
 				key = KEY_SOUND_PREFIX + i;
 			}
 
-			// fixme sort the ranges by RPM or things go shit
+			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), rangeProfileCompareFunction);
 		}
 		else throw std::logic_error("properties specify a preset profile instead of a custom one");
 	}

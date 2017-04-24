@@ -20,6 +20,8 @@
 #include <vector>
 #include <string>
 
+struct Pseudo3DCarseGame;  // foward declaration
+
 struct Vehicle
 {
 	std::string name, sheetFilename;
@@ -38,7 +40,7 @@ struct Vehicle
 	Vehicle();
 
 	// creates a vehicle with definitions taken from the given properties
-	Vehicle(const util::Properties& properties, CarseGame& game);
+	Vehicle(const util::Properties& properties, Pseudo3DCarseGame& game);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

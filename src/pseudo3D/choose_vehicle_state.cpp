@@ -34,7 +34,8 @@ int ChooseVehicleState::getId() { return CarseGame::CHOOSE_VEHICLE_STATE_ID; }
 ChooseVehicleState::ChooseVehicleState(CarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
-  menu(null)
+  menu(null),
+  vehicles(game->getVehicles())
 {}
 
 ChooseVehicleState::~ChooseVehicleState()
@@ -54,21 +55,6 @@ void ChooseVehicleState::initialize()
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font.ttf", 24);
 	fontInfo = new Font("assets/font.ttf", 12);
-
-	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
-	for(unsigned i = 0; i < vehicleFiles.size(); i++)
-	{
-		string filename = vehicleFiles[i];
-		if(ends_with(filename, ".properties"))
-		{
-			util::Properties prop;
-			prop.load(filename);
-			vehicles.push_back(Vehicle(prop, carseGame));
-
-			Vehicle& v = vehicles.back();
-			cout << "read vehicle " << v.name << endl;
-		}
-	}
 
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
 	menu->manageFontDeletion = true;

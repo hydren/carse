@@ -23,7 +23,7 @@ Vehicle::Vehicle()
   mass(1250)
 {}
 
-Vehicle::Vehicle(const Properties& prop, CarseGame& game)
+Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 {
 	string key;
 

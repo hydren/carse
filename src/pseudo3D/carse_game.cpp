@@ -42,6 +42,7 @@ Pseudo3DCarseGame::Pseudo3DCarseGame()
 void Pseudo3DCarseGame::initializeStatesList()
 {
 	this->loadPresetEngineSoundProfiles();
+	this->loadVehicles();
 
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
@@ -50,18 +51,29 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->setInitialState(MAIN_MENU_STATE_ID);
 }
 
+EngineSoundProfile& Pseudo3DCarseGame::getPresetEngineSoundProfile(const std::string presetName)
+{
+	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
+		return presetEngineSoundProfiles[presetName];
+	else
+		return presetEngineSoundProfiles["default"];
+}
+
+std::vector<Vehicle>& Pseudo3DCarseGame::getVehicles()
+{
+	return vehicles;
+}
+
 void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 {
-	Properties prop;
-
 	cout << "reading preset engine sound profiles..." << endl;
 	vector<string> pendingPresetFiles, presetFiles = fgeal::getFilenamesWithinDirectory("assets/sound/engine");
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
-		string filename = presetFiles[i];
+		string& filename = presetFiles[i];
 		if(ends_with(filename, ".properties"))
 		{
-			util::Properties prop;
+			Properties prop;
 			prop.load(filename);
 
 			const string
@@ -118,10 +130,19 @@ void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 	}
 }
 
-EngineSoundProfile& Pseudo3DCarseGame::getPresetEngineSoundProfile(const std::string presetName)
+void Pseudo3DCarseGame::loadVehicles()
 {
-	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
-		return presetEngineSoundProfiles[presetName];
-	else
-		return presetEngineSoundProfiles["default"];
+	cout << "reading vehicles..." << endl;
+	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
+	for(unsigned i = 0; i < vehicleFiles.size(); i++)
+	{
+		string& filename = vehicleFiles[i];
+		if(ends_with(filename, ".properties"))
+		{
+			Properties prop;
+			prop.load(filename);
+			vehicles.push_back(Vehicle(prop, *this));
+			cout << "read vehicle: " << filename << endl;
+		}
+	}
 }

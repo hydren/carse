@@ -13,9 +13,13 @@
 #include "futil/general/language.hpp"
 
 #include "automotive/engine_sound.hpp"
+#include "vehicle.hpp"
 #include "util/properties.hpp"
 
 #include <map>
+#include <vector>
+
+struct Vehicle;  // foward declaration
 
 class Pseudo3DCarseGame extends public fgeal::Game
 {
@@ -28,11 +32,18 @@ class Pseudo3DCarseGame extends public fgeal::Game
 	// gets one of the built-in engine sound presets, by name
 	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
 
+	// gets the vehicle list loaded at startup
+	std::vector<Vehicle>& getVehicles();
+
 	private:
 	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
+	std::vector<Vehicle> vehicles;
 
 	// intended to run on startup, loads all engine sound presets in assets/sound/engine/
 	void loadPresetEngineSoundProfiles();
+
+	// intended to run on startup, loads all vehicle in data/vehicles/
+	void loadVehicles();
 };
 
 typedef Pseudo3DCarseGame CarseGame;

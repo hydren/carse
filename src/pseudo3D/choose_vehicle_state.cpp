@@ -50,7 +50,6 @@ ChooseVehicleState::~ChooseVehicleState()
 
 void ChooseVehicleState::initialize()
 {
-	CarseGame& carseGame = static_cast<CarseGame&>(game);
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font.ttf", 24);
@@ -74,9 +73,7 @@ void ChooseVehicleState::onEnter()
 }
 
 void ChooseVehicleState::onLeave()
-{
-
-}
+{}
 
 void ChooseVehicleState::render()
 {

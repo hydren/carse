@@ -136,7 +136,24 @@ void Pseudo3DCarseGame::loadVehicles()
 	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
 	for(unsigned i = 0; i < vehicleFiles.size(); i++)
 	{
-		string& filename = vehicleFiles[i];
+		const string& filename = vehicleFiles[i];
+		if(fgeal::isFilenameDirectory(filename))
+		{
+			vector<string> subfolderFiles = fgeal::getFilenamesWithinDirectory(filename);
+			for(unsigned j = 0; j < subfolderFiles.size(); j++)
+			{
+				const string& subfolderFile = subfolderFiles[j];
+				if(ends_with(subfolderFile, ".properties"))
+				{
+					Properties prop;
+					prop.load(subfolderFile);
+					vehicles.push_back(Vehicle(prop, *this));
+					cout << "read vehicle: " << subfolderFile << endl;
+					break;
+				}
+			}
+		}
+
 		if(ends_with(filename, ".properties"))
 		{
 			Properties prop;

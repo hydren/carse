@@ -18,6 +18,9 @@ using std::string;
 static const unsigned DEFAULT_SPRITE_WIDTH = 56;
 static const unsigned DEFAULT_SPRITE_HEIGHT = 36;
 
+// fixme this factor still doesn't produce satisfactory results
+static const float POWER_TORQUE_FACTOR = 5.0/3.0;
+
 Vehicle::Vehicle()
 : spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
   mass(1250)
@@ -63,8 +66,9 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "engine_maximum_rpm";
 	engine.maxRpm = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 7000;
 
-	key = "engine_torque";
-	engine.torque = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 500;
+	key = "engine_maximum_power";
+	float power = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 300;
+	engine.torque = power*POWER_TORQUE_FACTOR;
 
 	key = "wheel_radius";
 	engine.wheelRadius = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 0.34;

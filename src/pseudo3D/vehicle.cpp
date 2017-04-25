@@ -15,8 +15,8 @@ using util::Properties;
 using std::map;
 using std::string;
 
-static const unsigned DEFAULT_SPRITE_WIDTH = 96;
-static const unsigned DEFAULT_SPRITE_HEIGHT = 60;
+static const unsigned DEFAULT_SPRITE_WIDTH = 56;
+static const unsigned DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
 : spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
@@ -46,9 +46,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	spriteFrameDuration = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : -1;
 
 	key = "sprite_scale";
-	spriteScale = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT/spriteHeight;
-	spriteScale *= 40.0/DEFAULT_SPRITE_HEIGHT; // internal adjustment
-
+	spriteScale = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight);
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
 	{

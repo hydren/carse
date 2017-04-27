@@ -15,16 +15,17 @@
 
 namespace Hud
 {
+	/** A generic gauge. Not virtual but not functional either. */
 	template <typename NumberType>
 	struct GenericGauge
 	{
-		// this widget's dimensions and position.
+		/** this widget's dimensions and position. */
 		fgeal::Rectangle bounds;
 
-		// the value to measure, the minimum and maximum expected values.
+		/** the value to measure. */
 		const NumberType& value;
 
-		// the minimum and maximum expected values.
+		/** the minimum and maximum expected values. */
 		NumberType min, max;
 
 		GenericGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
@@ -33,16 +34,17 @@ namespace Hud
 		{}
 	};
 
+	/** A generic dial-type gauge. Also not functional */
 	template <typename NumberType>
-	struct DialGauge extends GenericGauge<NumberType>
+	struct GenericDialGauge extends GenericGauge<NumberType>
 	{
-		// the minimum and maximum angle applied on the rotating pointer.
+		/** The minimum and maximum angle applied on the rotating pointer. */
 		float angleMin, angleMax;
 
-		// specifies the offset between the pointer's fixation point and its endpoint.
+		/** Specifies the offset between the pointer's fixation point and its endpoint. */
 		float fixationOffset;
 
-		DialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
+		GenericDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
 		: GenericGauge(bounds, var, min, max),
 		  angleMin(0.25*M_PI), angleMax(1.75*M_PI),
 		  fixationOffset(0)
@@ -55,17 +57,22 @@ namespace Hud
 		}
 	};
 
+	/** A needle dial-type gauge, drawn using native primitives. */
 	template <typename NumberType>
-	struct NeedleDialGauge extends DialGauge<NumberType>
+	struct NeedleDialGauge extends GenericDialGauge<NumberType>
 	{
+		/** The thickness of the pointer. */
+		float thickness;
+
 		void draw()
 		{
 			// todo needle dial gauge
 		}
 	};
 
+	/** A dial-type gauge drawn using provided custom images. */
 	template <typename NumberType>
-	struct CustomImageDialGauge extends DialGauge<NumberType>
+	struct CustomImageDialGauge extends GenericDialGauge<NumberType>
 	{
 		/** Custom gauge background and foreground images. */
 		fgeal::Image* background, *foreground;
@@ -104,16 +111,21 @@ namespace Hud
 		}
 	};
 
+	/** A bar-type gauge */
 	template <typename NumberType>
 	struct BarGauge extends GenericGauge<NumberType>
 	{
 		// todo bar gauge
 	};
 
+	/** A widget that displays a numeric value, possibly stylised. */
 	template <typename NumberType>
-	struct NumericGauge extends GenericGauge<NumberType>
+	struct NumericIndicator
 	{
-		// todo numeric gauge
+		// todo numeric indicator
+
+		/** the value to show. */
+		const NumberType& value;
 	};
 }
 

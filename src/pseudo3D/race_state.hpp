@@ -21,6 +21,7 @@
 #include "course.hpp"
 #include "vehicle.hpp"
 #include "automotive/engine_sound.hpp"
+#include "automotive/race_hud.hpp"
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
@@ -38,6 +39,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Course course;
 	Vehicle vehicle;
 	bool autoTransmission;
+
+	Hud::NeedleDialGauge<float>* gauge;
 
 	public:
 	int getId();

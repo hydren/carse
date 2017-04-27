@@ -45,7 +45,7 @@ namespace Hud
 		float fixationOffset;
 
 		GenericDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
-		: GenericGauge(bounds, var, min, max),
+		: GenericGauge<NumberType>(bounds, var, min, max),
 		  angleMin(0.25*M_PI), angleMax(1.75*M_PI),
 		  fixationOffset(0)
 		{}
@@ -61,12 +61,37 @@ namespace Hud
 	template <typename NumberType>
 	struct NeedleDialGauge extends GenericDialGauge<NumberType>
 	{
-		/** The thickness of the pointer. */
-		float thickness;
+		/** The background color. */
+		fgeal::Color backgroundColor;
+
+		/** The border's thickness. If 0 (zero), no border is drawn. */
+		float borderThickness;
+
+		/** The border's color. If set as transparent, no border is drawn. */
+		fgeal::Color borderColor;
+
+		/** The thickness of the pointing needle. */
+		float needleThickness;
+
+		/** The needle's color. */
+		fgeal::Color needleColor;
+
+		/** The radius the needle's "bolt". */
+		float boltRadius;
+
+		/** The bolt's color. */
+		fgeal::Color boltColor;
 
 		void draw()
 		{
 			// todo needle dial gauge
+			const fgeal::Point center = {bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h};
+			const float angle = this->getPointerAngle();
+
+			fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
+			fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
+			fgeal::Image::drawTriangle(needleColor,    center.x, center.y, center.x, center.y, center.x + bounds.w*cos(angle), center.y + bounds.h*sin(angle));
+			fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
 		}
 	};
 

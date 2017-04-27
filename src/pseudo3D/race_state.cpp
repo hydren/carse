@@ -48,7 +48,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
-  autoTransmission(true)
+  autoTransmission(true),
+  gauge(null)
 {}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
@@ -104,6 +105,8 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
+
+	gauge = new Hud::NeedleDialGauge<float>(vehicle.engine.rpm, 0, vehicle.engine.maxRpm);
 
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;

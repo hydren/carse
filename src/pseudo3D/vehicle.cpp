@@ -70,8 +70,11 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	float power = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 300;
 	engine.torque = power*POWER_TORQUE_FACTOR;
 
-	key = "wheel_radius";
-	engine.wheelRadius = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 0.34;
+	key = "tire_diameter";
+	engine.tireRadius = prop.containsKey(key) and prop.get(key) != "default"? 0.0005*atof(prop.get(key).c_str()) : 0.339;
+
+	key = "tyre_diameter";
+	engine.tireRadius = prop.containsKey(key) and prop.get(key) != "default"? 0.0005*atof(prop.get(key).c_str()) : 0.339;
 
 	// todo read more data from properties
 

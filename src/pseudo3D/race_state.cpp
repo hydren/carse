@@ -277,7 +277,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float curve = course.lines[((int)(position/course.roadSegmentLength))%N].curve;
 	posX -= atan(curve) * speed * 0.5 * delta;
 
-	vehicle.engine.rpm = (speed/vehicle.engine.wheelRadius) * vehicle.engine.gearRatio[vehicle.engine.gear] * vehicle.engine.gearRatio[0] * (30.0f/M_PI) * 0.002;
+	vehicle.engine.rpm = (speed/vehicle.engine.tireRadius) * vehicle.engine.gearRatio[vehicle.engine.gear] * vehicle.engine.gearRatio[0] * (30.0f/M_PI) * 0.002;
 	if(vehicle.engine.rpm < 1000)
 		vehicle.engine.rpm = 1000;
 

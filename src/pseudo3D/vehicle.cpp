@@ -21,6 +21,15 @@ static const unsigned DEFAULT_SPRITE_HEIGHT = 36;
 // fixme this factor still doesn't produce satisfactory results
 static const float POWER_TORQUE_FACTOR = 5.0/3.0;
 
+template <typename T, T (*convertFunction) (const char*)>
+T parseValue(const Properties& prop, const string& key, T defaultValue)
+{
+	if(prop.containsKey(key) and prop.get(key) != "default")
+		return convertFunction(prop.get(key).c_str());
+	else
+		return defaultValue;
+}
+
 Vehicle::Vehicle()
 : spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
   mass(1250)
@@ -36,50 +45,25 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
 
-	key = "sprite_state_count";
-	spriteStateCount = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 1;
-
-	key = "sprite_frame_width";
-	spriteWidth = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
-
-	key = "sprite_frame_height";
-	spriteHeight = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
-
-	key = "sprite_frame_duration";
-	spriteFrameDuration = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : -1;
-
-	key = "sprite_scale";
-	spriteScale = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight);
+	spriteStateCount = parseValue<int, atoi>(prop, "sprite_state_count", 1);
+	spriteWidth = parseValue<int, atoi>(prop, "sprite_frame_width", DEFAULT_SPRITE_WIDTH);
+	spriteHeight = parseValue<int, atoi>(prop, "sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
+	spriteFrameDuration = parseValue<double, atof>(prop, "sprite_frame_duration", -1);
+	spriteScale = parseValue<double, atof>(prop, "sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
-	{
-		key = string("sprite_state")+stateNumber+"_frame_count";
-		spriteStateFrameCount.push_back(prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 1);
-	}
+		spriteStateFrameCount.push_back(parseValue<int, atoi>(prop, string("sprite_state")+stateNumber+"_frame_count", 1));
 
-	key = "vehicle_mass";
-	if(prop.containsKey(key))
-		mass = atof(prop.get(key).c_str());
+	mass = parseValue<double, atof>(prop, "vehicle_mass", 1250);
 
-	mass = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 1250;
+	engine.maxRpm = parseValue<int, atoi>(prop, "engine_maximum_rpm", 7000);
+	engine.torque = parseValue<double, atof>(prop, "engine_maximum_power", 300) * POWER_TORQUE_FACTOR;
 
-	key = "engine_maximum_rpm";
-	engine.maxRpm = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 7000;
-
-	key = "engine_maximum_power";
-	float power = prop.containsKey(key) and prop.get(key) != "default"? atof(prop.get(key).c_str()) : 300;
-	engine.torque = power*POWER_TORQUE_FACTOR;
-
-	key = "tire_diameter";
-	engine.tireRadius = prop.containsKey(key) and prop.get(key) != "default"? 0.0005*atof(prop.get(key).c_str()) : 0.339;
-
-	key = "tyre_diameter";
-	engine.tireRadius = prop.containsKey(key) and prop.get(key) != "default"? 0.0005*atof(prop.get(key).c_str()) : 0.339;
+	engine.tireRadius = parseValue<double, atof>(prop, "tire_diameter", 678) * 0.0005;
 
 	// todo read more data from properties
 
-	key = "gear_count";
-	engine.gearCount = prop.containsKey(key) and prop.get(key) != "default"? atoi(prop.get(key).c_str()) : 6;
+	engine.gearCount = parseValue<int, atoi>(prop, "gear_count", 6);
 
 	engine.gearRatio = new float[engine.gearCount+1];
 

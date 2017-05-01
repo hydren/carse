@@ -51,9 +51,9 @@ namespace Hud
 		{}
 
 		protected:
-		float getPointerAngle()
+		float getDialAngle()
 		{
-			return ((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
+			return ((angleMax-angleMin)*this->value + angleMin*this->max - angleMax*this->min)/(this->max-this->min);
 		}
 	};
 
@@ -82,11 +82,20 @@ namespace Hud
 		/** The bolt's color. */
 		fgeal::Color boltColor;
 
+		NeedleDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
+		: GenericDialGauge<NumberType>(bounds, var, min, max),
+		  backgroundColor(fgeal::Color::WHITE),
+		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
+		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
+		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK)
+		{}
+
 		void draw()
 		{
 			// todo needle dial gauge
+			const fgeal::Rectangle& bounds = this->bounds;
 			const fgeal::Point center = {bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h};
-			const float angle = this->getPointerAngle();
+			const float angle = this->getDialAngle();
 
 			fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
 			fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
@@ -126,10 +135,11 @@ namespace Hud
 
 		void draw()
 		{
+			const fgeal::Rectangle& bounds = this->bounds;
 			background->drawScaled(bounds.x, bounds.y, bounds.w/background->getWidth(), bounds.h/background->getHeight());
-			pointer->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset,
+			pointer->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + this->fixationOffset,
 					0.5*bounds.h/pointer->getHeight(), 0.5*bounds.h/pointer->getHeight(),
-					this->getPointerAngle(), 0.5*pointer->getWidth(), 0);
+					this->getDialAngle(), 0.5*pointer->getWidth(), 0);
 
 			if(foreground != null)
 				foreground->drawScaled(bounds.x, bounds.y, bounds.w/foreground->getWidth(), bounds.h/foreground->getHeight());

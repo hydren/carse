@@ -58,14 +58,14 @@ namespace Hud
 
 		GenericDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
 		: GenericGauge<NumberType>(bounds, var, min, max),
-		  angleMin(0.75*M_PI), angleMax(2.25*M_PI),
+		  angleMin(0.25*M_PI), angleMax(1.75*M_PI),
 		  fixationOffset(0), gradeValueScale(1)
 		{}
 
 		protected:
 		float getDialAngle()
 		{
-			return ((angleMax-angleMin)*this->value + angleMin*this->max - angleMax*this->min)/(this->max-this->min);
+			return -((angleMax-angleMin)*this->value + angleMin*this->max - angleMax*this->min)/(this->max-this->min);
 		}
 	};
 
@@ -113,25 +113,25 @@ namespace Hud
 		{
 			// todo needle dial gauge
 			const fgeal::Rectangle& bounds = this->bounds;
-			const fgeal::Point center = {bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h};
+			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
 			const float angle = this->getDialAngle();
 
 			fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
 			fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
-			fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*cos(angle), center.y + 0.4*bounds.h*sin(angle));
+			fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*sin(angle), center.y + 0.4*bounds.h*cos(angle));
 			fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
 
 			for(NumberType g = this->min; g <= this->max; g += this->majorGrade)
 			{
 				float gAngle = ((this->angleMax-this->angleMin)*g + this->angleMin*this->max - this->angleMax*this->min)/(this->max-this->min);
 				fgeal::Image::drawLine(gradeColor,
-						center.x + 0.4*bounds.w*cos(gAngle), center.y + 0.4*bounds.h*sin(gAngle),
-						center.x + 0.5*bounds.w*cos(gAngle), center.y + 0.5*bounds.h*sin(gAngle));
+						center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
+						center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle));
 
 				if(gradeFont != null)
 				{
 					std::string str = std::string() + (g*this->gradeValueScale);
-					gradeFont->drawText(str, center.x + 0.375*bounds.w*cos(gAngle), center.y + 0.375*bounds.h*sin(gAngle) - 0.5*gradeFont->getSize(), gradeColor);
+					gradeFont->drawText(str, center.x + 0.375*bounds.w*sin(gAngle), center.y + 0.375*bounds.h*cos(gAngle) - 0.5*gradeFont->getSize(), gradeColor);
 				}
 			}
 
@@ -139,8 +139,8 @@ namespace Hud
 			{
 				float gAngle = ((this->angleMax-this->angleMin)*g + this->angleMin*this->max - this->angleMax*this->min)/(this->max-this->min);
 				fgeal::Image::drawLine(gradeColor,
-						center.x + 0.45*bounds.w*cos(gAngle), center.y + 0.45*bounds.h*sin(gAngle),
-						center.x + 0.50*bounds.w*cos(gAngle), center.y + 0.50*bounds.h*sin(gAngle));
+						center.x + 0.45*bounds.w*sin(gAngle), center.y + 0.45*bounds.h*cos(gAngle),
+						center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle));
 			}
 		}
 	};
@@ -155,12 +155,17 @@ namespace Hud
 		/**	Custom pointer image. */
 		fgeal::Image* pointer;
 
+		float pointerOffset;
+
 		/** If true, indicates that the images used by this gauge are shared, and thus, should not be deleted when this gauge is deleted. */
 		bool imagesAreShared;
 
 		/** Creates a dial gauge with custom images. The foreground can be ommited. */
-		CustomImageDialGauge(fgeal::Image* background, fgeal::Image* pointerImage, fgeal::Image* foreground=null)
-		: background(background),  pointer(pointerImage), foreground(null), imagesAreShared(false)
+		CustomImageDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max, fgeal::Image* background, fgeal::Image* pointerImage, fgeal::Image* foreground=null)
+		: GenericDialGauge<NumberType>(bounds, var, min, max),
+		  background(background), foreground(null), pointer(pointerImage),
+		  pointerOffset(0),
+		  imagesAreShared(false)
 		{}
 
 		~CustomImageDialGauge()
@@ -180,7 +185,7 @@ namespace Hud
 			background->drawScaled(bounds.x, bounds.y, bounds.w/background->getWidth(), bounds.h/background->getHeight());
 			pointer->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + this->fixationOffset,
 					0.5*bounds.h/pointer->getHeight(), 0.5*bounds.h/pointer->getHeight(),
-					this->getDialAngle(), 0.5*pointer->getWidth(), 0);
+					this->getDialAngle(), 0.5*pointer->getWidth(), pointerOffset);
 
 			if(foreground != null)
 				foreground->drawScaled(bounds.x, bounds.y, bounds.w/foreground->getWidth(), bounds.h/foreground->getHeight());

@@ -49,7 +49,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
   autoTransmission(true),
-  gauge(null)
+  rpmGauge(null)
 {}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
@@ -107,10 +107,13 @@ void Pseudo3DRaceState::onEnter()
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
 	fgeal::Display& display = fgeal::Display::getInstance();
-	float gaugeDiameter = 0.25*std::max(display.getWidth(), display.getHeight());
+	float gaugeDiameter = 0.2*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1*gaugeDiameter, display.getHeight() - 1.1*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	gauge = new Hud::NeedleDialGauge<float>(gaugeSize, vehicle.engine.rpm, 0, vehicle.engine.maxRpm);
-	gauge->borderThickness = 6;
+	rpmGauge = new Hud::NeedleDialGauge<float>(gaugeSize, vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, font);
+	rpmGauge->borderThickness = 6;
+	rpmGauge->majorGrade = 1000;
+	rpmGauge->minorGrade = 100;
+	rpmGauge->gradeValueScale = 0.001;
 
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
@@ -176,7 +179,7 @@ void Pseudo3DRaceState::render()
 	spritesVehicle[animationIndex]->scale.y = scale;
 	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
 
-	gauge->draw();
+	rpmGauge->draw();
 
 	char buffer[512];
 

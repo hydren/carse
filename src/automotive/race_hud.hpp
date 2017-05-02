@@ -11,6 +11,8 @@
 
 #include "fgeal/fgeal.hpp"
 
+#include "futil/string/more_operators.hpp"
+
 #include <cmath>
 
 #ifndef M_PI
@@ -32,9 +34,12 @@ namespace Hud
 		/** the minimum and maximum expected values. */
 		NumberType min, max;
 
+		/** the grade's size. */
+		NumberType majorGrade, minorGrade;
+
 		GenericGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
 		: bounds(bounds),
-		  value(var), min(min), max(max)
+		  value(var), min(min), max(max), majorGrade(0.1*(max-min)), minorGrade(0.01*(max-min))
 		{}
 	};
 
@@ -45,13 +50,16 @@ namespace Hud
 		/** The minimum and maximum angle applied on the rotating pointer. */
 		float angleMin, angleMax;
 
-		/** Specifies the offset between the pointer's fixation point and its endpoint. */
+		/** An optional offset between the pointer's fixation point and its endpoint. */
 		float fixationOffset;
+
+		/** An optional scaling factor for the grade values shown. */
+		float gradeValueScale;
 
 		GenericDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
 		: GenericGauge<NumberType>(bounds, var, min, max),
-		  angleMin(0.5*M_PI), angleMax(2.25*M_PI),
-		  fixationOffset(0)
+		  angleMin(0.75*M_PI), angleMax(2.25*M_PI),
+		  fixationOffset(0), gradeValueScale(1)
 		{}
 
 		protected:
@@ -86,12 +94,19 @@ namespace Hud
 		/** The bolt's color. */
 		fgeal::Color boltColor;
 
-		NeedleDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
+		/** The grade's color. */
+		fgeal::Color gradeColor;
+
+		/** The font used to display grade values. */
+		fgeal::Font* gradeFont;
+
+		NeedleDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max, fgeal::Font* gradeFont=null)
 		: GenericDialGauge<NumberType>(bounds, var, min, max),
 		  backgroundColor(fgeal::Color::WHITE),
 		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
 		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
-		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK)
+		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
+		  gradeColor(fgeal::Color::BLACK), gradeFont(gradeFont)
 		{}
 
 		void draw()
@@ -105,6 +120,28 @@ namespace Hud
 			fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
 			fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*cos(angle), center.y + 0.4*bounds.h*sin(angle));
 			fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
+
+			for(NumberType g = this->min; g <= this->max; g += this->majorGrade)
+			{
+				float gAngle = ((this->angleMax-this->angleMin)*g + this->angleMin*this->max - this->angleMax*this->min)/(this->max-this->min);
+				fgeal::Image::drawLine(gradeColor,
+						center.x + 0.4*bounds.w*cos(gAngle), center.y + 0.4*bounds.h*sin(gAngle),
+						center.x + 0.5*bounds.w*cos(gAngle), center.y + 0.5*bounds.h*sin(gAngle));
+
+				if(gradeFont != null)
+				{
+					std::string str = std::string() + (g*this->gradeValueScale);
+					gradeFont->drawText(str, center.x + 0.375*bounds.w*cos(gAngle), center.y + 0.375*bounds.h*sin(gAngle) - 0.5*gradeFont->getSize(), gradeColor);
+				}
+			}
+
+			for(NumberType g = this->min; g <= this->max; g += this->minorGrade)
+			{
+				float gAngle = ((this->angleMax-this->angleMin)*g + this->angleMin*this->max - this->angleMax*this->min)/(this->max-this->min);
+				fgeal::Image::drawLine(gradeColor,
+						center.x + 0.45*bounds.w*cos(gAngle), center.y + 0.45*bounds.h*sin(gAngle),
+						center.x + 0.50*bounds.w*cos(gAngle), center.y + 0.50*bounds.h*sin(gAngle));
+			}
 		}
 	};
 
@@ -159,9 +196,9 @@ namespace Hud
 
 	/** A widget that displays a numeric value, possibly stylised. */
 	template <typename NumberType>
-	struct NumericIndicator
+	struct NumericalDisplay
 	{
-		// todo numeric indicator
+		// todo numerical display
 
 		/** the value to show. */
 		const NumberType& value;

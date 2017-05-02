@@ -40,7 +40,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Vehicle vehicle;
 	bool autoTransmission;
 
-	Hud::NeedleDialGauge<float>* gauge;
+	Hud::NeedleDialGauge<float>* rpmGauge;
 
 	public:
 	int getId();

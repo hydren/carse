@@ -49,7 +49,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
   autoTransmission(true),
-  rpmGauge(null)
+  rpmGauge(null), speedGauge(null)
 {}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
@@ -69,6 +69,7 @@ void Pseudo3DRaceState::initialize()
 	bg = new Image("assets/bg.jpg");
 	music = new Music("assets/music_sample.ogg");
 }
+
 
 void Pseudo3DRaceState::setVehicle(const Vehicle& v)
 {
@@ -107,13 +108,26 @@ void Pseudo3DRaceState::onEnter()
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
 	fgeal::Display& display = fgeal::Display::getInstance();
-	float gaugeDiameter = 0.2*std::max(display.getWidth(), display.getHeight());
-	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1*gaugeDiameter, display.getHeight() - 1.1*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	rpmGauge = new Hud::NeedleDialGauge<float>(gaugeSize, vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, font);
+	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
+	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
+	rpmGauge = new Hud::DialGauge<float>(vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, gaugeSize);
 	rpmGauge->borderThickness = 6;
-	rpmGauge->majorGrade = 1000;
-	rpmGauge->minorGrade = 100;
-	rpmGauge->gradeValueScale = 0.001;
+	rpmGauge->graduationLevel = 2;
+	rpmGauge->graduationPrimarySize = 1000;
+	rpmGauge->graduationSecondarySize = 100;
+	rpmGauge->graduationValueScale = 0.001;
+	rpmGauge->graduationFont = font;
+
+	gaugeSize.x -= 1.5*gaugeDiameter;
+	gaugeSize.w *= 1.5;
+	gaugeSize.h *= 1.5;
+	speedGauge = new Hud::DialGauge<float>(speed, 0, 36000, gaugeSize);
+	speedGauge->borderThickness = 6;
+	speedGauge->graduationLevel = 2;
+	speedGauge->graduationPrimarySize = 2400;
+	speedGauge->graduationSecondarySize = 480;
+	speedGauge->graduationValueScale = 1.0f/120;
+	speedGauge->graduationFont = font;
 
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
@@ -180,6 +194,7 @@ void Pseudo3DRaceState::render()
 	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
 
 	rpmGauge->draw();
+	speedGauge->draw();
 
 	char buffer[512];
 

@@ -50,7 +50,7 @@ namespace Hud
 		/** The minimum and maximum angle applied on the rotating pointer. */
 		float angleMin, angleMax;
 
-		/** An optional offset between the pointer's fixation point and its endpoint. */
+		/** An optional vertical offset to the pointer's fixation position on the gauge. */
 		float fixationOffset;
 
 		/** An optional scaling factor for the grade values shown. */
@@ -155,7 +155,11 @@ namespace Hud
 		/**	Custom pointer image. */
 		fgeal::Image* pointer;
 
+		/** An optional offset applied to the pointer in relation to its fixation point. */
 		float pointerOffset;
+
+		/** An optional scale factor applied to the pointer's size. Normally (scale=1.0), the pointer size is equal to the gauge radius.*/
+		float pointerSizeScale;
 
 		/** If true, indicates that the images used by this gauge are shared, and thus, should not be deleted when this gauge is deleted. */
 		bool imagesAreShared;
@@ -164,7 +168,7 @@ namespace Hud
 		CustomImageDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max, fgeal::Image* background, fgeal::Image* pointerImage, fgeal::Image* foreground=null)
 		: GenericDialGauge<NumberType>(bounds, var, min, max),
 		  background(background), foreground(null), pointer(pointerImage),
-		  pointerOffset(0),
+		  pointerOffset(0), pointerSizeScale(1.0),
 		  imagesAreShared(false)
 		{}
 
@@ -184,7 +188,7 @@ namespace Hud
 			const fgeal::Rectangle& bounds = this->bounds;
 			background->drawScaled(bounds.x, bounds.y, bounds.w/background->getWidth(), bounds.h/background->getHeight());
 			pointer->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + this->fixationOffset,
-					0.5*bounds.h/pointer->getHeight(), 0.5*bounds.h/pointer->getHeight(),
+					0.5*pointerSizeScale*bounds.h/pointer->getHeight(), 0.5*pointerSizeScale*bounds.h/pointer->getHeight(),
 					this->getDialAngle(), 0.5*pointer->getWidth(), pointerOffset);
 
 			if(foreground != null)

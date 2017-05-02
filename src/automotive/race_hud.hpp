@@ -21,13 +21,11 @@
 
 namespace Hud
 {
-	/** A generic gauge. Not virtual but not functional either. */
+	/** A generic dial-type gauge. Can drawn either custom images or native primitives.
+	 *  To drawn using custom images, the image's fields must be non-null. Otherwise native versions will be drawn. */
 	template <typename NumberType>
-	struct GenericGauge
+	struct DialGauge
 	{
-		/** this widget's dimensions and position. */
-		fgeal::Rectangle bounds;
-
 		/** the value to measure. */
 		const NumberType& value;
 
@@ -35,44 +33,14 @@ namespace Hud
 		NumberType min, max;
 
 		/** the grade's size. */
-		NumberType majorGrade, minorGrade;
+		NumberType graduationPrimarySize, graduationSecondarySize, graduationTertiarySize;
 
-		GenericGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
-		: bounds(bounds),
-		  value(var), min(min), max(max), majorGrade(0.1*(max-min)), minorGrade(0.01*(max-min))
-		{}
-	};
+		/** this widget's dimensions and position. */
+		fgeal::Rectangle bounds;
 
-	/** A generic dial-type gauge. Also not functional */
-	template <typename NumberType>
-	struct GenericDialGauge extends GenericGauge<NumberType>
-	{
 		/** The minimum and maximum angle applied on the rotating pointer. */
 		float angleMin, angleMax;
 
-		/** An optional vertical offset to the pointer's fixation position on the gauge. */
-		float fixationOffset;
-
-		/** An optional scaling factor for the grade values shown. */
-		float gradeValueScale;
-
-		GenericDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
-		: GenericGauge<NumberType>(bounds, var, min, max),
-		  angleMin(0.25*M_PI), angleMax(1.75*M_PI),
-		  fixationOffset(0), gradeValueScale(1)
-		{}
-
-		protected:
-		float getDialAngle()
-		{
-			return -((angleMax-angleMin)*this->value + angleMin*this->max - angleMax*this->min)/(this->max-this->min);
-		}
-	};
-
-	/** A needle dial-type gauge, drawn using native primitives. */
-	template <typename NumberType>
-	struct NeedleDialGauge extends GenericDialGauge<NumberType>
-	{
 		/** The background color. */
 		fgeal::Color backgroundColor;
 
@@ -94,66 +62,20 @@ namespace Hud
 		/** The bolt's color. */
 		fgeal::Color boltColor;
 
-		/** The grade's color. */
-		fgeal::Color gradeColor;
+		/** The graduation's color. */
+		fgeal::Color graduationColor;
 
-		/** The font used to display grade values. */
-		fgeal::Font* gradeFont;
+		/** The font used to display graduation values. If null, no graduation values are shown. */
+		fgeal::Font* graduationFont;
 
-		NeedleDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max, fgeal::Font* gradeFont=null)
-		: GenericDialGauge<NumberType>(bounds, var, min, max),
-		  backgroundColor(fgeal::Color::WHITE),
-		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
-		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
-		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
-		  gradeColor(fgeal::Color::BLACK), gradeFont(gradeFont)
-		{}
+		/** An optional scaling factor for the graduation values shown. It's better used if set power of 10, like 0.1, 0.01, 0.001, etc. */
+		float graduationValueScale;
 
-		void draw()
-		{
-			// todo needle dial gauge
-			const fgeal::Rectangle& bounds = this->bounds;
-			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
-			const float angle = this->getDialAngle();
+		/** The level of graduation to show (currently 0 to 3). Setting as 0 makes the gauge to display no graduation at all. */
+		short graduationLevel;
 
-			fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
-			fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
-			fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*sin(angle), center.y + 0.4*bounds.h*cos(angle));
-			fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
-
-			for(NumberType g = this->min; g <= this->max; g += this->majorGrade)
-			{
-				float gAngle = ((this->angleMax-this->angleMin)*g + this->angleMin*this->max - this->angleMax*this->min)/(this->max-this->min);
-				fgeal::Image::drawLine(gradeColor,
-						center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
-						center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle));
-
-				if(gradeFont != null)
-				{
-					std::string str = std::string() + (g*this->gradeValueScale);
-					gradeFont->drawText(str, center.x + 0.375*bounds.w*sin(gAngle), center.y + 0.375*bounds.h*cos(gAngle) - 0.5*gradeFont->getSize(), gradeColor);
-				}
-			}
-
-			for(NumberType g = this->min; g <= this->max; g += this->minorGrade)
-			{
-				float gAngle = ((this->angleMax-this->angleMin)*g + this->angleMin*this->max - this->angleMax*this->min)/(this->max-this->min);
-				fgeal::Image::drawLine(gradeColor,
-						center.x + 0.45*bounds.w*sin(gAngle), center.y + 0.45*bounds.h*cos(gAngle),
-						center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle));
-			}
-		}
-	};
-
-	/** A dial-type gauge drawn using provided custom images. */
-	template <typename NumberType>
-	struct CustomImageDialGauge extends GenericDialGauge<NumberType>
-	{
-		/** Custom gauge background and foreground images. */
-		fgeal::Image* background, *foreground;
-
-		/**	Custom pointer image. */
-		fgeal::Image* pointer;
+		/** An optional vertical offset to the pointer's fixation position on the gauge. */
+		float fixationOffset;
 
 		/** An optional offset applied to the pointer in relation to its fixation point. */
 		float pointerOffset;
@@ -161,44 +83,112 @@ namespace Hud
 		/** An optional scale factor applied to the pointer's size. Normally (scale=1.0), the pointer size is equal to the gauge radius.*/
 		float pointerSizeScale;
 
-		/** If true, indicates that the images used by this gauge are shared, and thus, should not be deleted when this gauge is deleted. */
+		/** Custom gauge background and foreground images. */
+		fgeal::Image* backgroundImage, *foregroundImage;
+
+		/**	Custom pointer image. */
+		fgeal::Image* pointerImage;
+
+		/** If true, indicates that the custom images used by this gauge are shared, and thus, should not be deleted when this gauge is deleted. */
 		bool imagesAreShared;
 
-		/** Creates a dial gauge with custom images. The foreground can be ommited. */
-		CustomImageDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max, fgeal::Image* background, fgeal::Image* pointerImage, fgeal::Image* foreground=null)
-		: GenericDialGauge<NumberType>(bounds, var, min, max),
-		  background(background), foreground(null), pointer(pointerImage),
-		  pointerOffset(0), pointerSizeScale(1.0),
-		  imagesAreShared(false)
+		DialGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
+		: value(var), min(min), max(max),
+		  graduationPrimarySize(0.1*(max-min)), graduationSecondarySize(0.01*(max-min)), graduationTertiarySize(0.001*(max-min)),
+		  bounds(bounds), angleMin(0.25*M_PI), angleMax(1.75*M_PI),
+		  backgroundColor(fgeal::Color::WHITE),
+		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
+		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
+		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
+		  graduationColor(fgeal::Color::BLACK), graduationFont(null),
+		  graduationValueScale(1.0), graduationLevel(1),
+		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0),
+		  backgroundImage(null), foregroundImage(null), pointerImage(null), imagesAreShared(false)
 		{}
 
-		~CustomImageDialGauge()
+		~DialGauge()
 		{
 			if(not imagesAreShared)
 			{
-				delete pointer;
-				delete background;
-				if(foreground != null)
-					delete foreground;
+				if(pointerImage != null)    delete pointerImage;
+				if(backgroundImage != null) delete backgroundImage;
+				if(foregroundImage != null) delete foregroundImage;
 			}
+		}
+
+		float getDialAngle()
+		{
+			return -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
 		}
 
 		void draw()
 		{
 			const fgeal::Rectangle& bounds = this->bounds;
-			background->drawScaled(bounds.x, bounds.y, bounds.w/background->getWidth(), bounds.h/background->getHeight());
-			pointer->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + this->fixationOffset,
-					0.5*pointerSizeScale*bounds.h/pointer->getHeight(), 0.5*pointerSizeScale*bounds.h/pointer->getHeight(),
-					this->getDialAngle(), 0.5*pointer->getWidth(), pointerOffset);
+			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
+			const float angle = this->getDialAngle();
 
-			if(foreground != null)
-				foreground->drawScaled(bounds.x, bounds.y, bounds.w/foreground->getWidth(), bounds.h/foreground->getHeight());
+			if(backgroundImage != null)
+				backgroundImage->drawScaled(bounds.x, bounds.y, bounds.w/backgroundImage->getWidth(), bounds.h/backgroundImage->getHeight());
+			else
+			{
+				fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
+				fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
+			}
+
+			if(pointerImage != null)
+			{
+				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + this->fixationOffset,
+						0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(), 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(),
+						this->getDialAngle(), 0.5*pointerImage->getWidth(), pointerOffset);
+			}
+			else
+			{
+				fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*sin(angle), center.y + 0.4*bounds.h*cos(angle));
+				fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
+			}
+
+			if(graduationLevel >= 1)  // primary graduation
+			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
+			{
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
+				fgeal::Image::drawLine(graduationColor,
+						center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
+						center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle));
+
+				// numerical graduation
+				if(graduationFont != null)
+				{
+					std::string str = std::string() + (g * graduationValueScale);
+					graduationFont->drawText(str, center.x + 0.375*bounds.w*sin(gAngle), center.y + 0.375*bounds.h*cos(gAngle) - 0.5*graduationFont->getSize(), graduationColor);
+				}
+			}
+
+			if(graduationLevel >= 2)  // secondary graduation
+			for(NumberType g = min; g <= max; g += graduationSecondarySize)
+			{
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
+				fgeal::Image::drawLine(graduationColor,
+						center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
+						center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle));
+			}
+
+			if(graduationLevel >= 3)  // tertiary graduation
+			for(NumberType g = min; g <= max; g += graduationTertiarySize)
+			{
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
+				fgeal::Image::drawLine(graduationColor,
+						center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
+						center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle));
+			}
+
+			if(foregroundImage != null)
+				foregroundImage->drawScaled(bounds.x, bounds.y, bounds.w/foregroundImage->getWidth(), bounds.h/foregroundImage->getHeight());
 		}
 	};
 
 	/** A bar-type gauge */
 	template <typename NumberType>
-	struct BarGauge extends GenericGauge<NumberType>
+	struct BarGauge
 	{
 		// todo bar gauge
 	};

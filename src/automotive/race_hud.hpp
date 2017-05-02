@@ -137,14 +137,16 @@ namespace Hud
 
 			if(pointerImage != null)
 			{
-				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + this->fixationOffset,
+				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset,
 						0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(), 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(),
 						this->getDialAngle(), 0.5*pointerImage->getWidth(), pointerOffset);
 			}
 			else
 			{
-				fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*sin(angle), center.y + 0.4*bounds.h*cos(angle));
-				fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
+				fgeal::Image::drawLine(needleColor,
+						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
+						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle));
+				fgeal::Image::drawEllipse(boltColor, center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
 			}
 
 			if(graduationLevel >= 1)  // primary graduation

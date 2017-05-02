@@ -13,6 +13,10 @@
 
 #include <cmath>
 
+#ifndef M_PI
+	# define M_PI		3.14159265358979323846	/* pi */
+#endif
+
 namespace Hud
 {
 	/** A generic gauge. Not virtual but not functional either. */
@@ -46,7 +50,7 @@ namespace Hud
 
 		GenericDialGauge(const fgeal::Rectangle& bounds, const NumberType& var, NumberType min, NumberType max)
 		: GenericGauge<NumberType>(bounds, var, min, max),
-		  angleMin(0.25*M_PI), angleMax(1.75*M_PI),
+		  angleMin(0.5*M_PI), angleMax(2.25*M_PI),
 		  fixationOffset(0)
 		{}
 
@@ -99,7 +103,7 @@ namespace Hud
 
 			fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
 			fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
-			fgeal::Image::drawTriangle(needleColor,    center.x, center.y, center.x, center.y, center.x + bounds.w*cos(angle), center.y + bounds.h*sin(angle));
+			fgeal::Image::drawLine(needleColor,        center.x, center.y, center.x + 0.4*bounds.w*cos(angle), center.y + 0.4*bounds.h*sin(angle));
 			fgeal::Image::drawEllipse(boltColor,       center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
 		}
 	};

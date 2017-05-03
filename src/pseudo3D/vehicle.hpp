@@ -9,7 +9,7 @@
 #define PSEUDO3D_VEHICLE_HPP_
 #include <ciso646>
 
-#include "motor.hpp"
+#include "automotive/motor.hpp"
 #include "automotive/engine_sound.hpp"
 
 #include "util/properties.hpp"

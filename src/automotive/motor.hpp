@@ -12,12 +12,20 @@
 struct Engine
 {
 	float torque;
-	float rpm, maxRpm;
+	float rpm, maxRpm, minRpm;
 	int gear, gearCount;
 	float *gearRatio, reverseGearRatio; // fixme this leaks :)
 	float tireRadius;
 
+	bool automaticShiftingEnabled;
+	float automaticShiftingLowerThreshold;
+	float automaticShiftingUpperThreshold;
+
+	/** Returns the current driving force. */
 	float getDriveForce();
+
+	/** Updates the engine's state (RPM, gear, etc), given the current speed. */
+	void update(float currentSpeed);
 };
 
 #endif /* MOTOR_HPP_ */

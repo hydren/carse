@@ -38,7 +38,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Course course;
 	Vehicle vehicle;
-	bool autoTransmission;
 
 	Hud::DialGauge<float>* rpmGauge;
 	Hud::NumericalDisplay<float>* speedGauge;

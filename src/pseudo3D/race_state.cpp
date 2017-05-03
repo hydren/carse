@@ -48,7 +48,6 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
-  autoTransmission(true),
   rpmGauge(null), speedGauge(null)
 {}
 
@@ -128,6 +127,10 @@ void Pseudo3DRaceState::onEnter()
 	speedGauge->borderColor = fgeal::Color::LIGHT_GREY;
 	speedGauge->backgroundColor = fgeal::Color::BLACK;
 
+	vehicle.engine.minRpm = 1000;
+	vehicle.engine.automaticShiftingEnabled = true;
+	vehicle.engine.automaticShiftingLowerThreshold = 0.57;
+	vehicle.engine.automaticShiftingUpperThreshold = 0.95;
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
 
@@ -221,7 +224,7 @@ void Pseudo3DRaceState::render()
 
 		font2->drawText("Gear:", 25, display.getHeight()-100+25, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", vehicle.engine.gear);
-		font->drawText(std::string(buffer)+(autoTransmission? " (auto)":""), 60, display.getHeight()-100+25, fgeal::Color::WHITE);
+		font->drawText(std::string(buffer)+(vehicle.engine.automaticShiftingEnabled? " (auto)":""), 60, display.getHeight()-100+25, fgeal::Color::WHITE);
 
 		font2->drawText("Drive force:", 25, display.getHeight()-100+50, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
@@ -271,7 +274,7 @@ void Pseudo3DRaceState::handleInput()
 					strafeSpeed = 0;
 					break;
 				case Keyboard::Key::T:
-					autoTransmission = !autoTransmission;
+					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;
 					break;
 				case Keyboard::Key::M:
 					if(music->isPlaying())
@@ -301,20 +304,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float curve = course.lines[((int)(position/course.roadSegmentLength))%N].curve;
 	posX -= atan(curve) * speed * 0.5 * delta;
 
-	vehicle.engine.rpm = (speed/vehicle.engine.tireRadius) * vehicle.engine.gearRatio[vehicle.engine.gear] * vehicle.engine.gearRatio[0] * (30.0f/M_PI) * 0.002;
-	if(vehicle.engine.rpm < 1000)
-		vehicle.engine.rpm = 1000;
-
-	if(autoTransmission)
-	{
-		if(vehicle.engine.gear < vehicle.engine.gearCount
-		and vehicle.engine.rpm > 0.95f*vehicle.engine.maxRpm)
-			vehicle.engine.gear++;
-
-		if(vehicle.engine.gear > 1
-		and vehicle.engine.rpm < 0.57f*vehicle.engine.maxRpm)
-			vehicle.engine.gear--;
-	}
+	vehicle.engine.update(speed);
 
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += (vehicle.engine.getDriveForce() * delta)/vehicle.mass;
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= (vehicle.engine.getDriveForce() * delta)/vehicle.mass;

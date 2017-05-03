@@ -116,16 +116,10 @@ namespace Hud
 			}
 		}
 
-		float getDialAngle()
-		{
-			return -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
-		}
-
 		void draw()
 		{
-			const fgeal::Rectangle& bounds = this->bounds;
 			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
-			const float angle = this->getDialAngle();
+			const float angle = -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
 
 			if(backgroundImage != null)
 				backgroundImage->drawScaled(bounds.x, bounds.y, bounds.w/backgroundImage->getWidth(), bounds.h/backgroundImage->getHeight());
@@ -139,7 +133,7 @@ namespace Hud
 			{
 				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset,
 						0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(), 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(),
-						this->getDialAngle(), 0.5*pointerImage->getWidth(), pointerOffset);
+						angle, 0.5*pointerImage->getWidth(), pointerOffset);
 			}
 			else
 			{
@@ -188,11 +182,51 @@ namespace Hud
 		}
 	};
 
+	// todo improve BarGauge with more options
 	/** A bar-type gauge */
 	template <typename NumberType>
 	struct BarGauge
 	{
-		// todo bar gauge
+		/** the value to measure. */
+		const NumberType& value;
+
+		/** the minimum and maximum expected values. */
+		NumberType min, max;
+
+		/** this widget's dimensions and position. */
+		fgeal::Rectangle bounds;
+
+		/** The background color. */
+		fgeal::Color backgroundColor;
+
+		/** The border's thickness. If 0 (zero), no border is drawn. */
+		float borderThickness;
+
+		/** The border's color. If set as transparent, no border is drawn. */
+		fgeal::Color borderColor;
+
+		/** The needle's color. */
+		fgeal::Color fillColor;
+
+		BarGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
+		: value(var), min(min), max(max),
+		  bounds(bounds),
+		  backgroundColor(fgeal::Color::WHITE),
+		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
+		  fillColor(fgeal::Color::RED)
+		{}
+
+		void draw()
+		{
+			const float fillRatio = (value-min)/(max-min);
+			fgeal::Image::drawRectangle(borderColor, bounds.x, bounds.y, bounds.w, bounds.h);
+			fgeal::Image::drawRectangle(backgroundColor,
+					bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+					bounds.w - borderThickness, bounds.h - borderThickness);
+			fgeal::Image::drawRectangle(fillColor,
+					bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+					fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness);
+		}
 	};
 
 	/** A widget that displays a numeric value, possibly stylised. */

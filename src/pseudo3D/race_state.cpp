@@ -255,16 +255,14 @@ void Pseudo3DRaceState::handleInput()
 	{
 		eventQueue.waitNextEvent(&event);
 		if(event.getEventType() == Event::Type::DISPLAY_CLOSURE)
-		{
-			//game.enterState(CarseGame::MENU_STATE_ID);
 			game.running = false;
-		}
+
 		else if(event.getEventType() == Event::Type::KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::Key::ESCAPE:
-					game.running = false;
+					game.enterState(CarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::Key::R:
 					position = 0;

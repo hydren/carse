@@ -48,7 +48,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
   course(Course::createDebugCourse(200, 2000)),
-  autoTransmission(true)
+  autoTransmission(true),
+  rpmGauge(null), speedGauge(null)
 {}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
@@ -68,6 +69,7 @@ void Pseudo3DRaceState::initialize()
 	bg = new Image("assets/bg.jpg");
 	music = new Music("assets/music_sample.ogg");
 }
+
 
 void Pseudo3DRaceState::setVehicle(const Vehicle& v)
 {
@@ -104,6 +106,27 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
+
+	fgeal::Display& display = fgeal::Display::getInstance();
+	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
+	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
+	rpmGauge = new Hud::DialGauge<float>(vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, gaugeSize);
+	rpmGauge->borderThickness = 6;
+	rpmGauge->graduationLevel = 2;
+	rpmGauge->graduationPrimarySize = 1000;
+	rpmGauge->graduationSecondarySize = 100;
+	rpmGauge->graduationValueScale = 0.001;
+	rpmGauge->graduationFont = font;
+
+	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
+	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
+	gaugeSize.w = 32;
+	gaugeSize.h = 1.5 * font->getSize();
+	speedGauge = new Hud::NumericalDisplay<float>(speed, gaugeSize, font);
+	speedGauge->valueScale = 1.0/120;
+	speedGauge->borderThickness = 6;
+	speedGauge->borderColor = fgeal::Color::LIGHT_GREY;
+	speedGauge->backgroundColor = fgeal::Color::BLACK;
 
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
@@ -168,6 +191,9 @@ void Pseudo3DRaceState::render()
 	spritesVehicle[animationIndex]->scale.x = scale;
 	spritesVehicle[animationIndex]->scale.y = scale;
 	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
+
+	rpmGauge->draw();
+	speedGauge->draw();
 
 	char buffer[512];
 

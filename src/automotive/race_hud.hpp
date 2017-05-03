@@ -233,10 +233,56 @@ namespace Hud
 	template <typename NumberType>
 	struct NumericalDisplay
 	{
-		// todo numerical display
-
 		/** the value to show. */
 		const NumberType& value;
+
+		/** An optional scaling factor for the value shown. */
+		float valueScale;
+
+		/** this widget's dimensions and position. */
+		fgeal::Rectangle bounds;
+
+		/** The background color. */
+		fgeal::Color backgroundColor;
+
+		/** The border's thickness. If 0 (zero), no border is drawn. */
+		float borderThickness;
+
+		/** The border's color. If set as transparent, no border is drawn. */
+		fgeal::Color borderColor;
+
+		/** The display's color. */
+		fgeal::Color displayColor;
+
+		/** The font used to display the value. */
+		fgeal::Font* font;
+
+		/** If true, indicates that the font is shared, and thus, should not be deleted when this display is deleted. */
+		bool fontIsShared;
+
+		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
+		: value(var), valueScale(1.0), bounds(bounds),
+		  backgroundColor(fgeal::Color::WHITE),
+		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK), displayColor(fgeal::Color::GREEN),
+		  font(font), fontIsShared(false)
+		{}
+
+		~NumericalDisplay()
+		{
+			if(font != null and not fontIsShared)
+				delete font;
+		}
+
+		void draw()
+		{
+			fgeal::Image::drawRectangle(borderColor, bounds.x, bounds.y, bounds.w, bounds.h);
+			fgeal::Image::drawRectangle(backgroundColor,
+						bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+						bounds.w - borderThickness, bounds.h - borderThickness);
+
+			const std::string str = std::string() + static_cast<int>(value*valueScale);
+			font->drawText(str, bounds.x + borderThickness, bounds.y + borderThickness, displayColor);
+		}
 	};
 }
 

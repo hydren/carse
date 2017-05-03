@@ -47,6 +47,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), bg(null), music(null),
   cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0),
+  rollingFriction(0), airFriction(0), turnFriction(0),
   course(Course::createDebugCourse(200, 2000)),
   rpmGauge(null), speedGauge(null)
 {}
@@ -218,20 +219,32 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fkm/h", strafeSpeed/120);
 		font->drawText(std::string(buffer), 180, 100, fgeal::Color::WHITE);
 
+		font2->drawText("Rolling friction:", 25, 125, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", rollingFriction);
+		font->drawText(std::string(buffer), 200, 125, fgeal::Color::WHITE);
+
+		font2->drawText("Air friction:", 25, 150, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", airFriction);
+		font->drawText(std::string(buffer), 200, 150, fgeal::Color::WHITE);
+
+		font2->drawText("Turn friction:", 25, 175, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", turnFriction);
+		font->drawText(std::string(buffer), 200, 175, fgeal::Color::WHITE);
+
 		font2->drawText("RPM:", 25, display.getHeight()-100, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.f", vehicle.engine.rpm);
 		font->drawText(std::string(buffer), 55, display.getHeight()-100, fgeal::Color::WHITE);
 
-		font2->drawText("Gear:", 25, display.getHeight()-100+25, fgeal::Color::WHITE);
-		sprintf(buffer, "%d", vehicle.engine.gear);
-		font->drawText(std::string(buffer)+(vehicle.engine.automaticShiftingEnabled? " (auto)":""), 60, display.getHeight()-100+25, fgeal::Color::WHITE);
+		font2->drawText("Gear:", 25, display.getHeight()-75, fgeal::Color::WHITE);
+		const char* autoLabelTxt = (vehicle.engine.automaticShiftingEnabled? " (auto)":"");
+		sprintf(buffer, "%d %s", vehicle.engine.gear, autoLabelTxt);
+		font->drawText(std::string(buffer), 60, display.getHeight()-75, fgeal::Color::WHITE);
 
-		font2->drawText("Drive force:", 25, display.getHeight()-100+50, fgeal::Color::WHITE);
+		font2->drawText("Drive force:", 25, display.getHeight()-50, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
-		font->drawText(std::string(buffer), 180, display.getHeight()-100+50, fgeal::Color::WHITE);
+		font->drawText(std::string(buffer), 180, display.getHeight()-50, fgeal::Color::WHITE);
 
 		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.engine.rpm);
-
 		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)
 		{
 			const std::string format = std::string(engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
@@ -326,9 +339,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	posX += strafeSpeed*delta;
 
-	const float rollingFriction = 0.02 * vehicle.mass * 9.81 * (speed==0? 0 : speed > 0? 1 : -1),
-			    airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81,
-				turnFriction = Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT) or Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)? 2000 : 0;
+	rollingFriction = 0.02 * vehicle.mass * 9.81 * (speed==0? 0 : speed > 0? 1 : -1);
+	airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
+	turnFriction = Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT) or Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)? 2000 : 0;
 
 	speed -= (rollingFriction + airFriction + turnFriction)*delta;
 

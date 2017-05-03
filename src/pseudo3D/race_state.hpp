@@ -41,7 +41,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	bool autoTransmission;
 
 	Hud::DialGauge<float>* rpmGauge;
-	Hud::DialGauge<float>* speedGauge;
+	Hud::NumericalDisplay<float>* speedGauge;
 
 	public:
 	int getId();

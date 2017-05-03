@@ -118,16 +118,15 @@ void Pseudo3DRaceState::onEnter()
 	rpmGauge->graduationValueScale = 0.001;
 	rpmGauge->graduationFont = font;
 
-	gaugeSize.x -= 1.5*gaugeDiameter;
-	gaugeSize.w *= 1.5;
-	gaugeSize.h *= 1.5;
-	speedGauge = new Hud::DialGauge<float>(speed, 0, 36000, gaugeSize);
+	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
+	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
+	gaugeSize.w = 32;
+	gaugeSize.h = 1.5 * font->getSize();
+	speedGauge = new Hud::NumericalDisplay<float>(speed, gaugeSize, font);
+	speedGauge->valueScale = 1.0/120;
 	speedGauge->borderThickness = 6;
-	speedGauge->graduationLevel = 2;
-	speedGauge->graduationPrimarySize = 2400;
-	speedGauge->graduationSecondarySize = 480;
-	speedGauge->graduationValueScale = 1.0f/120;
-	speedGauge->graduationFont = font;
+	speedGauge->borderColor = fgeal::Color::LIGHT_GREY;
+	speedGauge->backgroundColor = fgeal::Color::BLACK;
 
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;

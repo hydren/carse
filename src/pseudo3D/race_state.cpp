@@ -356,7 +356,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	rollingFriction = 0.02 * vehicle.mass * 9.81 * (speed==0? 0 : speed > 0? 1 : -1);
 	airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
-	turnFriction = Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT) or Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT)? 2000 : 0;
+	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
 
 	speed -= (rollingFriction + airFriction + turnFriction)*delta;
 

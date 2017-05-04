@@ -49,7 +49,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   position(0), posX(0), speed(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0),
   course(Course::createDebugCourse(200, 2000)),
-  rpmGauge(null), speedGauge(null)
+  rpmGauge(null), speedGauge(null),
+  debugMode(true)
 {}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
@@ -200,10 +201,10 @@ void Pseudo3DRaceState::render()
 	rpmGauge->draw();
 	speedGauge->draw();
 
-	char buffer[512];
-
 	// DEBUG
+	if(debugMode)
 	{
+		char buffer[512];
 		float offset = 25;
 		font2->drawText("FPS:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", game.getFpsCount());
@@ -294,7 +295,7 @@ void Pseudo3DRaceState::handleInput()
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::Key::ESCAPE:
-					game.enterState(CarseGame::MAIN_MENU_STATE_ID);
+					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::Key::R:
 					position = 0;
@@ -310,6 +311,9 @@ void Pseudo3DRaceState::handleInput()
 						music->pause();
 					else
 						music->resume();
+					break;
+				case Keyboard::Key::D:
+					debugMode = !debugMode;
 					break;
 				case Keyboard::Key::LEFT_SHIFT:
 					if(vehicle.engine.gear < vehicle.engine.gearCount)

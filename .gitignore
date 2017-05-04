@@ -25,3 +25,6 @@ org.eclipse.cdt.codan.core.prefs
 
 # Other
 *.dll
+
+# Test vehicles
+data/vehicles/test_*

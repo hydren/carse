@@ -29,9 +29,9 @@ using fgeal::Image;
 using std::vector;
 using std::string;
 
-int ChooseVehicleState::getId() { return CarseGame::CHOOSE_VEHICLE_STATE_ID; }
+int ChooseVehicleState::getId() { return Pseudo3DCarseGame::CHOOSE_VEHICLE_STATE_ID; }
 
-ChooseVehicleState::ChooseVehicleState(CarseGame* game)
+ChooseVehicleState::ChooseVehicleState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
   menu(null),
@@ -118,7 +118,7 @@ void ChooseVehicleState::handleInput()
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::Key::ESCAPE:
-					game.enterState(CarseGame::MAIN_MENU_STATE_ID);
+					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::Key::ENTER:
 					this->onMenuSelect();

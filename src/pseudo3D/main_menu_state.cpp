@@ -20,7 +20,7 @@ using fgeal::Color;
 
 using std::string;
 
-int MainMenuState::getId() { return CarseGame::MAIN_MENU_STATE_ID; }
+int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
@@ -115,7 +115,7 @@ void MainMenuState::onMenuSelect()
 		const bool isDebug = (menu->getSelectedIndex() == 0);
 		Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
 		raceState->setCourse(isDebug? Course::createDebugCourse(200, 2000) : Course::createRandomCourse(200, 2000, 6400, 2.0));
-		game.enterState(CarseGame::CHOOSE_VEHICLE_STATE_ID);
+		game.enterState(Pseudo3DCarseGame::CHOOSE_VEHICLE_STATE_ID);
 	}
 
 	else if(menu->getSelectedIndex() == 2)

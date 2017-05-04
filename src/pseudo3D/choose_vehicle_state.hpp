@@ -29,7 +29,7 @@ class ChooseVehicleState extends public fgeal::Game::State
 	public:
 	int getId();
 
-	ChooseVehicleState(CarseGame* game);
+	ChooseVehicleState(Pseudo3DCarseGame* game);
 	~ChooseVehicleState();
 
 	void initialize();

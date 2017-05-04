@@ -179,9 +179,9 @@ void Pseudo3DRaceState::render()
 		if(l.Y > maxY) continue;
 		maxY = l.Y;
 
-		Color grass  = (n/3)%2? Color(16, 200, 16) : Color(  0, 154,   0);
-		Color rumble = (n/3)%2? Color(255,255,255) : Color(255,   0,   0);
-		Color road   = (n/3)%2? Color(107,107,107) : Color(105, 105, 105);
+		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
+		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
+		Color road   = (n/3)%2? Color( 64, 80, 80) : Color( 40, 64, 64);
 
 		Course::Segment& p = course.lines[(n-1)%N]; // previous line
 

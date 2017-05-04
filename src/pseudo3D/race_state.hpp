@@ -21,7 +21,7 @@
 #include "course.hpp"
 #include "vehicle.hpp"
 #include "automotive/engine_sound.hpp"
-#include "automotive/race_hud.hpp"
+#include "gui/race_hud.hpp"
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {

@@ -47,7 +47,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), bg(null), music(null),
   position(0), posX(0), speed(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0),
-  cameraDepth(0.84), coursePositionFactor(750),
+  cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   rpmGauge(null), speedGauge(null),
   debugMode(true)
@@ -172,7 +172,7 @@ void Pseudo3DRaceState::render()
 	float x = 0, dx = 0;
 	float maxY = display.getHeight();
 
-	for(unsigned n = fromPos+1; n < fromPos+300; n++)
+	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
 	{
 		Course::Segment& l = course.lines[n%N];
 		l.project(posX - x, camHeight, pos - (n>N?n*course.roadSegmentLength:0), cameraDepth);
@@ -365,6 +365,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
 	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
 
+	// fixme uncomment this line and fix friction values to play nice with the last RPM code revision.
 //	speed -= (rollingFriction + airFriction + turnFriction)*delta;
 
 	position += speed*delta;

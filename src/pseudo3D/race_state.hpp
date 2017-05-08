@@ -36,6 +36,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float rollingFriction, airFriction, turnFriction;
 
 	float cameraDepth;
+	unsigned drawDistance;
 	float coursePositionFactor;
 
 	Course course;

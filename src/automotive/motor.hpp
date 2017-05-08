@@ -13,6 +13,7 @@ struct Engine
 {
 	float torque;
 	float rpm, maxRpm, minRpm;
+	float transmissionEfficiency;
 	int gear, gearCount;
 	float *gearRatio, reverseGearRatio; // fixme this leaks :)
 	float tireRadius;

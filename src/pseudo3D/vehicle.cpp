@@ -63,6 +63,8 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	// todo read more data from properties
 
+	engine.transmissionEfficiency = 0.7;  // for the time being, assume 70% efficiency
+
 	engine.gearCount = parseValue<int, atoi>(prop, "gear_count", 6);
 
 	engine.gearRatio = new float[engine.gearCount+1];

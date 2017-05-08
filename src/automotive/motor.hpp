@@ -21,6 +21,9 @@ struct Engine
 	float automaticShiftingLowerThreshold;
 	float automaticShiftingUpperThreshold;
 
+	/** Returns this engine's torque in the given RPM. */
+	float getTorque(float rpm);
+
 	/** Returns the current driving force. */
 	float getDriveForce();
 

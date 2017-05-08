@@ -45,9 +45,9 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), music(null),
-  cameraDepth(0.84),
   position(0), posX(0), speed(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0),
+  cameraDepth(0.84), coursePositionFactor(750),
   course(Course::createDebugCourse(200, 2000)),
   rpmGauge(null), speedGauge(null),
   debugMode(true)
@@ -164,7 +164,10 @@ void Pseudo3DRaceState::render()
 
 	bg->draw();
 
-	const unsigned N = course.lines.size(), fromPos = position/course.roadSegmentLength;
+	// course position
+	const unsigned pos = position * coursePositionFactor;
+
+	const unsigned N = course.lines.size(), fromPos = pos/course.roadSegmentLength;
 	float camHeight = 1500 + course.lines[fromPos].y;
 	float x = 0, dx = 0;
 	float maxY = display.getHeight();
@@ -172,7 +175,7 @@ void Pseudo3DRaceState::render()
 	for(unsigned n = fromPos+1; n < fromPos+300; n++)
 	{
 		Course::Segment& l = course.lines[n%N];
-		l.project(posX - x, camHeight, position - (n>N?n*course.roadSegmentLength:0), cameraDepth);
+		l.project(posX - x, camHeight, pos - (n>N?n*course.roadSegmentLength:0), cameraDepth);
 		x += dx;
 		dx += l.curve;
 
@@ -217,17 +220,17 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		font2->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", speed/120);
+		sprintf(buffer, "%2.2fkm/h", speed*3.6);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		font2->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", strafeSpeed/120);
+		sprintf(buffer, "%2.2fkm/h", strafeSpeed*3.6);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		font2->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", curvePull/120);
+		sprintf(buffer, "%2.2fkm/h", curvePull*3.6);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
@@ -338,8 +341,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	curvePull = atan(curve) * speed * 0.5;
 	vehicle.engine.update(speed);
 
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += (vehicle.engine.getDriveForce() * delta)/vehicle.mass;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= (vehicle.engine.getDriveForce() * delta)/vehicle.mass;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += delta * vehicle.engine.getDriveForce()/vehicle.mass;
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= delta * vehicle.engine.getDriveForce()/vehicle.mass;
 
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
 	{
@@ -362,10 +365,10 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
 	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
 
-	speed -= (rollingFriction + airFriction + turnFriction)*delta;
+//	speed -= (rollingFriction + airFriction + turnFriction)*delta;
 
 	position += speed*delta;
 
-	while(position >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength;
-	while(position < 0) position += N*course.roadSegmentLength;
+	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;
+	while(position < 0) position += N*course.roadSegmentLength / coursePositionFactor;
 }

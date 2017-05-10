@@ -357,9 +357,9 @@ void Pseudo3DRaceState::handleInput()
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const unsigned N = course.lines.size();
-	const float curve = course.lines[((int)(position/course.roadSegmentLength))%N].curve;
+	const float curve = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N].curve;
 
-	curvePull = atan(curve) * speed * 0.5;
+	curvePull = atan(curve) * speed * coursePositionFactor * 0.5;
 	vehicle.engine.update(speed);
 
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += delta * vehicle.engine.getDriveForce()/vehicle.mass;
@@ -368,12 +368,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
 	{
 		if(strafeSpeed < 0) strafeSpeed *= 1/(1+5*delta);
-		strafeSpeed += speed*delta;
+		strafeSpeed += speed * coursePositionFactor * delta;
 	}
 	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
 	{
 		if(strafeSpeed > 0) strafeSpeed *= 1/(1+5*delta);
-		strafeSpeed -= speed*delta;
+		strafeSpeed -= speed * coursePositionFactor * delta;
 	}
 	else strafeSpeed *= 1/(1+5*delta);
 

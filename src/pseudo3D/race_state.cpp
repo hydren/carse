@@ -38,6 +38,25 @@ void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, 
 	Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
 }
 
+static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+static const float DEFAULT_AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+static const float DEFAULT_AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX Twin Turbo
+
+/* Rolling friction coefficients
+ * concrete - 0.01
+ * stone ---- 0.02
+ * alphalt -- 0.03
+ * gravel --- 0.06
+ * grass ---- 0.12
+ * snow ----- 0.16
+ * mud -------0.22
+ * sand ----- 0.30
+ * water ---- 0.75
+ *
+ * */
+
+#define sgn(x) (x > 0 ? 1 : x < 0 ? -1 : 0)
+
 // -------------------------------------------------------------------------------
 
 int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
@@ -47,6 +66,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), bg(null), music(null),
   position(0), posX(0), speed(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0),
+  rollingFrictionCoefficient(0.03), // value for tire on alphalt.
+  airFrictionCoefficient(DEFAULT_AIR_FRICTION_COEFFICIENT),
   cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   rpmGauge(null), speedGauge(null),
@@ -361,12 +382,11 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	posX += (strafeSpeed - curvePull)*delta;
 
-	rollingFriction = 0.02 * vehicle.mass * 9.81 * (speed==0? 0 : speed > 0? 1 : -1);
-	airFriction = 0.5 * 1.2 * 0.31 * (5e-6 * speed * speed) * 1.81;
+	rollingFriction = rollingFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	airFriction = 0.5 * DEFAULT_AIR_DENSITY * airFrictionCoefficient * speed * speed;
 	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
 
-	// fixme uncomment this line and fix friction values to play nice with the last RPM code revision.
-//	speed -= (rollingFriction + airFriction + turnFriction)*delta;
+	speed -= delta*(rollingFriction + airFriction + turnFriction)/vehicle.mass;
 
 	position += speed*delta;
 

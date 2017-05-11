@@ -43,6 +43,10 @@ static const float DEFAULT_AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF)
 static const float DEFAULT_AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX Twin Turbo
 static const float DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT = 0.7;
 
+static const float CURVE_PULL_FACTOR = 0.64;
+static const float STEERING_SPEED = 2.0;
+static const float PSEUDO_ANGLE_MAX = 1.0;
+
 /* Rolling friction coefficients
  * concrete - 0.01
  * stone ---- 0.02
@@ -65,7 +69,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), music(null),
-  position(0), posX(0), speed(0), strafeSpeed(0), curvePull(0),
+  position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0), brakingFriction(0),
   rollingFrictionCoefficient(0.03), // value for tire on alphalt.
   airFrictionCoefficient(DEFAULT_AIR_FRICTION_COEFFICIENT),
@@ -161,8 +165,7 @@ void Pseudo3DRaceState::onEnter()
 	position = 0;
 	posX = 0;
 	speed = 0;
-	strafeSpeed = 0;
-	curvePull = 0;
+	pseudoAngle = 0;
 
 	music->loop();
 	engineSound.playIdle();
@@ -331,7 +334,7 @@ void Pseudo3DRaceState::handleInput()
 					position = 0;
 					posX = 0;
 					speed = 0;
-					strafeSpeed = 0;
+					pseudoAngle = 0;
 					break;
 				case Keyboard::Key::T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;
@@ -367,7 +370,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float throttle = Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)? 1.0 : 0.0;
 
-	brakingFriction = braking * DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	const float tireFriction = DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	brakingFriction = braking * tireFriction;
 	rollingFriction = rollingFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	airFriction = 0.5 * DEFAULT_AIR_DENSITY * airFrictionCoefficient * speed * speed;
 	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
@@ -378,27 +382,40 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update position
 	position += speed*delta;
 
-	const unsigned N = course.lines.size();
-	const float curve = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N].curve;
-
-	const float strafeAcceleration = speed * coursePositionFactor; // fixme strafe acceleration still isnt perfect
+	// update steering
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
 	{
-		if(strafeSpeed < 0) strafeSpeed *= 1/(1+5*delta);
-		strafeSpeed += strafeAcceleration * delta;
+		if(pseudoAngle < 0) pseudoAngle *= 1/(1+5*delta);
+		pseudoAngle += delta * STEERING_SPEED;
 	}
 	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
 	{
-		if(strafeSpeed > 0) strafeSpeed *= 1/(1+5*delta);
-		strafeSpeed -= strafeAcceleration * delta;
+		if(pseudoAngle > 0) pseudoAngle *= 1/(1+5*delta);
+		pseudoAngle -= delta * STEERING_SPEED;
 	}
-	else strafeSpeed *= 1/(1+5*delta);
+	else pseudoAngle *= 1/(1+5*delta);
 
-	if(strafeSpeed >  15000.f) strafeSpeed = 15000.f;
-	if(strafeSpeed < -15000.f) strafeSpeed = -15000.f;
+	if(pseudoAngle > PSEUDO_ANGLE_MAX) pseudoAngle = PSEUDO_ANGLE_MAX;
+	if(pseudoAngle <-PSEUDO_ANGLE_MAX) pseudoAngle =-PSEUDO_ANGLE_MAX;
 
-	curvePull = atan(curve) * speed * coursePositionFactor * 0.5;
+	// update strafing
+	strafeSpeed = pseudoAngle * speed * coursePositionFactor;
 
+	// limit strafing speed by tire friction
+//	if(strafeSpeed >  tireFriction) strafeSpeed = tireFriction;
+//	if(strafeSpeed < -tireFriction) strafeSpeed =-tireFriction;
+
+	// limit strafing speed by magic constant
+	if(strafeSpeed >  15000) strafeSpeed = 15000;
+	if(strafeSpeed < -15000) strafeSpeed =-15000;
+
+	const unsigned N = course.lines.size();
+	const float curve = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N].curve;
+
+	// update curve pull
+	curvePull = atan(curve) * speed * coursePositionFactor * CURVE_PULL_FACTOR;
+
+	// update strafe position
 	posX += (strafeSpeed - curvePull)*delta;
 
 	// course looping control

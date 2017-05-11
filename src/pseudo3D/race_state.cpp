@@ -41,6 +41,7 @@ void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, 
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 static const float DEFAULT_AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 static const float DEFAULT_AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX Twin Turbo
+static const float DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT = 0.7;
 
 /* Rolling friction coefficients
  * concrete - 0.01
@@ -65,7 +66,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), bg(null), music(null),
   position(0), posX(0), speed(0), strafeSpeed(0), curvePull(0),
-  rollingFriction(0), airFriction(0), turnFriction(0),
+  rollingFriction(0), airFriction(0), turnFriction(0), brakingFriction(0),
   rollingFrictionCoefficient(0.03), // value for tire on alphalt.
   airFrictionCoefficient(DEFAULT_AIR_FRICTION_COEFFICIENT),
   cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
@@ -145,7 +146,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.w = 32;
 	gaugeSize.h = 1.5 * font->getSize();
 	speedGauge = new Hud::NumericalDisplay<float>(speed, gaugeSize, font);
-	speedGauge->valueScale = 1.0/120;
+	speedGauge->valueScale = 3.6;
 	speedGauge->borderThickness = 6;
 	speedGauge->borderColor = fgeal::Color::LIGHT_GREY;
 	speedGauge->backgroundColor = fgeal::Color::BLACK;
@@ -246,12 +247,17 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		font2->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", strafeSpeed*3.6);
+		sprintf(buffer, "%2.2fm/s", strafeSpeed/coursePositionFactor);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		font2->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", curvePull*3.6);
+		sprintf(buffer, "%2.2fm/s", curvePull/coursePositionFactor);
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+		offset += 25;
+		font2->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", brakingFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
@@ -356,40 +362,46 @@ void Pseudo3DRaceState::handleInput()
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
+	vehicle.engine.update(speed);
+
+	const float throttle = Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP)? 1.0 : 0.0;
+	const float braking =  Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)? 1.0 : 0.0;
+
+	brakingFriction = braking * DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	rollingFriction = rollingFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	airFriction = 0.5 * DEFAULT_AIR_DENSITY * airFrictionCoefficient * speed * speed;
+	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
+
+	// update speed
+	speed += delta*(throttle*vehicle.engine.getDriveForce() - brakingFriction - rollingFriction - airFriction - turnFriction)/vehicle.mass;
+
+	// update position
+	position += speed*delta;
+
 	const unsigned N = course.lines.size();
 	const float curve = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N].curve;
 
-	curvePull = atan(curve) * speed * coursePositionFactor * 0.5;
-	vehicle.engine.update(speed);
-
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))   speed += delta * vehicle.engine.getDriveForce()/vehicle.mass;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)) speed -= delta * vehicle.engine.getDriveForce()/vehicle.mass;
-
+	const float strafeAcceleration = speed * coursePositionFactor; // fixme strafe acceleration still isnt perfect
 	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
 	{
 		if(strafeSpeed < 0) strafeSpeed *= 1/(1+5*delta);
-		strafeSpeed += speed * coursePositionFactor * delta;
+		strafeSpeed += strafeAcceleration * delta;
 	}
 	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
 	{
 		if(strafeSpeed > 0) strafeSpeed *= 1/(1+5*delta);
-		strafeSpeed -= speed * coursePositionFactor * delta;
+		strafeSpeed -= strafeAcceleration * delta;
 	}
 	else strafeSpeed *= 1/(1+5*delta);
 
 	if(strafeSpeed >  15000.f) strafeSpeed = 15000.f;
 	if(strafeSpeed < -15000.f) strafeSpeed = -15000.f;
 
+	curvePull = atan(curve) * speed * coursePositionFactor * 0.5;
+
 	posX += (strafeSpeed - curvePull)*delta;
 
-	rollingFriction = rollingFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
-	airFriction = 0.5 * DEFAULT_AIR_DENSITY * airFrictionCoefficient * speed * speed;
-	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
-
-	speed -= delta*(rollingFriction + airFriction + turnFriction)/vehicle.mass;
-
-	position += speed*delta;
-
+	// course looping control
 	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;
 	while(position < 0) position += N*course.roadSegmentLength / coursePositionFactor;
 }

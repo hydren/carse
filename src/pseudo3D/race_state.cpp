@@ -39,24 +39,31 @@ void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, 
 }
 
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-static const float DEFAULT_AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
-static const float DEFAULT_AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX Twin Turbo
-static const float DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT = 0.7;
+static const float AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+static const float AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX (Z32)
+static const float TIRE_FRICTION_COEFFICIENT = 0.75;  // on dry asphalt
+static const float ROLLING_RESISTANCE_COEFFICIENT = 0.013;  // on dry asphalt
 
 static const float CURVE_PULL_FACTOR = 0.64;
 static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
 
-/* Rolling friction coefficients
- * concrete - 0.01
- * stone ---- 0.02
- * alphalt -- 0.03
- * gravel --- 0.06
- * grass ---- 0.12
- * snow ----- 0.16
- * mud -------0.22
- * sand ----- 0.30
- * water ---- 0.75
+/* Tire coefficients
+ *
+ *          Rolling resist. | Peak static frict. | Kinetic frict.
+ * dry alphalt - 0.013 ----------- 0.85 --------------- 0.75
+ * wet asphalt - 0.013 ----------- 0.65 --------------- 0.52
+ * concrete ---- 0.013 ----------- 0.85 --------------- 0.75
+ * gravel ------ 0.020 ----------- 0.60 --------------- 0.55
+ * grass ------- 0.100 ----------- 0.42 --------------- 0.35
+ * dirt -------- 0.050 ----------- 0.68 --------------- 0.65
+ * mud --------- 0.080 ----------- 0.55 --------------- 0.45
+ * sand -------- 0.300 ----------- 0.60 --------------- 0.55
+ * snow -------- 0.016 ----------- 0.20 --------------- 0.15
+ * ice --------- 0.013 ----------- 0.10 --------------- 0.07
+ *
+ * (extrapolated)
+ * water ------- 0.750 ----------- 2.00 --------------- 0.40
  *
  * */
 
@@ -71,8 +78,6 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), bg(null), music(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0), brakingFriction(0),
-  rollingFrictionCoefficient(0.03), // value for tire on alphalt.
-  airFrictionCoefficient(DEFAULT_AIR_FRICTION_COEFFICIENT),
   cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   rpmGauge(null), speedGauge(null),
@@ -370,10 +375,10 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float throttle = Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)? 1.0 : 0.0;
 
-	const float tireFriction = DEFAULT_TIRE_ASPHALT_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	brakingFriction = braking * tireFriction;
-	rollingFriction = rollingFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
-	airFriction = 0.5 * DEFAULT_AIR_DENSITY * airFrictionCoefficient * speed * speed;
+	rollingFriction = ROLLING_RESISTANCE_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed;
 	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
 
 	// update speed

@@ -223,8 +223,13 @@ void Pseudo3DRaceState::render()
 		drawQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
 	}
 
+	// linear sprite progression
+	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
+
+	// exponential sprite progression. may be slower.
+	//const unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_MAX)-1);
+
 	const float scale = display.getWidth() * 0.0048828125f * vehicle.spriteScale;
-	unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_MAX)-1);  // xxx this formula may be cubersome
 	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 	spritesVehicle[animationIndex]->scale.x = scale;
 	spritesVehicle[animationIndex]->scale.y = scale;

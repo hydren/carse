@@ -281,7 +281,7 @@ namespace Hud
 						bounds.w - borderThickness, bounds.h - borderThickness);
 
 			const std::string str = std::string() + static_cast<int>(value*valueScale);
-			font->drawText(str, bounds.x + borderThickness, bounds.y + borderThickness, displayColor);
+			font->drawText(str, bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
 		}
 	};
 }

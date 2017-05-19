@@ -155,7 +155,7 @@ namespace Hud
 				if(graduationFont != null)
 				{
 					std::string str = std::string() + (g * graduationValueScale);
-					graduationFont->drawText(str, center.x + 0.375*bounds.w*sin(gAngle), center.y + 0.375*bounds.h*cos(gAngle) - 0.5*graduationFont->getFontHeight(), graduationColor);
+					graduationFont->drawText(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str), center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getFontHeight(), graduationColor);
 				}
 			}
 

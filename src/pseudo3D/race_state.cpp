@@ -75,12 +75,12 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), bg(null), music(null),
+  font(null), font2(null), fontDebug(null), bg(null), music(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), turnFriction(0), brakingFriction(0),
   cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
-  rpmGauge(null), speedGauge(null),
+  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
   debugMode(true)
 {}
 
@@ -88,6 +88,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	delete font;
 	delete font2;
+	delete fontDebug;
 	delete bg;
 	delete music;
 	for(unsigned i = 0; i < spritesVehicle.size(); i++)
@@ -97,7 +98,8 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 void Pseudo3DRaceState::initialize()
 {
 	font = new Font("assets/font.ttf");
-	font2 = new Font("assets/font.ttf");
+	font2 = new Font("assets/font2.ttf", 40);
+	fontDebug = new Font("assets/font.ttf");
 	bg = new Image("assets/bg.jpg");
 	music = new Music("assets/music_sample.ogg");
 }
@@ -142,23 +144,31 @@ void Pseudo3DRaceState::onEnter()
 	fgeal::Display& display = fgeal::Display::getInstance();
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	rpmGauge = new Hud::DialGauge<float>(vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, gaugeSize);
-	rpmGauge->borderThickness = 6;
-	rpmGauge->graduationLevel = 2;
-	rpmGauge->graduationPrimarySize = 1000;
-	rpmGauge->graduationSecondarySize = 100;
-	rpmGauge->graduationValueScale = 0.001;
-	rpmGauge->graduationFont = font;
+	hudRpmGauge = new Hud::DialGauge<float>(vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, gaugeSize);
+	hudRpmGauge->borderThickness = 6;
+	hudRpmGauge->graduationLevel = 2;
+	hudRpmGauge->graduationPrimarySize = 1000;
+	hudRpmGauge->graduationSecondarySize = 100;
+	hudRpmGauge->graduationValueScale = 0.001;
+	hudRpmGauge->graduationFont = font;
 
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
-	gaugeSize.w = 32;
+	gaugeSize.w = 24;
 	gaugeSize.h = 1.5 * font->getFontHeight();
-	speedGauge = new Hud::NumericalDisplay<float>(speed, gaugeSize, font);
-	speedGauge->valueScale = 3.6;
-	speedGauge->borderThickness = 6;
-	speedGauge->borderColor = fgeal::Color::LIGHT_GREY;
-	speedGauge->backgroundColor = fgeal::Color::BLACK;
+	hudGearDisplay = new Hud::NumericalDisplay<int>(vehicle.engine.gear, gaugeSize, font);
+	hudGearDisplay->borderThickness = 6;
+	hudGearDisplay->borderColor = fgeal::Color::LIGHT_GREY;
+	hudGearDisplay->backgroundColor = fgeal::Color::BLACK;
+
+	gaugeSize.x = hudRpmGauge->bounds.x - font2->getTextWidth("---");
+	gaugeSize.w *= 3;
+	gaugeSize.h *= 1.7;
+	hudSpeedDisplay = new Hud::NumericalDisplay<float>(speed, gaugeSize, font2);
+	hudSpeedDisplay->valueScale = 3.6;
+	hudSpeedDisplay->disableBackground = true;
+	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
+	hudSpeedDisplay->borderThickness = 0;
 
 	vehicle.engine.minRpm = 1000;
 	vehicle.engine.automaticShiftingEnabled = true;
@@ -235,71 +245,73 @@ void Pseudo3DRaceState::render()
 	spritesVehicle[animationIndex]->scale.y = scale;
 	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
 
-	rpmGauge->draw();
-	speedGauge->draw();
+	hudSpeedDisplay->draw();
+	hudRpmGauge->draw();
+	hudGearDisplay->draw();
+	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
 
 	// DEBUG
 	if(debugMode)
 	{
 		char buffer[512];
 		float offset = 25;
-		font2->drawText("FPS:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("FPS:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", game.getFpsCount());
 		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Position:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Position:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", position);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", speed*3.6);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", strafeSpeed/coursePositionFactor);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", curvePull/coursePositionFactor);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", brakingFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", rollingFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", airFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		font2->drawText("Turn friction:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Turn friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", turnFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset = display.getHeight()-100;
-		font2->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.f", vehicle.engine.rpm);
 		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
-		font2->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
 		const char* autoLabelTxt = (vehicle.engine.automaticShiftingEnabled? " (auto)":"");
 		sprintf(buffer, "%d %s", vehicle.engine.gear, autoLabelTxt);
 		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
-		font2->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 

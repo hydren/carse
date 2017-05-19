@@ -25,7 +25,7 @@
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
-	fgeal::Font* font, *font2;
+	fgeal::Font* font, *font2, *fontDebug;
 	fgeal::Image* bg;
 	fgeal::Music* music;
 
@@ -42,8 +42,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Course course;
 	Vehicle vehicle;
 
-	Hud::DialGauge<float>* rpmGauge;
-	Hud::NumericalDisplay<float>* speedGauge;
+	Hud::DialGauge<float>* hudRpmGauge;
+	Hud::NumericalDisplay<float>* hudSpeedDisplay;
+	Hud::NumericalDisplay<int>* hudGearDisplay;
 
 	bool debugMode;
 

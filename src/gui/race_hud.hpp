@@ -246,10 +246,13 @@ namespace Hud
 		/** The background color. */
 		fgeal::Color backgroundColor;
 
+		/** If true, no background is drawn at all (border is also not drawn). */
+		bool disableBackground;
+
 		/** The border's thickness. If 0 (zero), no border is drawn. */
 		float borderThickness;
 
-		/** The border's color. If set as transparent, no border is drawn. */
+		/** The border's color. */
 		fgeal::Color borderColor;
 
 		/** The display's color. */
@@ -270,7 +273,7 @@ namespace Hud
 
 		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
 		: value(var), valueScale(1.0), bounds(bounds),
-		  backgroundColor(fgeal::Color::WHITE),
+		  backgroundColor(fgeal::Color::WHITE), disableBackground(false),
 		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK), displayColor(fgeal::Color::GREEN),
 		  font(font), fontIsShared(false)
 		{}
@@ -283,10 +286,13 @@ namespace Hud
 
 		void draw()
 		{
-			fgeal::Image::drawRectangle(borderColor, bounds.x, bounds.y, bounds.w, bounds.h);
-			fgeal::Image::drawRectangle(backgroundColor,
-						bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-						bounds.w - borderThickness, bounds.h - borderThickness);
+			if(not disableBackground)
+			{
+				fgeal::Image::drawRectangle(borderColor, bounds.x, bounds.y, bounds.w, bounds.h);
+				fgeal::Image::drawRectangle(backgroundColor,
+					bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+					bounds.w - borderThickness, bounds.h - borderThickness);
+			}
 
 			sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
 			font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);

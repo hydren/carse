@@ -13,6 +13,7 @@
 
 #include "futil/string/more_operators.hpp"
 
+#include <cstdio>
 #include <cmath>
 
 #ifndef M_PI
@@ -229,7 +230,7 @@ namespace Hud
 		}
 	};
 
-	/** A widget that displays a numeric value, possibly stylised. */
+	/** A widget that displays a numeric value, possibly stylised. Note: 32-char max; value will be cast to int. */
 	template <typename NumberType>
 	struct NumericalDisplay
 	{
@@ -260,6 +261,13 @@ namespace Hud
 		/** If true, indicates that the font is shared, and thus, should not be deleted when this display is deleted. */
 		bool fontIsShared;
 
+		private:
+
+		/** A buffer to convert value to string. */
+		char stringBuffer[32];
+
+		public:
+
 		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
 		: value(var), valueScale(1.0), bounds(bounds),
 		  backgroundColor(fgeal::Color::WHITE),
@@ -280,8 +288,8 @@ namespace Hud
 						bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
 						bounds.w - borderThickness, bounds.h - borderThickness);
 
-			const std::string str = std::string() + static_cast<int>(value*valueScale);
-			font->drawText(str, bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+			sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
+			font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
 		}
 	};
 }

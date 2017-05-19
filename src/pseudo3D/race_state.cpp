@@ -244,6 +244,8 @@ void Pseudo3DRaceState::render()
 	spritesVehicle[animationIndex]->scale.x = scale;
 	spritesVehicle[animationIndex]->scale.y = scale;
 	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
+	spritesVehicle[animationIndex]->duration = vehicle.spriteFrameDuration / sqrt(speed);
+	spritesVehicle[animationIndex]->computeCurrentFrame();
 
 	hudSpeedDisplay->draw();
 	hudRpmGauge->draw();

@@ -153,7 +153,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
 	gaugeSize.w = 32;
-	gaugeSize.h = 1.5 * font->getSize();
+	gaugeSize.h = 1.5 * font->getFontHeight();
 	speedGauge = new Hud::NumericalDisplay<float>(speed, gaugeSize, font);
 	speedGauge->valueScale = 3.6;
 	speedGauge->borderThickness = 6;
@@ -308,7 +308,7 @@ void Pseudo3DRaceState::render()
 		{
 			const std::string format = std::string(engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
 			sprintf(buffer, format.c_str(), i, engineSound.getSoundData()[i]->getVolume(), engineSound.getSoundData()[i]->getPlaybackSpeed());
-			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getSize(), fgeal::Color::WHITE);
+			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getFontHeight(), fgeal::Color::WHITE);
 		}
 	}
 

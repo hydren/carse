@@ -137,12 +137,12 @@ void Menu::draw()
 	fgeal::Image::drawRectangle(selectedColor, bounds.x, bounds.y, bounds.w, bounds.h);
 	fgeal::Image::drawRectangle(bgColor, bounds.x+2, bounds.y+2, bounds.w-4, bounds.h-4);
 
-	float distanceBetween = entrySpacingIsRelative? font->getSize() * (1+entrySpacing) : entrySpacing;
+	float distanceBetween = entrySpacingIsRelative? font->getFontHeight() * (1+entrySpacing) : entrySpacing;
 
 	if(layoutMode == STRETCH_SPACING)
-		distanceBetween = (bounds.h-font->getSize()) / ((float) entries.size() + (title.empty()?0:1));
+		distanceBetween = (bounds.h-font->getFontHeight()) / ((float) entries.size() + (title.empty()?0:1));
 
-	float offset = (title.empty()?0:font->getSize());
+	float offset = (title.empty()?0:font->getFontHeight());
 
 	if(not title.empty())
 		font->drawText(title, bounds.x, bounds.y, fontColor);

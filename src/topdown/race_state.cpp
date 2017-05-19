@@ -117,7 +117,7 @@ void TopDownRaceState::render()
 		car_sprite->drawRotated(0.1*toPixels(player->m_body->GetPosition().x)-camera.x, 0.1*toPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle(), 23, 48);
 	}
 
-	font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getSize(), fgeal::Color::CREAM);
+	font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getFontHeight(), fgeal::Color::CREAM);
 
 	if(showDebug)
 	{

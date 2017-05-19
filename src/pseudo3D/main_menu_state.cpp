@@ -66,7 +66,7 @@ void MainMenuState::render()
 	display.clear();
 	menu->draw();
 	fontMain->drawText("Carse Project", 84, 25, Color::WHITE);
-	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - fontDev->getSize(), Color::CREAM);
+	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - fontDev->getFontHeight(), Color::CREAM);
 }
 
 void MainMenuState::update(float delta)

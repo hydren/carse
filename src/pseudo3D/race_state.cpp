@@ -44,7 +44,7 @@ static const float AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded va
 static const float TIRE_FRICTION_COEFFICIENT = 0.75;  // on dry asphalt
 static const float ROLLING_RESISTANCE_COEFFICIENT = 0.013;  // on dry asphalt
 
-static const float CURVE_PULL_FACTOR = 0.64;
+static const float CURVE_PULL_FACTOR = 0.2;
 static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
 
@@ -436,7 +436,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float curve = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N].curve;
 
 	// update curve pull
-	curvePull = atan(curve) * speed * coursePositionFactor * CURVE_PULL_FACTOR;
+	curvePull = curve * speed * coursePositionFactor * CURVE_PULL_FACTOR;
 
 	// update strafe position
 	posX += (strafeSpeed - curvePull)*delta;

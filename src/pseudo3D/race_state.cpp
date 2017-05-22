@@ -47,6 +47,7 @@ static const float ROLLING_RESISTANCE_COEFFICIENT = 0.013;  // on dry asphalt
 static const float CURVE_PULL_FACTOR = 0.2;
 static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
+static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
 /* Tire coefficients
  *
@@ -234,10 +235,15 @@ void Pseudo3DRaceState::render()
 	}
 
 	// linear sprite progression
-	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
+//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	// exponential sprite progression. may be slower.
-	//const unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_MAX)-1);
+//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_MAX)-1);
+
+	// linear sprite progression with 1-index advance at threshold angle
+	unsigned animationIndex = 0;
+	if(vehicle.spriteStateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
+		animationIndex = 1 + (vehicle.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_MAX - PSEUDO_ANGLE_THRESHOLD);
 
 	const float scale = display.getWidth() * 0.0048828125f * vehicle.spriteScale;
 	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;

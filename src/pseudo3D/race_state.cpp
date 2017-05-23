@@ -49,6 +49,8 @@ static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
+static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
+
 /* Tire coefficients
  *
  *          Rolling resist. | Peak static frict. | Kinetic frict.
@@ -245,7 +247,7 @@ void Pseudo3DRaceState::render()
 	if(vehicle.spriteStateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
 		animationIndex = 1 + (vehicle.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_MAX - PSEUDO_ANGLE_THRESHOLD);
 
-	const float scale = display.getWidth() * 0.0048828125f * vehicle.spriteScale;
+	const float scale = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR * vehicle.spriteScale;
 	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 	spritesVehicle[animationIndex]->scale.x = scale;
 	spritesVehicle[animationIndex]->scale.y = scale;

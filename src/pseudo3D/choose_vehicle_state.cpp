@@ -13,7 +13,6 @@
 #include "futil/string/actions.hpp"
 #include "futil/string/more_operators.hpp"
 
-//xxx debug
 #include <iostream>
 using std::cout; using std::endl;
 
@@ -26,6 +25,7 @@ using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
 using fgeal::Image;
+using util::Properties;
 using std::vector;
 using std::string;
 
@@ -34,8 +34,7 @@ int ChooseVehicleState::getId() { return Pseudo3DCarseGame::CHOOSE_VEHICLE_STATE
 ChooseVehicleState::ChooseVehicleState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
-  menu(null),
-  vehicles(game->getVehicles())
+  menu(null)
 {}
 
 ChooseVehicleState::~ChooseVehicleState()
@@ -60,6 +59,36 @@ void ChooseVehicleState::initialize()
 	menu->bgColor = Color::AZURE;
 	menu->selectedColor = Color::NAVY;
 
+	cout << "reading vehicles..." << endl;
+	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
+	for(unsigned i = 0; i < vehicleFiles.size(); i++)
+	{
+		const string& filename = vehicleFiles[i];
+		if(fgeal::isFilenameDirectory(filename))
+		{
+			vector<string> subfolderFiles = fgeal::getFilenamesWithinDirectory(filename);
+			for(unsigned j = 0; j < subfolderFiles.size(); j++)
+			{
+				const string& subfolderFile = subfolderFiles[j];
+				if(ends_with(subfolderFile, ".properties"))
+				{
+					Properties prop;
+					prop.load(subfolderFile);
+					vehicles.push_back(Vehicle(prop, static_cast<Pseudo3DCarseGame&>(this->game)));
+					cout << "read vehicle: " << subfolderFile << endl;
+					break;
+				}
+			}
+		}
+		else if(ends_with(filename, ".properties"))
+		{
+			Properties prop;
+			prop.load(filename);
+			vehicles.push_back(Vehicle(prop, static_cast<Pseudo3DCarseGame&>(this->game)));
+			cout << "read vehicle: " << filename << endl;
+		}
+	}
+
 	for(unsigned i = 0; i < vehicles.size(); i++)
 	{
 		menu->addEntry(vehicles[i].name);
@@ -68,9 +97,7 @@ void ChooseVehicleState::initialize()
 }
 
 void ChooseVehicleState::onEnter()
-{
-	menu->setSelectedIndex(0);
-}
+{}
 
 void ChooseVehicleState::onLeave()
 {}

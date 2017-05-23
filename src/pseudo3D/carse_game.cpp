@@ -44,7 +44,6 @@ Pseudo3DCarseGame::Pseudo3DCarseGame()
 void Pseudo3DCarseGame::initializeStatesList()
 {
 	this->loadPresetEngineSoundProfiles();
-	this->loadVehicles();
 
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
@@ -60,11 +59,6 @@ EngineSoundProfile& Pseudo3DCarseGame::getPresetEngineSoundProfile(const std::st
 		return presetEngineSoundProfiles[presetName];
 	else
 		return presetEngineSoundProfiles["default"];
-}
-
-std::vector<Vehicle>& Pseudo3DCarseGame::getVehicles()
-{
-	return vehicles;
 }
 
 void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
@@ -130,39 +124,5 @@ void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 			break;
 		}
 		else previousCount = pendingPresetFiles.size();
-	}
-}
-
-void Pseudo3DCarseGame::loadVehicles()
-{
-	cout << "reading vehicles..." << endl;
-	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
-	for(unsigned i = 0; i < vehicleFiles.size(); i++)
-	{
-		const string& filename = vehicleFiles[i];
-		if(fgeal::isFilenameDirectory(filename))
-		{
-			vector<string> subfolderFiles = fgeal::getFilenamesWithinDirectory(filename);
-			for(unsigned j = 0; j < subfolderFiles.size(); j++)
-			{
-				const string& subfolderFile = subfolderFiles[j];
-				if(ends_with(subfolderFile, ".properties"))
-				{
-					Properties prop;
-					prop.load(subfolderFile);
-					vehicles.push_back(Vehicle(prop, *this));
-					cout << "read vehicle: " << subfolderFile << endl;
-					break;
-				}
-			}
-		}
-
-		if(ends_with(filename, ".properties"))
-		{
-			Properties prop;
-			prop.load(filename);
-			vehicles.push_back(Vehicle(prop, *this));
-			cout << "read vehicle: " << filename << endl;
-		}
 	}
 }

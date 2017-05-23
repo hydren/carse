@@ -23,7 +23,7 @@ class ChooseVehicleState extends public fgeal::Game::State
 	fgeal::Font* fontMain, *fontInfo;
 	Menu* menu;
 
-	std::vector<Vehicle>& vehicles;
+	std::vector<Vehicle> vehicles;
 	std::vector<fgeal::Image*> vehiclePreview;
 
 	public:

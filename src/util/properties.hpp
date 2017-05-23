@@ -10,6 +10,7 @@
 #include <ciso646>
 
 #include <string>
+#include <stdexcept>
 #include <map>
 
 namespace util
@@ -41,6 +42,24 @@ namespace util
 
 		/** Writes this property list (key and element pairs) in this Properties object to the given filename in a format suitable for using the load() method. */
 		void store(const std::string& filename);
+
+		template <typename T, T (*convertFunction) (const char*)>
+		static T loadPropertyOrDefault(const Properties& prop, const std::string& key, T defaultValue)
+		{
+			if(prop.containsKey(key) and prop.get(key) != "default")
+				return convertFunction(prop.get(key).c_str());
+			else
+				return defaultValue;
+		}
+
+		template <typename T, T (*convertFunction) (const char*)>
+		static T loadPropertyOrFail(const Properties& prop, const std::string& key, const std::string failMessage)
+		{
+			if(prop.containsKey(key))
+				return convertFunction(prop.get(key).c_str());
+			else
+				throw std::logic_error(failMessage);
+		}
 	};
 }
 

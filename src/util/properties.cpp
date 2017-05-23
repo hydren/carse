@@ -11,7 +11,6 @@ using util::Properties;
 #include "futil/string/actions.hpp"
 #include "futil/string/split.hpp"
 
-#include <stdexcept>
 #include <iostream>
 #include <fstream>
 

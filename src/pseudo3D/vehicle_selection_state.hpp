@@ -1,12 +1,12 @@
 /*
- * choose_vehicle_state.hpp
+ * vehicle_selection_state.hpp
  *
  *  Created on: 7 de abr de 2017
  *      Author: carlosfaruolo
  */
 
-#ifndef PSEUDO3D_CHOOSE_VEHICLE_STATE_HPP_
-#define PSEUDO3D_CHOOSE_VEHICLE_STATE_HPP_
+#ifndef PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_
+#define PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_
 #include <ciso646>
 
 #include <vector>
@@ -18,7 +18,7 @@
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
 
-class ChooseVehicleState extends public fgeal::Game::State
+class VehicleSelectionState extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain, *fontInfo;
 	Menu* menu;
@@ -29,8 +29,8 @@ class ChooseVehicleState extends public fgeal::Game::State
 	public:
 	int getId();
 
-	ChooseVehicleState(Pseudo3DCarseGame* game);
-	~ChooseVehicleState();
+	VehicleSelectionState(Pseudo3DCarseGame* game);
+	~VehicleSelectionState();
 
 	void initialize();
 	void onEnter();
@@ -44,4 +44,4 @@ class ChooseVehicleState extends public fgeal::Game::State
 	void onMenuSelect();
 };
 
-#endif /* PSEUDO3D_CHOOSE_VEHICLE_STATE_HPP_ */
+#endif /* PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_ */

@@ -21,7 +21,7 @@ using std::endl;
 // states
 #include "race_state.hpp"
 #include "main_menu_state.hpp"
-#include "choose_vehicle_state.hpp"
+#include "vehicle_selection_state.hpp"
 #include "course_selection_mode.hpp"
 
 using util::Properties;
@@ -32,7 +32,7 @@ using std::map;
 const int  // states IDs
 	Pseudo3DCarseGame::RACE_STATE_ID = 0,
 	Pseudo3DCarseGame::MAIN_MENU_STATE_ID = 1,
-	Pseudo3DCarseGame::CHOOSE_VEHICLE_STATE_ID = 2,
+	Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID = 2,
 	Pseudo3DCarseGame::COURSE_SELECTION_MODE_ID = 3;
 
 Pseudo3DCarseGame::Pseudo3DCarseGame()
@@ -47,7 +47,7 @@ void Pseudo3DCarseGame::initializeStatesList()
 
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
-	this->addState(new ChooseVehicleState(this));
+	this->addState(new VehicleSelectionState(this));
 	this->addState(new CourseSelectionMode(this));
 
 	this->setInitialState(MAIN_MENU_STATE_ID);

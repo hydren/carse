@@ -1,11 +1,11 @@
 /*
- * choose_vehicle_state.cpp
+ * vehicle_selection_state.cpp
  *
  *  Created on: 7 de abr de 2017
  *      Author: carlosfaruolo
  */
 
-#include "choose_vehicle_state.hpp"
+#include "vehicle_selection_state.hpp"
 
 #include "race_state.hpp"
 #include "util/properties.hpp"
@@ -29,15 +29,15 @@ using util::Properties;
 using std::vector;
 using std::string;
 
-int ChooseVehicleState::getId() { return Pseudo3DCarseGame::CHOOSE_VEHICLE_STATE_ID; }
+int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID; }
 
-ChooseVehicleState::ChooseVehicleState(Pseudo3DCarseGame* game)
+VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
   menu(null)
 {}
 
-ChooseVehicleState::~ChooseVehicleState()
+VehicleSelectionState::~VehicleSelectionState()
 {
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
@@ -47,7 +47,7 @@ ChooseVehicleState::~ChooseVehicleState()
 		delete vehiclePreview[i];
 }
 
-void ChooseVehicleState::initialize()
+void VehicleSelectionState::initialize()
 {
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
@@ -96,13 +96,13 @@ void ChooseVehicleState::initialize()
 	}
 }
 
-void ChooseVehicleState::onEnter()
+void VehicleSelectionState::onEnter()
 {}
 
-void ChooseVehicleState::onLeave()
+void VehicleSelectionState::onLeave()
 {}
 
-void ChooseVehicleState::render()
+void VehicleSelectionState::render()
 {
 	Display& display = Display::getInstance();
 	display.clear();
@@ -124,12 +124,12 @@ void ChooseVehicleState::render()
 	fontInfo->drawText(string("Weight: ")+vehicle.mass + "kg", 0.525*display.getWidth(), 0.525*display.getHeight()+24, Color::WHITE);
 }
 
-void ChooseVehicleState::update(float delta)
+void VehicleSelectionState::update(float delta)
 {
 	this->handleInput();
 }
 
-void ChooseVehicleState::handleInput()
+void VehicleSelectionState::handleInput()
 {
 	Event event;
 	EventQueue& eventQueue = EventQueue::getInstance();
@@ -163,7 +163,7 @@ void ChooseVehicleState::handleInput()
 	}
 }
 
-void ChooseVehicleState::onMenuSelect()
+void VehicleSelectionState::onMenuSelect()
 {
 	Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
 	raceState->setVehicle(vehicles[menu->getSelectedIndex()]);

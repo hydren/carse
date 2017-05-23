@@ -10,10 +10,24 @@
 #include "fgeal/fgeal.hpp"
 
 #include "futil/math/more_random.h"
+#include "futil/string/actions.hpp"
+#include "futil/string/split.hpp"
+
+#include <stdexcept>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+
+#define loadPropertyOrFail Properties::loadPropertyOrFail
+#define loadPropertyOrDefault Properties::loadPropertyOrDefault
+
+using util::Properties;
+using std::string;
+using std::vector;
 
 Course::Segment::Segment(Course* course) // @suppress("Class members should be properly initialized")
 : course(course) {curve=x=y=z=0;}
@@ -85,6 +99,61 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 		if(i > 750 and i < 1350) line.y = sin(i/30.0)*1500;
 		course.lines.push_back(line);
 	}
+
+	return course;
+}
+
+string charArrayToString(const char* str) { return string(str); }
+
+//static
+Course Course::createCourseFromFile(const Properties& prop)
+{
+	string segmentFilename = loadPropertyOrFail<string, charArrayToString>(prop, "segment_file", "Missing segment file for course!");
+	float segmentLength = loadPropertyOrDefault<double, atof>(prop, "segment_length", 200);  // this may become non-customizable
+	float roadWidth = loadPropertyOrDefault<double, atof>(prop, "road_width", 3000);
+	float length = loadPropertyOrDefault<double, atof>(prop, "course_length", 6400);
+
+	std::ifstream stream(segmentFilename.c_str());
+	if(not stream.is_open())
+		throw std::runtime_error("File could not be opened: " + segmentFilename);
+
+	Course course(segmentLength, roadWidth);
+	for(unsigned i = 0; i < length; i++)
+	{
+		Course::Segment line(&course);
+		line.z = i*course.roadSegmentLength;
+
+		string str;
+		do{
+			if(stream.good())
+			{
+				str = trim(str);
+				getline(stream, str);
+			}
+			else
+			{
+				str.clear();  // if no more input, signal no data by clearing str
+				break;
+			}
+		}
+		while(str.empty() or starts_with(str, "#") or starts_with(str, "!")); // ignore empty lines or commented out ones
+
+		vector<string> tokens = split(str, ',');
+		if(tokens.size() < 2)
+		{
+			std::cout << "ill formed segment file line " << i << std::endl;
+			line.curve = line.y = 0;
+		}
+		else
+		{
+			line.curve = atof(tokens[0].c_str());
+			line.y = atof(tokens[1].c_str());
+		}
+
+		course.lines.push_back(line);
+	}
+
+	stream.close();
 
 	return course;
 }

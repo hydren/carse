@@ -47,6 +47,7 @@ void MainMenuState::initialize()
 	menu->selectedColor = Color::NAVY;
 	menu->addEntry("Start debug course");
 	menu->addEntry("Start random course");
+	menu->addEntry("Start a loaded course");
 	menu->addEntry("Exit");
 }
 
@@ -119,6 +120,11 @@ void MainMenuState::onMenuSelect()
 	}
 
 	else if(menu->getSelectedIndex() == 2)
+	{
+		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_MODE_ID);
+	}
+
+	else if(menu->getSelectedIndex() == 3)
 	{
 		game.running = false;
 	}

@@ -80,7 +80,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), fontDebug(null), bg(null), music(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
-  rollingFriction(0), airFriction(0), turnFriction(0), brakingFriction(0),
+  rollingFriction(0), airFriction(0), brakingFriction(0),
   cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
@@ -305,9 +305,9 @@ void Pseudo3DRaceState::render()
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		fontDebug->drawText("Turn friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", turnFriction);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f", pseudoAngle);
+		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset = display.getHeight()-100;
 		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
@@ -400,15 +400,15 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	const float throttle = Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)? 1.0 : 0.0;
+	const float wheelAngleFactor = 1 - 0.5*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	brakingFriction = braking * tireFriction;
 	rollingFriction = ROLLING_RESISTANCE_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed;
-	turnFriction = std::min(0.25f*abs(strafeSpeed), 1500.0f);
 
 	// update speed
-	speed += delta*(throttle*vehicle.engine.getDriveForce() - brakingFriction - rollingFriction - airFriction - turnFriction)/vehicle.mass;
+	speed += delta*(wheelAngleFactor*throttle*vehicle.engine.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
 
 	// update position
 	position += speed*delta;

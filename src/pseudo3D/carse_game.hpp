@@ -14,7 +14,7 @@
 
 #include "automotive/engine_sound.hpp"
 #include "vehicle.hpp"
-#include "util/properties.hpp"
+#include "futil/properties.hpp"
 
 #include <map>
 #include <vector>

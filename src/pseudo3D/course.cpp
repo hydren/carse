@@ -22,10 +22,7 @@
 #include <ctime>
 #include <cmath>
 
-#define loadPropertyOrFail Properties::loadPropertyOrFail
-#define loadPropertyOrDefault Properties::loadPropertyOrDefault
-
-using util::Properties;
+using futil::Properties;
 using std::string;
 using std::vector;
 
@@ -108,10 +105,10 @@ string charArrayToString(const char* str) { return string(str); }
 //static
 Course Course::createCourseFromFile(const Properties& prop)
 {
-	string segmentFilename = loadPropertyOrFail<string, charArrayToString>(prop, "segment_file", "Missing segment file for course!");
-	float segmentLength = loadPropertyOrDefault<double, atof>(prop, "segment_length", 200);  // this may become non-customizable
-	float roadWidth = loadPropertyOrDefault<double, atof>(prop, "road_width", 3000);
-	float length = loadPropertyOrDefault<double, atof>(prop, "course_length", 6400);
+	string segmentFilename = prop.getAsValueOrFail<string, charArrayToString>("segment_file", "Missing segment file for course!");
+	float segmentLength = prop.getAsValueOrDefault<double, atof>("segment_length", 200);  // this may become non-customizable
+	float roadWidth = prop.getAsValueOrDefault<double, atof>("road_width", 3000);
+	float length = prop.getAsValueOrDefault<double, atof>("course_length", 6400);
 
 	std::ifstream stream(segmentFilename.c_str());
 	if(not stream.is_open())

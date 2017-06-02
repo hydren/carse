@@ -8,7 +8,7 @@
 #include "course_selection_mode.hpp"
 
 #include "race_state.hpp"
-#include "util/properties.hpp"
+#include "futil/properties.hpp"
 
 #include "futil/string/actions.hpp"
 #include "futil/string/more_operators.hpp"
@@ -29,7 +29,7 @@ using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
-using util::Properties;
+using futil::Properties;
 
 int CourseSelectionMode::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_MODE_ID; }
 

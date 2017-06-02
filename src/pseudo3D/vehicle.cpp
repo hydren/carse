@@ -11,11 +11,9 @@
 
 #include <cstdlib>
 
-using util::Properties;
+using futil::Properties;
 using std::map;
 using std::string;
-
-#define loadPropertyOrDefault Properties::loadPropertyOrDefault
 
 static const unsigned DEFAULT_SPRITE_WIDTH = 56;
 static const unsigned DEFAULT_SPRITE_HEIGHT = 36;
@@ -38,27 +36,27 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
 
-	spriteStateCount = loadPropertyOrDefault<int, atoi>(prop, "sprite_state_count", 1);
-	spriteWidth = loadPropertyOrDefault<int, atoi>(prop, "sprite_frame_width", DEFAULT_SPRITE_WIDTH);
-	spriteHeight = loadPropertyOrDefault<int, atoi>(prop, "sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
-	spriteFrameDuration = loadPropertyOrDefault<double, atof>(prop, "sprite_frame_duration", -1);
-	spriteScale = loadPropertyOrDefault<double, atof>(prop, "sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
+	spriteStateCount = prop.getAsValueOrDefault<int, atoi>("sprite_state_count", 1);
+	spriteWidth = prop.getAsValueOrDefault<int, atoi>("sprite_frame_width", DEFAULT_SPRITE_WIDTH);
+	spriteHeight = prop.getAsValueOrDefault<int, atoi>("sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
+	spriteFrameDuration = prop.getAsValueOrDefault<double, atof>("sprite_frame_duration", -1);
+	spriteScale = prop.getAsValueOrDefault<double, atof>("sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
-		spriteStateFrameCount.push_back(loadPropertyOrDefault<int, atoi>(prop, string("sprite_state")+stateNumber+"_frame_count", 1));
+		spriteStateFrameCount.push_back(prop.getAsValueOrDefault<int, atoi>(string("sprite_state")+stateNumber+"_frame_count", 1));
 
-	mass = loadPropertyOrDefault<double, atof>(prop, "vehicle_mass", 1250);
+	mass = prop.getAsValueOrDefault<double, atof>("vehicle_mass", 1250);
 
-	engine.maxRpm = loadPropertyOrDefault<int, atoi>(prop, "engine_maximum_rpm", 7000);
-	engine.torque = loadPropertyOrDefault<double, atof>(prop, "engine_maximum_power", 300) * POWER_TORQUE_FACTOR;
+	engine.maxRpm = prop.getAsValueOrDefault<int, atoi>("engine_maximum_rpm", 7000);
+	engine.torque = prop.getAsValueOrDefault<double, atof>("engine_maximum_power", 300) * POWER_TORQUE_FACTOR;
 
-	engine.tireRadius = loadPropertyOrDefault<double, atof>(prop, "tire_diameter", 678) * 0.0005;
+	engine.tireRadius = prop.getAsValueOrDefault<double, atof>("tire_diameter", 678) * 0.0005;
 
 	// todo read more data from properties
 
 	engine.transmissionEfficiency = 0.7;  // for the time being, assume 70% efficiency
 
-	engine.gearCount = loadPropertyOrDefault<int, atoi>(prop, "gear_count", 6);
+	engine.gearCount = prop.getAsValueOrDefault<int, atoi>("gear_count", 6);
 
 	engine.gearRatio = new float[engine.gearCount+1];
 

@@ -8,7 +8,7 @@
 #include "vehicle_selection_state.hpp"
 
 #include "race_state.hpp"
-#include "util/properties.hpp"
+#include "futil/properties.hpp"
 
 #include "futil/string/actions.hpp"
 #include "futil/string/more_operators.hpp"
@@ -27,7 +27,7 @@ using fgeal::Color;
 using fgeal::Image;
 using fgeal::Rectangle;
 using fgeal::Menu;
-using util::Properties;
+using futil::Properties;
 using std::vector;
 using std::string;
 

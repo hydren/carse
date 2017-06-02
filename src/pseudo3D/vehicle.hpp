@@ -12,7 +12,7 @@
 #include "automotive/motor.hpp"
 #include "automotive/engine_sound.hpp"
 
-#include "util/properties.hpp"
+#include "futil/properties.hpp"
 
 #include "carse_game.hpp"
 
@@ -40,7 +40,7 @@ struct Vehicle
 	Vehicle();
 
 	// creates a vehicle with definitions taken from the given properties
-	Vehicle(const util::Properties& properties, Pseudo3DCarseGame& game);
+	Vehicle(const futil::Properties& properties, Pseudo3DCarseGame& game);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

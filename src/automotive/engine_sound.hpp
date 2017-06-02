@@ -10,7 +10,7 @@
 #include <ciso646>
 
 #include "fgeal/fgeal.hpp"
-#include "util/properties.hpp"
+#include "futil/properties.hpp"
 
 #include <vector>
 #include <utility>
@@ -29,13 +29,13 @@ struct EngineSoundProfile
 	std::vector<RangeProfile> ranges;
 
 	// returns true if the given properties requests a preset profile instead of specifying a custom profile.
-	static bool requestsPresetProfile(const util::Properties& prop);
+	static bool requestsPresetProfile(const futil::Properties& prop);
 
 	// peeks the given properties object and returns the specified sound definition.
-	static std::string getSoundDefinitionFromProperties(const util::Properties& prop);
+	static std::string getSoundDefinitionFromProperties(const futil::Properties& prop);
 
 	// load a custom sound profile from properties. if a non-custom (preset) profile is specified, a std::logic_error is thrown.
-	static EngineSoundProfile loadFromProperties(const util::Properties& prop);
+	static EngineSoundProfile loadFromProperties(const futil::Properties& prop);
 };
 
 class EngineSoundSimulator

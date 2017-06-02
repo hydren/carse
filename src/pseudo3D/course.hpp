@@ -9,7 +9,7 @@
 #define PSEUDO3D_COURSE_HPP_
 #include <ciso646>
 
-#include "util/properties.hpp"
+#include "futil/properties.hpp"
 
 #include <vector>
 
@@ -45,7 +45,7 @@ struct Course
 	static Course createRandomCourse(float segmentLength, float roadWidth, float length, float curveness);
 
 	/** Creates a course from the given file. */
-	static Course createCourseFromFile(const util::Properties& properties);
+	static Course createCourseFromFile(const futil::Properties& properties);
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

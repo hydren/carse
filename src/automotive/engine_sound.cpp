@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-using util::Properties;
+using futil::Properties;
 using std::string;
 using std::vector;
 using fgeal::Sound;

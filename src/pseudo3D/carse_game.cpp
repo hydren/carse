@@ -24,7 +24,7 @@ using std::endl;
 #include "vehicle_selection_state.hpp"
 #include "course_selection_mode.hpp"
 
-using util::Properties;
+using futil::Properties;
 using std::vector;
 using std::string;
 using std::map;
@@ -98,7 +98,7 @@ void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 		for(unsigned i = 0; i < pendingPresetFiles.size(); i++)
 		{
 			string filename = pendingPresetFiles[i];
-			util::Properties prop;
+			Properties prop;
 			prop.load(filename);
 
 			const string

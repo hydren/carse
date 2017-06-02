@@ -25,6 +25,8 @@ using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
 using fgeal::Image;
+using fgeal::Rectangle;
+using fgeal::Menu;
 using util::Properties;
 using std::vector;
 using std::string;

@@ -17,7 +17,8 @@ using fgeal::EventQueue;
 using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
-
+using fgeal::Rectangle;
+using fgeal::Menu;
 using std::string;
 
 int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }

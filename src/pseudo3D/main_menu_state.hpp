@@ -10,7 +10,7 @@
 #include <ciso646>
 
 #include "carse_game.hpp"
-#include "gui/menu.hpp"
+#include "fgeal/extra/menu.hpp"
 
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
@@ -18,7 +18,7 @@
 class MainMenuState extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain, *fontDev;
-	Menu* menu;
+	fgeal::Menu* menu;
 
 	public:
 	int getId();

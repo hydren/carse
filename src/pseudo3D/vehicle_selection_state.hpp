@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "carse_game.hpp"
-#include "gui/menu.hpp"
+#include "fgeal/extra/menu.hpp"
 #include "vehicle.hpp"
 
 #include "futil/general/language.hpp"
@@ -21,7 +21,7 @@
 class VehicleSelectionState extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain, *fontInfo;
-	Menu* menu;
+	fgeal::Menu* menu;
 
 	std::vector<Vehicle> vehicles;
 	std::vector<fgeal::Image*> vehiclePreview;

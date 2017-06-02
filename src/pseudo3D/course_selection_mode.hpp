@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "carse_game.hpp"
-#include "gui/menu.hpp"
+#include "fgeal/extra/menu.hpp"
 #include "course.hpp"
 
 #include "futil/general/language.hpp"
@@ -21,7 +21,7 @@
 class CourseSelectionMode extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain, *fontInfo;
-	Menu* menu;
+	fgeal::Menu* menu;
 
 	std::vector<Course> courses;
 

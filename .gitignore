@@ -17,6 +17,8 @@
 /win32-mingw-sdl1.2-release/
 /win32-mingw-sdl2.0-debug/
 /win32-mingw-sdl2.0-release/
+/win32-mingw-sfml2.0-debug/
+/win32-mingw-sfml2.0-release/
 
 # Eclipse cache
 language.settings.xml

@@ -19,6 +19,7 @@
 /win32-mingw-sdl2.0-release/
 /win32-mingw-sfml2.0-debug/
 /win32-mingw-sfml2.0-release/
+/win32-msvc-sdl1.2-debug/
 
 # Eclipse cache
 language.settings.xml
@@ -27,6 +28,7 @@ org.eclipse.cdt.codan.core.prefs
 
 # Other
 *.dll
+spec.i
 
 # Test vehicles
 data/vehicles/test_*

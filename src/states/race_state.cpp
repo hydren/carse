@@ -7,12 +7,6 @@
 
 #include "race_state.hpp"
 
-// xxx debug code =======
-#include <iostream>
-using std::cout;
-using std::endl;
-// xxx debug code =======
-
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
@@ -187,14 +181,10 @@ void Pseudo3DRaceState::onEnter()
 
 	music->loop();
 	engineSound.playIdle();
-
-	cout << "race start!" << endl;
 }
 
 void Pseudo3DRaceState::onLeave()
 {
-	cout << "race end!" << endl;
-
 	engineSound.haltSound();
 	music->stop();
 }

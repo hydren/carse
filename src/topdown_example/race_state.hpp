@@ -5,13 +5,12 @@
  *      Author: Felipe
  */
 
-#ifndef TOPDOWN_RACE_STATE_HPP_
-#define TOPDOWN_RACE_STATE_HPP_
+#ifndef TOPDOWN_EXAMPLE_RACE_STATE_HPP_
+#define TOPDOWN_EXAMPLE_RACE_STATE_HPP_
 #include <ciso646>
 
-#include "carse_game.hpp"
-
 #include <Box2D/Box2D.h>
+#include "carse_game.hpp"
 
 #include "box2D/box2d_vehicle.hpp"
 #include "box2D/box2d_util.hpp"
@@ -63,4 +62,4 @@ class TopDownRaceState extends public fgeal::Game::State
 	void handleInput();
 };
 
-#endif /* TOPDOWN_RACE_STATE_HPP_ */
+#endif /* TOPDOWN_EXAMPLE_RACE_STATE_HPP_ */

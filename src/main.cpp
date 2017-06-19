@@ -17,7 +17,7 @@
 #if defined(PSEUDO_3D_MODE)
 	#include "carse_game.hpp"
 #elif defined(TOPDOWN_MODE)
-	#include "topdown/carse_game.hpp"
+	#include "topdown_example/carse_game.hpp"
 #endif
 
 #include "fgeal/fgeal.hpp"

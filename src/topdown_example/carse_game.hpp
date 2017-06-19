@@ -5,8 +5,8 @@
  *      Author: carlosfaruolo
  */
 
-#ifndef TOPDOWN_CARSE_GAME_HPP_
-#define TOPDOWN_CARSE_GAME_HPP_
+#ifndef TOPDOWN_EXAMPLE_CARSE_GAME_HPP_
+#define TOPDOWN_EXAMPLE_CARSE_GAME_HPP_
 #include <ciso646>
 
 #include "fgeal/extra/game.hpp"
@@ -23,4 +23,4 @@ class TopdownCarseGame extends public fgeal::Game
 
 typedef TopdownCarseGame CarseGame;
 
-#endif /* TOPDOWN_CARSE_GAME_HPP_ */
+#endif /* TOPDOWN_EXAMPLE_CARSE_GAME_HPP_ */

@@ -32,7 +32,7 @@ TopDownRaceState::TopDownRaceState(CarseGame* game)
 : State(*game)
 {
 	lockOn = false;
-	showDebug = false;
+	showDebug = true;
 
 	cameraAngle = 0;
 
@@ -119,10 +119,10 @@ void TopDownRaceState::render()
 		car_sprite->drawRotated(0.1*toPixels(player->m_body->GetPosition().x)-camera.x, 0.1*toPixels(player->m_body->GetPosition().y)-camera.y, M_PI - player->m_body->GetAngle(), 23, 48);
 	}
 
-	font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getFontHeight(), fgeal::Color::CREAM);
-
 	if(showDebug)
 	{
+		font->drawText(std::string("Using fgeal ")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" "+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - font->getFontHeight(), fgeal::Color::CREAM);
+
 		font2->drawText("Linear velocity:", 25, 25, fgeal::Color::WHITE);
 		sprintf(buffer, "% 5.2f, % 5.2f, % 5.2f", player->m_body->GetLinearVelocity().x, player->m_body->GetLinearVelocity().y, player->m_body->GetLinearVelocity().Length());
 		font->drawText(std::string(buffer), 50, 50, fgeal::Color::WHITE);

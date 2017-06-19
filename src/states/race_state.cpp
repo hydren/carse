@@ -221,12 +221,13 @@ void Pseudo3DRaceState::render()
 		animationIndex = 1 + (vehicle.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_MAX - PSEUDO_ANGLE_THRESHOLD);
 
 	const float scale = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR * vehicle.spriteScale;
-	spritesVehicle[animationIndex]->flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-	spritesVehicle[animationIndex]->scale.x = scale;
-	spritesVehicle[animationIndex]->scale.y = scale;
-	spritesVehicle[animationIndex]->draw(0.5*(display.getWidth() - scale*vehicle.spriteWidth), display.getHeight()-1.5*scale*vehicle.spriteHeight);
-	spritesVehicle[animationIndex]->duration = vehicle.spriteFrameDuration / sqrt(speed);
-	spritesVehicle[animationIndex]->computeCurrentFrame();
+	Sprite& sprite = *spritesVehicle[animationIndex];
+	sprite.flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+	sprite.scale.x = scale;
+	sprite.scale.y = scale;
+	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // fixme this formula doesn't present good tire animation results.
+	sprite.computeCurrentFrame();
+	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), display.getHeight()-1.5*sprite.scale.y*vehicle.spriteHeight);
 
 	hudSpeedDisplay->draw();
 	hudRpmGauge->draw();

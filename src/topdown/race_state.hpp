@@ -44,9 +44,6 @@ class TopDownRaceState extends public fgeal::Game::State
 	fgeal::Music* music_sample;
 	fgeal::Font* font, *font2;
 
-	bool isKeyUpPressed, isKeyDownPressed,
-		 isKeyRightPressed, isKeyLeftPressed;
-
 	char buffer[256];
 
 	public:

@@ -20,6 +20,7 @@ using fgeal::Music;
 using fgeal::Font;
 using fgeal::Event;
 using fgeal::EventQueue;
+using fgeal::Keyboard;
 
 using util::toPixels;
 using util::toMeters;
@@ -35,11 +36,6 @@ TopDownRaceState::TopDownRaceState(CarseGame* game)
 	showDebug = true;
 
 	cameraAngle = 0;
-
-	isKeyUpPressed = false;
-	isKeyDownPressed = false;
-	isKeyRightPressed = false;
-	isKeyLeftPressed = false;
 
 	camera.x = camera.y = camera.w = camera.h = 0;
 
@@ -148,9 +144,9 @@ void TopDownRaceState::handlePhysics(float delta)
 	const double forceFactorAbs = 50;
 
 	double forceFactor = 0;
-	if(isKeyDownPressed)
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN))
 		forceFactor = -forceFactorAbs/2;
-	else if(isKeyUpPressed)
+	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))
 	{
 		forceFactor = forceFactorAbs;
 		int i;
@@ -159,9 +155,9 @@ void TopDownRaceState::handlePhysics(float delta)
 	}
 
 	float angle = 0;
-	if(isKeyLeftPressed)
+	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
 		angle = -M_PI/4;
-	else if(isKeyRightPressed)
+	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
 		angle = M_PI/4;
 
 	player->update(delta, forceFactor, angle);
@@ -196,62 +192,36 @@ void TopDownRaceState::handleInput()
 		{
 			switch(event.getEventKeyCode())
 			{
-			case fgeal::Keyboard::Key::ARROW_UP:
-				isKeyUpPressed = true;
-				car_sound_idle->stop();
-				if(not car_sound_high->isPlaying())
-					car_sound_high->loop();
-				break;
-			case fgeal::Keyboard::Key::ARROW_DOWN:
-				isKeyDownPressed = true;
-				break;
-			case fgeal::Keyboard::Key::ARROW_RIGHT:
-				isKeyRightPressed = true;
-				break;
-			case fgeal::Keyboard::Key::ARROW_LEFT:
-				isKeyLeftPressed = true;
-				break;
-			case fgeal::Keyboard::Key::ESCAPE:
-				break;
-			case fgeal::Keyboard::Key::ENTER:
-				break;
-			case fgeal::Keyboard::Key::P:
-				if(music_sample->isPlaying())
-					music_sample->pause();
-				else
-					music_sample->resume();
-				break;
-			case fgeal::Keyboard::Key::L:
-				lockOn = !lockOn;
-				break;
-			case fgeal::Keyboard::Key::D:
-				showDebug = !showDebug;
-				break;
-			default:
-				break;
+				case fgeal::Keyboard::Key::ARROW_UP:
+					car_sound_idle->stop();
+					if(not car_sound_high->isPlaying())
+						car_sound_high->loop();
+					break;
+				case fgeal::Keyboard::Key::P:
+					if(music_sample->isPlaying())
+						music_sample->pause();
+					else
+						music_sample->resume();
+					break;
+				case fgeal::Keyboard::Key::L:
+					lockOn = !lockOn;
+					break;
+				case fgeal::Keyboard::Key::D:
+					showDebug = !showDebug;
+					break;
+				default: break;
 			}
 		}
 		else if(event.getEventType() == fgeal::Event::Type::KEY_RELEASE)
 		{
 			switch(event.getEventKeyCode())
 			{
-			case fgeal::Keyboard::Key::ARROW_UP:
-				isKeyUpPressed = false;
-				car_sound_high->stop();
-				if(not car_sound_idle->isPlaying())
-				car_sound_idle->loop();
-				break;
-			case fgeal::Keyboard::Key::ARROW_DOWN:
-				isKeyDownPressed = false;
-				break;
-			case fgeal::Keyboard::Key::ARROW_RIGHT:
-				isKeyRightPressed = false;
-				break;
-			case fgeal::Keyboard::Key::ARROW_LEFT:
-				isKeyLeftPressed = false;
-				break;
-			default:
-				break;
+				case fgeal::Keyboard::Key::ARROW_UP:
+					car_sound_high->stop();
+					if(not car_sound_idle->isPlaying())
+					car_sound_idle->loop();
+					break;
+				default: break;
 			}
 		}
 	}

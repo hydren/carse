@@ -1,12 +1,12 @@
 /*
- * course_selection_mode.hpp
+ * course_selection_state.hpp
  *
  *  Created on: 23 de mai de 2017
  *      Author: carlosfaruolo
  */
 
-#ifndef PSEUDO3D_COURSE_SELECTION_MODE_HPP_
-#define PSEUDO3D_COURSE_SELECTION_MODE_HPP_
+#ifndef PSEUDO3D_COURSE_SELECTION_STATE_HPP_
+#define PSEUDO3D_COURSE_SELECTION_STATE_HPP_
 #include <ciso646>
 
 #include <vector>
@@ -18,7 +18,7 @@
 #include "futil/general/language.hpp"
 #include "fgeal/fgeal.hpp"
 
-class CourseSelectionMode extends public fgeal::Game::State
+class CourseSelectionState extends public fgeal::Game::State
 {
 	fgeal::Font* fontMain, *fontInfo;
 	fgeal::Menu* menu;
@@ -28,8 +28,8 @@ class CourseSelectionMode extends public fgeal::Game::State
 	public:
 	int getId();
 
-	CourseSelectionMode(Pseudo3DCarseGame* game);
-	~CourseSelectionMode();
+	CourseSelectionState(Pseudo3DCarseGame* game);
+	~CourseSelectionState();
 
 	void initialize();
 	void onEnter();
@@ -43,4 +43,4 @@ class CourseSelectionMode extends public fgeal::Game::State
 	void onMenuSelect();
 };
 
-#endif /* PSEUDO3D_COURSE_SELECTION_MODE_HPP_ */
+#endif /* PSEUDO3D_COURSE_SELECTION_STATE_HPP_ */

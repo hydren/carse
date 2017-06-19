@@ -1,11 +1,11 @@
 /*
- * course_selection_mode.cpp
+ * course_selection_state.cpp
  *
  *  Created on: 23 de mai de 2017
  *      Author: carlosfaruolo
  */
 
-#include "course_selection_mode.hpp"
+#include "course_selection_state.hpp"
 
 #include "race_state.hpp"
 #include "futil/properties.hpp"
@@ -31,22 +31,22 @@ using std::cout;
 using std::endl;
 using futil::Properties;
 
-int CourseSelectionMode::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_MODE_ID; }
+int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 
-CourseSelectionMode::CourseSelectionMode(Pseudo3DCarseGame* game)
+CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
   menu(null)
 {}
 
-CourseSelectionMode::~CourseSelectionMode()
+CourseSelectionState::~CourseSelectionState()
 {
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(menu != null) delete menu;
 }
 
-void CourseSelectionMode::initialize()
+void CourseSelectionState::initialize()
 {
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
@@ -74,13 +74,13 @@ void CourseSelectionMode::initialize()
 	}
 }
 
-void CourseSelectionMode::onEnter()
+void CourseSelectionState::onEnter()
 {}
 
-void CourseSelectionMode::onLeave()
+void CourseSelectionState::onLeave()
 {}
 
-void CourseSelectionMode::render()
+void CourseSelectionState::render()
 {
 	Display& display = Display::getInstance();
 	display.clear();
@@ -91,12 +91,12 @@ void CourseSelectionMode::render()
 	fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", 0.525*display.getWidth(), 0.525*display.getHeight(), Color::WHITE);
 }
 
-void CourseSelectionMode::update(float delta)
+void CourseSelectionState::update(float delta)
 {
 	this->handleInput();
 }
 
-void CourseSelectionMode::handleInput()
+void CourseSelectionState::handleInput()
 {
 	Event event;
 	EventQueue& eventQueue = EventQueue::getInstance();
@@ -130,7 +130,7 @@ void CourseSelectionMode::handleInput()
 	}
 }
 
-void CourseSelectionMode::onMenuSelect()
+void CourseSelectionState::onMenuSelect()
 {
 	Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
 	raceState->setCourse(courses[menu->getSelectedIndex()]);

@@ -22,7 +22,7 @@ using std::endl;
 #include "race_state.hpp"
 #include "main_menu_state.hpp"
 #include "vehicle_selection_state.hpp"
-#include "course_selection_mode.hpp"
+#include "course_selection_state.hpp"
 
 using futil::Properties;
 using std::vector;
@@ -33,7 +33,7 @@ const int  // states IDs
 	Pseudo3DCarseGame::RACE_STATE_ID = 0,
 	Pseudo3DCarseGame::MAIN_MENU_STATE_ID = 1,
 	Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID = 2,
-	Pseudo3DCarseGame::COURSE_SELECTION_MODE_ID = 3;
+	Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID = 3;
 
 Pseudo3DCarseGame::Pseudo3DCarseGame()
 : Game("Carse", null, 800, 600)
@@ -48,7 +48,7 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
 	this->addState(new VehicleSelectionState(this));
-	this->addState(new CourseSelectionMode(this));
+	this->addState(new CourseSelectionState(this));
 
 	this->setInitialState(MAIN_MENU_STATE_ID);
 }

@@ -122,7 +122,7 @@ void MainMenuState::onMenuSelect()
 
 	else if(menu->getSelectedIndex() == 2)
 	{
-		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_MODE_ID);
+		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID);
 	}
 
 	else if(menu->getSelectedIndex() == 3)

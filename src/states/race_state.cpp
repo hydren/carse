@@ -117,22 +117,23 @@ void Pseudo3DRaceState::onEnter()
 {
 	if(not spritesVehicle.empty())
 	{
+		delete spritesVehicle[0]->image;
+
 		for(unsigned i = 0; i < spritesVehicle.size(); i++)
 			delete spritesVehicle[i];
 
 		spritesVehicle.clear();
 	}
 
+	Image* sheet = new Image(vehicle.sheetFilename);
 	for(unsigned i = 0; i < vehicle.spriteStateCount; i++)
 	{
-		Image* sheet = new Image(vehicle.sheetFilename);
-
 		if(sheet->getWidth() < static_cast<int>(vehicle.spriteWidth))
 			throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
 
 		Sprite* sprite = new Sprite(sheet, vehicle.spriteWidth, vehicle.spriteHeight,
 									vehicle.spriteFrameDuration, vehicle.spriteStateFrameCount[i],
-									0, i*vehicle.spriteHeight, true);
+									0, i*vehicle.spriteHeight);
 		spritesVehicle.push_back(sprite);
 	}
 

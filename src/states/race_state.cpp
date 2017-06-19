@@ -307,8 +307,6 @@ void Pseudo3DRaceState::render()
 			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getFontHeight(), fgeal::Color::WHITE);
 		}
 	}
-
-	fgeal::rest(0.01);
 }
 
 void Pseudo3DRaceState::update(float delta)

@@ -9,11 +9,10 @@
 #define PSEUDO3D_COURSE_HPP_
 #include <ciso646>
 
+#include "fgeal/fgeal.hpp"
 #include "futil/properties.hpp"
 
 #include <vector>
-
-struct Pseudo3DRaceState;  //fwd_decl
 
 struct Course
 {
@@ -35,6 +34,15 @@ struct Course
 	float roadSegmentLength, roadWidth;
 
 	Course(float segmentLength, float roadWidth);
+
+	struct DrawParameters
+	{
+		int drawAreaWidth, drawAreaHeight;
+		unsigned drawDistance;
+		float cameraDepth;
+	};
+
+	void draw(int positionZ, int positionX, const DrawParameters& param);
 
 	void updateReferences();
 

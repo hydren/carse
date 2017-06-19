@@ -35,8 +35,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float position, posX, speed, pseudoAngle, strafeSpeed, curvePull;
 	float rollingFriction, airFriction, brakingFriction;
 
-	float cameraDepth;
-	unsigned drawDistance;
+	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
 
 	Course course;

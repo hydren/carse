@@ -32,12 +32,6 @@ using fgeal::Sound;
 using fgeal::Music;
 using fgeal::Sprite;
 
-//custom call to draw quad
-void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
-{
-	Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
-}
-
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 static const float AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 static const float AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX (Z32)
@@ -81,11 +75,14 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), fontDebug(null), bg(null), music(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), brakingFriction(0),
-  cameraDepth(0.84), drawDistance(300), coursePositionFactor(500),
+  drawParameters(), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
   debugMode(true)
-{}
+{
+	drawParameters.cameraDepth = 0.84;
+	drawParameters.drawDistance = 300;
+}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
@@ -105,6 +102,9 @@ void Pseudo3DRaceState::initialize()
 	fontDebug = new Font("assets/font.ttf");
 	bg = new Image("assets/bg.jpg");
 	music = new Music("assets/music_sample.ogg");
+
+	drawParameters.drawAreaWidth = Display::getInstance().getWidth();
+	drawParameters.drawAreaHeight = Display::getInstance().getHeight();
 }
 
 
@@ -207,34 +207,7 @@ void Pseudo3DRaceState::render()
 
 	bg->draw();
 
-	// course position
-	const unsigned pos = position * coursePositionFactor;
-
-	const unsigned N = course.lines.size(), fromPos = pos/course.roadSegmentLength;
-	float camHeight = 1500 + course.lines[fromPos].y;
-	float x = 0, dx = 0;
-	float maxY = display.getHeight();
-
-	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
-	{
-		Course::Segment& l = course.lines[n%N];
-		l.project(posX - x, camHeight, pos - (n>N?n*course.roadSegmentLength:0), cameraDepth);
-		x += dx;
-		dx += l.curve;
-
-		if(l.Y > maxY) continue;
-		maxY = l.Y;
-
-		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
-		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
-		Color road   = (n/3)%2? Color( 64, 80, 80) : Color( 40, 64, 64);
-
-		Course::Segment& p = course.lines[(n-1)%N]; // previous line
-
-		drawQuad(grass,  0,   p.Y, display.getWidth(), 0, l.Y, display.getWidth());
-		drawQuad(rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
-		drawQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
-	}
+	course.draw(position * coursePositionFactor, posX, drawParameters);
 
 	// linear sprite progression
 //	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;

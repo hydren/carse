@@ -15,11 +15,24 @@ using futil::Properties;
 using std::map;
 using std::string;
 
-static const unsigned DEFAULT_SPRITE_WIDTH = 56;
-static const unsigned DEFAULT_SPRITE_HEIGHT = 36;
-
 // fixme this factor still doesn't produce satisfactory results
 static const float POWER_TORQUE_FACTOR = 5.0/3.0;
+
+// default float constants
+static const float
+	DEFAULT_VEHICLE_MASS = 1250,
+	DEFAULT_MAXIMUM_RPM = 7000,
+	DEFAULT_MAXIMUM_POWER = 320,
+	DEFAULT_TIRE_DIAMETER = 678,
+	DEFAULT_GEAR_COUNT = 5,
+
+	// for the time being, assume 70% efficiency
+	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
+
+// default uint constants
+static const unsigned
+	DEFAULT_SPRITE_WIDTH = 56,
+	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
 : spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
@@ -45,18 +58,18 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
 		spriteStateFrameCount.push_back(prop.getAsValueOrDefault<int, atoi>(string("sprite_state")+stateNumber+"_frame_count", 1));
 
-	mass = prop.getAsValueOrDefault<double, atof>("vehicle_mass", 1250);
+	mass = prop.getAsValueOrDefault<double, atof>("vehicle_mass", DEFAULT_VEHICLE_MASS);
 
-	engine.maxRpm = prop.getAsValueOrDefault<int, atoi>("engine_maximum_rpm", 7000);
-	engine.torque = prop.getAsValueOrDefault<double, atof>("engine_maximum_power", 300) * POWER_TORQUE_FACTOR;
+	engine.maxRpm = prop.getAsValueOrDefault<int, atoi>("engine_maximum_rpm", DEFAULT_MAXIMUM_RPM);
+	engine.torque = prop.getAsValueOrDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
 
-	engine.tireRadius = prop.getAsValueOrDefault<double, atof>("tire_diameter", 678) * 0.0005;
+	engine.tireRadius = prop.getAsValueOrDefault<double, atof>("tire_diameter", DEFAULT_TIRE_DIAMETER) * 0.0005;
 
 	// todo read more data from properties
 
-	engine.transmissionEfficiency = 0.7;  // for the time being, assume 70% efficiency
+	engine.transmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
 
-	engine.gearCount = prop.getAsValueOrDefault<int, atoi>("gear_count", 6);
+	engine.gearCount = prop.getAsValueOrDefault<int, atoi>("gear_count", DEFAULT_GEAR_COUNT);
 
 	engine.gearRatio = new float[engine.gearCount+1];
 

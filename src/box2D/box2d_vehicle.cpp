@@ -1,14 +1,13 @@
 /*
- * elements.cpp
+ * box2d_vehicle.cpp
  *
- *  Created on: 29/08/2014
- *      Author: felipe
+ *  Created on: 19 de jun de 2017
+ *      Author: carlosfaruolo
  */
 
-#include "vehicle.hpp"
+#include "box2d_vehicle.hpp"
 
-
-Tire::Tire(b2World* world, float maxDriveForce, float maxLateralImpulse)
+Box2DVehicleBody::Tire::Tire(b2World* world, float maxDriveForce, float maxLateralImpulse)
 : m_maxDriveForce(maxDriveForce), m_maxLateralImpulse(maxLateralImpulse)
 {
 	b2BodyDef bodyDef;
@@ -25,8 +24,17 @@ Tire::Tire(b2World* world, float maxDriveForce, float maxLateralImpulse)
 	m_currentTraction = 1;
 }
 
+b2Vec2 Box2DVehicleBody::Tire::getLateralVelocity() {
+        b2Vec2 currentRightNormal = m_body->GetWorldVector( b2Vec2(1,0) );
+        return b2Dot( currentRightNormal, m_body->GetLinearVelocity() ) * currentRightNormal;
+    }
 
-void Tire::updateFriction() {
+b2Vec2 Box2DVehicleBody::Tire::getForwardVelocity() {
+    b2Vec2 currentForwardNormal = m_body->GetWorldVector( b2Vec2(0,1) );
+    return b2Dot( currentForwardNormal, m_body->GetLinearVelocity() ) * currentForwardNormal;
+}
+
+void Box2DVehicleBody::Tire::updateFriction() {
 	//lateral linear velocity
 	b2Vec2 impulse = m_body->GetMass() * -getLateralVelocity();
 	if ( impulse.Length() > m_maxLateralImpulse )
@@ -43,7 +51,7 @@ void Tire::updateFriction() {
 	m_body->ApplyForce( m_currentTraction * dragForceMagnitude * currentForwardNormal, m_body->GetWorldCenter() , true);
 }
 
-void Tire::updateDrive(float desiredSpeed) {
+void Box2DVehicleBody::Tire::updateDrive(float desiredSpeed) {
 
 	//find current speed in forward direction
 	b2Vec2 currentForwardNormal = m_body->GetWorldVector( b2Vec2(0,1) );
@@ -60,7 +68,13 @@ void Tire::updateDrive(float desiredSpeed) {
 	m_body->ApplyForce( m_currentTraction * force * currentForwardNormal, m_body->GetWorldCenter() , true);
 }
 
-Car::Car(b2World* world, float x, float y, float angle) {
+void Box2DVehicleBody::Tire::updateTurn(float desiredTorque) {
+	m_body->ApplyTorque( desiredTorque , true);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Box2DVehicleBody::Box2DVehicleBody(b2World* world, float x, float y, float angle) {
 //TODO adapt the code to specify position and angle
 	//create car body
 	b2BodyDef bodyDef;
@@ -121,7 +135,14 @@ Car::Car(b2World* world, float x, float y, float angle) {
 	frJoint = (b2RevoluteJoint*)world->CreateJoint( &jointDef );
 }
 
-void Car::update(float delta, float throtle, float desiredAngle) {
+Box2DVehicleBody::~Box2DVehicleBody() {
+        delete tireFrontLeft;
+        delete tireFrontRight;
+        delete tireRearLeft;
+        delete tireRearRight;
+}
+
+void Box2DVehicleBody::update(float delta, float throtle, float desiredAngle) {
 
    	tireFrontLeft->updateFriction();
    	tireFrontRight->updateFriction();
@@ -143,4 +164,3 @@ void Car::update(float delta, float throtle, float desiredAngle) {
    	flJoint->SetLimits( newAngle, newAngle );
    	frJoint->SetLimits( newAngle, newAngle );
 }
-

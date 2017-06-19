@@ -7,8 +7,6 @@
 
 #include "race_state.hpp"
 
-#include "box2d_util.hpp"
-
 #include <iostream>
 #include <cmath>
 #include <cstdio>

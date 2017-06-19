@@ -11,16 +11,17 @@
 
 #include "carse_game.hpp"
 
-#include "racing/vehicle.hpp"
+#include <Box2D/Box2D.h>
+
+#include "box2D/box2d_vehicle.hpp"
+#include "box2D/box2d_util.hpp"
 
 #include "fgeal/fgeal.hpp"
 
 #include "futil/general/language.hpp"
 #include "futil/math/rect.hpp"
 
-#include <Box2D/Box2D.h>
-
-#include "box2d_util.hpp"
+typedef Box2DVehicleBody Car;
 
 class TopDownRaceState extends public fgeal::Game::State
 {

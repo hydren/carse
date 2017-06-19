@@ -11,11 +11,11 @@
 
 #include <cstdlib>
 
-//#define PSEUDO_3D_MODE
-#define TOPDOWN_MODE
+#define PSEUDO_3D_MODE
+//#define TOPDOWN_MODE
 
 #if defined(PSEUDO_3D_MODE)
-	#include "pseudo3D/carse_game.hpp"
+	#include "carse_game.hpp"
 #elif defined(TOPDOWN_MODE)
 	#include "topdown/carse_game.hpp"
 #endif

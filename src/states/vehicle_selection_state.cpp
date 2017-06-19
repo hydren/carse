@@ -169,5 +169,5 @@ void VehicleSelectionState::onMenuSelect()
 {
 	Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
 	raceState->setVehicle(vehicles[menu->getSelectedIndex()]);
-	game.enterState(CarseGame::RACE_STATE_ID);
+	game.enterState(Pseudo3DCarseGame::RACE_STATE_ID);
 }

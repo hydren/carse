@@ -43,9 +43,9 @@ void MainMenuState::initialize()
 	fontMain = new Font("assets/font.ttf", 32);
 	fontDev = new Font("assets/font.ttf", 12);
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
-	menu->manageFontDeletion = true;
+	menu->fontIsOwned = true;
 	menu->bgColor = Color::AZURE;
-	menu->selectedColor = Color::NAVY;
+	menu->focusedEntryFontColor = Color::NAVY;
 	menu->addEntry("Start debug course");
 	menu->addEntry("Start random course");
 	menu->addEntry("Start a loaded course");

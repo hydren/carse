@@ -57,9 +57,9 @@ void VehicleSelectionState::initialize()
 	fontInfo = new Font("assets/font.ttf", 12);
 
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
-	menu->manageFontDeletion = true;
+	menu->fontIsOwned = true;
 	menu->bgColor = Color::AZURE;
-	menu->selectedColor = Color::NAVY;
+	menu->focusedEntryFontColor = Color::NAVY;
 
 	cout << "reading vehicles..." << endl;
 	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");

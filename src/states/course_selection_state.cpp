@@ -54,9 +54,9 @@ void CourseSelectionState::initialize()
 	fontInfo = new Font("assets/font.ttf", 12);
 
 	menu = new Menu(menuBounds, new Font("assets/font2.ttf", 18), Color::WHITE);
-	menu->manageFontDeletion = true;
+	menu->fontIsOwned = true;
 	menu->bgColor = Color::GREEN;
-	menu->selectedColor = Color::DARK_GREEN;
+	menu->focusedEntryFontColor = Color::DARK_GREEN;
 
 	cout << "reading vehicles..." << endl;
 

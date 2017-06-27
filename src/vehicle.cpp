@@ -20,11 +20,12 @@ static const float POWER_TORQUE_FACTOR = 5.0/3.0;
 
 // default float constants
 static const float
-	DEFAULT_VEHICLE_MASS = 1250,
+	DEFAULT_VEHICLE_MASS = 1250,  // kg
 	DEFAULT_MAXIMUM_RPM = 7000,
-	DEFAULT_MAXIMUM_POWER = 320,
-	DEFAULT_TIRE_DIAMETER = 678,
+	DEFAULT_MAXIMUM_POWER = 320,  // bhp
+	DEFAULT_TIRE_DIAMETER = 678,  // mm
 	DEFAULT_GEAR_COUNT = 5,
+	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
 
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
@@ -35,7 +36,7 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1),
+: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1), spriteMaxDepictedTurnAngle(1),
   mass(1250)
 {}
 
@@ -52,8 +53,9 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	spriteStateCount = prop.getAsValueOrDefault<int, atoi>("sprite_state_count", 1);
 	spriteWidth = prop.getAsValueOrDefault<int, atoi>("sprite_frame_width", DEFAULT_SPRITE_WIDTH);
 	spriteHeight = prop.getAsValueOrDefault<int, atoi>("sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
-	spriteFrameDuration = prop.getAsValueOrDefault<double, atof>("sprite_frame_duration", -1);
+	spriteFrameDuration = prop.getAsValueOrDefault<double, atof>("sprite_frame_duration", -1.0);
 	spriteScale = prop.getAsValueOrDefault<double, atof>("sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
+	spriteMaxDepictedTurnAngle = prop.getAsValueOrDefault<double, atof>("sprite_max_depicted_turn_angle", DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE)/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
 		spriteStateFrameCount.push_back(prop.getAsValueOrDefault<int, atoi>(string("sprite_state")+stateNumber+"_frame_count", 1));

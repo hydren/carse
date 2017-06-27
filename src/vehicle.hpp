@@ -30,6 +30,7 @@ struct Vehicle
 	float spriteFrameDuration;
 	std::vector<unsigned> spriteStateFrameCount;
 	float spriteScale;
+	float spriteMaxDepictedTurnAngle;
 
 	EngineSoundProfile engineSoundProfile;
 

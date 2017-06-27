@@ -200,16 +200,24 @@ void Pseudo3DRaceState::render()
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 
+	// the ammount of pseudo angle that will trigger the last sprite
+//	const float PSEUDO_ANGLE_LAST_STATE = PSEUDO_ANGLE_MAX;  // show last sprite when the pseudo angle is at its max
+	const float PSEUDO_ANGLE_LAST_STATE = vehicle.spriteMaxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
+
 	// linear sprite progression
-//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
+//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
 
 	// exponential sprite progression. may be slower.
-//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_MAX)-1);
+//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
 
 	// linear sprite progression with 1-index advance at threshold angle
 	unsigned animationIndex = 0;
 	if(vehicle.spriteStateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
-		animationIndex = 1 + (vehicle.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_MAX - PSEUDO_ANGLE_THRESHOLD);
+		animationIndex = 1 + (vehicle.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
+
+	// cap index to max possible
+	if(animationIndex > vehicle.spriteStateCount - 1)
+		animationIndex = vehicle.spriteStateCount - 1;
 
 	const float scale = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR * vehicle.spriteScale;
 	Sprite& sprite = *spritesVehicle[animationIndex];

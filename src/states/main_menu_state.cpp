@@ -9,7 +9,7 @@
 
 #include "race_state.hpp"
 
-#include "futil/string/more_operators.hpp"
+#include "futil/string_extra_operators.hpp"
 
 using fgeal::Display;
 using fgeal::Event;
@@ -83,24 +83,24 @@ void MainMenuState::handleInput()
 	while(eventQueue.hasEvents())
 	{
 		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::Type::DISPLAY_CLOSURE)
+		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
 		{
 			game.running = false;
 		}
-		else if(event.getEventType() == Event::Type::KEY_PRESS)
+		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
 			{
-				case Keyboard::Key::ESCAPE:
+				case Keyboard::KEY_ESCAPE:
 					game.running = false;
 					break;
-				case Keyboard::Key::ENTER:
+				case Keyboard::KEY_ENTER:
 					this->onMenuSelect();
 					break;
-				case Keyboard::Key::ARROW_UP:
+				case Keyboard::KEY_ARROW_UP:
 					menu->cursorUp();
 					break;
-				case Keyboard::Key::ARROW_DOWN:
+				case Keyboard::KEY_ARROW_DOWN:
 					menu->cursorDown();
 					break;
 				default:

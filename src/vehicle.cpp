@@ -7,7 +7,7 @@
 
 #include "vehicle.hpp"
 
-#include "futil/string/more_operators.hpp"
+#include "futil/string_extra_operators.hpp"
 
 #include <cstdlib>
 

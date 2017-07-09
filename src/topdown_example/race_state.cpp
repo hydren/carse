@@ -144,9 +144,9 @@ void TopDownRaceState::handlePhysics(float delta)
 	const double forceFactorAbs = 50;
 
 	double forceFactor = 0;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN))
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
 		forceFactor = -forceFactorAbs/2;
-	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP))
+	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
 	{
 		forceFactor = forceFactorAbs;
 		int i;
@@ -155,9 +155,9 @@ void TopDownRaceState::handlePhysics(float delta)
 	}
 
 	float angle = 0;
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
 		angle = -M_PI/4;
-	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
+	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
 		angle = M_PI/4;
 
 	player->update(delta, forceFactor, angle);
@@ -183,40 +183,40 @@ void TopDownRaceState::handleInput()
 	while(not eventQueue.isEmpty())
 	{
 		eventQueue.waitNextEvent(&event);
-		if(event.getEventType() == fgeal::Event::Type::DISPLAY_CLOSURE)
+		if(event.getEventType() == fgeal::Event::TYPE_DISPLAY_CLOSURE)
 		{
 			//game.enterState(CarseGame::MENU_STATE_ID);
 			game.running = false;
 		}
-		else if(event.getEventType() == fgeal::Event::Type::KEY_PRESS)
+		else if(event.getEventType() == fgeal::Event::TYPE_KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
 			{
-				case fgeal::Keyboard::Key::ARROW_UP:
+				case fgeal::Keyboard::KEY_ARROW_UP:
 					car_sound_idle->stop();
 					if(not car_sound_high->isPlaying())
 						car_sound_high->loop();
 					break;
-				case fgeal::Keyboard::Key::P:
+				case fgeal::Keyboard::KEY_P:
 					if(music_sample->isPlaying())
 						music_sample->pause();
 					else
 						music_sample->resume();
 					break;
-				case fgeal::Keyboard::Key::L:
+				case fgeal::Keyboard::KEY_L:
 					lockOn = !lockOn;
 					break;
-				case fgeal::Keyboard::Key::D:
+				case fgeal::Keyboard::KEY_D:
 					showDebug = !showDebug;
 					break;
 				default: break;
 			}
 		}
-		else if(event.getEventType() == fgeal::Event::Type::KEY_RELEASE)
+		else if(event.getEventType() == fgeal::Event::TYPE_KEY_RELEASE)
 		{
 			switch(event.getEventKeyCode())
 			{
-				case fgeal::Keyboard::Key::ARROW_UP:
+				case fgeal::Keyboard::KEY_ARROW_UP:
 					car_sound_high->stop();
 					if(not car_sound_idle->isPlaying())
 					car_sound_idle->loop();

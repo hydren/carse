@@ -322,39 +322,39 @@ void Pseudo3DRaceState::handleInput()
 	while(not eventQueue.isEmpty())
 	{
 		eventQueue.waitNextEvent(&event);
-		if(event.getEventType() == Event::Type::DISPLAY_CLOSURE)
+		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
 			game.running = false;
 
-		else if(event.getEventType() == Event::Type::KEY_PRESS)
+		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
 			{
-				case Keyboard::Key::ESCAPE:
+				case Keyboard::KEY_ESCAPE:
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
-				case Keyboard::Key::R:
+				case Keyboard::KEY_R:
 					position = 0;
 					posX = 0;
 					speed = 0;
 					pseudoAngle = 0;
 					break;
-				case Keyboard::Key::T:
+				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;
 					break;
-				case Keyboard::Key::M:
+				case Keyboard::KEY_M:
 					if(music->isPlaying())
 						music->pause();
 					else
 						music->resume();
 					break;
-				case Keyboard::Key::D:
+				case Keyboard::KEY_D:
 					debugMode = !debugMode;
 					break;
-				case Keyboard::Key::LEFT_SHIFT:
+				case Keyboard::KEY_LEFT_SHIFT:
 					if(vehicle.engine.gear < vehicle.engine.gearCount)
 						vehicle.engine.gear++;
 					break;
-				case Keyboard::Key::LEFT_CONTROL:
+				case Keyboard::KEY_LEFT_CONTROL:
 					if(vehicle.engine.gear > 1)
 						vehicle.engine.gear--;
 					break;
@@ -369,8 +369,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	vehicle.engine.update(speed);
 
-	const float throttle = Keyboard::isKeyPressed(Keyboard::Key::ARROW_UP)? 1.0 : 0.0;
-	const float braking =  Keyboard::isKeyPressed(Keyboard::Key::ARROW_DOWN)? 1.0 : 0.0;
+	const float throttle = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
+	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
 	const float wheelAngleFactor = 1 - 0.5*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
@@ -385,12 +385,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	position += speed*delta;
 
 	// update steering
-	if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_LEFT))
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
 	{
 		if(pseudoAngle < 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle += delta * STEERING_SPEED;
 	}
-	else if(Keyboard::isKeyPressed(Keyboard::Key::ARROW_RIGHT))
+	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
 	{
 		if(pseudoAngle > 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle -= delta * STEERING_SPEED;

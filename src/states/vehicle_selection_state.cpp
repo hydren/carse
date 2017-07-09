@@ -10,8 +10,8 @@
 #include "race_state.hpp"
 #include "futil/properties.hpp"
 
-#include "futil/string/actions.hpp"
-#include "futil/string/more_operators.hpp"
+#include "futil/string_actions.hpp"
+#include "futil/string_extra_operators.hpp"
 
 #include <iostream>
 using std::cout; using std::endl;
@@ -28,6 +28,7 @@ using fgeal::Image;
 using fgeal::Rectangle;
 using fgeal::Menu;
 using futil::Properties;
+using futil::ends_with;
 using std::vector;
 using std::string;
 
@@ -62,13 +63,13 @@ void VehicleSelectionState::initialize()
 	menu->focusedEntryFontColor = Color::NAVY;
 
 	cout << "reading vehicles..." << endl;
-	vector<string> vehicleFiles = fgeal::getFilenamesWithinDirectory("data/vehicles");
+	vector<string> vehicleFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
 	for(unsigned i = 0; i < vehicleFiles.size(); i++)
 	{
 		const string& filename = vehicleFiles[i];
-		if(fgeal::isFilenameDirectory(filename))
+		if(fgeal::filesystem::isFilenameDirectory(filename))
 		{
-			vector<string> subfolderFiles = fgeal::getFilenamesWithinDirectory(filename);
+			vector<string> subfolderFiles = fgeal::filesystem::getFilenamesWithinDirectory(filename);
 			for(unsigned j = 0; j < subfolderFiles.size(); j++)
 			{
 				const string& subfolderFile = subfolderFiles[j];
@@ -138,24 +139,24 @@ void VehicleSelectionState::handleInput()
 	while(eventQueue.hasEvents())
 	{
 		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::Type::DISPLAY_CLOSURE)
+		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
 		{
 			game.running = false;
 		}
-		else if(event.getEventType() == Event::Type::KEY_PRESS)
+		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
 			{
-				case Keyboard::Key::ESCAPE:
+				case Keyboard::KEY_ESCAPE:
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
-				case Keyboard::Key::ENTER:
+				case Keyboard::KEY_ENTER:
 					this->onMenuSelect();
 					break;
-				case Keyboard::Key::ARROW_UP:
+				case Keyboard::KEY_ARROW_UP:
 					menu->cursorUp();
 					break;
-				case Keyboard::Key::ARROW_DOWN:
+				case Keyboard::KEY_ARROW_DOWN:
 					menu->cursorDown();
 					break;
 				default:

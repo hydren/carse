@@ -20,8 +20,8 @@
 #endif
 
 #include "fgeal/fgeal.hpp"
-#include "futil/string/actions.hpp"
-#include "futil/string/split.hpp"
+#include "futil/string_actions.hpp"
+#include "futil/string_split.hpp"
 
 #define CARSE_VERSION "0.4.2-dev"
 
@@ -33,6 +33,8 @@ using fgeal::Image;
 using fgeal::Display;
 using fgeal::Color;
 
+using futil::starts_with;
+using futil::split;
 
 void runSplash()
 {

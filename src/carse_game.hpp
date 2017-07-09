@@ -9,8 +9,9 @@
 #define CARSE_GAME_HPP_
 #include <ciso646>
 
+#include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
-#include "futil/general/language.hpp"
+#include "futil/language.hpp"
 
 #include "automotive/engine_sound.hpp"
 #include "vehicle.hpp"

@@ -10,7 +10,7 @@
 #include <ciso646>
 
 #include "fgeal/extra/game.hpp"
-#include "futil/general/language.hpp"
+#include "futil/language.hpp"
 
 class TopdownCarseGame extends public fgeal::Game
 {

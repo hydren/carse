@@ -1,5 +1,7 @@
 # todo
 
+- Fix incorrect tire animation speed.
+- Fix incorrect precision when drawing some floats.
 - In vehicle sprite specification, create separate x and y scales.
 - Implement a simple, generic torque curve instead of current flat torque curve along RPM range.
 - Load more data from vehicle properties file, including some informative data (gives a hipster feel).

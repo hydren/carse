@@ -10,8 +10,8 @@
 #include "race_state.hpp"
 #include "futil/properties.hpp"
 
-#include "futil/string/actions.hpp"
-#include "futil/string/more_operators.hpp"
+#include "futil/string_actions.hpp"
+#include "futil/string_extra_operators.hpp"
 
 #include <iostream>
 #include <vector>
@@ -30,6 +30,7 @@ using std::string;
 using std::cout;
 using std::endl;
 using futil::Properties;
+using futil::ends_with;
 
 int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 
@@ -60,7 +61,7 @@ void CourseSelectionState::initialize()
 
 	cout << "reading vehicles..." << endl;
 
-	vector<string> courseFiles = fgeal::getFilenamesWithinDirectory("data/courses");
+	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/courses");
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 	{
 		if(ends_with(courseFiles[i], ".properties"))
@@ -103,24 +104,24 @@ void CourseSelectionState::handleInput()
 	while(eventQueue.hasEvents())
 	{
 		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::Type::DISPLAY_CLOSURE)
+		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
 		{
 			game.running = false;
 		}
-		else if(event.getEventType() == Event::Type::KEY_PRESS)
+		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
 			{
-				case Keyboard::Key::ESCAPE:
+				case Keyboard::KEY_ESCAPE:
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
-				case Keyboard::Key::ENTER:
+				case Keyboard::KEY_ENTER:
 					this->onMenuSelect();
 					break;
-				case Keyboard::Key::ARROW_UP:
+				case Keyboard::KEY_ARROW_UP:
 					menu->cursorUp();
 					break;
-				case Keyboard::Key::ARROW_DOWN:
+				case Keyboard::KEY_ARROW_DOWN:
 					menu->cursorDown();
 					break;
 				default:

@@ -7,9 +7,9 @@
 
 #include "course.hpp"
 
-#include "futil/math/more_random.h"
-#include "futil/string/actions.hpp"
-#include "futil/string/split.hpp"
+#include "futil/random.h"
+#include "futil/string_actions.hpp"
+#include "futil/string_split.hpp"
 
 #include <stdexcept>
 #include <iostream>
@@ -24,6 +24,10 @@ using fgeal::Color;
 using futil::Properties;
 using std::string;
 using std::vector;
+using futil::random_between_decimal;
+using futil::split;
+using futil::trim;
+using futil::starts_with;
 
 //custom call to draw quad
 void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
@@ -119,9 +123,9 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 		if(currentCurve == 0)
 		{
 			if(rand() % 500 == 0)
-				currentCurve = random_decimal_between(-5*curveness, 5*curveness);
+				currentCurve = random_between_decimal(-5*curveness, 5*curveness);
 			else if(rand() % 50 == 0)
-				currentCurve = random_decimal_between(-curveness, curveness);
+				currentCurve = random_between_decimal(-curveness, curveness);
 		}
 
 		else if(currentCurve != 0 and rand() % 100 == 0)
@@ -137,15 +141,13 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	return course;
 }
 
-string charArrayToString(const char* str) { return string(str); }
-
 //static
 Course Course::createCourseFromFile(const Properties& prop)
 {
-	string segmentFilename = prop.getAsValueOrFail<string, charArrayToString>("segment_file", "Missing segment file for course!");
-	float segmentLength = prop.getAsValueOrDefault<double, atof>("segment_length", 200);  // this may become non-customizable
-	float roadWidth = prop.getAsValueOrDefault<double, atof>("road_width", 3000);
-	float length = prop.getAsValueOrDefault<double, atof>("course_length", 6400);
+	string segmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
+	float segmentLength = prop.getParsedAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
+	float roadWidth = prop.getParsedAllowDefault<double, atof>("road_width", 3000);
+	float length = prop.getParsedAllowDefault<double, atof>("course_length", 6400);
 
 	std::ifstream stream(segmentFilename.c_str());
 	if(not stream.is_open())

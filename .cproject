@@ -1303,6 +1303,7 @@
 		</configuration>
 		<configuration configurationName="linux-gcc-sdl2.0-release"/>
 		<configuration configurationName="linux-gcc-sfml2.0-release"/>
+		<configuration configurationName="win32-mingw-sfml2.0-debug"/>
 		<configuration configurationName="linux-gcc-allegro5.0-debug"/>
 		<configuration configurationName="Linux SDL 1.2 Release">
 			<resource resourceType="PROJECT" workspacePath="/carse"/>
@@ -1315,6 +1316,7 @@
 		<configuration configurationName="Multiple configurations">
 			<resource resourceType="PROJECT" workspacePath="/carse"/>
 		</configuration>
+		<configuration configurationName="win32-mingw-sfml2.0-release"/>
 		<configuration configurationName="Linux Allegro 5 Debug">
 			<resource resourceType="PROJECT" workspacePath="/carse"/>
 		</configuration>
@@ -1361,6 +1363,7 @@
 		<configuration configurationName="Win32 SDL 2.0 Release">
 			<resource resourceType="PROJECT" workspacePath="/carse"/>
 		</configuration>
+		<configuration configurationName="win32-msvc-sdl1.2-debug"/>
 		<configuration configurationName="Linux Allegro 5 Release">
 			<resource resourceType="PROJECT" workspacePath="/carse"/>
 		</configuration>

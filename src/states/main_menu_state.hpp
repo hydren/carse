@@ -12,7 +12,7 @@
 #include "carse_game.hpp"
 #include "fgeal/extra/menu.hpp"
 
-#include "futil/general/language.hpp"
+#include "futil/language.hpp"
 #include "fgeal/fgeal.hpp"
 
 class MainMenuState extends public fgeal::Game::State

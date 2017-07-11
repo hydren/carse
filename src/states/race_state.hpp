@@ -14,7 +14,7 @@
 
 #include "carse_game.hpp"
 
-#include "futil/general/language.hpp"
+#include "futil/language.hpp"
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/sprite.hpp"
 

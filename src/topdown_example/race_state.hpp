@@ -17,8 +17,7 @@
 
 #include "fgeal/fgeal.hpp"
 
-#include "futil/general/language.hpp"
-#include "futil/math/rect.hpp"
+#include "futil/language.hpp"
 
 typedef Box2DVehicleBody Car;
 
@@ -35,7 +34,7 @@ class TopDownRaceState extends public fgeal::Game::State
 	bool showDebug;
 
 	//the race camera
-	Rect camera;
+	fgeal::Rectangle camera;
 	double cameraAngle;
 
 	fgeal::Image* car_sprite, *track_bg;

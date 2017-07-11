@@ -15,7 +15,7 @@
 #include "fgeal/extra/menu.hpp"
 #include "course.hpp"
 
-#include "futil/general/language.hpp"
+#include "futil/language.hpp"
 #include "fgeal/fgeal.hpp"
 
 class CourseSelectionState extends public fgeal::Game::State

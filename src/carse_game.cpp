@@ -7,8 +7,8 @@
 
 #include "carse_game.hpp"
 
-#include "futil/string/actions.hpp"
-#include "futil/string/split.hpp"
+#include "futil/string_actions.hpp"
+#include "futil/string_split.hpp"
 
 // XXX debug code
 #include <iostream>
@@ -25,6 +25,7 @@ using std::endl;
 #include "states/course_selection_state.hpp"
 
 using futil::Properties;
+using futil::ends_with;
 using std::vector;
 using std::string;
 using std::map;
@@ -64,7 +65,7 @@ EngineSoundProfile& Pseudo3DCarseGame::getPresetEngineSoundProfile(const std::st
 void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 {
 	cout << "reading preset engine sound profiles..." << endl;
-	vector<string> pendingPresetFiles, presetFiles = fgeal::getFilenamesWithinDirectory("assets/sound/engine");
+	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory("assets/sound/engine");
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
 		string& filename = presetFiles[i];

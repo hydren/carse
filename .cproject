@@ -382,7 +382,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.1522148624" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.695599340" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl1.2-debug" id="org.eclipse.cdt.build.core.internal.builder.114417258" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl1.2-debug" id="org.eclipse.cdt.build.core.internal.builder.114417258" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.1840904505" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.486814926" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -444,7 +444,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.276218169.482858306." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.805621270" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1916057583" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-allegro5.0-debug" id="org.eclipse.cdt.build.core.internal.builder.1683503908" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-allegro5.0-debug" id="org.eclipse.cdt.build.core.internal.builder.1683503908" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.646534094" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.505425170" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -506,7 +506,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.31789471.215207481." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.107012092" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1634843711" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-allegro5.0-release" id="org.eclipse.cdt.build.core.internal.builder.1044534680" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-allegro5.0-release" id="org.eclipse.cdt.build.core.internal.builder.1044534680" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.1302725262" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.959466456" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -568,7 +568,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.53857838" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.93141730" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl1.2-release" id="org.eclipse.cdt.build.core.internal.builder.1303801197" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl1.2-release" id="org.eclipse.cdt.build.core.internal.builder.1303801197" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.695552213" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.660217485" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -754,7 +754,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.1168972581." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.661397647" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.679343748" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl2.0-debug" id="org.eclipse.cdt.build.core.internal.builder.1727335684" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl2.0-debug" id="org.eclipse.cdt.build.core.internal.builder.1727335684" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.901299662" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1063974874" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -816,7 +816,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.1943992401." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.1838150673" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1753627193" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl2.0-release" id="org.eclipse.cdt.build.core.internal.builder.1812800513" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sdl2.0-release" id="org.eclipse.cdt.build.core.internal.builder.1812800513" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.1406321362" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.2134491869" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -1122,7 +1122,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1392165547.1430976377.1800355337.193191745." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.1632616770" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1740913137" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sfml2.0-debug" id="org.eclipse.cdt.build.core.internal.builder.471975049" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sfml2.0-debug" id="org.eclipse.cdt.build.core.internal.builder.471975049" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.1811135738" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1795189273" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -1182,7 +1182,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.1001427263.2009811506.588208529.1294717427." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.mingw.base.222867621" name="MinGW GCC" superClass="cdt.managedbuild.toolchain.gnu.mingw.base">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.PE" id="cdt.managedbuild.target.gnu.platform.mingw.base.1334282020" name="Debug Platform" osList="win32" superClass="cdt.managedbuild.target.gnu.platform.mingw.base"/>
-							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sfml2.0-release" id="org.eclipse.cdt.build.core.internal.builder.1799756935" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder buildPath="${workspace_loc:/carse}/win32-mingw-sfml2.0-release" id="org.eclipse.cdt.build.core.internal.builder.1799756935" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.mingw.base.1041726987" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.1505024601" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -1244,6 +1244,9 @@
 							<tool id="org.eclipse.cdt.msvc.cl.c.dll.debug.1104979825" name="C Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.c.dll.debug">
 								<option id="org.eclipse.cdt.msvc.cl.option.optimization.1055885757" name="Optimization" superClass="org.eclipse.cdt.msvc.cl.option.optimization" useByScannerDiscovery="false" value="org.eclipse.cdt.msvc.cl.option.optimization.default" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.msvc.cl.option.debugFormat.801187220" name="Debug Information Format" superClass="org.eclipse.cdt.msvc.cl.option.debugFormat" useByScannerDiscovery="false" value="org.eclipse.cdt.msvc.cl.option.debugFormat.complete" valueType="enumerated"/>
+								<option id="org.eclipse.cdt.msvc.cl.option.includes.2055276621" superClass="org.eclipse.cdt.msvc.cl.option.includes" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${WINSDK_INCLUDE_PATH}&quot;"/>
+								</option>
 								<inputType id="org.eclipse.cdt.msvc.cl.inputType.c.1515093824" superClass="org.eclipse.cdt.msvc.cl.inputType.c"/>
 							</tool>
 							<tool id="org.eclipse.cdt.msvc.cl.dll.debug.1164712915" name="C++ Compiler (cl)" superClass="org.eclipse.cdt.msvc.cl.dll.debug">

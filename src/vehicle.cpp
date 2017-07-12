@@ -50,28 +50,28 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
 
-	spriteStateCount = prop.getParsedAllowDefault<int, atoi>("sprite_state_count", 1);
-	spriteWidth = prop.getParsedAllowDefault<int, atoi>("sprite_frame_width", DEFAULT_SPRITE_WIDTH);
-	spriteHeight = prop.getParsedAllowDefault<int, atoi>("sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
-	spriteFrameDuration = prop.getParsedAllowDefault<double, atof>("sprite_frame_duration", -1.0);
-	spriteScale = prop.getParsedAllowDefault<double, atof>("sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
-	spriteMaxDepictedTurnAngle = prop.getParsedAllowDefault<double, atof>("sprite_max_depicted_turn_angle", DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE)/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+	spriteStateCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_state_count", 1);
+	spriteWidth = prop.getParsedCStrAllowDefault<int, atoi>("sprite_frame_width", DEFAULT_SPRITE_WIDTH);
+	spriteHeight = prop.getParsedCStrAllowDefault<int, atoi>("sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
+	spriteFrameDuration = prop.getParsedCStrAllowDefault<double, atof>("sprite_frame_duration", -1.0);
+	spriteScale = prop.getParsedCStrAllowDefault<double, atof>("sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
+	spriteMaxDepictedTurnAngle = prop.getParsedCStrAllowDefault<double, atof>("sprite_max_depicted_turn_angle", DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE)/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
-		spriteStateFrameCount.push_back(prop.getParsedAllowDefault<int, atoi>(string("sprite_state")+stateNumber+"_frame_count", 1));
+		spriteStateFrameCount.push_back(prop.getParsedCStrAllowDefault<int, atoi>(string("sprite_state")+stateNumber+"_frame_count", 1));
 
-	mass = prop.getParsedAllowDefault<double, atof>("vehicle_mass", DEFAULT_VEHICLE_MASS);
+	mass = prop.getParsedCStrAllowDefault<double, atof>("vehicle_mass", DEFAULT_VEHICLE_MASS);
 
-	engine.maxRpm = prop.getParsedAllowDefault<int, atoi>("engine_maximum_rpm", DEFAULT_MAXIMUM_RPM);
-	engine.torque = prop.getParsedAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
+	engine.maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", DEFAULT_MAXIMUM_RPM);
+	engine.torque = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
 
-	engine.tireRadius = prop.getParsedAllowDefault<double, atof>("tire_diameter", DEFAULT_TIRE_DIAMETER) * 0.0005;
+	engine.tireRadius = prop.getParsedCStrAllowDefault<double, atof>("tire_diameter", DEFAULT_TIRE_DIAMETER) * 0.0005;
 
 	// todo read more data from properties
 
 	engine.transmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
 
-	engine.gearCount = prop.getParsedAllowDefault<int, atoi>("gear_count", DEFAULT_GEAR_COUNT);
+	engine.gearCount = prop.getParsedCStrAllowDefault<int, atoi>("gear_count", DEFAULT_GEAR_COUNT);
 
 	engine.gearRatio = new float[engine.gearCount+1];
 

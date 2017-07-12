@@ -145,9 +145,9 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 Course Course::createCourseFromFile(const Properties& prop)
 {
 	string segmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
-	float segmentLength = prop.getParsedAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
-	float roadWidth = prop.getParsedAllowDefault<double, atof>("road_width", 3000);
-	float length = prop.getParsedAllowDefault<double, atof>("course_length", 6400);
+	float segmentLength = prop.getParsedCStrAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
+	float roadWidth = prop.getParsedCStrAllowDefault<double, atof>("road_width", 3000);
+	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
 
 	std::ifstream stream(segmentFilename.c_str());
 	if(not stream.is_open())

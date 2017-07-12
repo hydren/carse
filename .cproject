@@ -1245,7 +1245,7 @@
 								<option id="org.eclipse.cdt.msvc.cl.option.optimization.1055885757" name="Optimization" superClass="org.eclipse.cdt.msvc.cl.option.optimization" useByScannerDiscovery="false" value="org.eclipse.cdt.msvc.cl.option.optimization.default" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.msvc.cl.option.debugFormat.801187220" name="Debug Information Format" superClass="org.eclipse.cdt.msvc.cl.option.debugFormat" useByScannerDiscovery="false" value="org.eclipse.cdt.msvc.cl.option.debugFormat.complete" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.msvc.cl.option.includes.2055276621" superClass="org.eclipse.cdt.msvc.cl.option.includes" useByScannerDiscovery="false" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${WINSDK_INCLUDE_PATH}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${WindowsSdkDir}/Include&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.msvc.cl.inputType.c.1515093824" superClass="org.eclipse.cdt.msvc.cl.inputType.c"/>
 							</tool>
@@ -1253,7 +1253,7 @@
 								<option id="org.eclipse.cdt.msvc.cl.option.includes.1229730605" name="Include Path (/I)" superClass="org.eclipse.cdt.msvc.cl.option.includes" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/src_libs&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${WINSDK_INCLUDE_PATH}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${WindowsSdkDir}/Include&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.msvc.cl.option.optimization.1127448191" name="Optimization" superClass="org.eclipse.cdt.msvc.cl.option.optimization" useByScannerDiscovery="false" value="org.eclipse.cdt.msvc.cl.option.optimization.default" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.msvc.cl.option.debugFormat.1457577334" name="Debug Information Format" superClass="org.eclipse.cdt.msvc.cl.option.debugFormat" useByScannerDiscovery="false" value="org.eclipse.cdt.msvc.cl.option.debugFormat.complete" valueType="enumerated"/>
@@ -1274,7 +1274,7 @@
 								</option>
 								<option id="org.eclipse.cdt.msvc.link.option.debug.924443903" name="Generate Debug Info (/debug)" superClass="org.eclipse.cdt.msvc.link.option.debug" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="org.eclipse.cdt.msvc.link.option.libpath.1869837684" name="Additional Libpath (/libpath)" superClass="org.eclipse.cdt.msvc.link.option.libpath" useByScannerDiscovery="false" valueType="stringList">
-									<listOptionValue builtIn="false" value="&quot;${WINSDK_LIB_PATH}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${WindowsSdkDir}/Lib&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.msvc.link.inputType.480527247" superClass="org.eclipse.cdt.msvc.link.inputType"/>
 							</tool>

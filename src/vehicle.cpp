@@ -64,6 +64,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	engine.maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", DEFAULT_MAXIMUM_RPM);
 	engine.torque = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
+	engine.torqueCurveProfile = Engine::TorqueCurveProfile::create(engine.maxRpm);
 
 	engine.tireRadius = prop.getParsedCStrAllowDefault<double, atof>("tire_diameter", DEFAULT_TIRE_DIAMETER) * 0.0005;
 

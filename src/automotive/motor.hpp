@@ -18,6 +18,16 @@ struct Engine
 	float *gearRatio, reverseGearRatio; // fixme this leaks :)
 	float tireRadius;
 
+	struct TorqueCurveProfile
+	{
+		float parameters[3][3];
+
+		/** Creates a torque curve with some hardcoded values and the given max. RPM and max. torque RPM (Optional) */
+		static TorqueCurveProfile create(float maxRpm, float rpmMaxTorque=-1);
+	};
+
+	TorqueCurveProfile torqueCurveProfile;
+
 	bool automaticShiftingEnabled;
 	float automaticShiftingLowerThreshold;
 	float automaticShiftingUpperThreshold;

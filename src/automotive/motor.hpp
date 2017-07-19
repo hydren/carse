@@ -24,6 +24,9 @@ struct Engine
 
 		/** Creates a torque curve with some hardcoded values and the given max. RPM and max. torque RPM (Optional) */
 		static TorqueCurveProfile create(float maxRpm, float rpmMaxTorque=-1);
+
+		/** Fraction of maximum torque that is available with 1000rpm and max.rpm, respectively. */
+		static const float TORQUE_CURVE_INITIAL_VALUE, TORQUE_CURVE_FINAL_VALUE;
 	};
 
 	TorqueCurveProfile torqueCurveProfile;

@@ -15,9 +15,6 @@ using futil::Properties;
 using std::map;
 using std::string;
 
-// fixme this factor still doesn't produce satisfactory results
-static const float POWER_TORQUE_FACTOR = 5.0/3.0;
-
 // default float constants
 static const float
 	DEFAULT_VEHICLE_MASS = 1250,  // kg
@@ -26,6 +23,7 @@ static const float
 	DEFAULT_TIRE_DIAMETER = 678,  // mm
 	DEFAULT_GEAR_COUNT = 5,
 	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
+	DEFAULT_MAX_TORQUE_RPM_POSITION = 2.f/3.f,  // 0.66666... (two thirds)
 
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
@@ -63,8 +61,20 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	mass = prop.getParsedCStrAllowDefault<double, atof>("vehicle_mass", DEFAULT_VEHICLE_MASS);
 
 	engine.maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", DEFAULT_MAXIMUM_RPM);
-	engine.torque = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
-	engine.torqueCurveProfile = Engine::TorqueCurveProfile::create(engine.maxRpm);
+
+	const float maxPower = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER);
+
+	// generic torque rpm position
+	const float maxTorqueRpm = (engine.maxRpm + 1000.f)*DEFAULT_MAX_TORQUE_RPM_POSITION;
+
+	// estimate max power rpm
+	const float maxPowerRpm = 0.5*(engine.maxRpm + maxTorqueRpm);
+
+	const float conversionFactor = 5252.0 * 1.355818, K = Engine::TorqueCurveProfile::TORQUE_CURVE_FINAL_VALUE;
+	engine.torque = conversionFactor * maxPower * (engine.maxRpm - maxTorqueRpm) / (maxPowerRpm*(engine.maxRpm + (K-1.0)*maxPowerRpm - K*maxTorqueRpm));
+//	engine.torque = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
+
+	engine.torqueCurveProfile = Engine::TorqueCurveProfile::create(engine.maxRpm, maxTorqueRpm);
 
 	engine.tireRadius = prop.getParsedCStrAllowDefault<double, atof>("tire_diameter", DEFAULT_TIRE_DIAMETER) * 0.0005;
 

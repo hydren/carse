@@ -227,7 +227,9 @@ void Pseudo3DRaceState::render()
 	sprite.flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 	sprite.scale.x = scale;
 	sprite.scale.y = scale;
-	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // fixme this formula doesn't present good tire animation results.
+//	sprite.duration = speed != 0? 0.1*400.0/(speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
+	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // this formula doesn't present good tire animation results.
+//	sprite.duration = speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
 	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), display.getHeight()-1.5*sprite.scale.y*vehicle.spriteHeight);
 

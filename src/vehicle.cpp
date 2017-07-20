@@ -65,12 +65,11 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	const float maxPower = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER);
 
 	// generic torque rpm position
-	const float maxTorqueRpm = (engine.maxRpm + 1000.f)*DEFAULT_MAX_TORQUE_RPM_POSITION;
+	const float maxTorqueRpm = (1000.0 + engine.maxRpm)*DEFAULT_MAX_TORQUE_RPM_POSITION;
 	//float maxTorqueRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_torque_rpm", -1);
 
-	// estimate max power rpm
-	const float maxPowerRpm = 0.5*(engine.maxRpm + maxTorqueRpm);
-	//float maxPowerRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_power_rpm", -1);
+	// attempt to read max power rpm
+	float maxPowerRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_power_rpm", -1);
 
 	const float conversionFactor = 5252.0 * 1.355818, K = Engine::TorqueCurveProfile::TORQUE_CURVE_FINAL_VALUE;
 
@@ -82,12 +81,13 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 //		}
 //		else maxTorqueRpm = (engine.maxRpm + 1000.f)*DEFAULT_MAX_TORQUE_RPM_POSITION;  // generic torque rpm position
 //	}
-//	if(maxPowerRpm < 0)  // if no rpm of max power is specified, estimate one
-//	{
-//		maxPowerRpm = (maxTorqueRpm*K - engine.maxRpm)/(2.f*K - 2);
-//	}
 
-	engine.torque = conversionFactor * maxPower * (engine.maxRpm - maxTorqueRpm) / (maxPowerRpm*(engine.maxRpm + (K-1.0)*maxPowerRpm - K*maxTorqueRpm));
+	// if no rpm of max power is specified, estimate one
+	if(maxPowerRpm < 0)
+		// estimate max power rpm
+		maxPowerRpm = (maxTorqueRpm + engine.maxRpm)*0.5;
+
+	engine.torque = conversionFactor * maxPower * (engine.maxRpm - maxTorqueRpm) / (maxPowerRpm*((K - 1.0)*maxPowerRpm + engine.maxRpm - maxTorqueRpm*K));
 //	engine.torque = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
 
 	engine.torqueCurveProfile = Engine::TorqueCurveProfile::create(engine.maxRpm, maxTorqueRpm);

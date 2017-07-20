@@ -133,7 +133,6 @@ void CourseSelectionState::handleInput()
 
 void CourseSelectionState::onMenuSelect()
 {
-	Pseudo3DRaceState* raceState = static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID));
-	raceState->setCourse(courses[menu->getSelectedIndex()]);
+	Pseudo3DRaceState::getInstance(game)->setCourse(courses[menu->getSelectedIndex()]);
 	game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID);
 }

@@ -1,6 +1,5 @@
 # todo
 
-- Fix incorrect tire animation speed.
 - Fix incorrect vertical alignment of vehicles on race state.
 - In vehicle sprite specification, create separate x and y scales.
 - Implement a simple, generic torque curve instead of current flat torque curve along RPM range.
@@ -15,3 +14,4 @@
 - Create props to decorate the road.
 - Introduce a more human-readable course file format, or create a usable course editor.
 - Create a new UI. 
+- Fix incorrect tire animation speed.

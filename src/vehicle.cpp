@@ -7,7 +7,7 @@
 
 #include "vehicle.hpp"
 
-#include "futil/string_extra_operators.hpp"
+#include "futil/string_actions.hpp"
 
 #include <cstdlib>
 
@@ -38,6 +38,8 @@ Vehicle::Vehicle()
   mass(1250)
 {}
 
+#define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
+
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 {
 	string key;
@@ -48,28 +50,50 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
 
-	spriteStateCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_state_count", 1);
-	spriteWidth = prop.getParsedCStrAllowDefault<int, atoi>("sprite_frame_width", DEFAULT_SPRITE_WIDTH);
-	spriteHeight = prop.getParsedCStrAllowDefault<int, atoi>("sprite_frame_height", DEFAULT_SPRITE_HEIGHT);
-	spriteFrameDuration = prop.getParsedCStrAllowDefault<double, atof>("sprite_frame_duration", -1.0);
-	spriteScale = prop.getParsedCStrAllowDefault<double, atof>("sprite_scale", DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight));
-	spriteMaxDepictedTurnAngle = prop.getParsedCStrAllowDefault<double, atof>("sprite_max_depicted_turn_angle", DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE)/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+	key = "sprite_state_count";
+	spriteStateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+
+	key = "sprite_frame_width";
+	spriteWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
+
+	key = "sprite_frame_height";
+	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
+
+	key = "sprite_frame_duration";
+	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
+
+	key = "sprite_scale";
+	spriteScale = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight);
+
+	key = "sprite_max_depicted_turn_angle";
+	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
-		spriteStateFrameCount.push_back(prop.getParsedCStrAllowDefault<int, atoi>(string("sprite_state")+stateNumber+"_frame_count", 1));
+	{
+		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
+		const unsigned stateFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+		spriteStateFrameCount.push_back(stateFrameCount);
+	}
 
-	mass = prop.getParsedCStrAllowDefault<double, atof>("vehicle_mass", DEFAULT_VEHICLE_MASS);
+	key = "vehicle_mass";
+	mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
 
-	engine.maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", DEFAULT_MAXIMUM_RPM);
+	key = "engine_maximum_rpm";
+	engine.maxRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_RPM;
 
-	const float maxPower = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER);
+	key = "engine_maximum_power";
+	const float maxPower = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_POWER;
 
-	// generic torque rpm position
+	// xxx generic hardcoded torque rpm position
 	const float maxTorqueRpm = (1000.0 + engine.maxRpm)*DEFAULT_MAX_TORQUE_RPM_POSITION;
-	//float maxTorqueRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_torque_rpm", -1);
+
+//	key = "engine_maximum_torque_rpm";
+//	float maxTorqueRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1;
 
 	// attempt to read max power rpm
-	float maxPowerRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_power_rpm", -1);
+	key = "engine_maximum_power_rpm";
+	float maxPowerRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1;
 
 	const float conversionFactor = 5252.0 * 1.355818, K = Engine::TorqueCurveProfile::TORQUE_CURVE_FINAL_VALUE;
 
@@ -87,19 +111,21 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 		// estimate max power rpm
 		maxPowerRpm = (maxTorqueRpm + engine.maxRpm)*0.5;
 
+//	key = "engine_maximum_power";
+//	engine.torque = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_POWER)*POWER_TORQUE_FACTOR;
 	engine.torque = conversionFactor * maxPower * (engine.maxRpm - maxTorqueRpm) / (maxPowerRpm*((K - 1.0)*maxPowerRpm + engine.maxRpm - maxTorqueRpm*K));
-//	engine.torque = prop.getParsedCStrAllowDefault<double, atof>("engine_maximum_power", DEFAULT_MAXIMUM_POWER) * POWER_TORQUE_FACTOR;
 
 	engine.torqueCurveProfile = Engine::TorqueCurveProfile::create(engine.maxRpm, maxTorqueRpm);
 
-	engine.tireRadius = prop.getParsedCStrAllowDefault<double, atof>("tire_diameter", DEFAULT_TIRE_DIAMETER) * 0.0005;
+	key = "tire_diameter";
+	engine.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
 
 	// todo read more data from properties
 
 	engine.transmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
 
-	engine.gearCount = prop.getParsedCStrAllowDefault<int, atoi>("gear_count", DEFAULT_GEAR_COUNT);
-
+	key = "gear_count";
+	engine.gearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;
 	engine.gearRatio = new float[engine.gearCount+1];
 
 	// first, set default ratios, then override
@@ -122,7 +148,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 			for(int g = 1; g <= engine.gearCount; g++)
 			{
-				key = string("gear_") + g + "_ratio";
+				key = "gear_" + futil::to_string(g) + "_ratio";
 				if(prop.containsKey(key))
 					engine.gearRatio[g] = atof(prop.get(key).c_str());
 			}

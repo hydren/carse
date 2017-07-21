@@ -128,6 +128,8 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.clear();
 	}
 
+	fgeal::Display& display = fgeal::Display::getInstance();
+	const float scaleFactor = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
 	Image* sheet = new Image(vehicle.sheetFilename);
 	for(unsigned i = 0; i < vehicle.spriteStateCount; i++)
 	{
@@ -137,12 +139,13 @@ void Pseudo3DRaceState::onEnter()
 		Sprite* sprite = new Sprite(sheet, vehicle.spriteWidth, vehicle.spriteHeight,
 									vehicle.spriteFrameDuration, vehicle.spriteStateFrameCount[i],
 									0, i*vehicle.spriteHeight);
+
+		sprite->scale = vehicle.spriteScale * scaleFactor;
 		spritesVehicle.push_back(sprite);
 	}
 
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
-	fgeal::Display& display = fgeal::Display::getInstance();
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
 	hudRpmGauge = new Hud::DialGauge<float>(vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, gaugeSize);
@@ -222,11 +225,8 @@ void Pseudo3DRaceState::render()
 	if(animationIndex > vehicle.spriteStateCount - 1)
 		animationIndex = vehicle.spriteStateCount - 1;
 
-	const float scale = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR * vehicle.spriteScale;
 	Sprite& sprite = *spritesVehicle[animationIndex];
 	sprite.flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-	sprite.scale.x = scale;
-	sprite.scale.y = scale;
 //	sprite.duration = speed != 0? 0.1*400.0/(speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
 	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // this formula doesn't present good tire animation results.
 //	sprite.duration = speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.

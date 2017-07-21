@@ -15,3 +15,4 @@
 - Introduce a more human-readable course file format, or create a usable course editor.
 - Create a new UI. 
 - Fix incorrect tire animation speed.
+- Decrease bike (category) turn speed penalty

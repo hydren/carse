@@ -29,7 +29,7 @@ struct Vehicle
 	unsigned spriteStateCount, spriteWidth, spriteHeight;
 	float spriteFrameDuration;
 	std::vector<unsigned> spriteStateFrameCount;
-	float spriteScale;
+	fgeal::Vector2D spriteScale;
 	float spriteMaxDepictedTurnAngle;
 
 	EngineSoundProfile engineSoundProfile;

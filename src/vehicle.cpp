@@ -34,7 +34,7 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(-1), spriteMaxDepictedTurnAngle(1),
+: spriteStateCount(), spriteWidth(), spriteHeight(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1),
   mass(1250)
 {}
 
@@ -63,7 +63,13 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
 
 	key = "sprite_scale";
-	spriteScale = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT / static_cast<float>(spriteHeight);
+	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
+
+	key = "sprite_scale_y";
+	spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.y;
+
+	key = "sprite_scale_x";
+	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
 
 	key = "sprite_max_depicted_turn_angle";
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;

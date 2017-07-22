@@ -1,7 +1,6 @@
 # todo
 
-- Fix incorrect vertical alignment of vehicles on race state.
-- Implement a simple, generic torque curve instead of current flat torque curve along RPM range.
+- Add newly created vehicle specification fields to the example vehicles.
 - Load more data from vehicle properties file, including some informative data (gives a hipster feel).
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.

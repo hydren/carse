@@ -62,10 +62,10 @@ static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
 // -------------------------------------------------------------------------------
 
-int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
+int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
 //static
-Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID)); }
+Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID)); }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),

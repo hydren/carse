@@ -129,7 +129,6 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	fgeal::Display& display = fgeal::Display::getInstance();
-	const float scaleFactor = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
 	Image* sheet = new Image(vehicle.sheetFilename);
 	for(unsigned i = 0; i < vehicle.spriteStateCount; i++)
 	{
@@ -140,7 +139,7 @@ void Pseudo3DRaceState::onEnter()
 									vehicle.spriteFrameDuration, vehicle.spriteStateFrameCount[i],
 									0, i*vehicle.spriteHeight);
 
-		sprite->scale = vehicle.spriteScale * scaleFactor;
+		sprite->scale = vehicle.spriteScale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
 		spritesVehicle.push_back(sprite);
 	}
 

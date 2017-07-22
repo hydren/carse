@@ -1,7 +1,6 @@
 # todo
 
 - Fix incorrect vertical alignment of vehicles on race state.
-- In vehicle sprite specification, create separate x and y scales.
 - Implement a simple, generic torque curve instead of current flat torque curve along RPM range.
 - Load more data from vehicle properties file, including some informative data (gives a hipster feel).
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.

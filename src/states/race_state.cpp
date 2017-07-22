@@ -140,6 +140,7 @@ void Pseudo3DRaceState::onEnter()
 									0, i*vehicle.spriteHeight);
 
 		sprite->scale = vehicle.spriteScale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
+		sprite->referencePixelY = - (int) vehicle.offset;
 		spritesVehicle.push_back(sprite);
 	}
 

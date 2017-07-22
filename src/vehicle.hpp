@@ -26,7 +26,7 @@ struct Vehicle
 {
 	std::string name, sheetFilename;
 
-	unsigned spriteStateCount, spriteWidth, spriteHeight;
+	unsigned spriteStateCount, spriteWidth, spriteHeight, offset;
 	float spriteFrameDuration;
 	std::vector<unsigned> spriteStateFrameCount;
 	fgeal::Vector2D spriteScale;

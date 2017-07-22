@@ -59,7 +59,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_frame_height";
 	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
 
-	key = "sprite_wheel_offset";
+	key = "sprite_offset";
 	offset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
 
 	key = "sprite_frame_duration";

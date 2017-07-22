@@ -231,7 +231,8 @@ void Pseudo3DRaceState::render()
 	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // this formula doesn't present good tire animation results.
 //	sprite.duration = speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
-	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), display.getHeight()-1.5*sprite.scale.y*vehicle.spriteHeight);
+	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), 0.825*(display.getHeight()-sprite.scale.y*vehicle.spriteHeight)-sprite.scale.y*vehicle.offset);
+//	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), display.getHeight()-1.5*sprite.scale.y*vehicle.spriteHeight);
 
 	hudSpeedDisplay->draw();
 	hudRpmGauge->draw();

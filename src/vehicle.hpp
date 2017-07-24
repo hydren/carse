@@ -24,18 +24,19 @@ struct Pseudo3DCarseGame;  // foward declaration
 
 struct Vehicle
 {
-	std::string name, sheetFilename;
+	std::string name, authors, credits, comments;
 
+	std::string sheetFilename;
 	unsigned spriteStateCount, spriteWidth, spriteHeight, offset;
 	float spriteFrameDuration;
 	std::vector<unsigned> spriteStateFrameCount;
 	fgeal::Vector2D spriteScale;
 	float spriteMaxDepictedTurnAngle;
 
-	EngineSoundProfile engineSoundProfile;
-
-	Engine engine;
 	float mass;
+	Engine engine;
+
+	EngineSoundProfile engineSoundProfile;
 
 	// creates a empty vehicle object
 	Vehicle();

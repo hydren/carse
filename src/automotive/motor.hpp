@@ -9,6 +9,8 @@
 #define MOTOR_HPP_
 #include <ciso646>
 
+#include <string>
+
 struct Engine
 {
 	float torque;
@@ -17,6 +19,11 @@ struct Engine
 	int gear, gearCount;
 	float *gearRatio, reverseGearRatio; // fixme this leaks :)
 	float tireRadius;
+
+	// read-only info fields!
+	std::string configuration, aspiration, valvetrain;
+	unsigned displacement, valveCount;
+	float maximumPower, maximumPowerRpm, maximumTorqueRpm;
 
 	struct TorqueCurveProfile
 	{

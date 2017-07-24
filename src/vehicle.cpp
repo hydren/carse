@@ -44,8 +44,42 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 {
 	string key;
 
+	// info data
+
 	key = "vehicle_name";
 	name = prop.containsKey(key)? prop.get(key) : "unnamed";
+
+	key = "authors";
+	authors = prop.containsKey(key)? prop.get(key) : "unknown";
+
+	key = "credits";
+	credits = prop.containsKey(key)? prop.get(key) : "";
+
+	key = "comments";
+	comments = prop.containsKey(key)? prop.get(key) : "";
+
+	key = "engine_configuration";
+	engine.configuration = prop.containsKey(key)? prop.get(key) : "";
+
+	key = "engine_aspiration";
+	engine.aspiration = prop.containsKey(key)? prop.get(key) : "";
+
+	key = "engine_valvetrain";
+	engine.valvetrain = prop.containsKey(key)? prop.get(key) : "";
+
+	key = "engine_displacement";
+	engine.displacement = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 0;
+
+	key = "engine_valve_count";
+	engine.valveCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 0;
+
+	/*
+	 * 	std::string configuration, aspiration, valvetrain;
+	unsigned displacement, valveCount;
+	float maximumPower, maximumPowerRpm, maximumTorque, maximumTorqueRpm;
+	*/
+
+	// sprite data
 
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
@@ -84,6 +118,8 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 		const unsigned stateFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 		spriteStateFrameCount.push_back(stateFrameCount);
 	}
+
+	// physics data
 
 	key = "vehicle_mass";
 	mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
@@ -126,6 +162,11 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	engine.torqueCurveProfile = Engine::TorqueCurveProfile::create(engine.maxRpm, maxTorqueRpm);
 
+	// informative-only fields
+	engine.maximumPower = maxPower;
+	engine.maximumPowerRpm = maxPowerRpm;
+	engine.maximumTorqueRpm = maxTorqueRpm;
+
 	key = "tire_diameter";
 	engine.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
 
@@ -163,6 +204,8 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 			}
 		}
 	}
+
+	// sound data
 
 	if(EngineSoundProfile::requestsPresetProfile(prop))
 		engineSoundProfile = game.getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));

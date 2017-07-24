@@ -11,12 +11,13 @@
 #include "futil/properties.hpp"
 
 #include "futil/string_actions.hpp"
-#include "futil/string_extra_operators.hpp"
 
 #include <iostream>
 using std::cout; using std::endl;
 
 #include <vector>
+#include <iomanip>
+#include <sstream>
 
 using fgeal::Display;
 using fgeal::Event;
@@ -29,8 +30,16 @@ using fgeal::Rectangle;
 using fgeal::Menu;
 using futil::Properties;
 using futil::ends_with;
+using futil::to_string;
 using std::vector;
 using std::string;
+
+string toStrRounded(float value, unsigned placesCount=1)
+{
+	std::stringstream ss;
+	ss << std::fixed << std::setprecision(placesCount) << value;
+	return ss.str();
+}
 
 int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID; }
 
@@ -123,9 +132,19 @@ void VehicleSelectionState::render()
 
 	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.spriteWidth, vehicle.spriteHeight);
 
-	fontInfo->drawText(string("Power: ")+vehicle.engine.torque*3.0/5.0 + "hp", 0.525*display.getWidth(), 0.525*display.getHeight(), Color::WHITE);
-	fontInfo->drawText(string("Gears: ")+vehicle.engine.gearCount, 0.525*display.getWidth(), 0.525*display.getHeight()+12, Color::WHITE);
-	fontInfo->drawText(string("Weight: ")+vehicle.mass + "kg", 0.525*display.getWidth(), 0.525*display.getHeight()+24, Color::WHITE);
+	// info sheet
+	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
+	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
+							+ (vehicle.engine.displacement == 0?  "" : toStrRounded(vehicle.engine.displacement/1000.0) + "L ")
+							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")
+							+ (vehicle.engine.valveCount == 0?    "" : to_string(vehicle.engine.valveCount) + "-valve ")
+							+ (vehicle.engine.configuration.empty()? "" : vehicle.engine.configuration);
+	if(not engineDesc.empty()) fontInfo->drawText("Engine: "+engineDesc, sheetX, sheetY+=12, Color::WHITE);
+	else sheetY+=12;
+	fontInfo->drawText("Power:  " +to_string(vehicle.engine.maximumPower) + "hp @" + to_string((int)vehicle.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.torque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText(to_string(vehicle.engine.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Weight: "+to_string(vehicle.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
 }
 
 void VehicleSelectionState::update(float delta)

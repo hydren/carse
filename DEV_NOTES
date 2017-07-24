@@ -1,6 +1,5 @@
 # todo
 
-- Load more data from vehicle properties file, including some informative data (gives a hipster feel).
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.

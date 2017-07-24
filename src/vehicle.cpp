@@ -12,6 +12,7 @@
 #include <cstdlib>
 
 using futil::Properties;
+using futil::to_lower;
 using std::map;
 using std::string;
 
@@ -34,7 +35,7 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1),
+: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1),
   mass(1250)
 {}
 
@@ -120,6 +121,15 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	}
 
 	// physics data
+
+	key = "vehicle_type";
+	if(prop.containsKey(key))
+	{
+		string t = prop.get(key);
+		if(to_lower(t) == "car") type = TYPE_CAR;
+		else if(to_lower(t) == "bike") type = TYPE_BIKE;
+		else type = TYPE_OTHER;
+	}
 
 	key = "vehicle_mass";
 	mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;

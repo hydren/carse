@@ -57,7 +57,7 @@ EngineSoundProfile EngineSoundProfile::loadFromProperties(const Properties& prop
 
 	if(prop.containsKey(KEY_SOUND))
 	{
-		if(prop.get(KEY_SOUND) == "no")
+		if(prop.get(KEY_SOUND) == "none")
 		{
 			profile.ranges.clear();
 		}

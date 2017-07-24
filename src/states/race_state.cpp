@@ -71,7 +71,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), fontDebug(null), bg(null), music(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
-  rollingFriction(0), airFriction(0), brakingFriction(0),
+  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0),
   drawParameters(), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
@@ -174,6 +174,7 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
 
+	corneringForceLeechFactor = (vehicle.type == Vehicle::TYPE_BIKE? 0.25 : 0.5);
 	vehicle.engine.minRpm = 1000;
 	vehicle.engine.automaticShiftingEnabled = true;
 	vehicle.engine.automaticShiftingLowerThreshold = 0.57;
@@ -387,7 +388,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	const float throttle = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
-	const float wheelAngleFactor = 1 - 0.5*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
+	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	brakingFriction = braking * tireFriction;

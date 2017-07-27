@@ -40,6 +40,11 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, floa
 	return profile;
 }
 
+float Engine::getCurrentTorque()
+{
+	return this->getTorque(rpm);
+}
+
 float Engine::getTorque(float rpm)
 {
 	#define torqueCurve torqueCurveProfile.parameters
@@ -48,30 +53,4 @@ float Engine::getTorque(float rpm)
 					  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
 							  	  	  	  	  	  	    torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );
 	#undef torqueCurve
-}
-
-float Engine::getDriveForce()
-{
-	return this->getTorque(rpm) * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency / tireRadius;
-//	return this->getTorque(rpm) * gearRatio[gear] * gearRatio[differential] * 0.765 * tireRadius * 5000.0;
-}
-
-void Engine::update(float speed)
-{
-	const float wheelAngularSpeed = speed / tireRadius;  // fixme implement a better way to compute wheel angular speed as this formula assumes no wheel spin.
-
-	rpm = wheelAngularSpeed * gearRatio[gear] * gearRatio[differential] * (30.0/M_PI);  // 60/2pi conversion to RPM
-//	rpm = (speed/tireRadius) * gearRatio[gear] * gearRatio[differential] * (30.0f/M_PI) * 0.002;
-
-	if(rpm < minRpm)
-		rpm = minRpm;
-
-	if(automaticShiftingEnabled)
-	{
-		if(gear < gearCount and rpm > automaticShiftingUpperThreshold*maxRpm)
-			gear++;
-
-		if(gear > 1 and rpm < automaticShiftingLowerThreshold*maxRpm)
-			gear--;
-	}
 }

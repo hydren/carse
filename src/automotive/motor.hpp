@@ -15,10 +15,6 @@ struct Engine
 {
 	float torque;
 	float rpm, maxRpm, minRpm;
-	float transmissionEfficiency;
-	int gear, gearCount;
-	float *gearRatio, reverseGearRatio; // fixme this leaks :)
-	float tireRadius;
 
 	// read-only info fields!
 	std::string configuration, aspiration, valvetrain;
@@ -38,18 +34,11 @@ struct Engine
 
 	TorqueCurveProfile torqueCurveProfile;
 
-	bool automaticShiftingEnabled;
-	float automaticShiftingLowerThreshold;
-	float automaticShiftingUpperThreshold;
+	/** Returns this engine's torque in the current RPM. */
+	float getCurrentTorque();
 
 	/** Returns this engine's torque in the given RPM. */
 	float getTorque(float rpm);
-
-	/** Returns the current driving force. */
-	float getDriveForce();
-
-	/** Updates the engine's state (RPM, gear, etc), given the current speed. */
-	void update(float currentSpeed);
 };
 
 #endif /* MOTOR_HPP_ */

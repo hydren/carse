@@ -144,11 +144,11 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.push_back(sprite);
 	}
 
-	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
+	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.body.engine.maxRpm);
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	hudRpmGauge = new Hud::DialGauge<float>(vehicle.engine.rpm, 1000, vehicle.engine.maxRpm, gaugeSize);
+	hudRpmGauge = new Hud::DialGauge<float>(vehicle.body.engine.rpm, 1000, vehicle.body.engine.maxRpm, gaugeSize);
 	hudRpmGauge->borderThickness = 6;
 	hudRpmGauge->graduationLevel = 2;
 	hudRpmGauge->graduationPrimarySize = 1000;
@@ -160,7 +160,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
 	gaugeSize.w = 24;
 	gaugeSize.h = 1.5 * font->getFontHeight();
-	hudGearDisplay = new Hud::NumericalDisplay<int>(vehicle.engine.gear, gaugeSize, font);
+	hudGearDisplay = new Hud::NumericalDisplay<int>(vehicle.body.gear, gaugeSize, font);
 	hudGearDisplay->borderThickness = 6;
 	hudGearDisplay->borderColor = fgeal::Color::LIGHT_GREY;
 	hudGearDisplay->backgroundColor = fgeal::Color::BLACK;
@@ -175,12 +175,12 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->borderThickness = 0;
 
 	corneringForceLeechFactor = (vehicle.type == Vehicle::TYPE_BIKE? 0.25 : 0.5);
-	vehicle.engine.minRpm = 1000;
-	vehicle.engine.automaticShiftingEnabled = true;
-	vehicle.engine.automaticShiftingLowerThreshold = 0.57;
-	vehicle.engine.automaticShiftingUpperThreshold = 0.95;
-	vehicle.engine.gear = 1;
-	vehicle.engine.rpm = 100;
+	vehicle.body.engine.rpm = 1000;
+	vehicle.body.engine.minRpm = 1000;
+	vehicle.body.automaticShiftingEnabled = true;
+	vehicle.body.automaticShiftingLowerThreshold = 0.57;
+	vehicle.body.automaticShiftingUpperThreshold = 0.95;
+	vehicle.body.gear = 1;
 
 	position = 0;
 	posX = 0;
@@ -291,31 +291,31 @@ void Pseudo3DRaceState::render()
 
 		offset = display.getHeight()-100;
 		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.f", vehicle.engine.rpm);
+		sprintf(buffer, "%2.f", vehicle.body.engine.rpm);
 		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
 		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
-		const char* autoLabelTxt = (vehicle.engine.automaticShiftingEnabled? " (auto)":"");
-		sprintf(buffer, "%d %s", vehicle.engine.gear, autoLabelTxt);
+		const char* autoLabelTxt = (vehicle.body.automaticShiftingEnabled? " (auto)":"");
+		sprintf(buffer, "%d %s", vehicle.body.gear, autoLabelTxt);
 		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
 		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
+		sprintf(buffer, "%2.2fN", vehicle.body.getDriveForce());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
 		fontDebug->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fNm", vehicle.engine.getTorque(vehicle.engine.rpm));
+		sprintf(buffer, "%2.2fNm", vehicle.body.engine.getCurrentTorque());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
 		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.f*vehicle.engine.getTorque(vehicle.engine.rpm)/vehicle.engine.torque);
+		sprintf(buffer, "%2.2f%%", 100.f*vehicle.body.engine.getCurrentTorque()/vehicle.body.engine.torque);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.engine.rpm);
+		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.body.engine.rpm);
 		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)
 		{
 			const std::string format = std::string(engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
@@ -329,7 +329,7 @@ void Pseudo3DRaceState::update(float delta)
 {
 	handleInput();
 	handlePhysics(delta);
-	engineSound.updateSound(vehicle.engine.rpm);
+	engineSound.updateSound(vehicle.body.engine.rpm);
 }
 
 void Pseudo3DRaceState::handleInput()
@@ -356,7 +356,7 @@ void Pseudo3DRaceState::handleInput()
 					pseudoAngle = 0;
 					break;
 				case Keyboard::KEY_T:
-					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;
+					vehicle.body.automaticShiftingEnabled = !vehicle.body.automaticShiftingEnabled;
 					break;
 				case Keyboard::KEY_M:
 					if(music->isPlaying())
@@ -368,12 +368,12 @@ void Pseudo3DRaceState::handleInput()
 					debugMode = !debugMode;
 					break;
 				case Keyboard::KEY_LEFT_SHIFT:
-					if(vehicle.engine.gear < vehicle.engine.gearCount)
-						vehicle.engine.gear++;
+					if(vehicle.body.gear < vehicle.body.gearCount)
+						vehicle.body.gear++;
 					break;
 				case Keyboard::KEY_LEFT_CONTROL:
-					if(vehicle.engine.gear > 1)
-						vehicle.engine.gear--;
+					if(vehicle.body.gear > 1)
+						vehicle.body.gear--;
 					break;
 				default:
 					break;
@@ -384,19 +384,19 @@ void Pseudo3DRaceState::handleInput()
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
-	vehicle.engine.update(speed);
+	vehicle.body.update(speed);
 
 	const float throttle = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
-	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.body.mass * GRAVITY_ACCELERATION * sgn(speed);
 	brakingFriction = braking * tireFriction;
-	rollingFriction = ROLLING_RESISTANCE_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	rollingFriction = ROLLING_RESISTANCE_COEFFICIENT * vehicle.body.mass * GRAVITY_ACCELERATION * sgn(speed);
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed;
 
 	// update speed
-	speed += delta*(wheelAngleFactor*throttle*vehicle.engine.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
+	speed += delta*(wheelAngleFactor*throttle*vehicle.body.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.body.mass;
 
 	// update position
 	position += speed*delta;

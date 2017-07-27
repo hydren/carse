@@ -35,14 +35,14 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1),
-  mass(1250)
+: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1)
 {}
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 {
+	Engine& engine = body.engine;
 	string key;
 
 	// info data
@@ -132,7 +132,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	}
 
 	key = "vehicle_mass";
-	mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
+	body.mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
 
 	key = "engine_maximum_rpm";
 	engine.maxRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_RPM;
@@ -178,21 +178,21 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	engine.maximumTorqueRpm = maxTorqueRpm;
 
 	key = "tire_diameter";
-	engine.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
+	body.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
 
 	// todo read more data from properties
 
-	engine.transmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
+	body.transmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
 
 	key = "gear_count";
-	engine.gearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;
-	engine.gearRatio = new float[engine.gearCount+1];
+	body.gearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;
+	body.gearRatio = new float[body.gearCount+1];
 
 	// first, set default ratios, then override
-	engine.reverseGearRatio = 3.25;
-	engine.gearRatio[0] = 3.0;
-	for(int g = 1; g <= engine.gearCount; g++)
-		engine.gearRatio[g] = 3.0 + 2.0*((g - 1.0)/(1.0 - engine.gearCount)); // generic gear ratio
+	body.reverseGearRatio = 3.25;
+	body.gearRatio[0] = 3.0;
+	for(int g = 1; g <= body.gearCount; g++)
+		body.gearRatio[g] = 3.0 + 2.0*((g - 1.0)/(1.0 - body.gearCount)); // generic gear ratio
 
 	key = "gear_ratios";
 	if(prop.containsKey(key))
@@ -201,16 +201,16 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 		if(ratiosTxt == "custom")
 		{
 			key = "gear_differential_ratio";
-			if(prop.containsKey(key)) engine.gearRatio[0] = atof(prop.get(key).c_str());
+			if(prop.containsKey(key)) body.gearRatio[0] = atof(prop.get(key).c_str());
 
 			key = "gear_reverse_ratio";
-			if(prop.containsKey(key)) engine.reverseGearRatio = atof(prop.get(key).c_str());
+			if(prop.containsKey(key)) body.reverseGearRatio = atof(prop.get(key).c_str());
 
-			for(int g = 1; g <= engine.gearCount; g++)
+			for(int g = 1; g <= body.gearCount; g++)
 			{
 				key = "gear_" + futil::to_string(g) + "_ratio";
 				if(prop.containsKey(key))
-					engine.gearRatio[g] = atof(prop.get(key).c_str());
+					body.gearRatio[g] = atof(prop.get(key).c_str());
 			}
 		}
 	}

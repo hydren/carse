@@ -134,17 +134,17 @@ void VehicleSelectionState::render()
 
 	// info sheet
 	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
-	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
-							+ (vehicle.engine.displacement == 0?  "" : toStrRounded(vehicle.engine.displacement/1000.0) + "L ")
-							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")
-							+ (vehicle.engine.valveCount == 0?    "" : to_string(vehicle.engine.valveCount) + "-valve ")
-							+ (vehicle.engine.configuration.empty()? "" : vehicle.engine.configuration);
+	const string engineDesc = (vehicle.body.engine.aspiration.empty()? "" : vehicle.body.engine.aspiration + " ")
+							+ (vehicle.body.engine.displacement == 0?  "" : toStrRounded(vehicle.body.engine.displacement/1000.0) + "L ")
+							+ (vehicle.body.engine.valvetrain.empty()? "" : vehicle.body.engine.valvetrain + " ")
+							+ (vehicle.body.engine.valveCount == 0?    "" : to_string(vehicle.body.engine.valveCount) + "-valve ")
+							+ (vehicle.body.engine.configuration.empty()? "" : vehicle.body.engine.configuration);
 
 	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Power:  " +to_string(vehicle.engine.maximumPower) + "hp @" + to_string((int)vehicle.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.torque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText(to_string(vehicle.engine.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Weight: "+to_string(vehicle.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Power:  " +to_string(vehicle.body.engine.maximumPower) + "hp @" + to_string((int)vehicle.body.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Torque: " +toStrRounded(vehicle.body.engine.torque) + "Nm @" + to_string((int)vehicle.body.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText(to_string(vehicle.body.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Weight: "+to_string(vehicle.body.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
 }
 
 void VehicleSelectionState::update(float delta)

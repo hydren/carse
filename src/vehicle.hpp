@@ -9,7 +9,7 @@
 #define PSEUDO3D_VEHICLE_HPP_
 #include <ciso646>
 
-#include "automotive/motor.hpp"
+#include "automotive/vehicle_physics.hpp"
 #include "automotive/engine_sound.hpp"
 
 #include "futil/properties.hpp"
@@ -36,8 +36,7 @@ struct Vehicle
 	fgeal::Vector2D spriteScale;
 	float spriteMaxDepictedTurnAngle;
 
-	float mass;
-	Engine engine;
+	VehicleBody body;
 
 	EngineSoundProfile engineSoundProfile;
 

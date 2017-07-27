@@ -384,7 +384,7 @@ void Pseudo3DRaceState::handleInput()
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
-	vehicle.engine.update(speed);
+	vehicle.engine.update(speed, speed);
 
 	const float throttle = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;

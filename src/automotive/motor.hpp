@@ -15,10 +15,14 @@ struct Engine
 {
 	float maximumTorque;
 	float rpm, maxRpm, minRpm;
+
 	float transmissionEfficiency;
 	int gear, gearCount;
 	float *gearRatio, reverseGearRatio; // fixme this leaks :)
+
 	float tireRadius;
+
+	float throttlePosition, brakePosition;
 
 	// read-only info fields!
 	std::string configuration, aspiration, valvetrain;
@@ -48,8 +52,8 @@ struct Engine
 	/** Returns the current driving force. */
 	float getDriveForce();
 
-	/** Updates the engine's state (RPM, gear, etc), given the current speed. */
-	void update(float currentSpeed);
+	/** Updates the engine's state (RPM, gear, etc), given the time step and current speed. */
+	void update(float delta, float speed);
 };
 
 #endif /* MOTOR_HPP_ */

@@ -26,6 +26,9 @@
 const float Engine::TorqueCurveProfile::TORQUE_CURVE_INITIAL_VALUE = 0.55f,
 			Engine::TorqueCurveProfile::TORQUE_CURVE_FINAL_VALUE =   1.f/3.f;  // 0.33333... (one third)
 
+//xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
+const float AVERAGE_WHEEL_DENSITY = 75/pow(330, 2);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
+
 Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, float rpmMaxTorque)
 {
 	const float torque_i = TORQUE_CURVE_INITIAL_VALUE,
@@ -43,10 +46,11 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, floa
 float Engine::getCurrentTorque()
 {
 	#define torqueCurve torqueCurveProfile.parameters
-	return maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm :
-					  rpm < torqueCurve[0][PARAM_RPM] ? torqueCurve[0][PARAM_SLOPE]*rpm + torqueCurve[0][PARAM_INTERCEPT] :
-					  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
-							  	  	  	  	  	  	    torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );
+	return throttlePosition * maximumTorque *
+			( rpm > maxRpm ? -rpm/maxRpm :
+			  rpm < torqueCurve[0][PARAM_RPM] ? torqueCurve[0][PARAM_SLOPE]*rpm + torqueCurve[0][PARAM_INTERCEPT] :
+			  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
+												torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );
 	#undef torqueCurve
 }
 
@@ -56,12 +60,31 @@ float Engine::getDriveForce()
 //	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * 0.765 * tireRadius * 5000.0;
 }
 
-void Engine::update(float speed)
+void Engine::update(float delta, float currentSpeed)
 {
-	const float wheelAngularSpeed = speed / tireRadius;  // fixme implement a better way to compute wheel angular speed as this formula assumes no wheel spin.
+	const float rpmWheelAngularSpeedRatio = gearRatio[gear] * gearRatio[differential] * (30.0/M_PI);  // 60/2pi conversion to RPM
 
-	rpm = wheelAngularSpeed * gearRatio[gear] * gearRatio[differential] * (30.0/M_PI);  // 60/2pi conversion to RPM
-//	rpm = (speed/tireRadius) * gearRatio[gear] * gearRatio[differential] * (30.0f/M_PI) * 0.002;
+//	const float wheelAngularSpeed = speed / tireRadius;  // this formula assumes no wheel spin.
+	float wheelAngularSpeed = rpm / rpmWheelAngularSpeedRatio;
+
+	const float driveTorque = this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency;
+
+	const float slipRatio = (wheelAngularSpeed*tireRadius - currentSpeed)/fabs(currentSpeed);
+	const float tractionForce = 30*slipRatio; // fixme how to compute a reasonable curve? we know weight load can be computed from weight distribuition.
+	const float tractionTorque = tractionForce / tireRadius;
+
+	const float brakingTorque = brakePosition*30; //fixme how to do this formula right? remove from ingame state braking calculation
+
+	const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+
+	const float totalTorque = driveTorque + tractionTorque*drivenWheelsCount + brakingTorque;
+
+	const float wheelMass = AVERAGE_WHEEL_DENSITY * tireRadius*tireRadius;  // m = d*r^2, assuming wheel width = 1/PI
+	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * tireRadius*tireRadius * 0.5;  // I = (mr^2)/2
+
+	wheelAngularSpeed += (totalTorque / drivenWheelsInertia)*delta;  // xxx we're assuming no inertia from the engine components.
+
+	rpm = wheelAngularSpeed * rpmWheelAngularSpeedRatio;
 
 	if(rpm < minRpm)
 		rpm = minRpm;

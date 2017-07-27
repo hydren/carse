@@ -13,7 +13,7 @@
 
 struct Engine
 {
-	float torque;
+	float maximumTorque;
 	float rpm, maxRpm, minRpm;
 	float transmissionEfficiency;
 	int gear, gearCount;
@@ -43,7 +43,7 @@ struct Engine
 	float automaticShiftingUpperThreshold;
 
 	/** Returns this engine's torque in the given RPM. */
-	float getTorque(float rpm);
+	float getCurrentTorque();
 
 	/** Returns the current driving force. */
 	float getDriveForce();

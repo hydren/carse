@@ -40,10 +40,10 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, floa
 	return profile;
 }
 
-float Engine::getTorque(float rpm)
+float Engine::getCurrentTorque()
 {
 	#define torqueCurve torqueCurveProfile.parameters
-	return torque * ( rpm > maxRpm ? -rpm/maxRpm :
+	return maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm :
 					  rpm < torqueCurve[0][PARAM_RPM] ? torqueCurve[0][PARAM_SLOPE]*rpm + torqueCurve[0][PARAM_INTERCEPT] :
 					  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
 							  	  	  	  	  	  	    torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );
@@ -52,8 +52,8 @@ float Engine::getTorque(float rpm)
 
 float Engine::getDriveForce()
 {
-	return this->getTorque(rpm) * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency / tireRadius;
-//	return this->getTorque(rpm) * gearRatio[gear] * gearRatio[differential] * 0.765 * tireRadius * 5000.0;
+	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency / tireRadius;
+//	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * 0.765 * tireRadius * 5000.0;
 }
 
 void Engine::update(float speed)

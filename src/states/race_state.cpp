@@ -307,12 +307,12 @@ void Pseudo3DRaceState::render()
 
 		offset -= 25;
 		fontDebug->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fNm", vehicle.engine.getTorque(vehicle.engine.rpm));
+		sprintf(buffer, "%2.2fNm", vehicle.engine.getCurrentTorque());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
 		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.f*vehicle.engine.getTorque(vehicle.engine.rpm)/vehicle.engine.torque);
+		sprintf(buffer, "%2.2f%%", 100.f*vehicle.engine.getCurrentTorque()/vehicle.engine.maximumTorque);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.engine.rpm);

@@ -142,7 +142,7 @@ void VehicleSelectionState::render()
 
 	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), sheetX, sheetY+=12, Color::WHITE);
 	fontInfo->drawText("Power:  " +to_string(vehicle.engine.maximumPower) + "hp @" + to_string((int)vehicle.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.torque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
 	fontInfo->drawText(to_string(vehicle.engine.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
 	fontInfo->drawText("Weight: "+to_string(vehicle.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
 }

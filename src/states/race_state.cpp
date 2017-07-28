@@ -29,8 +29,10 @@ using fgeal::Sprite;
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 static const float AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 static const float AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX (Z32)
-static const float TIRE_FRICTION_COEFFICIENT = 0.75;  // on dry asphalt
-static const float ROLLING_RESISTANCE_COEFFICIENT = 0.013;  // on dry asphalt
+static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.75;
+static const float TIRE_FRICTION_COEFFICIENT_GRASS = 0.35;
+static const float ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013;
+static const float ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100;
 
 static const float CURVE_PULL_FACTOR = 0.2;
 static const float STEERING_SPEED = 2.0;
@@ -390,9 +392,13 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
-	const float tireFriction = TIRE_FRICTION_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	const bool onGrass = (fabs(posX) > 1.2*course.roadWidth);
+	const float tireFrictionCoefficient = onGrass? TIRE_FRICTION_COEFFICIENT_GRASS : TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT,
+				rollingResistanceCoefficient = onGrass? ROLLING_RESISTANCE_COEFFICIENT_GRASS : ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
+
+	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	brakingFriction = braking * tireFriction;
-	rollingFriction = ROLLING_RESISTANCE_COEFFICIENT * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed;
 
 	// update speed

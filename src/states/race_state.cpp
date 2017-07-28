@@ -34,6 +34,10 @@ static const float TIRE_FRICTION_COEFFICIENT_GRASS = 0.35;
 static const float ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013;
 static const float ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100;
 
+// these arbitrary multipliers don't have foundation in physics, but serves as a fine-tuning for the gameplay
+#define AIR_FRICTION_ARBITRARY_ADJUST 0.8
+#define ROLLING_FRICTION_ARBITRARY_ADJUST 2.5
+
 static const float CURVE_PULL_FACTOR = 0.2;
 static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
@@ -398,8 +402,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
 	brakingFriction = braking * tireFriction;
-	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
-	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed;
+	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed) * ROLLING_FRICTION_ARBITRARY_ADJUST;
+	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update speed
 	speed += delta*(wheelAngleFactor*throttle*vehicle.engine.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;

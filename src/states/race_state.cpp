@@ -25,6 +25,7 @@ using fgeal::EventQueue;
 using fgeal::Sound;
 using fgeal::Music;
 using fgeal::Sprite;
+using fgeal::Point;
 
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 static const float AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
@@ -75,7 +76,7 @@ Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return st
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), fontDebug(null), bg(null), music(null),
+  font(null), font2(null), fontDebug(null), bg(null), music(null), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0),
   drawParameters(), coursePositionFactor(500),
@@ -94,6 +95,8 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	delete fontDebug;
 	delete bg;
 	delete music;
+	delete spriteSmokeLeft;
+	delete spriteSmokeRight;
 	for(unsigned i = 0; i < spritesVehicle.size(); i++)
 		delete spritesVehicle[i];
 }
@@ -105,6 +108,11 @@ void Pseudo3DRaceState::initialize()
 	fontDebug = new Font("assets/font.ttf");
 	bg = new Image("assets/bg.jpg");
 	music = new Music("assets/music_sample.ogg");
+
+	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
+	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
+	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
+	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
 
 	drawParameters.drawAreaWidth = Display::getInstance().getWidth();
 	drawParameters.drawAreaHeight = Display::getInstance().getHeight();
@@ -238,10 +246,23 @@ void Pseudo3DRaceState::render()
 	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // this formula doesn't present good tire animation results.
 //	sprite.duration = speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
-	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), 0.825*(display.getHeight()-sprite.scale.y*vehicle.spriteHeight)-sprite.scale.y*vehicle.offset);
-//	sprite.draw(0.5*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth), display.getHeight()-1.5*sprite.scale.y*vehicle.spriteHeight);
+
+	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth),
+										0.825f*(display.getHeight()- sprite.scale.y*vehicle.spriteHeight) - sprite.scale.y*vehicle.offset };
+
+	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
+
+	const float smokeTurnOffset = (pseudoAngle < 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle;
+	spriteSmokeLeft->computeCurrentFrame();
+	spriteSmokeLeft->draw(1.25f*vehicleSpritePosition.x - 0.5f*spriteSmokeLeft->width + smokeTurnOffset,
+								vehicleSpritePosition.y + sprite.height*sprite.scale.y*0.67f);
+
+	spriteSmokeRight->computeCurrentFrame();
+	spriteSmokeRight->draw(2.02f*vehicleSpritePosition.x - 0.5f*spriteSmokeRight->width + smokeTurnOffset,
+								 vehicleSpritePosition.y + sprite.height*sprite.scale.y*0.67f);
 
 	hudSpeedDisplay->draw();
+
 	hudRpmGauge->draw();
 	hudGearDisplay->draw();
 	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);

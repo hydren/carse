@@ -30,6 +30,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Music* music;
 
 	std::vector<fgeal::Sprite*> spritesVehicle;
+	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
 
 	EngineSoundSimulator engineSound;
 	float position, posX, speed, pseudoAngle, strafeSpeed, curvePull;

@@ -186,7 +186,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	key = "gear_count";
 	engine.gearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;
-	engine.gearRatio = new float[engine.gearCount+1];
+	engine.gearRatio.resize(engine.gearCount+1);
 
 	// first, set default ratios, then override
 	engine.reverseGearRatio = 3.25;

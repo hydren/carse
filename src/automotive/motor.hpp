@@ -11,13 +11,16 @@
 
 #include <string>
 
+#include <vector>
+
 struct Engine
 {
 	float maximumTorque;
 	float rpm, maxRpm, minRpm;
 	float transmissionEfficiency;
 	int gear, gearCount;
-	float *gearRatio, reverseGearRatio; // fixme this leaks :)
+	std::vector<float> gearRatio;
+	float reverseGearRatio;
 	float tireRadius;
 
 	// read-only info fields!

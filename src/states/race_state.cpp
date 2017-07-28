@@ -183,8 +183,8 @@ void Pseudo3DRaceState::onEnter()
 	corneringForceLeechFactor = (vehicle.type == Vehicle::TYPE_BIKE? 0.25 : 0.5);
 	vehicle.engine.minRpm = 1000;
 	vehicle.engine.automaticShiftingEnabled = true;
-	vehicle.engine.automaticShiftingLowerThreshold = 0.57;
-	vehicle.engine.automaticShiftingUpperThreshold = 0.95;
+	vehicle.engine.automaticShiftingLowerThreshold = 0.5*vehicle.engine.maximumTorqueRpm/vehicle.engine.maxRpm;
+	vehicle.engine.automaticShiftingUpperThreshold = vehicle.engine.maximumPowerRpm/vehicle.engine.maxRpm;
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
 

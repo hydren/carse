@@ -188,6 +188,11 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
 
+	spriteSmokeLeft->scale.x =
+			spriteSmokeLeft->scale.y =
+					spriteSmokeRight->scale.x =
+							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
+
 	corneringForceLeechFactor = (vehicle.type == Vehicle::TYPE_BIKE? 0.25 : 0.5);
 	vehicle.engine.minRpm = 1000;
 	vehicle.engine.automaticShiftingEnabled = true;
@@ -256,8 +261,9 @@ void Pseudo3DRaceState::render()
 	  (vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)))
 	{
 		const Point smokeSpritePosition = {
-				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteDepictedVehicleWidth) - spriteSmokeLeft->width) + ((pseudoAngle < 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle),
-				vehicleSpritePosition.y + (sprite.height - vehicle.offset)*sprite.scale.y
+				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteDepictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
+				+ ((pseudoAngle < 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle),
+				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
 		};
 
 		spriteSmokeLeft->computeCurrentFrame();

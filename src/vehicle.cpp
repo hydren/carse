@@ -8,6 +8,7 @@
 #include "vehicle.hpp"
 
 #include "futil/string_actions.hpp"
+#include "futil/round.h"
 
 #include <cstdlib>
 
@@ -90,7 +91,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
 
 	key = "sprite_vehicle_width";
-	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION;
+	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
 
 	key = "sprite_scale";
 	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;

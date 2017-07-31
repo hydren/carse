@@ -25,7 +25,7 @@ static const float
 	DEFAULT_GEAR_COUNT = 5,
 	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
 	DEFAULT_MAX_TORQUE_RPM_POSITION = 2.f/3.f,  // 0.66666... (two thirds)
-	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH = 48,
+	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION = 0.857142857143,  // ~0,857
 
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
@@ -75,12 +75,6 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "engine_valve_count";
 	engine.valveCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 0;
 
-	/*
-	 * 	std::string configuration, aspiration, valvetrain;
-	unsigned displacement, valveCount;
-	float maximumPower, maximumPowerRpm, maximumTorque, maximumTorqueRpm;
-	*/
-
 	// sprite data
 
 	key = "sprite_sheet_file";
@@ -95,11 +89,8 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_frame_height";
 	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
 
-	key = "sprite_contact_offset";
-	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
-
-	key = "sprite_frame_duration";
-	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
+	key = "sprite_vehicle_width";
+	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION;
 
 	key = "sprite_scale";
 	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
@@ -110,12 +101,15 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_scale_x";
 	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
 
+	key = "sprite_contact_offset";
+	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+
 	key = "sprite_max_depicted_turn_angle";
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
-	key = "sprite_vehicle_width";
-	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH;
+	key = "sprite_frame_duration";
+	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
 	{

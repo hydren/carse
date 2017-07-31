@@ -142,7 +142,7 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.clear();
 	}
 
-	fgeal::Display& display = fgeal::Display::getInstance();
+	Display& display = Display::getInstance();
 	Image* sheet = new Image(vehicle.sheetFilename);
 	for(unsigned i = 0; i < vehicle.spriteStateCount; i++)
 	{
@@ -154,7 +154,7 @@ void Pseudo3DRaceState::onEnter()
 									0, i*vehicle.spriteHeight);
 
 		sprite->scale = vehicle.spriteScale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.offset;
+		sprite->referencePixelY = - (int) vehicle.spriteContatctOffset;
 		spritesVehicle.push_back(sprite);
 	}
 
@@ -218,8 +218,7 @@ void Pseudo3DRaceState::onLeave()
 
 void Pseudo3DRaceState::render()
 {
-	fgeal::Display& display = fgeal::Display::getInstance();
-
+	Display& display = Display::getInstance();
 	display.clear();
 
 	bg->draw();
@@ -253,7 +252,7 @@ void Pseudo3DRaceState::render()
 	sprite.computeCurrentFrame();
 
 	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth),
-										0.825f*(display.getHeight()- sprite.scale.y*vehicle.spriteHeight) - sprite.scale.y*vehicle.offset };
+										0.825f*(display.getHeight()- sprite.scale.y*vehicle.spriteHeight) - sprite.scale.y*vehicle.spriteContatctOffset };
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 

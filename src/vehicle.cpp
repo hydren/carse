@@ -36,7 +36,7 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1), spriteDepictedVehicleWidth(0),
+: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), spriteContatctOffset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1), spriteDepictedVehicleWidth(0),
   mass(1250)
 {}
 
@@ -95,8 +95,8 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_frame_height";
 	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
 
-	key = "sprite_offset";
-	offset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+	key = "sprite_contact_offset";
+	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
 
 	key = "sprite_frame_duration";
 	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;

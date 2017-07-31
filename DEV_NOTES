@@ -7,6 +7,7 @@
 - Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
 - Create a smoke animation.
 - Use a sprite background instead of a picture.
+- Implement paralax-moving background.
 - Create props to decorate the road.
 - Introduce a more human-readable course file format, or create a usable course editor.
 - Create a new UI. 

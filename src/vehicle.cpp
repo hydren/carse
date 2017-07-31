@@ -114,7 +114,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
-	key = "sprite_depicted_vehicle_width";
+	key = "sprite_vehicle_width";
 	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH;
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)

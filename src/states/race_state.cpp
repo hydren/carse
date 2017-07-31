@@ -255,14 +255,16 @@ void Pseudo3DRaceState::render()
 	if(fabs(pseudoAngle) == PSEUDO_ANGLE_MAX or
 	  (vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)))
 	{
-		const float smokeTurnOffset = (pseudoAngle < 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle;
+		const Point smokeSpritePosition = {
+				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteDepictedVehicleWidth) - spriteSmokeLeft->width) + ((pseudoAngle < 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle),
+				vehicleSpritePosition.y + (sprite.height - vehicle.offset)*sprite.scale.y
+		};
+
 		spriteSmokeLeft->computeCurrentFrame();
-		spriteSmokeLeft->draw(1.25f*vehicleSpritePosition.x - 0.5f*spriteSmokeLeft->width + smokeTurnOffset,
-									vehicleSpritePosition.y + sprite.height*sprite.scale.y*0.67f);
+		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
 
 		spriteSmokeRight->computeCurrentFrame();
-		spriteSmokeRight->draw(2.02f*vehicleSpritePosition.x - 0.5f*spriteSmokeRight->width + smokeTurnOffset,
-									 vehicleSpritePosition.y + sprite.height*sprite.scale.y*0.67f);
+		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteDepictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
 
 	hudSpeedDisplay->draw();

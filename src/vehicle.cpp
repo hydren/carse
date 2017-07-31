@@ -25,6 +25,7 @@ static const float
 	DEFAULT_GEAR_COUNT = 5,
 	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
 	DEFAULT_MAX_TORQUE_RPM_POSITION = 2.f/3.f,  // 0.66666... (two thirds)
+	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH = 48,
 
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
@@ -35,7 +36,7 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1),
+: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), offset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1), spriteDepictedVehicleWidth(0),
   mass(1250)
 {}
 
@@ -112,6 +113,9 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "sprite_max_depicted_turn_angle";
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+
+	key = "sprite_depicted_vehicle_width";
+	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH;
 
 	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
 	{

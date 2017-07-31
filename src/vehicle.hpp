@@ -35,6 +35,7 @@ struct Vehicle
 	std::vector<unsigned> spriteStateFrameCount;
 	fgeal::Vector2D spriteScale;
 	float spriteMaxDepictedTurnAngle;
+	unsigned spriteDepictedVehicleWidth;
 
 	float mass;
 	Engine engine;

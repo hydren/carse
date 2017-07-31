@@ -5,7 +5,6 @@
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
 - Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
-- Create a smoke animation.
 - Use a sprite background instead of a picture.
 - Implement paralax-moving background.
 - Create props to decorate the road.

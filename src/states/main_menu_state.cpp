@@ -115,7 +115,7 @@ void MainMenuState::onMenuSelect()
 	if(menu->getSelectedIndex() == 0 or menu->getSelectedIndex() == 1)
 	{
 		const bool isDebug = (menu->getSelectedIndex() == 0);
-		Pseudo3DRaceState::getInstance(game)->setCourse(isDebug? Course::createDebugCourse(200, 3000) : Course::createRandomCourse(200, 3000, 6400, 2.0));
+		Pseudo3DRaceState::getInstance(game)->setCourse(isDebug? Course::createDebugCourse(200, 3000) : Course::createRandomCourse(200, 3000, 6400, 1.5));
 		game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID);
 	}
 

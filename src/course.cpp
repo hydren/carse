@@ -30,7 +30,7 @@ using futil::trim;
 using futil::starts_with;
 
 //custom call to draw quad
-void drawQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
+void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
 {
 	fgeal::Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
 }
@@ -77,9 +77,9 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 
 		Course::Segment& p = lines[(n-1)%N]; // previous line
 
-		drawQuad(grass,  0,   p.Y, param.drawAreaWidth, 0, l.Y, param.drawAreaWidth);
-		drawQuad(rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
-		drawQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
+		drawRoadQuad(grass,  0,   p.Y, param.drawAreaWidth, 0, l.Y, param.drawAreaWidth);
+		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
+		drawRoadQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
 	}
 }
 

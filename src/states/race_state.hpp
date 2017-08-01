@@ -29,12 +29,15 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Image* bg;
 	fgeal::Music* music;
 
+	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop;
+
 	std::vector<fgeal::Sprite*> spritesVehicle;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
 
 	EngineSoundSimulator engineSound;
 	float position, posX, speed, pseudoAngle, strafeSpeed, curvePull;
 	float rollingFriction, airFriction, brakingFriction, corneringForceLeechFactor;
+	bool isBurningRubber;
 
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;

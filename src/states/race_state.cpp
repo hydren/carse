@@ -76,9 +76,11 @@ Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return st
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), fontDebug(null), bg(null), music(null), spriteSmokeLeft(null), spriteSmokeRight(null),
+  font(null), font2(null), fontDebug(null), bg(null), music(null),
+  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null),
+  spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
-  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0),
+  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
   drawParameters(), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
@@ -108,6 +110,9 @@ void Pseudo3DRaceState::initialize()
 	fontDebug = new Font("assets/font.ttf");
 	bg = new Image("assets/bg.jpg");
 	music = new Music("assets/music_sample.ogg");
+
+	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
+	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
 
 	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
@@ -206,6 +211,8 @@ void Pseudo3DRaceState::onEnter()
 	speed = 0;
 	pseudoAngle = 0;
 
+	isBurningRubber = false;
+
 	music->loop();
 	engineSound.playIdle();
 }
@@ -256,8 +263,7 @@ void Pseudo3DRaceState::render()
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
-	if(fabs(pseudoAngle) == PSEUDO_ANGLE_MAX or
-	  (vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)))
+	if(isBurningRubber)
 	{
 		const Point smokeSpritePosition = {
 				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteDepictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
@@ -368,6 +374,28 @@ void Pseudo3DRaceState::update(float delta)
 	handleInput();
 	handlePhysics(delta);
 	engineSound.updateSound(vehicle.engine.rpm);
+
+	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
+	{
+		if(not isBurningRubber)
+			sndTireBurnoutStandIntro->play();
+		else if(not sndTireBurnoutStandIntro->isPlaying() and not sndTireBurnoutStandLoop->isPlaying())
+			sndTireBurnoutStandLoop->loop();
+
+		isBurningRubber = true;
+	}
+	else if(fabs(pseudoAngle) == PSEUDO_ANGLE_MAX)
+	{
+		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
+		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
+		isBurningRubber = true;
+	}
+	else
+	{
+		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
+		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
+		isBurningRubber = false;
+	}
 }
 
 void Pseudo3DRaceState::handleInput()

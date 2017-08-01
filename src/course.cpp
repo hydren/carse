@@ -21,6 +21,7 @@
 #include <cmath>
 
 using fgeal::Color;
+using fgeal::Display;
 using futil::Properties;
 using std::string;
 using std::vector;
@@ -35,58 +36,57 @@ void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float 
 	fgeal::Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
 }
 
-Course::Segment::Segment(Course* course) // @suppress("Class members should be properly initialized")
-: course(course) {curve=x=y=z=0;}
-
-void Course::Segment::project(int camX, int camY, int camZ, float camDepth)
-{
-	fgeal::Display& display = fgeal::Display::getInstance();
-	scale = camDepth / (z - camZ);
-	X = (1 + scale*(x + camX)) * display.getWidth()/2;
-	Y = (1 - scale*(y - camY)) * display.getHeight()/2;
-	W = scale * course->roadWidth * display.getWidth()/2;
-}
-
 Course::Course(float segmentLength, float roadWidth)
 : lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth)
 {}
 
 void Course::draw(int pos, int posX, const DrawParameters& param)
 {
+	Display& display = Display::getInstance();
 	const unsigned N = lines.size(), fromPos = pos/roadSegmentLength;
 	float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
 
-	const float& cameraDepth = param.cameraDepth;
+	const float& camDepth = param.cameraDepth;
 	const unsigned& drawDistance = param.drawDistance;
 	float maxY = param.drawAreaHeight;
+
+	// screen coordinates
+	float lX=0, lY=0, lW=0;  // current segment
+	float pX=0, pY=0, pW=0;  // previous segment
 
 	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
 	{
 		Course::Segment& l = lines[n%N];
-		l.project(posX - x, camHeight, pos - (n>N?n*roadSegmentLength:0), cameraDepth);
+
+		// pass previous values to 'p'-prefixed variables
+		pX = lX; pY = lY; pW = lW;
+
+		// project from "world" to "screen" coordinates
+		const float camX = posX - x,
+					camY = camHeight,
+					camZ = pos - (n > N? n * roadSegmentLength : 0.0f),
+					scale = camDepth / (l.z - camZ);
+
+		lX = (1 + scale*(l.x + camX)) * display.getWidth()*0.5f;
+		lY = (1 - scale*(l.y - camY)) * display.getHeight()*0.5f;
+		lW = scale * roadWidth * display.getWidth()*0.5f;
+
+		// update curve
 		x += dx;
 		dx += l.curve;
 
-		if(l.Y > maxY) continue;
-		maxY = l.Y;
+		if(lY > maxY) continue;
+		maxY = lY;
 
 		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
 		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
 		Color road   = (n/3)%2? Color( 64, 80, 80) : Color( 40, 64, 64);
 
-		Course::Segment& p = lines[(n-1)%N]; // previous line
-
-		drawRoadQuad(grass,  0,   p.Y, param.drawAreaWidth, 0, l.Y, param.drawAreaWidth);
-		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
-		drawRoadQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
+		drawRoadQuad(grass,  0,   pY, param.drawAreaWidth, 0, lY, param.drawAreaWidth);
+		drawRoadQuad(rumble, pX, pY, pW*1.2, lX, lY, lW*1.2);
+		drawRoadQuad(road,   pX, pY, pW, lX, lY, lW);
 	}
-}
-
-void Course::updateReferences()
-{
-	for(unsigned i = 0; i < lines.size(); i++)
-		lines[i].course = this;
 }
 
 //static
@@ -95,7 +95,7 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < 1600; i++) // generating hardcoded course
 	{
-		Course::Segment line(&course);
+		Segment line;
 		line.z = i*course.roadSegmentLength;
 		if(i > 300 && i < 500) line.curve = 0.3;
 		if(i > 500 && i < 700) line.curve = -0.3;
@@ -117,7 +117,7 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	// generating random course
 	for(unsigned i = 0; i < length; i++)
 	{
-		Course::Segment line(&course);
+		Segment line;
 		line.z = i*course.roadSegmentLength;
 
 		if(currentCurve == 0)
@@ -156,7 +156,7 @@ Course Course::createCourseFromFile(const Properties& prop)
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < length; i++)
 	{
-		Course::Segment line(&course);
+		Segment line;
 		line.z = i*course.roadSegmentLength;
 
 		string str;

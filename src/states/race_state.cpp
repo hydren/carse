@@ -134,7 +134,6 @@ void Pseudo3DRaceState::setVehicle(const Vehicle& v)
 void Pseudo3DRaceState::setCourse(const Course& c)
 {
 	course = c;
-	course.updateReferences();
 }
 
 void Pseudo3DRaceState::onEnter()

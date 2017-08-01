@@ -30,8 +30,8 @@ using fgeal::Point;
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 static const float AIR_DENSITY = 1.2041;  // at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 static const float AIR_FRICTION_COEFFICIENT = 0.31 * 1.81;  // CdA. Hardcoded values are: 0.31 drag coefficient (Cd) and 1.81m2 reference/frontal area (A) of a Nissan 300ZX (Z32)
-static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.75;
-static const float TIRE_FRICTION_COEFFICIENT_GRASS = 0.35;
+static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85;
+static const float TIRE_FRICTION_COEFFICIENT_GRASS = 0.42;
 static const float ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013;
 static const float ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100;
 
@@ -80,7 +80,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
-  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
+  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
   drawParameters(), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
@@ -214,6 +214,7 @@ void Pseudo3DRaceState::onEnter()
 	pseudoAngle = 0;
 
 	isBurningRubber = false;
+	fakeBrakeBuildUp = false;
 
 	music->loop();
 	engineSound.playIdle();
@@ -375,6 +376,13 @@ void Pseudo3DRaceState::update(float delta)
 {
 	handleInput();
 	handlePhysics(delta);
+
+	// xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN) and fabs(speed) > 5.0)
+		fakeBrakeBuildUp += delta;
+	else
+		fakeBrakeBuildUp = 0;
+
 	engineSound.updateSound(vehicle.engine.rpm);
 
 	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
@@ -389,7 +397,8 @@ void Pseudo3DRaceState::update(float delta)
 
 		isBurningRubber = true;
 	}
-	else if(fabs(pseudoAngle) == PSEUDO_ANGLE_MAX)
+	else if(fabs(pseudoAngle) == PSEUDO_ANGLE_MAX
+			or fakeBrakeBuildUp > 0.75)  // xxx fake braking burnout
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
@@ -474,7 +483,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 				rollingResistanceCoefficient = onGrass? ROLLING_RESISTANCE_COEFFICIENT_GRASS : ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
 
 	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
-	brakingFriction = braking * tireFriction;
+	brakingFriction = braking * tireFriction;  // a multiplier here could be added for stronger and easier braking
 	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed) * ROLLING_FRICTION_ARBITRARY_ADJUST;
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed * AIR_FRICTION_ARBITRARY_ADJUST;
 

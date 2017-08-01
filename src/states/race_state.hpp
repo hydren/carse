@@ -39,6 +39,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float position, posX, speed, pseudoAngle, strafeSpeed, curvePull;
 	float rollingFriction, airFriction, brakingFriction, corneringForceLeechFactor;
 	bool isBurningRubber;
+	float fakeBrakeBuildUp;  // xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping
 
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;

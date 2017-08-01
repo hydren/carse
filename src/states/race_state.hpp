@@ -29,7 +29,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Image* bg;
 	fgeal::Music* music;
 
-	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop;
+	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
+				 *sndTireBurnoutIntro, *sndTireBurnoutLoop;
 
 	std::vector<fgeal::Sprite*> spritesVehicle;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;

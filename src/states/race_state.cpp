@@ -77,7 +77,7 @@ Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return st
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), fontDebug(null), bg(null), music(null),
-  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null),
+  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
@@ -113,6 +113,8 @@ void Pseudo3DRaceState::initialize()
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
 	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
+	sndTireBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");
+	sndTireBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
 
 	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
@@ -377,6 +379,9 @@ void Pseudo3DRaceState::update(float delta)
 
 	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
 	{
+		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
+		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
+
 		if(not isBurningRubber)
 			sndTireBurnoutStandIntro->play();
 		else if(not sndTireBurnoutStandIntro->isPlaying() and not sndTireBurnoutStandLoop->isPlaying())
@@ -388,12 +393,20 @@ void Pseudo3DRaceState::update(float delta)
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
+
+		if(not isBurningRubber)
+			sndTireBurnoutIntro->play();
+		else if(not sndTireBurnoutIntro->isPlaying() and not sndTireBurnoutLoop->isPlaying())
+			sndTireBurnoutLoop->loop();
+
 		isBurningRubber = true;
 	}
 	else
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
+		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
+		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
 		isBurningRubber = false;
 	}
 }

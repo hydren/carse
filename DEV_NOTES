@@ -6,6 +6,7 @@
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
 - Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
 - Use a sprite background instead of a picture.
+- Add noise for vehicle sliding on grass.
 - Implement paralax-moving background.
 - Create props to decorate the road.
 - Introduce a more human-readable course file format, or create a usable course editor.

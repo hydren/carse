@@ -82,7 +82,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
   drawParameters(), coursePositionFactor(500),
-  course(Course::createDebugCourse(200, 2000)),
+  course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
   debugMode(true)
 {

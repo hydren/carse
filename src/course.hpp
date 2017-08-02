@@ -19,8 +19,7 @@ struct Course
 	struct Segment
 	{
 		float x, y, z; // 3d center of line (delta coordinates)
-		float X, Y, W; // screen coordinate
-		float scale, curve;
+		float curve;
 
 		Segment();
 	};

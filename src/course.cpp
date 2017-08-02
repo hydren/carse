@@ -54,25 +54,32 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	const unsigned& drawDistance = param.drawDistance;
 	float maxY = param.drawAreaHeight;
 
+	// screen coordinates
+	float lX = 0, lY = 0, lW = 0;  // current segment
+	float pX = 0, pY = 0, pW = 0;  // previous segment
+
 	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
 	{
 		Course::Segment& l = lines[n%N];
 
+		// shift current values to previous before fetching new coordinates
+		pX = lX; pY = lY; pW = lW;
+
 		const int camX = posX - x,
 				  camY = camHeight,
 				  camZ = pos - (n>=N?n*roadSegmentLength:0);
-		const float camDepth = cameraDepth;
+		const float camDepth = cameraDepth,
+					scale = camDepth / (l.z - camZ);
 
-		l.scale = camDepth / (l.z - camZ);
-		l.X = (1 + l.scale*(l.x + camX)) * display.getWidth()/2;
-		l.Y = (1 - l.scale*(l.y - camY)) * display.getHeight()/2;
-		l.W = l.scale * roadWidth * display.getWidth()/2;
+		lX = (1 + scale*(l.x + camX)) * display.getWidth()/2;
+		lY = (1 - scale*(l.y - camY)) * display.getHeight()/2;
+		lW = scale * roadWidth * display.getWidth()/2;
 
 		x += dx;
 		dx += l.curve;
 
-		if(l.Y > maxY) continue;
-		maxY = l.Y;
+		if(lY > maxY) continue;
+		maxY = lY;
 
 		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
 		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
@@ -80,9 +87,9 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 
 		Course::Segment& p = lines[(n-1)%N]; // previous line
 
-		drawRoadQuad(grass,  0,   p.Y, param.drawAreaWidth, 0, l.Y, param.drawAreaWidth);
-		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, l.X, l.Y, l.W*1.2);
-		drawRoadQuad(road,   p.X, p.Y, p.W, l.X, l.Y, l.W);
+		drawRoadQuad(grass,  0,   pY, param.drawAreaWidth, 0, lY, param.drawAreaWidth);
+		drawRoadQuad(rumble, pX, pY, pW*1.2, lX, lY, lW*1.2);
+		drawRoadQuad(road,   pX, pY, pW, lX, lY, lW);
 	}
 }
 

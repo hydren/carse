@@ -36,8 +36,8 @@ void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float 
 	fgeal::Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
 }
 
-Course::Segment::Segment()  // @suppress("Class members should be properly initialized")
-{curve=x=y=z=0;}
+// needed to ensure consistency
+Course::Segment::Segment() : x(0), y(0), z(0), curve(0) {}
 
 Course::Course(float segmentLength, float roadWidth)
 : lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth)
@@ -60,11 +60,12 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 
 	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
 	{
-		Course::Segment& l = lines[n%N];
+		Segment& l = lines[n%N];
 
 		// shift current values to previous before fetching new coordinates
 		pX = lX; pY = lY; pW = lW;
 
+		// project from "world" to "screen" coordinates
 		const int camX = posX - x,
 				  camY = camHeight,
 				  camZ = pos - (n>=N?n*roadSegmentLength:0);
@@ -76,6 +77,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		lY = (1 - scale*(l.y - camY)) * display.getHeight()/2;
 		lW = scale * roadWidth * display.getWidth()/2;
 
+		// update curve
 		x += dx;
 		dx += l.curve;
 
@@ -85,8 +87,6 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
 		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
 		Color road   = (n/3)%2? Color( 64, 80, 80) : Color( 40, 64, 64);
-
-		Course::Segment& p = lines[(n-1)%N]; // previous line
 
 		drawRoadQuad(grass,  0,   pY, param.drawAreaWidth, 0, lY, param.drawAreaWidth);
 		drawRoadQuad(rumble, pX, pY, pW*1.2, lX, lY, lW*1.2);
@@ -100,7 +100,7 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < 1600; i++) // generating hardcoded course
 	{
-		Course::Segment line;
+		Segment line;
 		line.z = i*course.roadSegmentLength;
 		if(i > 300 && i < 500) line.curve = 0.3;
 		if(i > 500 && i < 700) line.curve = -0.3;
@@ -122,7 +122,7 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	// generating random course
 	for(unsigned i = 0; i < length; i++)
 	{
-		Course::Segment line;
+		Segment line;
 		line.z = i*course.roadSegmentLength;
 
 		if(currentCurve == 0)
@@ -161,7 +161,7 @@ Course Course::createCourseFromFile(const Properties& prop)
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < length; i++)
 	{
-		Course::Segment line;
+		Segment line;
 		line.z = i*course.roadSegmentLength;
 
 		string str;

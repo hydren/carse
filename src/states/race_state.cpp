@@ -125,7 +125,6 @@ void Pseudo3DRaceState::initialize()
 	drawParameters.drawAreaHeight = Display::getInstance().getHeight();
 }
 
-
 void Pseudo3DRaceState::setVehicle(const Vehicle& v)
 {
 	vehicle = v;
@@ -261,7 +260,7 @@ void Pseudo3DRaceState::render()
 		animationIndex = vehicle.spriteStateCount - 1;
 
 	Sprite& sprite = *spritesVehicle[animationIndex];
-	sprite.flipmode = strafeSpeed < 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+	sprite.flipmode = strafeSpeed > 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 //	sprite.duration = speed != 0? 0.1*400.0/(speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
 	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // this formula doesn't present good tire animation results.
 //	sprite.duration = speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
@@ -276,7 +275,7 @@ void Pseudo3DRaceState::render()
 	{
 		const Point smokeSpritePosition = {
 				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteDepictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
-				+ ((pseudoAngle < 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle),
+				+ ((pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle),
 				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
 		};
 
@@ -501,12 +500,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	position += speed*delta;
 
 	// update steering
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
 	{
 		if(pseudoAngle < 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle += delta * STEERING_SPEED;
 	}
-	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
+	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
 	{
 		if(pseudoAngle > 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle -= delta * STEERING_SPEED;

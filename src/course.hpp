@@ -18,16 +18,11 @@ struct Course
 {
 	struct Segment
 	{
-		Course* course;
-
 		float x, y, z; // 3d center of line (delta coordinates)
 		float X, Y, W; // screen coordinate
 		float scale, curve;
 
-		Segment(Course* state);
-
-		// from "world" to screen coordinates
-		void project(int camX, int camY, int camZ, float camDepth);
+		Segment();
 	};
 
 	std::vector<Segment> lines;
@@ -43,8 +38,6 @@ struct Course
 	};
 
 	void draw(int positionZ, int positionX, const DrawParameters& param);
-
-	void updateReferences();
 
 	/** Creates a debug course. */
 	static Course createDebugCourse(float segmentLength, float roadWidth);

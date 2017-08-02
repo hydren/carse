@@ -21,6 +21,7 @@
 #include <cmath>
 
 using fgeal::Color;
+using fgeal::Display;
 using futil::Properties;
 using std::string;
 using std::vector;
@@ -35,17 +36,8 @@ void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float 
 	fgeal::Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
 }
 
-Course::Segment::Segment(Course* course) // @suppress("Class members should be properly initialized")
-: course(course) {curve=x=y=z=0;}
-
-void Course::Segment::project(int camX, int camY, int camZ, float camDepth)
-{
-	fgeal::Display& display = fgeal::Display::getInstance();
-	scale = camDepth / (z - camZ);
-	X = (1 + scale*(x + camX)) * display.getWidth()/2;
-	Y = (1 - scale*(y - camY)) * display.getHeight()/2;
-	W = scale * course->roadWidth * display.getWidth()/2;
-}
+Course::Segment::Segment()  // @suppress("Class members should be properly initialized")
+{curve=x=y=z=0;}
 
 Course::Course(float segmentLength, float roadWidth)
 : lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth)
@@ -53,6 +45,7 @@ Course::Course(float segmentLength, float roadWidth)
 
 void Course::draw(int pos, int posX, const DrawParameters& param)
 {
+	Display& display = Display::getInstance();
 	const unsigned N = lines.size(), fromPos = pos/roadSegmentLength;
 	float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
@@ -64,7 +57,17 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
 	{
 		Course::Segment& l = lines[n%N];
-		l.project(posX - x, camHeight, pos - (n>=N?n*roadSegmentLength:0), cameraDepth);
+
+		const int camX = posX - x,
+				  camY = camHeight,
+				  camZ = pos - (n>=N?n*roadSegmentLength:0);
+		const float camDepth = cameraDepth;
+
+		l.scale = camDepth / (l.z - camZ);
+		l.X = (1 + l.scale*(l.x + camX)) * display.getWidth()/2;
+		l.Y = (1 - l.scale*(l.y - camY)) * display.getHeight()/2;
+		l.W = l.scale * roadWidth * display.getWidth()/2;
+
 		x += dx;
 		dx += l.curve;
 
@@ -83,19 +86,13 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	}
 }
 
-void Course::updateReferences()
-{
-	for(unsigned i = 0; i < lines.size(); i++)
-		lines[i].course = this;
-}
-
 //static
 Course Course::createDebugCourse(float segmentLength, float roadWidth)
 {
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < 1600; i++) // generating hardcoded course
 	{
-		Course::Segment line(&course);
+		Course::Segment line;
 		line.z = i*course.roadSegmentLength;
 		if(i > 300 && i < 500) line.curve = 0.3;
 		if(i > 500 && i < 700) line.curve = -0.3;
@@ -117,7 +114,7 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	// generating random course
 	for(unsigned i = 0; i < length; i++)
 	{
-		Course::Segment line(&course);
+		Course::Segment line;
 		line.z = i*course.roadSegmentLength;
 
 		if(currentCurve == 0)
@@ -156,7 +153,7 @@ Course Course::createCourseFromFile(const Properties& prop)
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < length; i++)
 	{
-		Course::Segment line(&course);
+		Course::Segment line;
 		line.z = i*course.roadSegmentLength;
 
 		string str;

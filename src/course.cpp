@@ -50,15 +50,13 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
 
-	const float& cameraDepth = param.cameraDepth;
-	const unsigned& drawDistance = param.drawDistance;
 	float maxY = param.drawAreaHeight;
 
 	// screen coordinates
 	float lX = 0, lY = 0, lW = 0;  // current segment
 	float pX = 0, pY = 0, pW = 0;  // previous segment
 
-	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
+	for(unsigned n = fromPos+1; n < fromPos + param.drawDistance; n++)
 	{
 		Segment& l = lines[n%N];
 
@@ -69,8 +67,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		const int camX = posX - x,
 				  camY = camHeight,
 				  camZ = pos - (n>=N?n*roadSegmentLength:0);
-		const float camDepth = cameraDepth,
-					scale = camDepth / (l.z - camZ);
+		const float scale = param.cameraDepth / (l.z - camZ);
 
 		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
 		lX = (1 + scale*(l.x - camX)) * display.getWidth()/2;

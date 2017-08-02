@@ -108,7 +108,7 @@ void Pseudo3DRaceState::initialize()
 	font = new Font("assets/font.ttf");
 	font2 = new Font("assets/font2.ttf", 40);
 	fontDebug = new Font("assets/font.ttf");
-	bg = new Image("assets/bg.jpg");
+	bg = new Image("assets/bg.png");
 	music = new Music("assets/music_sample.ogg");
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");

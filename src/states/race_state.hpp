@@ -32,11 +32,13 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
 				 *sndTireBurnoutIntro, *sndTireBurnoutLoop;
 
+	fgeal::Color bgColor;
 	std::vector<fgeal::Sprite*> spritesVehicle;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
 
 	EngineSoundSimulator engineSound;
 	float position, posX, speed, pseudoAngle, strafeSpeed, curvePull;
+	fgeal::Point bgParalax;
 	float rollingFriction, airFriction, brakingFriction, corneringForceLeechFactor;
 	bool isBurningRubber;
 	float fakeBrakeBuildUp;  // xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping

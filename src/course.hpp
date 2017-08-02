@@ -18,8 +18,10 @@ struct Course
 {
 	struct Segment
 	{
-		float x, y, z; // 3d center of line (delta coordinates)
-		float curve;
+		float x, y, z;  // 3d center of line (delta coordinates)
+		float curve;  //fixme this "curve" field completely renders the "x" field useless
+
+		//todo add a slope field to control y-variation
 
 		Segment();
 	};

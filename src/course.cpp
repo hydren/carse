@@ -71,6 +71,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		const float camDepth = cameraDepth,
 					scale = camDepth / (l.z - camZ);
 
+		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
 		lX = (1 + scale*(l.x + camX)) * display.getWidth()/2;
 		lY = (1 - scale*(l.y - camY)) * display.getHeight()/2;
 		lW = scale * roadWidth * display.getWidth()/2;

@@ -38,7 +38,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	EngineSoundSimulator engineSound;
 	float position, posX, speed, pseudoAngle, strafeSpeed, curvePull;
-	fgeal::Point bgParalax;
+	fgeal::Point bgParallax;
 	float rollingFriction, airFriction, brakingFriction, corneringForceLeechFactor;
 	bool isBurningRubber;
 	float fakeBrakeBuildUp;  // xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping

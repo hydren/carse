@@ -224,6 +224,10 @@ void Pseudo3DRaceState::onLeave()
 {
 	engineSound.haltSound();
 	music->stop();
+	sndTireBurnoutIntro->stop();
+	sndTireBurnoutLoop->stop();
+	sndTireBurnoutStandIntro->stop();
+	sndTireBurnoutStandLoop->stop();
 }
 
 void Pseudo3DRaceState::render()

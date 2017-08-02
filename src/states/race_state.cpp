@@ -88,6 +88,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 {
 	drawParameters.cameraDepth = 0.84;
 	drawParameters.drawDistance = 300;
+	bgParallax.x = bgParallax.y = 0;
 }
 
 Pseudo3DRaceState::~Pseudo3DRaceState()

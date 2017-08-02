@@ -78,8 +78,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
-  spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0),
+  bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
+  position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
   drawParameters(), coursePositionFactor(500),
   course(Course::createDebugCourse(200, 2000)),
@@ -108,7 +108,7 @@ void Pseudo3DRaceState::initialize()
 	font = new Font("assets/font.ttf");
 	font2 = new Font("assets/font2.ttf", 40);
 	fontDebug = new Font("assets/font.ttf");
-	bg = new Image("assets/bg.jpg");
+	bg = new Image("assets/bg.png");
 	music = new Music("assets/music_sample.ogg");
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
@@ -207,6 +207,7 @@ void Pseudo3DRaceState::onEnter()
 	vehicle.engine.gear = 1;
 	vehicle.engine.rpm = 100;
 
+	bgParallax.x = bgParallax.y = 0;
 	position = 0;
 	posX = 0;
 	speed = 0;
@@ -223,6 +224,10 @@ void Pseudo3DRaceState::onLeave()
 {
 	engineSound.haltSound();
 	music->stop();
+	sndTireBurnoutIntro->stop();
+	sndTireBurnoutLoop->stop();
+	sndTireBurnoutStandIntro->stop();
+	sndTireBurnoutStandLoop->stop();
 }
 
 void Pseudo3DRaceState::render()
@@ -230,7 +235,9 @@ void Pseudo3DRaceState::render()
 	Display& display = Display::getInstance();
 	display.clear();
 
-	bg->draw();
+	Image::drawRectangle(bgColor, 0, 0, display.getWidth(), display.getHeight());
+	bg->draw(bgParallax.x, bgParallax.y + 0.55*display.getHeight() - bg->getHeight());
+	bg->draw(bgParallax.x + bg->getWidth(), bgParallax.y + 0.55*display.getHeight() - bg->getHeight());
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 
@@ -441,6 +448,7 @@ void Pseudo3DRaceState::handleInput()
 					posX = 0;
 					speed = 0;
 					pseudoAngle = 0;
+					bgParallax.x = bgParallax.y = 0;
 					break;
 				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;
@@ -520,13 +528,23 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(strafeSpeed < -15000) strafeSpeed =-15000;
 
 	const unsigned N = course.lines.size();
-	const float curve = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N].curve;
+	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N];
 
 	// update curve pull
-	curvePull = curve * speed * coursePositionFactor * CURVE_PULL_FACTOR;
+	curvePull = segment.curve * speed * coursePositionFactor * CURVE_PULL_FACTOR;
 
 	// update strafe position
 	posX += (strafeSpeed - curvePull)*delta;
+
+	// update bg parallax
+	bgParallax.x += segment.curve*speed*0.025;
+	bgParallax.y = -segment.y*0.01;
+
+	if(bgParallax.x < -(2.0f*bg->getWidth()-Display::getInstance().getWidth()))
+		bgParallax.x += bg->getWidth();
+
+	if(bgParallax.x > 0)
+		bgParallax.x -= bg->getWidth();
 
 	// course looping control
 	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;

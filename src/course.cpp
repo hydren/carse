@@ -64,7 +64,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
 	{
 		Course::Segment& l = lines[n%N];
-		l.project(posX - x, camHeight, pos - (n>N?n*roadSegmentLength:0), cameraDepth);
+		l.project(posX - x, camHeight, pos - (n>=N?n*roadSegmentLength:0), cameraDepth);
 		x += dx;
 		dx += l.curve;
 

@@ -34,7 +34,7 @@ struct Course
 		float cameraDepth;
 	};
 
-	void draw(int positionZ, int positionX, const DrawParameters& param);
+	void draw(int positionZ, float positionX, const DrawParameters& param);
 
 	/** Creates a debug course. */
 	static Course createDebugCourse(float segmentLength, float roadWidth);

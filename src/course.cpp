@@ -40,22 +40,22 @@ Course::Course(float segmentLength, float roadWidth)
 : lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth)
 {}
 
-void Course::draw(int pos, int posX, const DrawParameters& param)
+void Course::draw(int pos, float posX, const DrawParameters& param)
 {
 	Display& display = Display::getInstance();
-	const unsigned N = lines.size(), fromPos = pos/roadSegmentLength;
-	float camHeight = 1500 + lines[fromPos].y;
+	const int N = lines.size(), fromPos = pos/roadSegmentLength;
+	float camHeight = lines[fromPos].y + 1500;
 	float x = 0, dx = 0;
 
-	const float& camDepth = param.cameraDepth;
-	const unsigned& drawDistance = param.drawDistance;
+	const float camDepth = param.cameraDepth;
+	const int drawDistance = param.drawDistance;
 	float maxY = param.drawAreaHeight;
 
 	// screen coordinates
 	float lX=0, lY=0, lW=0;  // current segment
 	float pX=0, pY=0, pW=0;  // previous segment
 
-	for(unsigned n = fromPos+1; n < fromPos+drawDistance; n++)
+	for(int n = fromPos; n < fromPos+drawDistance; n++)
 	{
 		Course::Segment& l = lines[n%N];
 
@@ -63,12 +63,12 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		pX = lX; pY = lY; pW = lW;
 
 		// project from "world" to "screen" coordinates
-		const float camX = posX - x,
+		const float camX = posX*roadWidth - x,
 					camY = camHeight,
-					camZ = pos - (n > N? n * roadSegmentLength : 0.0f),
+					camZ = fromPos*roadSegmentLength - (n >= N? N*roadSegmentLength : 0),
 					scale = camDepth / (l.z - camZ);
 
-		lX = (1 + scale*(l.x + camX)) * display.getWidth()*0.5f;
+		lX = (1 + scale*(l.x - camX)) * display.getWidth()*0.5f;
 		lY = (1 - scale*(l.y - camY)) * display.getHeight()*0.5f;
 		lW = scale * roadWidth * display.getWidth()*0.5f;
 
@@ -96,7 +96,7 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 	for(unsigned i = 0; i < 1600; i++) // generating hardcoded course
 	{
 		Segment line;
-		line.z = i*course.roadSegmentLength;
+		line.z = i*segmentLength;
 		if(i > 300 && i < 500) line.curve = 0.3;
 		if(i > 500 && i < 700) line.curve = -0.3;
 		if(i > 900 && i < 1300) line.curve = -2.2;

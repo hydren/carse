@@ -136,7 +136,7 @@ void VehicleSelectionState::render()
 	// info sheet
 	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
 	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
-							+ (vehicle.engine.displacement == 0?  "" : toStrRounded(vehicle.engine.displacement/1000.0) + "L ")
+							+ (vehicle.engine.displacement == 0?  "" : vehicle.engine.displacement >= 950? toStrRounded(vehicle.engine.displacement/1000.0) + "L " : to_string(vehicle.engine.displacement)+"cc ")
 							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")
 							+ (vehicle.engine.valveCount == 0?    "" : to_string(vehicle.engine.valveCount) + "-valve ")
 							+ (vehicle.engine.configuration.empty()? "" : vehicle.engine.configuration);

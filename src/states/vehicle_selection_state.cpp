@@ -68,6 +68,7 @@ void VehicleSelectionState::initialize()
 
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
 	menu->fontIsOwned = true;
+	menu->cursorWrapAroundEnabled = true;
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
 

@@ -17,6 +17,7 @@ using fgeal::EventQueue;
 using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
+using fgeal::Sound;
 using fgeal::Rectangle;
 using fgeal::Menu;
 using std::string;
@@ -26,7 +27,7 @@ int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
   fontMain(null), fontDev(null),
-  menu(null)
+  menu(null), sndCursorMove(null), sndCursorAccept(null)
 {}
 
 MainMenuState::~MainMenuState()
@@ -34,6 +35,8 @@ MainMenuState::~MainMenuState()
 	if(fontMain != null) delete fontMain;
 	if(fontDev != null) delete fontDev;
 	if(menu != null) delete menu;
+	if(sndCursorMove != null) delete sndCursorMove;
+	if(sndCursorAccept != null) delete sndCursorAccept;
 }
 
 void MainMenuState::initialize()
@@ -50,6 +53,8 @@ void MainMenuState::initialize()
 	menu->addEntry("Start random course");
 	menu->addEntry("Start a loaded course");
 	menu->addEntry("Exit");
+	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
+	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
 }
 
 void MainMenuState::onEnter()
@@ -95,12 +100,15 @@ void MainMenuState::handleInput()
 					game.running = false;
 					break;
 				case Keyboard::KEY_ENTER:
+					sndCursorAccept->play();
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
+					sndCursorMove->play();
 					menu->cursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
+					sndCursorMove->play();
 					menu->cursorDown();
 					break;
 				default:

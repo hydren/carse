@@ -24,6 +24,7 @@ using fgeal::Event;
 using fgeal::EventQueue;
 using fgeal::Keyboard;
 using fgeal::Font;
+using fgeal::Sound;
 using fgeal::Color;
 using fgeal::Image;
 using fgeal::Rectangle;
@@ -46,7 +47,7 @@ int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION
 VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
-  menu(null)
+  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null)
 {}
 
 VehicleSelectionState::~VehicleSelectionState()
@@ -54,6 +55,9 @@ VehicleSelectionState::~VehicleSelectionState()
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(menu != null) delete menu;
+	if(sndCursorMove != null) delete sndCursorMove;
+	if(sndCursorAccept != null) delete sndCursorAccept;
+	if(sndCursorOut != null) delete sndCursorOut;
 
 	for(unsigned i = 0; i < vehiclePreview.size(); i++)
 		delete vehiclePreview[i];
@@ -65,6 +69,10 @@ void VehicleSelectionState::initialize()
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font.ttf", 24);
 	fontInfo = new Font("assets/font.ttf", 12);
+
+	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
+	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
+	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
 	menu->fontIsOwned = true;
@@ -169,15 +177,19 @@ void VehicleSelectionState::handleInput()
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::KEY_ESCAPE:
+					sndCursorOut->play();
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_ENTER:
+					sndCursorAccept->play();
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
+					sndCursorMove->play();
 					menu->cursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
+					sndCursorMove->play();
 					menu->cursorDown();
 					break;
 				default:

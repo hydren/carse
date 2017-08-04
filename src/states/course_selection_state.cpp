@@ -23,6 +23,7 @@ using fgeal::Keyboard;
 using fgeal::Font;
 using fgeal::Color;
 using fgeal::Image;
+using fgeal::Sound;
 using fgeal::Rectangle;
 using fgeal::Menu;
 using std::vector;
@@ -37,7 +38,7 @@ int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_S
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
-  menu(null)
+  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null)
 {}
 
 CourseSelectionState::~CourseSelectionState()
@@ -45,6 +46,9 @@ CourseSelectionState::~CourseSelectionState()
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(menu != null) delete menu;
+	if(sndCursorMove != null) delete sndCursorMove;
+	if(sndCursorAccept != null) delete sndCursorAccept;
+	if(sndCursorOut != null) delete sndCursorOut;
 }
 
 void CourseSelectionState::initialize()
@@ -53,6 +57,10 @@ void CourseSelectionState::initialize()
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font.ttf", 24);
 	fontInfo = new Font("assets/font.ttf", 12);
+
+	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
+	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
+	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
 	menu = new Menu(menuBounds, new Font("assets/font2.ttf", 18), Color::WHITE);
 	menu->fontIsOwned = true;
@@ -113,15 +121,19 @@ void CourseSelectionState::handleInput()
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::KEY_ESCAPE:
+					sndCursorOut->play();
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_ENTER:
+					sndCursorAccept->play();
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
+					sndCursorMove->play();
 					menu->cursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
+					sndCursorMove->play();
 					menu->cursorDown();
 					break;
 				default:

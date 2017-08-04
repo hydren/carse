@@ -1,14 +1,20 @@
 # todo
 
-- Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
-- Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
+- Make possible to input vehicle real-life width instead of sprite scale.
+- Add aspect ratio to vehicle specification so it can be possible to specify it instead of individual x/y scale. 
+- Streamline code to be more like the outrun example (see the dev/refact_course_struct branch)
+- Add different terrains.
+- Add traffic cars.
+- Add opponent cars.
+- Fix vehicle selection state proportions of info strings. Also fix vehicles sizes in it (account for scale x/y changes). 
+- Create props to decorate the road.
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
 - Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
-- Use a sprite background instead of a picture.
 - Add noise for vehicle sliding on grass.
-- Implement paralax-moving background.
-- Create props to decorate the road.
-- Introduce a more human-readable course file format, or create a usable course editor.
+- Scale the bg to be resolution-independent.
 - Create a new UI. 
 - Fix incorrect tire animation speed.
+- Introduce a more human-readable course file format, or create a usable course editor.
+- Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
+- Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.

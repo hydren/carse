@@ -203,7 +203,9 @@ float Vehicle::getDriveForce()
 static float normalizedTractionForce(float slipRatio)
 {
 	//0 to 6% slip ratio gives traction from 0 up to 120%; after that, traction slowly declines, with 20% slip ratio giving 100%, and down.
-	return slipRatio < 0.06? 20.0*slipRatio : (9.0 - 10.0*slipRatio)/7.0;
+	return slipRatio < 0.06? (20.0*slipRatio)            // 0 to 6% slip ratio gives traction from 0 up to 120%
+		 : slipRatio < 0.90? (9.0 - 10.0*slipRatio)/7.0  // 6% to 90% slip ratio gives traction from 120 down to 0%
+		                   : 0;                          // >90% slip ration gives no traction at all
 }
 
 /** Updates the simulation state of this vehicle (RPM, gear, etc). */

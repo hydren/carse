@@ -499,7 +499,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed);
 	brakingFriction = vehicle.brakePedalPosition * tireFriction;  // a multiplier here could be added for stronger and easier braking
-	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * ROLLING_FRICTION_ARBITRARY_ADJUST;
+	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * 4;  // fixme this formula assumes 4 wheels
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update speed

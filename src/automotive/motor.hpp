@@ -51,6 +51,9 @@ struct Engine
 	/** Returns the current driving force. */
 	float getDriveTorque();
 
+	/** Returns the current engine angular speed (which derives from the current RPM). */
+	float getAngularSpeed();
+
 	/** Updates the engine's state (RPM, gear, etc), given the current wheel angular speed. */
 	void update(float wheelAngularSpeed);
 };

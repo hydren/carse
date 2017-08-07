@@ -55,10 +55,14 @@ float Engine::getDriveTorque()
 	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency;
 }
 
+float Engine::getAngularSpeed()
+{
+	return rpm / (gearRatio[gear] * gearRatio[differential] * (30.0/M_PI));  // 60/2pi conversion to RPM
+}
+
 void Engine::update(float wheelAngularSpeed)
 {
 	rpm = wheelAngularSpeed * gearRatio[gear] * gearRatio[differential] * (30.0/M_PI);  // 60/2pi conversion to RPM
-//	rpm = (speed/tireRadius) * gearRatio[gear] * gearRatio[differential] * (30.0f/M_PI) * 0.002;
 
 	if(rpm < minRpm)
 		rpm = minRpm;

@@ -66,7 +66,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		// project from "world" to "screen" coordinates
 		const int camX = posX - x,
 				  camY = camHeight,
-				  camZ = pos - (n>=N?n*roadSegmentLength:0);
+				  camZ = pos - (n >= N? N*roadSegmentLength : 0);
 		const float scale = param.cameraDepth / (l.z - camZ);
 
 		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift

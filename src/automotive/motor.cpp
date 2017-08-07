@@ -43,7 +43,7 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, floa
 float Engine::getCurrentTorque()
 {
 	#define torqueCurve torqueCurveProfile.parameters
-	return maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm :
+	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm :
 					  rpm < torqueCurve[0][PARAM_RPM] ? torqueCurve[0][PARAM_SLOPE]*rpm + torqueCurve[0][PARAM_INTERCEPT] :
 					  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
 							  	  	  	  	  	  	    torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );

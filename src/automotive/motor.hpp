@@ -17,6 +17,7 @@ struct Engine
 {
 	float maximumTorque;
 	float rpm, maxRpm, minRpm;
+	float throttlePosition;
 	float transmissionEfficiency;
 	int gear, gearCount;
 	std::vector<float> gearRatio;

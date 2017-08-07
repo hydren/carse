@@ -29,7 +29,7 @@ static const float
 
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
-  mass(0), tireRadius(0), engine(), speed(0),
+  mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
   engineSoundProfile(), gfx()
 {}
 
@@ -166,7 +166,9 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 		}
 	}
 
+	engine.throttlePosition = 0;
 	speed = 0;
+	brakePedalPosition = 0;
 
 	// sound data
 

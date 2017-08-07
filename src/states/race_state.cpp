@@ -487,10 +487,10 @@ void Pseudo3DRaceState::handleInput()
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
+	vehicle.engine.throttlePosition = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
+	vehicle.brakePedalPosition =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
 	vehicle.update(delta);
 
-	const float throttle = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
-	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	const bool onGrass = (fabs(posX) > 1.2*course.roadWidth);
@@ -498,12 +498,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 				rollingResistanceCoefficient = onGrass? ROLLING_RESISTANCE_COEFFICIENT_GRASS : ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
 
 	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed);
-	brakingFriction = braking * tireFriction;  // a multiplier here could be added for stronger and easier braking
+	brakingFriction = vehicle.brakePedalPosition * tireFriction;  // a multiplier here could be added for stronger and easier braking
 	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * ROLLING_FRICTION_ARBITRARY_ADJUST;
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update speed
-	vehicle.speed += delta*(wheelAngleFactor*throttle*vehicle.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
+	vehicle.speed += delta*(wheelAngleFactor*vehicle.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
 
 	// update position
 	position += vehicle.speed*delta;

@@ -35,7 +35,7 @@ struct Vehicle
 	float mass;
 	float tireRadius;
 	Engine engine;
-	float speed;
+	float speed, brakePedalPosition;
 
 	// sound data
 	EngineSoundProfile engineSoundProfile;

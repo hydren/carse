@@ -113,7 +113,7 @@ void VehicleSelectionState::initialize()
 	for(unsigned i = 0; i < vehicles.size(); i++)
 	{
 		menu->addEntry(vehicles[i].name);
-		vehiclePreview.push_back(new Image(vehicles[i].sheetFilename));
+		vehiclePreview.push_back(new Image(vehicles[i].gfx.sheetFilename));
 	}
 }
 
@@ -133,13 +133,13 @@ void VehicleSelectionState::render()
 	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
 	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
 
-	const float scalex = display.getWidth() * 0.0048828125f * vehicle.spriteScale.x,
-				scaley = display.getWidth() * 0.0048828125f * vehicle.spriteScale.y,
-				posX = 0.7*display.getWidth() - 0.5*vehicle.spriteWidth * scalex,
-				posY = 0.35*display.getHeight() - 0.5*vehicle.spriteHeight * scaley,
-				offsetY = vehicle.spriteHeight * (vehicle.spriteStateCount/2);
+	const float scalex = display.getWidth() * 0.0048828125f * vehicle.gfx.spriteScale.x,
+				scaley = display.getWidth() * 0.0048828125f * vehicle.gfx.spriteScale.y,
+				posX = 0.7*display.getWidth() - 0.5*vehicle.gfx.spriteWidth * scalex,
+				posY = 0.35*display.getHeight() - 0.5*vehicle.gfx.spriteHeight * scaley,
+				offsetY = vehicle.gfx.spriteHeight * (vehicle.gfx.spriteStateCount/2);
 
-	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.spriteWidth, vehicle.spriteHeight);
+	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.gfx.spriteWidth, vehicle.gfx.spriteHeight);
 
 	// info sheet
 	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();

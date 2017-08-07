@@ -8,13 +8,11 @@
 #include "vehicle.hpp"
 
 #include "futil/string_actions.hpp"
-#include "futil/round.h"
 
 #include <cstdlib>
 
 using futil::Properties;
 using futil::to_lower;
-using std::map;
 using std::string;
 
 // default float constants
@@ -24,24 +22,15 @@ static const float
 	DEFAULT_MAXIMUM_POWER = 320,  // bhp
 	DEFAULT_TIRE_DIAMETER = 678,  // mm
 	DEFAULT_GEAR_COUNT = 5,
-	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
 	DEFAULT_MAX_TORQUE_RPM_POSITION = 2.f/3.f,  // 0.66666... (two thirds)
-	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION = 0.857142857143,  // ~0,857
 
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
-// default uint constants
-static const unsigned
-	DEFAULT_SPRITE_WIDTH = 56,
-	DEFAULT_SPRITE_HEIGHT = 36;
-
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
   mass(0), tireRadius(0), engine(), speed(0),
-  engineSoundProfile(),
-  sheetFilename(), spriteStateCount(), spriteWidth(), spriteHeight(), spriteContatctOffset(), spriteScale(),
-  spriteFrameDuration(-1), spriteStateFrameCount(), spriteMaxDepictedTurnAngle(1), spriteDepictedVehicleWidth(0)
+  engineSoundProfile(), gfx()
 {}
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
@@ -188,46 +177,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	// sprite data
 
-	key = "sprite_sheet_file";
-	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
-
-	key = "sprite_state_count";
-	spriteStateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
-
-	key = "sprite_frame_width";
-	spriteWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
-
-	key = "sprite_frame_height";
-	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
-
-	key = "sprite_vehicle_width";
-	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
-
-	key = "sprite_scale";
-	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
-
-	key = "sprite_scale_y";
-	spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.y;
-
-	key = "sprite_scale_x";
-	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
-
-	key = "sprite_contact_offset";
-	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
-
-	key = "sprite_max_depicted_turn_angle";
-	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
-	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
-
-	key = "sprite_frame_duration";
-	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
-
-	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
-	{
-		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
-		const unsigned stateFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
-		spriteStateFrameCount.push_back(stateFrameCount);
-	}
+	gfx = VehicleGraphics(prop);
 }
 
 /** Returns the current driving force. */

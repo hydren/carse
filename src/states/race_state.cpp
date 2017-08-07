@@ -157,18 +157,18 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	Display& display = Display::getInstance();
-	Image* sheet = new Image(vehicle.sheetFilename);
-	for(unsigned i = 0; i < vehicle.spriteStateCount; i++)
+	Image* sheet = new Image(vehicle.gfx.sheetFilename);
+	for(unsigned i = 0; i < vehicle.gfx.spriteStateCount; i++)
 	{
-		if(sheet->getWidth() < static_cast<int>(vehicle.spriteWidth))
+		if(sheet->getWidth() < static_cast<int>(vehicle.gfx.spriteWidth))
 			throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
 
-		Sprite* sprite = new Sprite(sheet, vehicle.spriteWidth, vehicle.spriteHeight,
-									vehicle.spriteFrameDuration, vehicle.spriteStateFrameCount[i],
-									0, i*vehicle.spriteHeight);
+		Sprite* sprite = new Sprite(sheet, vehicle.gfx.spriteWidth, vehicle.gfx.spriteHeight,
+									vehicle.gfx.spriteFrameDuration, vehicle.gfx.spriteStateFrameCount[i],
+									0, i*vehicle.gfx.spriteHeight);
 
-		sprite->scale = vehicle.spriteScale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.spriteContatctOffset;
+		sprite->scale = vehicle.gfx.spriteScale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
+		sprite->referencePixelY = - (int) vehicle.gfx.spriteContatctOffset;
 		spritesVehicle.push_back(sprite);
 	}
 
@@ -251,40 +251,40 @@ void Pseudo3DRaceState::render()
 
 	// the ammount of pseudo angle that will trigger the last sprite
 //	const float PSEUDO_ANGLE_LAST_STATE = PSEUDO_ANGLE_MAX;  // show last sprite when the pseudo angle is at its max
-	const float PSEUDO_ANGLE_LAST_STATE = vehicle.spriteMaxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
+	const float PSEUDO_ANGLE_LAST_STATE = vehicle.gfx.spriteMaxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
 
 	// linear sprite progression
-//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
+//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
 
 	// exponential sprite progression. may be slower.
-//	const unsigned animationIndex = (vehicle.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
+//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
 
 	// linear sprite progression with 1-index advance at threshold angle
 	unsigned animationIndex = 0;
-	if(vehicle.spriteStateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
-		animationIndex = 1 + (vehicle.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
+	if(vehicle.gfx.spriteStateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
+		animationIndex = 1 + (vehicle.gfx.spriteStateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
 
 	// cap index to max possible
-	if(animationIndex > vehicle.spriteStateCount - 1)
-		animationIndex = vehicle.spriteStateCount - 1;
+	if(animationIndex > vehicle.gfx.spriteStateCount - 1)
+		animationIndex = vehicle.gfx.spriteStateCount - 1;
 
 	Sprite& sprite = *spritesVehicle[animationIndex];
 	sprite.flipmode = strafeSpeed > 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 //	sprite.duration = vehicle.speed != 0? 0.1*400.0/(vehicle.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = vehicle.spriteFrameDuration / sqrt(vehicle.speed);  // this formula doesn't present good tire animation results.
+	sprite.duration = vehicle.gfx.spriteFrameDuration / sqrt(vehicle.speed);  // this formula doesn't present good tire animation results.
 //	sprite.duration = vehicle.speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(vehicle.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
 
-	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth),
-										0.825f*(display.getHeight()- sprite.scale.y*vehicle.spriteHeight) - sprite.scale.y*vehicle.spriteContatctOffset };
+	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.gfx.spriteWidth),
+										0.825f*(display.getHeight()- sprite.scale.y*vehicle.gfx.spriteHeight) - sprite.scale.y*vehicle.gfx.spriteContatctOffset };
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
 	if(isBurningRubber)
 	{
 		const Point smokeSpritePosition = {
-				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteDepictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
-				+ ((pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteMaxDepictedTurnAngle),
+				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.gfx.spriteDepictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
+				+ ((pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.gfx.spriteMaxDepictedTurnAngle),
 				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
 		};
 
@@ -292,7 +292,7 @@ void Pseudo3DRaceState::render()
 		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
 
 		spriteSmokeRight->computeCurrentFrame();
-		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteDepictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
+		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.gfx.spriteDepictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
 
 	hudSpeedDisplay->draw();

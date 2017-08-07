@@ -11,6 +11,7 @@
 
 #include "automotive/motor.hpp"
 #include "automotive/engine_sound.hpp"
+#include "pseudo3d/vehicle_gfx.hpp"
 
 #include "futil/properties.hpp"
 
@@ -40,13 +41,7 @@ struct Vehicle
 	EngineSoundProfile engineSoundProfile;
 
 	// graphics data
-	std::string sheetFilename;
-	unsigned spriteStateCount, spriteWidth, spriteHeight, spriteContatctOffset;
-	fgeal::Vector2D spriteScale;
-	float spriteFrameDuration;
-	std::vector<unsigned> spriteStateFrameCount;
-	float spriteMaxDepictedTurnAngle;
-	unsigned spriteDepictedVehicleWidth;
+	VehicleGraphics gfx;
 
 	/** Creates a empty vehicle object. */
 	Vehicle();

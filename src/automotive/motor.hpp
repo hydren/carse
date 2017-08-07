@@ -21,7 +21,6 @@ struct Engine
 	int gear, gearCount;
 	std::vector<float> gearRatio;
 	float reverseGearRatio;
-	float tireRadius;
 
 	// read-only info fields!
 	std::string configuration, aspiration, valvetrain;
@@ -49,10 +48,10 @@ struct Engine
 	float getCurrentTorque();
 
 	/** Returns the current driving force. */
-	float getDriveForce();
+	float getDriveTorque();
 
-	/** Updates the engine's state (RPM, gear, etc), given the current speed. */
-	void update(float currentSpeed);
+	/** Updates the engine's state (RPM, gear, etc), given the current wheel angular speed. */
+	void update(float wheelAngularSpeed);
 };
 
 #endif /* MOTOR_HPP_ */

@@ -27,26 +27,38 @@ struct Vehicle
 	// todo support more types of vehicles (jetskis, motorboats, hovercrafts, hovercars, trikes, etc)
 	enum Type { TYPE_CAR, TYPE_BIKE, TYPE_OTHER } type;
 
+	// general information
 	std::string name, authors, credits, comments;
 
+	// physics data and simulation
+	float mass;
+	float tireRadius;
+	Engine engine;
+	float speed;
+
+	// sound data
+	EngineSoundProfile engineSoundProfile;
+
+	// graphics data
 	std::string sheetFilename;
 	unsigned spriteStateCount, spriteWidth, spriteHeight, spriteContatctOffset;
+	fgeal::Vector2D spriteScale;
 	float spriteFrameDuration;
 	std::vector<unsigned> spriteStateFrameCount;
-	fgeal::Vector2D spriteScale;
 	float spriteMaxDepictedTurnAngle;
 	unsigned spriteDepictedVehicleWidth;
 
-	float mass;
-	Engine engine;
-
-	EngineSoundProfile engineSoundProfile;
-
-	// creates a empty vehicle object
+	/** Creates a empty vehicle object. */
 	Vehicle();
 
-	// creates a vehicle with definitions taken from the given properties
+	/** Creates a vehicle with definitions taken from the given properties. */
 	Vehicle(const futil::Properties& properties, Pseudo3DCarseGame& game);
+
+	/** Returns the current driving force. */
+	float getDriveForce();
+
+	/** Updates the simulation state of this vehicle (engine, speed, etc). */
+	void update(float delta);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

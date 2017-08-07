@@ -37,15 +37,30 @@ static const unsigned
 	DEFAULT_SPRITE_HEIGHT = 36;
 
 Vehicle::Vehicle()
-: type(TYPE_CAR), spriteStateCount(), spriteWidth(), spriteHeight(), spriteContatctOffset(), spriteFrameDuration(-1), spriteScale(), spriteMaxDepictedTurnAngle(1), spriteDepictedVehicleWidth(0),
-  mass(1250)
+: type(TYPE_CAR), name(), authors(), credits(), comments(),
+  mass(0), tireRadius(0), engine(), speed(0),
+  engineSoundProfile(),
+  sheetFilename(), spriteStateCount(), spriteWidth(), spriteHeight(), spriteContatctOffset(), spriteScale(),
+  spriteFrameDuration(-1), spriteStateFrameCount(), spriteMaxDepictedTurnAngle(1), spriteDepictedVehicleWidth(0)
 {}
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 {
+	// aux. var
 	string key;
+
+	// logic data
+
+	key = "vehicle_type";
+	if(prop.containsKey(key))
+	{
+		string t = prop.get(key);
+		if(to_lower(t) == "car") type = TYPE_CAR;
+		else if(to_lower(t) == "bike") type = TYPE_BIKE;
+		else type = TYPE_OTHER;
+	}
 
 	// info data
 
@@ -76,59 +91,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "engine_valve_count";
 	engine.valveCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 0;
 
-	// sprite data
-
-	key = "sprite_sheet_file";
-	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
-
-	key = "sprite_state_count";
-	spriteStateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
-
-	key = "sprite_frame_width";
-	spriteWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
-
-	key = "sprite_frame_height";
-	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
-
-	key = "sprite_vehicle_width";
-	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
-
-	key = "sprite_scale";
-	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
-
-	key = "sprite_scale_y";
-	spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.y;
-
-	key = "sprite_scale_x";
-	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
-
-	key = "sprite_contact_offset";
-	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
-
-	key = "sprite_max_depicted_turn_angle";
-	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
-	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
-
-	key = "sprite_frame_duration";
-	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
-
-	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
-	{
-		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
-		const unsigned stateFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
-		spriteStateFrameCount.push_back(stateFrameCount);
-	}
-
 	// physics data
-
-	key = "vehicle_type";
-	if(prop.containsKey(key))
-	{
-		string t = prop.get(key);
-		if(to_lower(t) == "car") type = TYPE_CAR;
-		else if(to_lower(t) == "bike") type = TYPE_BIKE;
-		else type = TYPE_OTHER;
-	}
 
 	key = "vehicle_mass";
 	mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
@@ -177,7 +140,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	engine.maximumTorqueRpm = maxTorqueRpm;
 
 	key = "tire_diameter";
-	engine.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
+	tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
 
 	// todo read more data from properties
 
@@ -214,10 +177,68 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 		}
 	}
 
+	speed = 0;
+
 	// sound data
 
 	if(EngineSoundProfile::requestsPresetProfile(prop))
 		engineSoundProfile = game.getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
 	else
 		engineSoundProfile = EngineSoundProfile::loadFromProperties(prop);
+
+	// sprite data
+
+	key = "sprite_sheet_file";
+	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
+
+	key = "sprite_state_count";
+	spriteStateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+
+	key = "sprite_frame_width";
+	spriteWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
+
+	key = "sprite_frame_height";
+	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
+
+	key = "sprite_vehicle_width";
+	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
+
+	key = "sprite_scale";
+	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
+
+	key = "sprite_scale_y";
+	spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.y;
+
+	key = "sprite_scale_x";
+	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
+
+	key = "sprite_contact_offset";
+	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+
+	key = "sprite_max_depicted_turn_angle";
+	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+
+	key = "sprite_frame_duration";
+	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
+
+	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
+	{
+		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
+		const unsigned stateFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+		spriteStateFrameCount.push_back(stateFrameCount);
+	}
+}
+
+/** Returns the current driving force. */
+float Vehicle::getDriveForce()
+{
+	return engine.getDriveTorque() / tireRadius;
+}
+
+/** Updates the simulation state of this vehicle (RPM, gear, etc). */
+void Vehicle::update(float delta)
+{
+	float wheelAngularSpeed = speed/tireRadius;  // fixme implement a better way to compute wheel angular speed as this formula assumes no wheel spin.
+	engine.update(wheelAngularSpeed);
 }

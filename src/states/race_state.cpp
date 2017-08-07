@@ -65,7 +65,15 @@ static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
  *
  * */
 
+#ifdef sgn
+	#undef sgn
+#endif
 #define sgn(x) (x > 0 ? 1 : x < 0 ? -1 : 0)
+
+#ifdef squared
+	#undef squared
+#endif
+#define squared(x) (x*x)
 
 // -------------------------------------------------------------------------------
 
@@ -79,7 +87,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), speed(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
+  position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
   drawParameters(), coursePositionFactor(500),
   course(0, 0),
@@ -188,7 +196,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.x = hudRpmGauge->bounds.x - font2->getTextWidth("---");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
-	hudSpeedDisplay = new Hud::NumericalDisplay<float>(speed, gaugeSize, font2);
+	hudSpeedDisplay = new Hud::NumericalDisplay<float>(vehicle.speed, gaugeSize, font2);
 	hudSpeedDisplay->valueScale = 3.6;
 	hudSpeedDisplay->disableBackground = true;
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
@@ -210,7 +218,7 @@ void Pseudo3DRaceState::onEnter()
 	bgParallax.x = bgParallax.y = 0;
 	position = 0;
 	posX = 0;
-	speed = 0;
+	vehicle.speed = 0;
 	pseudoAngle = 0;
 
 	isBurningRubber = false;
@@ -262,9 +270,9 @@ void Pseudo3DRaceState::render()
 
 	Sprite& sprite = *spritesVehicle[animationIndex];
 	sprite.flipmode = strafeSpeed > 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = speed != 0? 0.1*400.0/(speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = vehicle.spriteFrameDuration / sqrt(speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
+//	sprite.duration = vehicle.speed != 0? 0.1*400.0/(vehicle.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
+	sprite.duration = vehicle.spriteFrameDuration / sqrt(vehicle.speed);  // this formula doesn't present good tire animation results.
+//	sprite.duration = vehicle.speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(vehicle.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
 
 	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.spriteWidth),
@@ -309,7 +317,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", speed*3.6);
+		sprintf(buffer, "%2.2fkm/h", vehicle.speed*3.6);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
@@ -355,7 +363,7 @@ void Pseudo3DRaceState::render()
 
 		offset -= 25;
 		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.engine.getDriveForce());
+		sprintf(buffer, "%2.2fN", vehicle.getDriveForce());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset -= 25;
@@ -384,7 +392,7 @@ void Pseudo3DRaceState::update(float delta)
 	handlePhysics(delta);
 
 	// xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN) and fabs(speed) > 5.0)
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN) and fabs(vehicle.speed) > 5.0)
 		fakeBrakeBuildUp += delta;
 	else
 		fakeBrakeBuildUp = 0;
@@ -446,7 +454,7 @@ void Pseudo3DRaceState::handleInput()
 				case Keyboard::KEY_R:
 					position = 0;
 					posX = 0;
-					speed = 0;
+					vehicle.speed = 0;
 					pseudoAngle = 0;
 					bgParallax.x = bgParallax.y = 0;
 					break;
@@ -479,7 +487,7 @@ void Pseudo3DRaceState::handleInput()
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
-	vehicle.engine.update(speed);
+	vehicle.update(delta);
 
 	const float throttle = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
 	const float braking =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
@@ -489,16 +497,16 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const float tireFrictionCoefficient = onGrass? TIRE_FRICTION_COEFFICIENT_GRASS : TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT,
 				rollingResistanceCoefficient = onGrass? ROLLING_RESISTANCE_COEFFICIENT_GRASS : ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
 
-	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed);
+	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed);
 	brakingFriction = braking * tireFriction;  // a multiplier here could be added for stronger and easier braking
-	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(speed) * ROLLING_FRICTION_ARBITRARY_ADJUST;
-	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * speed * speed * AIR_FRICTION_ARBITRARY_ADJUST;
+	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * ROLLING_FRICTION_ARBITRARY_ADJUST;
+	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update speed
-	speed += delta*(wheelAngleFactor*throttle*vehicle.engine.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
+	vehicle.speed += delta*(wheelAngleFactor*throttle*vehicle.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
 
 	// update position
-	position += speed*delta;
+	position += vehicle.speed*delta;
 
 	// update steering
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
@@ -517,7 +525,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(pseudoAngle <-PSEUDO_ANGLE_MAX) pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	strafeSpeed = pseudoAngle * speed * coursePositionFactor;
+	strafeSpeed = pseudoAngle * vehicle.speed * coursePositionFactor;
 
 	// limit strafing speed by tire friction
 //	if(strafeSpeed >  tireFriction) strafeSpeed = tireFriction;
@@ -531,13 +539,13 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N];
 
 	// update curve pull
-	curvePull = segment.curve * speed * coursePositionFactor * CURVE_PULL_FACTOR;
+	curvePull = segment.curve * vehicle.speed * coursePositionFactor * CURVE_PULL_FACTOR;
 
 	// update strafe position
 	posX += (strafeSpeed - curvePull)*delta;
 
 	// update bg parallax
-	bgParallax.x += segment.curve*speed*0.025;
+	bgParallax.x += segment.curve*vehicle.speed*0.025;
 	bgParallax.y = -segment.y*0.01;
 
 	if(bgParallax.x < -(2.0f*bg->getWidth()-Display::getInstance().getWidth()))

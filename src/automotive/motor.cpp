@@ -50,16 +50,13 @@ float Engine::getCurrentTorque()
 	#undef torqueCurve
 }
 
-float Engine::getDriveForce()
+float Engine::getDriveTorque()
 {
-	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency / tireRadius;
-//	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * 0.765 * tireRadius * 5000.0;
+	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency;
 }
 
-void Engine::update(float speed)
+void Engine::update(float wheelAngularSpeed)
 {
-	const float wheelAngularSpeed = speed / tireRadius;  // fixme implement a better way to compute wheel angular speed as this formula assumes no wheel spin.
-
 	rpm = wheelAngularSpeed * gearRatio[gear] * gearRatio[differential] * (30.0/M_PI);  // 60/2pi conversion to RPM
 //	rpm = (speed/tireRadius) * gearRatio[gear] * gearRatio[differential] * (30.0f/M_PI) * 0.002;
 

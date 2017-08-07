@@ -168,7 +168,7 @@ void Pseudo3DRaceState::onEnter()
 									0, i*vehicle.gfx.spriteHeight);
 
 		sprite->scale = vehicle.gfx.spriteScale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.gfx.spriteContatctOffset;
+		sprite->referencePixelY = - (int) vehicle.gfx.spriteContactOffset;
 		spritesVehicle.push_back(sprite);
 	}
 
@@ -276,7 +276,7 @@ void Pseudo3DRaceState::render()
 	sprite.computeCurrentFrame();
 
 	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.gfx.spriteWidth),
-										0.825f*(display.getHeight()- sprite.scale.y*vehicle.gfx.spriteHeight) - sprite.scale.y*vehicle.gfx.spriteContatctOffset };
+										0.825f*(display.getHeight()- sprite.scale.y*vehicle.gfx.spriteHeight) - sprite.scale.y*vehicle.gfx.spriteContactOffset };
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 

@@ -60,7 +60,7 @@ VehicleGraphics::VehicleGraphics(const Properties& prop)
 	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
 
 	key = "sprite_contact_offset";
-	spriteContatctOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+	spriteContactOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
 
 	key = "sprite_max_depicted_turn_angle";
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;

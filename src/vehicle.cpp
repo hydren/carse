@@ -35,11 +35,6 @@ static const float
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
-//xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
-static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
-
-static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
   mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
@@ -199,41 +194,48 @@ float Vehicle::getDriveForce()
 	return engine.getDriveTorque() / tireRadius;
 }
 
-// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
-static float normalizedTractionForce(float slipRatio)
-{
-	//0 to 6% slip ratio gives traction from 0 up to 120%; after that, traction slowly declines, with 20% slip ratio giving 100%, and down.
-	return slipRatio < 0.06? (20.0*slipRatio)            // 0 to 6% slip ratio gives traction from 0 up to 120%
-		 : slipRatio < 0.90? (9.0 - 10.0*slipRatio)/7.0  // 6% to 90% slip ratio gives traction from 120 down to 0%
-		                   : 0;                          // >90% slip ration gives no traction at all
-}
-
 /** Updates the simulation state of this vehicle (RPM, gear, etc). */
 void Vehicle::update(float delta)
 {
-	const float wheelAngularSpeed = speed/tireRadius;  // fixme this formula assumes no wheel spin.
-	engine.update(wheelAngularSpeed);
-
-	// fixme this formula still don't work properly
-//	float wheelAngularSpeed = engine.getAngularSpeed();
-//
-//	const float slipRatio = (fabs(speed)==0? 0 : (wheelAngularSpeed*tireRadius - speed)/fabs(speed));
-//	const float tireWeightLoad = (mass * GRAVITY_ACCELERATION)/4;  // xxx this formula assumes 4 wheels. this is not always the case (ex: bikes).
-//	const float tractionForce = normalizedTractionForce(slipRatio) * tireWeightLoad;
-//	const float tractionTorque = tractionForce / tireRadius;
-//
-//	//fixme how to do this formula right? remove from ingame state braking calculation
-////	const float brakingTorque = -brakePedalPosition*30;
-//	const float brakingTorque = 0;
-//
-//	const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
-//
-//	const float totalTorque = engine.getDriveTorque() + tractionTorque*drivenWheelsCount + brakingTorque;
-//
-//	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
-//	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
-//
-//	wheelAngularSpeed += (totalTorque / drivenWheelsInertia)*delta;  // xxx we're assuming no inertia from the engine components.
-//
-//	engine.update(wheelAngularSpeed);
+	//fixme this formula assumes no wheel spin.
+	const float wheelAngularSpeed = speed/tireRadius;
+	engine.update(wheelAngularSpeed);  // set new wheel angular speed
 }
+
+/*
+//xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
+static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
+static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+
+void Vehicle::update(float delta)
+{
+	float wheelAngularSpeed = engine.getAngularSpeed();
+
+	const float tireWeightLoad = (mass * GRAVITY_ACCELERATION)/4;  // xxx this formula assumes 4 wheels. this is not always the case (ex: bikes).
+
+	//fixme this Pacejka's formula still don't work properly
+	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
+	const float longitudinalSlipRatio = fabs(speed)==0? 0 : (wheelAngularSpeed*tireRadius - speed)/fabs(speed);
+	const float normalizedTractionForce = longitudinalSlipRatio < 0.06? (      20.0*longitudinalSlipRatio)      // 0 to 6% slip ratio gives traction from 0 up to 120%
+										: longitudinalSlipRatio < 0.90? (9.0 - 10.0*longitudinalSlipRatio)/7.0  // 6% to 90% slip ratio gives traction from 120 down to 0%
+										: 0;  // over 90% slip ratio gives no traction at all
+
+	const float tractionForce = normalizedTractionForce * tireWeightLoad;
+	const float tractionTorque = tractionForce / tireRadius;
+
+	//fixme how to do this formula right? remove from ingame state braking calculation
+//	const float brakingTorque = -brakePedalPosition*30;
+	const float brakingTorque = 0;
+
+	const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+
+	const float totalTorque = engine.getDriveTorque() + tractionTorque*drivenWheelsCount + brakingTorque;
+
+	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
+	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
+
+	wheelAngularSpeed += (totalTorque / drivenWheelsInertia)*delta;  // xxx we're assuming no inertia from the engine components.
+
+	engine.update(wheelAngularSpeed);  // set new wheel angular speed
+}
+*/

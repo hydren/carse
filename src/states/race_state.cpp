@@ -173,6 +173,17 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.push_back(sprite);
 	}
 
+	if(vehicle.sprite.asymmetrical) for(unsigned i = 1; i < vehicle.sprite.stateCount; i++)
+	{
+		Sprite* sprite = new Sprite(sheet, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight,
+									vehicle.sprite.frameDuration, vehicle.sprite.stateFrameCount[i],
+									0, (vehicle.sprite.stateCount-1 + i)*vehicle.sprite.frameHeight);
+
+		sprite->scale = vehicle.sprite.scale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
+		sprite->referencePixelY = - (int) vehicle.sprite.contactOffset;
+		spritesVehicle.push_back(sprite);
+	}
+
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
@@ -269,8 +280,14 @@ void Pseudo3DRaceState::render()
 	if(animationIndex > vehicle.sprite.stateCount - 1)
 		animationIndex = vehicle.sprite.stateCount - 1;
 
+	const bool isLeanRight = (strafeSpeed > 0 and animationIndex != 0);
+
+	// if asymmetrical, right-leaning sprites are after all left-leaning ones
+	if(isLeanRight and vehicle.sprite.asymmetrical)
+		animationIndex += (vehicle.sprite.stateCount-1);
+
 	Sprite& sprite = *spritesVehicle[animationIndex];
-	sprite.flipmode = strafeSpeed > 0 and animationIndex > 0? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+	sprite.flipmode = isLeanRight and not vehicle.sprite.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
 //	sprite.duration = vehicle.speed != 0? 0.1*400.0/(vehicle.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
 	sprite.duration = vehicle.sprite.frameDuration / sqrt(vehicle.speed);  // this formula doesn't present good tire animation results.
 //	sprite.duration = vehicle.speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(vehicle.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.

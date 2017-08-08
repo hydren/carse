@@ -14,8 +14,10 @@
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
-using futil::Properties;
 using std::string;
+using futil::Properties;
+using futil::to_lower;
+using futil::trim;
 
 // default uint constants
 static const unsigned
@@ -61,6 +63,15 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 
 	key = "sprite_contact_offset";
 	contactOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+
+	asymmetrical = false;
+	key = "sprite_asymmetric";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = to_lower(trim(prop.get(key)));
+		if(value == "true" or value == "yes")
+			asymmetrical = true;
+	}
 
 	key = "sprite_max_depicted_turn_angle";
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;

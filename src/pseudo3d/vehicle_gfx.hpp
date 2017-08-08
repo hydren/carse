@@ -44,6 +44,10 @@ struct Pseudo3DVehicleAnimationProfile
 	/** A vector containing the amount of frames of each state. Each index corresponds to each state. */
 	std::vector<unsigned> stateFrameCount;
 
+	/** If true, the sprite is not horizontally symmetrical and, therefore, includes right-leaning
+	 *  versions of each state. */
+	bool asymmetrical;
+
 	/** The maximum turning angle depicted on the sprite. This is used to adjust how quickly the
 	 *  animation will switch states depending on the vehicle's pseudo angle. */
 	float maxDepictedTurnAngle;

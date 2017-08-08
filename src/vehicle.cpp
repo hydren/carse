@@ -38,7 +38,7 @@ static const float
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
   mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
-  engineSoundProfile(), gfx()
+  engineSoundProfile(), sprite()
 {}
 
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
@@ -185,7 +185,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	// sprite data
 
-	gfx = VehicleGraphics(prop);
+	sprite = Pseudo3DVehicleAnimationProfile(prop);
 }
 
 /** Returns the current driving force. */

@@ -27,10 +27,10 @@ static const float
 	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
 	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION = 0.857142857143;  // ~0,857
 
-VehicleGraphics::VehicleGraphics() {}   // @suppress("Class members should be properly initialized")
+Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile() {}   // @suppress("Class members should be properly initialized")
 
 /** Creates a vehicle graphics profile from the given properties data. */
-VehicleGraphics::VehicleGraphics(const Properties& prop)
+Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Properties& prop)
 {
 	// aux. var
 	string key;
@@ -39,40 +39,40 @@ VehicleGraphics::VehicleGraphics(const Properties& prop)
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
 
 	key = "sprite_state_count";
-	spriteStateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+	stateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 
 	key = "sprite_frame_width";
-	spriteWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
+	frameWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
 
 	key = "sprite_frame_height";
-	spriteHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
+	frameHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
 
 	key = "sprite_vehicle_width";
-	spriteDepictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(spriteWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
+	depictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(frameWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
 
 	key = "sprite_scale";
-	spriteScale.x = spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
+	scale.x = scale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
 
 	key = "sprite_scale_y";
-	spriteScale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.y;
+	scale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : scale.y;
 
 	key = "sprite_scale_x";
-	spriteScale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spriteScale.x;
+	scale.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : scale.x;
 
 	key = "sprite_contact_offset";
-	spriteContactOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+	contactOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
 
 	key = "sprite_max_depicted_turn_angle";
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
-	spriteMaxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+	maxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
 	key = "sprite_frame_duration";
-	spriteFrameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
+	frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
 
-	for(unsigned stateNumber = 0; stateNumber < spriteStateCount; stateNumber++)
+	for(unsigned stateNumber = 0; stateNumber < stateCount; stateNumber++)
 	{
 		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
-		const unsigned stateFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
-		spriteStateFrameCount.push_back(stateFrameCount);
+		const unsigned frameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+		stateFrameCount.push_back(frameCount);
 	}
 }

@@ -16,21 +16,47 @@
 #include "fgeal/fgeal.hpp"
 #include "futil/properties.hpp"
 
-struct VehicleGraphics
+/** A class containing data used to draw pseudo-3D vehicle animations. */
+struct Pseudo3DVehicleAnimationProfile
 {
+	/** The filename of the image containing the sprite sheet. */
 	std::string sheetFilename;
-	unsigned spriteStateCount, spriteWidth, spriteHeight, spriteContactOffset;
-	fgeal::Vector2D spriteScale;
-	float spriteFrameDuration;
-	std::vector<unsigned> spriteStateFrameCount;
-	float spriteMaxDepictedTurnAngle;
-	unsigned spriteDepictedVehicleWidth;
+
+	/** The amount of states of this animation. */
+	unsigned stateCount;
+
+	/** The width of the sprite frame. */
+	unsigned frameWidth;
+
+	/** The width of the sprite frame. */
+	unsigned frameHeight;
+
+	/** The offset between the sprite's bottom and the depicted contact point of the vehicle (i.e the
+	 *  distance between the car tires' bottom and the sprite's bottom). */
+	unsigned contactOffset;
+
+	/** The scaling factor of this animation. Applies to all frames. */
+	fgeal::Vector2D scale;
+
+	/** The time duration of each frame. Applies to all frames. */
+	float frameDuration;
+
+	/** A vector containing the amount of frames of each state. Each index corresponds to each state. */
+	std::vector<unsigned> stateFrameCount;
+
+	/** The maximum turning angle depicted on the sprite. This is used to adjust how quickly the
+	 *  animation will switch states depending on the vehicle's pseudo angle. */
+	float maxDepictedTurnAngle;
+
+	/** The width of the vehicle as depicted in the sprite (in pixels). This is used to align animation
+	 *  effects, such as burning rubber's smoking animation, etc. */
+	unsigned depictedVehicleWidth;
 
 	/** Empty constructor */
-	VehicleGraphics();
+	Pseudo3DVehicleAnimationProfile();
 
 	/** Creates a vehicle graphics profile from the given properties data. */
-	VehicleGraphics(const futil::Properties& properties);
+	Pseudo3DVehicleAnimationProfile(const futil::Properties& properties);
 };
 
 #endif /* PSEUDO3D_VEHICLE_GFX_HPP_ */

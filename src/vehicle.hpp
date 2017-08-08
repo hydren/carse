@@ -41,7 +41,7 @@ struct Vehicle
 	EngineSoundProfile engineSoundProfile;
 
 	// graphics data
-	VehicleGraphics gfx;
+	Pseudo3DVehicleAnimationProfile sprite;
 
 	/** Creates a empty vehicle object. */
 	Vehicle();

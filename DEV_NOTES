@@ -1,12 +1,11 @@
 # todo
 
+- Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Make possible to input vehicle real-life width instead of sprite scale.
 - Add aspect ratio to vehicle specification so it can be possible to specify it instead of individual x/y scale. 
-- Streamline code to be more like the outrun example (see the dev/refact_course_struct branch)
 - Add different terrains.
 - Add traffic cars.
-- Add opponent cars.
-- Fix vehicle selection state proportions of info strings. Also fix vehicles sizes in it (account for scale x/y changes). 
+- Add opponent cars. 
 - Create props to decorate the road.
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
@@ -15,6 +14,6 @@
 - Scale the bg to be resolution-independent.
 - Create a new UI. 
 - Fix incorrect tire animation speed.
-- Introduce a more human-readable course file format, or create a usable course editor.
+- Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.

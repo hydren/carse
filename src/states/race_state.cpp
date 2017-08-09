@@ -395,6 +395,11 @@ void Pseudo3DRaceState::render()
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset -= 18;
+		fontDebug->drawText("Power:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fhp", (vehicle.engine.getCurrentTorque()*vehicle.engine.rpm)/(5252.0 * 1.355818));
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
+		offset -= 18;
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2frad/s", vehicle.engine.getAngularSpeed());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);

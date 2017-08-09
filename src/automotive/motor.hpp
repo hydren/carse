@@ -9,8 +9,9 @@
 #define MOTOR_HPP_
 #include <ciso646>
 
-#include <string>
+#include "futil/properties.hpp"
 
+#include <string>
 #include <vector>
 
 struct Engine
@@ -44,6 +45,12 @@ struct Engine
 	bool automaticShiftingEnabled;
 	float automaticShiftingLowerThreshold;
 	float automaticShiftingUpperThreshold;
+
+	/** Empty constructor */
+	Engine();
+
+	/** Creates a engine profile from the given properties data. */
+	Engine(const futil::Properties& properties);
 
 	/** Returns this engine's torque in the given RPM. */
 	float getCurrentTorque();

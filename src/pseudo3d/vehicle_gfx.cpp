@@ -36,7 +36,7 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile() {}   // @supp
 Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Properties& prop)
 {
 	// aux. vars
-	string key, key2;
+	string key, key2, key3;
 
 	key = "sprite_sheet_file";
 	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
@@ -61,8 +61,8 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 	{
 		const float vehicleWidth = atoi(prop.get(key).c_str());  // the real-life vehicle width, in mm
 
-		key = "sprite_vehicle_height"; key2 = "vehicle_height";
-		if(isValueSpecified(prop, key) and isValueSpecified(prop, key2))  // if vehicle height (both real-life and in sprite) are available, adjust scale factor
+		key = "sprite_vehicle_height"; key2 = "vehicle_height"; key3 = "vehicle_width_height_ratio";
+		if(isValueSpecified(prop, key) and (isValueSpecified(prop, key2) or isValueSpecified(prop, key3)))  // if vehicle height (both real-life and in sprite) are available, adjust scale factor
 		{
 			// adjust scale factor to account for width/height ratio discrepancies
 			const float spriteVehicleHeight = atoi(prop.get(key).c_str()),  // the vehicle width on the sprite, in pixels
@@ -74,7 +74,8 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 			if(vehicleHeight == 0)
 				throw std::invalid_argument("vehicle height is zero!");
 
-			const float vehicleWHRatio = (vehicleWidth / vehicleHeight);  // calculate it from the available real-life width and height
+			const float vehicleWHRatio = isValueSpecified(prop, key3)? atof(prop.get(key3).c_str())  // if real-life width/height ratio is available, prefer to use it
+															   : (vehicleWidth / vehicleHeight);  // otherwise calculate it from the available real-life width and height
 
 			const float ratioFixFactor = vehicleWHRatio / spriteWHRatio,  // multiplier that makes the sprite width/height ratio match the real-life width/height ratio
 						fixedDepictedVehicleWidth = depictedVehicleWidth * ratioFixFactor;  // corrected in-sprite width

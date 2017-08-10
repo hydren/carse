@@ -56,13 +56,23 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 	// default scale
 	scale.x = scale.y = 1.0;
 
+	bool keepAspectRatio = false;
+	key = "sprite_keep_aspect_ratio";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = to_lower(trim(prop.get(key)));
+		if(value == "true" or value == "yes")
+			keepAspectRatio = true;
+	}
+
 	key = "vehicle_width";
 	if(isValueSpecified(prop, key))  // if vehicle width is available, compute recommended scale factor
 	{
 		const float vehicleWidth = atoi(prop.get(key).c_str());  // the real-life vehicle width, in mm
 
 		key = "sprite_vehicle_height"; key2 = "vehicle_height"; key3 = "vehicle_width_height_ratio";
-		if(isValueSpecified(prop, key) and (isValueSpecified(prop, key2) or isValueSpecified(prop, key3)))  // if vehicle height (both real-life and in sprite) are available, adjust scale factor
+		if(not keepAspectRatio and isValueSpecified(prop, key)  // if vehicle height (both real-life and in sprite) are available, adjust scale factor (if allowed)
+		and (isValueSpecified(prop, key2) or isValueSpecified(prop, key3)))  // ratios can be obtained by specifing height or ratio itself
 		{
 			// adjust scale factor to account for width/height ratio discrepancies
 			const float spriteVehicleHeight = atoi(prop.get(key).c_str()),  // the vehicle width on the sprite, in pixels

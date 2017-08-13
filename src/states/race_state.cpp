@@ -199,7 +199,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
 	gaugeSize.w = 24;
-	gaugeSize.h = 1.5 * font->getFontHeight();
+	gaugeSize.h = 1.5 * font->getHeight();
 	hudGearDisplay = new Hud::NumericalDisplay<int>(vehicle.engine.gear, gaugeSize, font);
 	hudGearDisplay->borderThickness = 6;
 	hudGearDisplay->borderColor = fgeal::Color::LIGHT_GREY;
@@ -409,7 +409,7 @@ void Pseudo3DRaceState::render()
 		{
 			const std::string format = std::string(engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
 			sprintf(buffer, format.c_str(), i, engineSound.getSoundData()[i]->getVolume(), engineSound.getSoundData()[i]->getPlaybackSpeed());
-			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getFontHeight(), fgeal::Color::WHITE);
+			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getHeight(), fgeal::Color::WHITE);
 		}
 	}
 }

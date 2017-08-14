@@ -110,10 +110,15 @@ void Vehicle::resolveSimulationSimple(float delta)
 	engine.update(speed/tireRadius);  // set new wheel angular speed
 }
 
+float Vehicle::getLongitudinalSlipRatio()
+{
+	return fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius)/fabs(speed) - 1.0; // or (wheelAngularSpeed*tireRadius - speed)/fabs(speed)
+}
+
 //xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
 static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 20;  // 20m/s == 72km/h
+static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s == 79,2km/h
 
 void Vehicle::resolveSimulationAdvanced(float delta)
 {
@@ -129,7 +134,7 @@ void Vehicle::resolveSimulationAdvanced(float delta)
 
 	//fixme this Pacejka's formula still don't work properly
 	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
-	const float longitudinalSlipRatio = fabs(speed)==0? 0 : (wheelAngularSpeed*tireRadius - speed)/fabs(speed);
+	const float longitudinalSlipRatio = getLongitudinalSlipRatio();
 	const float normalizedTractionForce = longitudinalSlipRatio < 0.06? (20.0*longitudinalSlipRatio)           // 0 to 6% slip ratio gives traction from 0 up to 120%
 										: longitudinalSlipRatio < 0.20? (7.2 - longitudinalSlipRatio)/7.0      // 6 to 20% slip ratio gives traction from 120% up to 100%
 										: longitudinalSlipRatio < 1.00? (1.075 - 0.375*longitudinalSlipRatio)  // 20% to 100% slip ratio gives traction from 100 down to 70%

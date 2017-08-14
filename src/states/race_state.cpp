@@ -368,7 +368,7 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2f", pseudoAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
-		offset = display.getHeight()-100;
+		offset = display.getHeight()-72;
 		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.f", vehicle.engine.rpm);
 		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
@@ -403,6 +403,12 @@ void Pseudo3DRaceState::render()
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2frad/s", vehicle.engine.getAngularSpeed());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
+		offset -= 18;
+		fontDebug->drawText("Longit. Slip Ratio:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f%%", 100.0*vehicle.getLongitudinalSlipRatio());
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
 
 		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.engine.rpm);
 		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)

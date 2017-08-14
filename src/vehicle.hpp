@@ -55,6 +55,8 @@ struct Vehicle
 	/** Updates the simulation state of this vehicle (engine, speed, etc). */
 	void update(float delta);
 
+	float getLongitudinalSlipRatio();
+
 	private:
 
 	void resolveSimulationSimple(float delta);

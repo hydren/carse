@@ -54,6 +54,11 @@ struct Vehicle
 
 	/** Updates the simulation state of this vehicle (engine, speed, etc). */
 	void update(float delta);
+
+	private:
+
+	void resolveSimulationSimple(float delta);
+	void resolveSimulationAdvanced(float delta);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

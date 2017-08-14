@@ -119,7 +119,7 @@ void Vehicle::resolveSimulationAdvanced(float delta)
 {
 	if(speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
 	{
-		engine.update(speed/tireRadius);  // fixme this formula assumes no wheel spin.
+		resolveSimulationSimple(delta);
 		return;
 	}
 

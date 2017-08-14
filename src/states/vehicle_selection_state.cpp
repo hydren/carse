@@ -47,7 +47,8 @@ int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION
 VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
-  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null)
+  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
+  layout(LAYOUT_PROTOTYPE_SLIDE_STAND)
 {}
 
 VehicleSelectionState::~VehicleSelectionState()
@@ -67,7 +68,7 @@ void VehicleSelectionState::initialize()
 {
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
-	fontMain = new Font("assets/font.ttf", 24);
+	fontMain = new Font("assets/font2.ttf", 48 * 0.0015625*display.getHeight());
 	fontInfo = new Font("assets/font.ttf", 12);
 
 	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
@@ -127,33 +128,12 @@ void VehicleSelectionState::render()
 {
 	Display& display = Display::getInstance();
 	display.clear();
-	menu->draw();
-	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
-
-	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
-	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
-
-	const float scalex = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.x,
-				scaley = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.y,
-				posX = 0.7*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
-				posY = 0.35*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
-				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
-
-	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
-
-	// info sheet
-	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
-	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
-							+ (vehicle.engine.displacement == 0?  "" : vehicle.engine.displacement >= 950? toStrRounded(vehicle.engine.displacement/1000.0) + "L " : to_string(vehicle.engine.displacement)+"cc ")
-							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")
-							+ (vehicle.engine.valveCount == 0?    "" : to_string(vehicle.engine.valveCount) + "-valve ")
-							+ (vehicle.engine.configuration.empty()? "" : vehicle.engine.configuration);
-
-	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Power:  " +to_string(vehicle.engine.maximumPower) + "hp @" + to_string((int)vehicle.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText(to_string(vehicle.engine.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Weight: "+to_string(vehicle.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
+	switch(layout)
+	{
+		default:
+		case LAYOUT_PROTOTYPE_LIST: renderMenuPrototypeList(); break;
+		case LAYOUT_PROTOTYPE_SLIDE_STAND: renderMenuPrototypeSlideStand(); break;
+	}
 }
 
 void VehicleSelectionState::update(float delta)
@@ -185,10 +165,12 @@ void VehicleSelectionState::handleInput()
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
+				case Keyboard::KEY_ARROW_LEFT:
 					sndCursorMove->play();
 					menu->cursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
+				case Keyboard::KEY_ARROW_RIGHT:
 					sndCursorMove->play();
 					menu->cursorDown();
 					break;
@@ -203,4 +185,105 @@ void VehicleSelectionState::onMenuSelect()
 {
 	Pseudo3DRaceState::getInstance(game)->setVehicle(vehicles[menu->getSelectedIndex()]);
 	game.enterState(Pseudo3DCarseGame::RACE_STATE_ID);
+}
+
+void VehicleSelectionState::renderMenuPrototypeList()
+{
+	Display& display = Display::getInstance();
+	menu->draw();
+	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
+
+	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
+	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+
+	const float scalex = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.x,
+				scaley = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.y,
+				posX = 0.7*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
+				posY = 0.35*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
+				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+
+	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+
+	// info sheet
+	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
+	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
+							+ (vehicle.engine.displacement == 0?  "" : vehicle.engine.displacement >= 950? toStrRounded(vehicle.engine.displacement/1000.0) + "L " : to_string(vehicle.engine.displacement)+"cc ")
+							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")
+							+ (vehicle.engine.valveCount == 0?    "" : to_string(vehicle.engine.valveCount) + "-valve ")
+							+ (vehicle.engine.configuration.empty()? "" : vehicle.engine.configuration);
+
+	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Power:  " +to_string(vehicle.engine.maximumPower) + "hp @" + to_string((int)vehicle.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText(to_string(vehicle.engine.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Weight: "+to_string(vehicle.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
+}
+
+void VehicleSelectionState::renderMenuPrototypeSlideStand()
+{
+	Display& display = Display::getInstance();
+
+	// draw previous vehicle
+	if(vehiclePreview.size() > 2 or (vehiclePreview.size() == 2 and menu->getSelectedIndex() == 1))
+	{
+		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
+		Vehicle& vehicle = vehicles[index];
+		Image& sheetVehicle = *vehiclePreview[index];
+
+		const float scalex = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.x,
+					scaley = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.y,
+					posX = 0.25*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
+					posY = 0.30*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
+					offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+
+		sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+	}
+
+	// draw next vehicle
+	if(vehiclePreview.size() > 2 or (vehiclePreview.size() == 2 and menu->getSelectedIndex() == 0))
+	{
+		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
+		Vehicle& vehicle = vehicles[index];
+		Image& sheetVehicle = *vehiclePreview[index];
+
+		const float scalex = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.x,
+					scaley = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.y,
+					posX = 0.75*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
+					posY = 0.30*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
+					offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+
+		sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+	}
+
+	Image::drawRectangle(Color(0, 0, 0, 128), 0, 0, display.getWidth(), display.getHeight());
+
+	// draw current vehicle
+	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	Image& sheetVehicle = *vehiclePreview[menu->getSelectedIndex()];
+
+	const float scalex = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.x,
+				scaley = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.y,
+				posX = 0.5*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
+				posY = 0.35*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
+				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+
+	sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+
+	const string lblChooseVehicle = "Choose your vehicle";
+	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
+
+	// info sheet
+	int infoX = 0.333*display.getWidth(), infoY = 0.525*display.getHeight();
+	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
+							+ (vehicle.engine.displacement == 0?  "" : vehicle.engine.displacement >= 950? toStrRounded(vehicle.engine.displacement/1000.0) + "L " : to_string(vehicle.engine.displacement)+"cc ")
+							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")
+							+ (vehicle.engine.valveCount == 0?    "" : to_string(vehicle.engine.valveCount) + "-valve ")
+							+ (vehicle.engine.configuration.empty()? "" : vehicle.engine.configuration);
+
+	fontMain->drawText((vehicle.name.empty()? "--" : vehicle.name), infoX, infoY, Color::WHITE);
+	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), infoX, infoY+=48, Color::WHITE);
+	fontInfo->drawText("Power:  " +to_string(vehicle.engine.maximumPower) + "hp @" + to_string((int)vehicle.engine.maximumPowerRpm)+"rpm", infoX, infoY+=12, Color::WHITE);
+	fontInfo->drawText("Torque: " +toStrRounded(vehicle.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.engine.maximumTorqueRpm)+"rpm", infoX, infoY+=12, Color::WHITE);
+	fontInfo->drawText(to_string(vehicle.engine.gearCount)+"-speed transmission", infoX, infoY+=12, Color::WHITE);
+	fontInfo->drawText("Weight: "+to_string(vehicle.mass) + "kg", infoX, infoY+=12, Color::WHITE);
 }

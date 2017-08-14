@@ -9,14 +9,14 @@
 #define PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_
 #include <ciso646>
 
-#include <vector>
-
 #include "carse_game.hpp"
-#include "fgeal/extra/menu.hpp"
-#include "vehicle.hpp"
 
 #include "futil/language.hpp"
 #include "fgeal/fgeal.hpp"
+#include "fgeal/extra/menu.hpp"
+#include "vehicle.hpp"
+
+#include <vector>
 
 class VehicleSelectionState extends public fgeal::Game::State
 {
@@ -26,6 +26,10 @@ class VehicleSelectionState extends public fgeal::Game::State
 
 	std::vector<Vehicle> vehicles;
 	std::vector<fgeal::Image*> vehiclePreview;
+
+	enum Layout {
+		LAYOUT_PROTOTYPE_LIST, LAYOUT_PROTOTYPE_SLIDE_STAND
+	} layout;
 
 	public:
 	int getId();
@@ -43,6 +47,9 @@ class VehicleSelectionState extends public fgeal::Game::State
 	private:
 	void handleInput();
 	void onMenuSelect();
+
+	void renderMenuPrototypeList();
+	void renderMenuPrototypeSlideStand();
 };
 
 #endif /* PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_ */

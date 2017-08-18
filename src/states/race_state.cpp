@@ -328,86 +328,107 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%d", game.getFpsCount());
 		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
+
 		offset += 25;
 		fontDebug->drawText("Position:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", position);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
-		offset += 25;
+		offset += 18;
 		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", vehicle.speed*3.6);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
-		offset += 25;
-		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", strafeSpeed/coursePositionFactor);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", curvePull/coursePositionFactor);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", brakingFriction);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", rollingFriction);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", airFriction);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f", pseudoAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
-		offset = display.getHeight()-72;
-		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.f", vehicle.engine.rpm);
-		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
+		offset += 18;
+		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm/s", strafeSpeed/coursePositionFactor);
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		offset -= 25;
-		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
-		const char* autoLabelTxt = (vehicle.engine.automaticShiftingEnabled? " (auto)":"");
-		sprintf(buffer, "%d %s", vehicle.engine.gear, autoLabelTxt);
-		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
-		offset -= 25;
+		offset += 25;
+		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm/s", curvePull/coursePositionFactor);
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", brakingFriction);
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", rollingFriction);
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", airFriction);
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + brakingFriction + rollingFriction + airFriction));
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+
+		offset += 25;
 		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", vehicle.getDriveForce());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		offset -= 25;
-		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.f*vehicle.engine.getCurrentTorque()/vehicle.engine.maximumTorque);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset -= 18;
+		offset += 18;
 		fontDebug->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fNm", vehicle.engine.getCurrentTorque());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		offset -= 18;
+		offset += 18;
+		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f%%", 100.f*vehicle.engine.getCurrentTorque()/vehicle.engine.maximumTorque);
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
+		offset += 18;
 		fontDebug->drawText("Power:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fhp", (vehicle.engine.getCurrentTorque()*vehicle.engine.rpm)/(5252.0 * 1.355818));
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		offset -= 18;
+
+		offset += 25;
+		fontDebug->drawText("Tire load:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", vehicle.getTireLoad());
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Longit. Slip Ratio:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f%%", 100.0*vehicle.getLongitudinalSlipRatio());
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Normaliz. Traction Force:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f", vehicle.getNormalizedTractionForce());
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+
+		offset += 25;
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2frad/s", vehicle.engine.getAngularSpeed());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		offset -= 18;
-		fontDebug->drawText("Longit. Slip Ratio:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.0*vehicle.getLongitudinalSlipRatio());
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		offset += 18;
+		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.f", vehicle.engine.rpm);
+		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
+		const char* autoLabelTxt = (vehicle.engine.automaticShiftingEnabled? " (auto)":"");
+		sprintf(buffer, "%d %s", vehicle.engine.gear, autoLabelTxt);
+		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
 
 		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.engine.rpm);

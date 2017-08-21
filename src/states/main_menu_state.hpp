@@ -17,9 +17,30 @@
 
 class MainMenuState extends public fgeal::Game::State
 {
-	fgeal::Font* fontMain, *fontDev;
-	fgeal::Menu* menu;
-	fgeal::Sound* sndCursorMove, *sndCursorAccept;
+	struct Layout
+	{
+		fgeal::Menu menu;
+		Layout();
+		virtual void draw() abstract;
+		virtual void updateBounds(fgeal::Display&) abstract;
+		virtual void onCursorChange() abstract;
+		virtual void onCursorAccept() abstract;
+		virtual ~Layout();
+	};
+
+	Layout* layout;
+	fgeal::Font* fontDev;
+
+	struct PrototypeSimpleLayout extends Layout
+	{
+		fgeal::Font fontMain;
+		fgeal::Sound sndCursorMove, sndCursorAccept;
+		PrototypeSimpleLayout();
+		void draw();
+		void updateBounds(fgeal::Display&);
+		void onCursorChange();
+		void onCursorAccept();
+	};
 
 	public:
 	int getId();

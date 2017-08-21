@@ -26,40 +26,25 @@ int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
-  fontMain(null), fontDev(null),
-  menu(null), sndCursorMove(null), sndCursorAccept(null)
+  layout(null), fontDev(null)
 {}
 
 MainMenuState::~MainMenuState()
 {
-	if(fontMain != null) delete fontMain;
+	if(layout != null) delete layout;
 	if(fontDev != null) delete fontDev;
-	if(menu != null) delete menu;
-	if(sndCursorMove != null) delete sndCursorMove;
-	if(sndCursorAccept != null) delete sndCursorAccept;
 }
 
 void MainMenuState::initialize()
 {
-	Display& display = Display::getInstance();
-	Rectangle menuBounds = {0.125f*display.getWidth(), 0.5f*display.getHeight(), 0.4f*display.getWidth(), 0.4f*display.getHeight()};
-	fontMain = new Font("assets/font.ttf", 32);
+	layout = new PrototypeSimpleLayout();
 	fontDev = new Font("assets/font.ttf", 12);
-	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
-	menu->fontIsOwned = true;
-	menu->bgColor = Color::AZURE;
-	menu->focusedEntryFontColor = Color::NAVY;
-	menu->addEntry("Start debug course");
-	menu->addEntry("Start random course");
-	menu->addEntry("Start a loaded course");
-	menu->addEntry("Exit");
-	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
-	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
 }
 
 void MainMenuState::onEnter()
 {
-	menu->setSelectedIndex(0);
+	layout->updateBounds(game.getDisplay());
+	layout->menu.setSelectedIndex(0);
 }
 
 void MainMenuState::onLeave()
@@ -71,8 +56,7 @@ void MainMenuState::render()
 {
 	Display& display = Display::getInstance();
 	display.clear();
-	menu->draw();
-	fontMain->drawText("Carse Project", 84, 25, Color::WHITE);
+	layout->draw();
 	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - fontDev->getHeight(), Color::CREAM);
 }
 
@@ -100,16 +84,16 @@ void MainMenuState::handleInput()
 					game.running = false;
 					break;
 				case Keyboard::KEY_ENTER:
-					sndCursorAccept->play();
 					this->onMenuSelect();
+					layout->onCursorAccept();
 					break;
 				case Keyboard::KEY_ARROW_UP:
-					sndCursorMove->play();
-					menu->cursorUp();
+					layout->menu.cursorUp();
+					layout->onCursorChange();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
-					sndCursorMove->play();
-					menu->cursorDown();
+					layout->menu.cursorDown();
+					layout->onCursorChange();
 					break;
 				default:
 					break;
@@ -120,20 +104,66 @@ void MainMenuState::handleInput()
 
 void MainMenuState::onMenuSelect()
 {
-	if(menu->getSelectedIndex() == 0 or menu->getSelectedIndex() == 1)
+	if(layout->menu.getSelectedIndex() == 0 or layout->menu.getSelectedIndex() == 1)
 	{
-		const bool isDebug = (menu->getSelectedIndex() == 0);
+		const bool isDebug = (layout->menu.getSelectedIndex() == 0);
 		Pseudo3DRaceState::getInstance(game)->setCourse(isDebug? Course::createDebugCourse(200, 3000) : Course::createRandomCourse(200, 3000, 6400, 1.5));
 		game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID);
 	}
 
-	else if(menu->getSelectedIndex() == 2)
+	else if(layout->menu.getSelectedIndex() == 2)
 	{
 		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID);
 	}
 
-	else if(menu->getSelectedIndex() == 3)
+	else if(layout->menu.getSelectedIndex() == 3)
 	{
 		game.running = false;
 	}
+}
+
+MainMenuState::Layout::Layout()
+: menu(fgeal::Rectangle(), new Font("assets/font.ttf", 18), Color::WHITE)
+{
+	menu.fontIsOwned = true;
+	menu.bgColor = Color::AZURE;
+	menu.focusedEntryFontColor = Color::NAVY;
+	menu.addEntry("Start debug course");
+	menu.addEntry("Start random course");
+	menu.addEntry("Start a loaded course");
+	menu.addEntry("Exit");
+}
+
+MainMenuState::Layout::~Layout()
+{}
+
+MainMenuState::PrototypeSimpleLayout::PrototypeSimpleLayout()
+: fontMain("assets/font.ttf", 32),
+  sndCursorMove("assets/sound/cursor_move.ogg"), sndCursorAccept("assets/sound/cursor_accept.ogg")
+{}
+
+void MainMenuState::PrototypeSimpleLayout::updateBounds(Display& display)
+{
+	Rectangle menuBounds = {
+		0.125f*display.getWidth(), 0.5f*display.getHeight(),
+		0.4f*display.getWidth(), 0.4f*display.getHeight()
+	};
+
+	menu.bounds = menuBounds;
+}
+
+void MainMenuState::PrototypeSimpleLayout::draw()
+{
+	menu.draw();
+	fontMain.drawText("Carse Project", 84, 25, Color::WHITE);
+}
+
+void MainMenuState::PrototypeSimpleLayout::onCursorChange()
+{
+	sndCursorAccept.play();
+}
+
+void MainMenuState::PrototypeSimpleLayout::onCursorAccept()
+{
+	sndCursorAccept.play();
 }

@@ -15,3 +15,4 @@
 - Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
+- Howl engine when selecting car (either a default engine howl or one using the car engine profile).

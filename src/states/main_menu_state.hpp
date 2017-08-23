@@ -52,17 +52,33 @@ class MainMenuState extends public fgeal::Game::State
 
 	Layout* layout;
 
+	// todo once this PrototypeSimpleLayout becames time-tested, make it all virtual (and remove Prototype prefix)
 	struct PrototypeSimpleLayout extends Layout
 	{
 		fgeal::Font fontMain;
 		fgeal::Sound sndCursorMove, sndCursorAccept;
 		PrototypeSimpleLayout(MainMenuState& state);
-		virtual void draw();
-		virtual void update(float delta);
-		virtual void pack(fgeal::Display&);
-		virtual void navigate(NavigationDirection navDir);
-		virtual void onCursorChange();
-		virtual void onCursorAccept();
+		void draw();
+		void update(float delta);
+		void pack(fgeal::Display&);
+		void navigate(NavigationDirection navDir);
+		void onCursorChange();
+		void onCursorAccept();
+	};
+
+	// todo once this PrototypeGridLayout becames time-tested, make it all virtual (and remove Prototype prefix)
+	struct PrototypeGridLayout extends Layout
+	{
+		fgeal::Font fontMain, fontTitle;
+		fgeal::Sound sndCursorMove, sndCursorAccept;
+		fgeal::Rectangle slot[4];
+		fgeal::Color selectedSlotColor;
+		PrototypeGridLayout(MainMenuState& state);
+		void draw();
+		void update(float delta);
+		void pack(fgeal::Display&);
+		void navigate(NavigationDirection navDir);
+		void onCursorAccept();
 	};
 
 	public:

@@ -26,6 +26,10 @@ class CourseSelectionState extends public fgeal::Game::State
 
 	std::vector<Course> courses;
 
+	bool isLoadedCourseSelected;
+
+	bool isDebugCourseSelected;
+
 	public:
 	int getId();
 

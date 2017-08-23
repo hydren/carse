@@ -38,7 +38,8 @@ int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_S
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
-  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null)
+  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
+  isLoadedCourseSelected(true), isDebugCourseSelected(false)
 {}
 
 CourseSelectionState::~CourseSelectionState()
@@ -55,19 +56,20 @@ void CourseSelectionState::initialize()
 {
 	Display& display = Display::getInstance();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
-	fontMain = new Font("assets/font.ttf", 24);
+	fontMain = new Font("assets/font2.ttf", 32);
 	fontInfo = new Font("assets/font.ttf", 12);
 
 	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
 	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
 	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
-	menu = new Menu(menuBounds, new Font("assets/font2.ttf", 18), Color::WHITE);
+	menu = new Menu(menuBounds, new Font("assets/font.ttf", 12), Color::DARK_GREEN, "Courses:");
 	menu->fontIsOwned = true;
 	menu->bgColor = Color::GREEN;
-	menu->focusedEntryFontColor = Color::DARK_GREEN;
+	menu->focusedEntryFontColor = Color::WHITE;
+	menu->titleColor = Color::RED;
 
-	cout << "reading vehicles..." << endl;
+	cout << "reading courses..." << endl;
 
 	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/courses");
 	for(unsigned i = 0; i < courseFiles.size(); i++)
@@ -93,11 +95,25 @@ void CourseSelectionState::render()
 {
 	Display& display = Display::getInstance();
 	display.clear();
-	menu->draw();
-	fontMain->drawText("Choose a course", 84, 25, Color::WHITE);
 
-	Course& course = courses[menu->getSelectedIndex()];
-	fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", 0.525*display.getWidth(), 0.525*display.getHeight(), Color::WHITE);
+	if(isLoadedCourseSelected)
+	{
+		menu->draw();
+		Course& course = courses[menu->getSelectedIndex()];
+		fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", menu->bounds.x + menu->bounds.w + 32, menu->bounds.y + menu->bounds.h * 0.5f, Color::WHITE);
+	}
+	else if(isDebugCourseSelected)
+	{
+		Image::drawRectangle(Color::GREY, menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h);
+		fontMain->drawText("Debug course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, Color::LIGHT_GREY);
+	}
+	else
+	{
+		Image::drawRectangle(menu->bgColor, menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h);
+		fontMain->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, Color::RED);
+	}
+
+	fontMain->drawText("Choose a course", 84, 25, Color::WHITE);
 }
 
 void CourseSelectionState::update(float delta)
@@ -135,6 +151,39 @@ void CourseSelectionState::handleInput()
 				case Keyboard::KEY_ARROW_DOWN:
 					sndCursorMove->play();
 					menu->cursorDown();
+					break;
+				case Keyboard::KEY_ARROW_LEFT:
+					sndCursorMove->play();
+					if(isLoadedCourseSelected)
+						isLoadedCourseSelected = false;
+					else
+					{
+						if(isDebugCourseSelected)
+						{
+							isLoadedCourseSelected = true;
+							isDebugCourseSelected = false;
+						}
+						else
+							isDebugCourseSelected = true;
+					}
+					break;
+				case Keyboard::KEY_ARROW_RIGHT:
+					sndCursorMove->play();
+					if(isLoadedCourseSelected)
+					{
+						isLoadedCourseSelected = false;
+						isDebugCourseSelected = true;
+					}
+					else
+					{
+						if(isDebugCourseSelected)
+							isDebugCourseSelected = false;
+						else
+						{
+							isLoadedCourseSelected = true;
+							isDebugCourseSelected = false;
+						}
+					}
 					break;
 				default:
 					break;

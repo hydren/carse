@@ -17,29 +17,52 @@
 
 class MainMenuState extends public fgeal::Game::State
 {
+	// the menu
+	fgeal::Menu* menu;
+
+	// a font for debugging
+	fgeal::Font* fontDev;
+
 	struct Layout
 	{
-		fgeal::Menu menu;
-		Layout();
-		virtual void draw() abstract;
-		virtual void updateBounds(fgeal::Display&) abstract;
-		virtual void onCursorChange() abstract;
-		virtual void onCursorAccept() abstract;
+		MainMenuState& state;
+		Layout(MainMenuState& state);
 		virtual ~Layout();
+
+		// draws the layout
+		virtual void draw() abstract;
+
+		// performs any logic-related updates, if needed
+		virtual void update(float delta) abstract;
+
+		// updates all stuff's sizes to fit the display properly, if needed
+		virtual void pack(fgeal::Display& display) abstract;
+
+		enum NavigationDirection { NAV_UP, NAV_DOWN, NAV_LEFT, NAV_RIGHT };
+
+		// action when user navigates
+		virtual void navigate(NavigationDirection navDir) abstract;
+
+		// action when user accept or selects and confirm a item of the menu
+		virtual void onCursorAccept();
+
+		// stuff to be done when exiting the menu
+		virtual void onQuit();
 	};
 
 	Layout* layout;
-	fgeal::Font* fontDev;
 
 	struct PrototypeSimpleLayout extends Layout
 	{
 		fgeal::Font fontMain;
 		fgeal::Sound sndCursorMove, sndCursorAccept;
-		PrototypeSimpleLayout();
-		void draw();
-		void updateBounds(fgeal::Display&);
-		void onCursorChange();
-		void onCursorAccept();
+		PrototypeSimpleLayout(MainMenuState& state);
+		virtual void draw();
+		virtual void update(float delta);
+		virtual void pack(fgeal::Display&);
+		virtual void navigate(NavigationDirection navDir);
+		virtual void onCursorChange();
+		virtual void onCursorAccept();
 	};
 
 	public:
@@ -57,7 +80,7 @@ class MainMenuState extends public fgeal::Game::State
 
 	private:
 	void handleInput();
-	void onMenuSelect();
+	void menuSelectionAction();
 };
 
 #endif /* PSEUDO3D_MAIN_MENU_STATE_HPP_ */

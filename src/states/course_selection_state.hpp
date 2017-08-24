@@ -20,7 +20,7 @@
 
 class CourseSelectionState extends public fgeal::Game::State
 {
-	fgeal::Font* fontMain, *fontInfo;
+	fgeal::Font* fontMain, *fontInfo, *fontTab;
 	fgeal::Menu* menu;
 	fgeal::Sound* sndCursorMove, *sndCursorAccept, *sndCursorOut;
 

@@ -37,7 +37,7 @@ int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_S
 
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
-  fontMain(null), fontInfo(null),
+  fontMain(null), fontInfo(null), fontTab(null),
   menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
   isLoadedCourseSelected(true), isDebugCourseSelected(false)
 {}
@@ -46,6 +46,7 @@ CourseSelectionState::~CourseSelectionState()
 {
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
+	if(fontTab  != null) delete fontTab;
 	if(menu != null) delete menu;
 	if(sndCursorMove != null) delete sndCursorMove;
 	if(sndCursorAccept != null) delete sndCursorAccept;
@@ -56,16 +57,16 @@ void CourseSelectionState::initialize()
 {
 	fontMain = new Font("assets/font2.ttf", 32);
 	fontInfo = new Font("assets/font.ttf", 12);
+	fontTab  = new Font("assets/font2.ttf", 16);
 
 	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
 	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
 	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
-	menu = new Menu(Rectangle(), new Font("assets/font.ttf", 12), Color::DARK_GREEN, "Courses:");
+	menu = new Menu(Rectangle(), new Font("assets/font.ttf", 12), Color::RED);
 	menu->fontIsOwned = true;
 	menu->bgColor = Color::GREEN;
 	menu->focusedEntryFontColor = Color::WHITE;
-	menu->titleColor = Color::RED;
 
 	cout << "reading courses..." << endl;
 
@@ -95,19 +96,33 @@ void CourseSelectionState::render()
 	display.clear();
 
 	const float displayWidth = display.getWidth(),
-				displayHeight = display.getHeight();
+				displayHeight = display.getHeight(),
+				xspacing = 0.01f*displayWidth,
+				yspacing = 0.01f*displayHeight;;
 
 	// update menu bounds
 	{
-		const Rectangle updatedBounds =
-		{
-				0.0625f * displayWidth,
-				0.25f * displayHeight,
-				0.4f * displayWidth,
-				0.5f * displayHeight
-		};
+		const Rectangle updatedBounds = {0.0625f*displayWidth, 0.25f*displayHeight, 0.4f*displayWidth, 0.5f*displayHeight};
 		menu->bounds = updatedBounds;
 	}
+
+	const Rectangle tabSettingsBounds = {
+			menu->bounds.x,
+			menu->bounds.y - 0.1f*displayHeight,
+			0.4f*menu->bounds.w,
+			0.1f*displayHeight
+	};
+	const Rectangle tabLoadedCoursesBounds = {
+			menu->bounds.x + xspacing + tabSettingsBounds.w,
+			tabSettingsBounds.y,
+			tabSettingsBounds.w,
+			tabSettingsBounds.h
+	};
+
+	Image::drawFilledRectangle(tabSettingsBounds, not isLoadedCourseSelected? Color::GREEN : Color::DARK_GREEN);
+	fontTab->drawText("Custom",tabSettingsBounds.x + xspacing, tabSettingsBounds.y + yspacing, not isLoadedCourseSelected? Color::BLACK : Color::GREEN);
+	Image::drawFilledRectangle(tabLoadedCoursesBounds, isLoadedCourseSelected? Color::GREEN : Color::DARK_GREEN);
+	fontTab->drawText("Courses",tabLoadedCoursesBounds.x + xspacing, tabLoadedCoursesBounds.y + yspacing, isLoadedCourseSelected? Color::BLACK : Color::GREEN);
 
 	if(isLoadedCourseSelected)
 	{
@@ -115,15 +130,14 @@ void CourseSelectionState::render()
 		Course& course = courses[menu->getSelectedIndex()];
 		fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", menu->bounds.x + menu->bounds.w + 32, menu->bounds.y + menu->bounds.h * 0.5f, Color::WHITE);
 	}
-	else if(isDebugCourseSelected)
-	{
-		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h, Color::GREY);
-		fontMain->drawText("Debug course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, Color::LIGHT_GREY);
-	}
 	else
 	{
-		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h, menu->bgColor);
-		fontMain->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, Color::RED);
+		Image::drawFilledRectangle(menu->bounds, isDebugCourseSelected? Color::GREY : menu->bgColor);
+		Image::drawRectangle(menu->bounds, Color::RED);
+		if(isDebugCourseSelected)
+			fontMain->drawText("Debug course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, isDebugCourseSelected? Color::LIGHT_GREY : Color::BLACK);
+		else
+			fontMain->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, isDebugCourseSelected? Color::BLACK : Color::RED);
 	}
 
 	fontMain->drawText("Choose a course", 84, 25, Color::WHITE);
@@ -159,44 +173,25 @@ void CourseSelectionState::handleInput()
 					break;
 				case Keyboard::KEY_ARROW_UP:
 					sndCursorMove->play();
-					menu->cursorUp();
+					if(isLoadedCourseSelected)
+						menu->cursorUp();
+					else
+						isDebugCourseSelected = !isDebugCourseSelected;
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
 					sndCursorMove->play();
-					menu->cursorDown();
+					if(isLoadedCourseSelected)
+						menu->cursorDown();
+					else
+						isDebugCourseSelected = !isDebugCourseSelected;
 					break;
 				case Keyboard::KEY_ARROW_LEFT:
 					sndCursorMove->play();
-					if(isLoadedCourseSelected)
-						isLoadedCourseSelected = false;
-					else
-					{
-						if(isDebugCourseSelected)
-						{
-							isLoadedCourseSelected = true;
-							isDebugCourseSelected = false;
-						}
-						else
-							isDebugCourseSelected = true;
-					}
+					isLoadedCourseSelected = !isLoadedCourseSelected;
 					break;
 				case Keyboard::KEY_ARROW_RIGHT:
 					sndCursorMove->play();
-					if(isLoadedCourseSelected)
-					{
-						isLoadedCourseSelected = false;
-						isDebugCourseSelected = true;
-					}
-					else
-					{
-						if(isDebugCourseSelected)
-							isDebugCourseSelected = false;
-						else
-						{
-							isLoadedCourseSelected = true;
-							isDebugCourseSelected = false;
-						}
-					}
+					isLoadedCourseSelected = !isLoadedCourseSelected;
 					break;
 				default:
 					break;
@@ -207,6 +202,13 @@ void CourseSelectionState::handleInput()
 
 void CourseSelectionState::onMenuSelect()
 {
-	Pseudo3DRaceState::getInstance(game)->setCourse(courses[menu->getSelectedIndex()]);
-	game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID);
+	if(isLoadedCourseSelected)
+		Pseudo3DRaceState::getInstance(game)->setCourse(courses[menu->getSelectedIndex()]);
+	else
+		if(isDebugCourseSelected)
+			Pseudo3DRaceState::getInstance(game)->setCourse(Course::createDebugCourse(200, 3000));
+		else
+			Pseudo3DRaceState::getInstance(game)->setCourse(Course::createRandomCourse(200, 3000, 6400, 1.5));
+
+	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }

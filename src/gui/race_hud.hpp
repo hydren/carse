@@ -126,8 +126,8 @@ namespace Hud
 				backgroundImage->drawScaled(bounds.x, bounds.y, bounds.w/backgroundImage->getWidth(), bounds.h/backgroundImage->getHeight());
 			else
 			{
-				fgeal::Image::drawEllipse(borderColor,     center.x, center.y, 0.5*bounds.w, 0.5*bounds.h);
-				fgeal::Image::drawEllipse(backgroundColor, center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness));
+				fgeal::Image::drawFilledEllipse(center.x, center.y, 0.5*bounds.w, 0.5*bounds.h, borderColor);
+				fgeal::Image::drawFilledEllipse(center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness), backgroundColor);
 			}
 
 			if(pointerImage != null)
@@ -138,19 +138,18 @@ namespace Hud
 			}
 			else
 			{
-				fgeal::Image::drawLine(needleColor,
+				fgeal::Image::drawLine(
 						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
-						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle));
-				fgeal::Image::drawEllipse(boltColor, center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w);
+						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle), needleColor);
+				fgeal::Image::drawFilledEllipse(center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w, boltColor);
 			}
 
 			if(graduationLevel >= 1)  // primary graduation
 			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
 			{
 				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				fgeal::Image::drawLine(graduationColor,
-						center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
-						center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle));
+				fgeal::Image::drawLine(center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
+									   center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle), graduationColor);
 
 				// numerical graduation
 				if(graduationFont != null)
@@ -164,18 +163,16 @@ namespace Hud
 			for(NumberType g = min; g <= max; g += graduationSecondarySize)
 			{
 				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				fgeal::Image::drawLine(graduationColor,
-						center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
-						center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle));
+				fgeal::Image::drawLine(center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
+									   center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle), graduationColor);
 			}
 
 			if(graduationLevel >= 3)  // tertiary graduation
 			for(NumberType g = min; g <= max; g += graduationTertiarySize)
 			{
 				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				fgeal::Image::drawLine(graduationColor,
-						center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
-						center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle));
+				fgeal::Image::drawLine(center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
+									   center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle), graduationColor);
 			}
 
 			if(foregroundImage != null)
@@ -220,13 +217,11 @@ namespace Hud
 		void draw()
 		{
 			const float fillRatio = (value-min)/(max-min);
-			fgeal::Image::drawRectangle(borderColor, bounds.x, bounds.y, bounds.w, bounds.h);
-			fgeal::Image::drawRectangle(backgroundColor,
-					bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-					bounds.w - borderThickness, bounds.h - borderThickness);
-			fgeal::Image::drawRectangle(fillColor,
-					bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-					fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness);
+			fgeal::Image::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
+			fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+											  bounds.w - borderThickness, bounds.h - borderThickness), backgroundColor;
+			fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+											  fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness, fillColor);
 		}
 	};
 
@@ -288,10 +283,9 @@ namespace Hud
 		{
 			if(not disableBackground)
 			{
-				fgeal::Image::drawRectangle(borderColor, bounds.x, bounds.y, bounds.w, bounds.h);
-				fgeal::Image::drawRectangle(backgroundColor,
-					bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-					bounds.w - borderThickness, bounds.h - borderThickness);
+				fgeal::Image::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
+				fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+												  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
 			}
 
 			sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));

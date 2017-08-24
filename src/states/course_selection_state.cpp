@@ -54,8 +54,6 @@ CourseSelectionState::~CourseSelectionState()
 
 void CourseSelectionState::initialize()
 {
-	Display& display = Display::getInstance();
-	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font2.ttf", 32);
 	fontInfo = new Font("assets/font.ttf", 12);
 
@@ -63,7 +61,7 @@ void CourseSelectionState::initialize()
 	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
 	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
-	menu = new Menu(menuBounds, new Font("assets/font.ttf", 12), Color::DARK_GREEN, "Courses:");
+	menu = new Menu(Rectangle(), new Font("assets/font.ttf", 12), Color::DARK_GREEN, "Courses:");
 	menu->fontIsOwned = true;
 	menu->bgColor = Color::GREEN;
 	menu->focusedEntryFontColor = Color::WHITE;
@@ -96,6 +94,21 @@ void CourseSelectionState::render()
 	Display& display = Display::getInstance();
 	display.clear();
 
+	const float displayWidth = display.getWidth(),
+				displayHeight = display.getHeight();
+
+	// update menu bounds
+	{
+		const Rectangle updatedBounds =
+		{
+				0.0625f * displayWidth,
+				0.25f * displayHeight,
+				0.4f * displayWidth,
+				0.5f * displayHeight
+		};
+		menu->bounds = updatedBounds;
+	}
+
 	if(isLoadedCourseSelected)
 	{
 		menu->draw();
@@ -104,12 +117,12 @@ void CourseSelectionState::render()
 	}
 	else if(isDebugCourseSelected)
 	{
-		Image::drawRectangle(Color::GREY, menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h);
+		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h, Color::GREY);
 		fontMain->drawText("Debug course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, Color::LIGHT_GREY);
 	}
 	else
 	{
-		Image::drawRectangle(menu->bgColor, menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h);
+		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y, menu->bounds.w, menu->bounds.h, menu->bgColor);
 		fontMain->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, Color::RED);
 	}
 

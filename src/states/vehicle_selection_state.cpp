@@ -255,7 +255,7 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 		sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
 	}
 
-	Image::drawRectangle(Color(0, 0, 0, 128), 0, 0, display.getWidth(), display.getHeight());
+	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(),Color(0, 0, 0, 128));
 
 	// draw current vehicle
 	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];

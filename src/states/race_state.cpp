@@ -255,7 +255,7 @@ void Pseudo3DRaceState::render()
 	Display& display = Display::getInstance();
 	display.clear();
 
-	Image::drawRectangle(bgColor, 0, 0, display.getWidth(), display.getHeight());
+	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(), bgColor);
 	bg->draw(bgParallax.x, bgParallax.y + 0.55*display.getHeight() - bg->getHeight());
 	bg->draw(bgParallax.x + bg->getWidth(), bgParallax.y + 0.55*display.getHeight() - bg->getHeight());
 

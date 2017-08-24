@@ -270,8 +270,8 @@ void MainMenuState::PrototypeGridLayout::draw()
 	for(unsigned i = 0; i < state.menu->getNumberOfEntries(); i++)
 	{
 		const bool isSelected = (i == state.menu->getSelectedIndex());
-		Image::drawRectangle(Color::BLACK, slot[i].x, slot[i].y, slot[i].w, slot[i].h);
-		Image::drawRectangle(isSelected? Color::BLUE : Color::AZURE, slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f);
+		Image::drawFilledRectangle(slot[i].x, slot[i].y, slot[i].w, slot[i].h, Color::BLACK);
+		Image::drawFilledRectangle(slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f, isSelected? Color::BLUE : Color::AZURE);
 		fontMain.drawText((*state.menu)[i].label, slot[i].x * 1.015f, slot[i].y * 1.015f, isSelected? selectedSlotColor : Color::WHITE);
 	}
 

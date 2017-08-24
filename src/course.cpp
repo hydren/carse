@@ -22,6 +22,7 @@
 
 using fgeal::Color;
 using fgeal::Display;
+using fgeal::Image;
 using futil::Properties;
 using std::string;
 using std::vector;
@@ -33,7 +34,7 @@ using futil::starts_with;
 //custom call to draw quad
 void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
 {
-	fgeal::Image::drawQuadrangle(c, x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1);
+	Image::drawFilledQuadrangle(x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1, c);
 }
 
 // needed to ensure consistency

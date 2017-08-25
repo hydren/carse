@@ -44,9 +44,9 @@ void MainMenuState::initialize()
 	menu->fontIsOwned = true;
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
-	menu->addEntry("Start debug course");
-	menu->addEntry("Start random course");
-	menu->addEntry("Start a loaded course");
+	menu->addEntry("Race!");
+	menu->addEntry("Choose vehicle");
+	menu->addEntry("Choose course");
 	menu->addEntry("Exit");
 
 	fontDev = new Font("assets/font.ttf", 12);
@@ -131,22 +131,17 @@ void MainMenuState::handleInput()
 
 void MainMenuState::menuSelectionAction()
 {
-	if(menu->getSelectedIndex() == 0 or menu->getSelectedIndex() == 1)
-	{
-		const bool isDebug = (menu->getSelectedIndex() == 0);
-		Pseudo3DRaceState::getInstance(game)->setCourse(isDebug? Course::createDebugCourse(200, 3000) : Course::createRandomCourse(200, 3000, 6400, 1.5));
+	if(menu->getSelectedIndex() == 0)
+		game.enterState(Pseudo3DCarseGame::RACE_STATE_ID);
+
+	if(menu->getSelectedIndex() == 1)
 		game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID);
-	}
 
-	else if(menu->getSelectedIndex() == 2)
-	{
+	if(menu->getSelectedIndex() == 2)
 		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID);
-	}
 
-	else if(menu->getSelectedIndex() == 3)
-	{
+	if(menu->getSelectedIndex() == 3)
 		game.running = false;
-	}
 }
 
 // ============================================================================================
@@ -272,10 +267,13 @@ void MainMenuState::PrototypeGridLayout::draw()
 		const bool isSelected = (i == state.menu->getSelectedIndex());
 		Image::drawFilledRectangle(slot[i].x, slot[i].y, slot[i].w, slot[i].h, Color::BLACK);
 		Image::drawFilledRectangle(slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f, isSelected? Color::BLUE : Color::AZURE);
-		fontMain.drawText((*state.menu)[i].label, slot[i].x * 1.015f, slot[i].y * 1.015f, isSelected? selectedSlotColor : Color::WHITE);
+		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
+		fontMain.drawText(state.menu->at(i).label, slot[i].x + 0.5*(slot[i].w - textWidth), slot[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
 	}
 
-	fontTitle.drawText("Carse Project", 84, 25, Color::WHITE);
+	const string title("Carse Project");
+	fontTitle.drawText(title, 0.5*(state.game.getDisplay().getWidth() - fontTitle.getTextWidth(title)),
+							  0.05*(state.game.getDisplay().getHeight() - fontTitle.getHeight()), Color::WHITE);
 }
 
 void MainMenuState::PrototypeGridLayout::update(float delta)

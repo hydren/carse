@@ -37,6 +37,7 @@ int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_S
 
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
+  imgRandom(null), imgCircuit(null),
   fontMain(null), fontInfo(null), fontTab(null),
   menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
   isLoadedCourseSelected(true), isDebugCourseSelected(false)
@@ -55,6 +56,9 @@ CourseSelectionState::~CourseSelectionState()
 
 void CourseSelectionState::initialize()
 {
+	imgRandom = new Image("assets/portrait-random.png");
+	imgCircuit = new Image("assets/portrait-circuit.png");
+
 	fontMain = new Font("assets/font2.ttf", 32);
 	fontInfo = new Font("assets/font.ttf", 12);
 	fontTab  = new Font("assets/font2.ttf", 16);
@@ -124,23 +128,45 @@ void CourseSelectionState::render()
 	Image::drawFilledRectangle(tabLoadedCoursesBounds, isLoadedCourseSelected? Color::GREEN : Color::DARK_GREEN);
 	fontTab->drawText("Courses",tabLoadedCoursesBounds.x + xspacing, tabLoadedCoursesBounds.y + yspacing, isLoadedCourseSelected? Color::BLACK : Color::GREEN);
 
+	const Rectangle portraitBounds = {
+			menu->bounds.x + menu->bounds.w + 32,
+			1.1f *menu->bounds.y,
+			0.75f*menu->bounds.h,
+			0.75f*menu->bounds.h
+	};
+	Image::drawFilledRectangle(portraitBounds, Color::DARK_GREY);  // portrait frame
+
+	const Rectangle portraitImgBounds = {
+			portraitBounds.x + portraitBounds.w*0.02f,
+			portraitBounds.y + portraitBounds.h*0.02f,
+			portraitBounds.w * 0.96f,
+			portraitBounds.h * 0.96f
+	};
+
 	if(isLoadedCourseSelected)
 	{
 		menu->draw();
+		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
 		Course& course = courses[menu->getSelectedIndex()];
-		fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", menu->bounds.x + menu->bounds.w + 32, menu->bounds.y + menu->bounds.h * 0.5f, Color::WHITE);
+		fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", menu->bounds.x + menu->bounds.w + 32, menu->bounds.y + menu->bounds.h, Color::WHITE);
 	}
 	else
 	{
 		Image::drawFilledRectangle(menu->bounds, isDebugCourseSelected? Color::GREY : menu->bgColor);
 		Image::drawRectangle(menu->bounds, Color::RED);
 		if(isDebugCourseSelected)
+		{
 			fontMain->drawText("Debug course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, isDebugCourseSelected? Color::LIGHT_GREY : Color::BLACK);
+			imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
+		}
 		else
+		{
 			fontMain->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, isDebugCourseSelected? Color::BLACK : Color::RED);
+			imgRandom->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
+		}
 	}
 
-	fontMain->drawText("Choose a course", 84, 25, Color::WHITE);
+	fontMain->drawText("Choose a course", menu->bounds.x, 0.025f*displayHeight, Color::WHITE);
 }
 
 void CourseSelectionState::update(float delta)

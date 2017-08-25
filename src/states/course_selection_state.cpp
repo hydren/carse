@@ -241,3 +241,8 @@ void CourseSelectionState::onMenuSelect()
 
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }
+
+Image* CourseSelectionState::getSelectedCoursePreview()
+{
+	return isLoadedCourseSelected or isDebugCourseSelected? imgCircuit : imgRandom;
+}

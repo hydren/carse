@@ -23,6 +23,9 @@ class MainMenuState extends public fgeal::Game::State
 	// a font for debugging
 	fgeal::Font* fontDev;
 
+	// ilustrations
+	fgeal::Image* imgRace, *imgExit;
+
 	struct Layout
 	{
 		MainMenuState& state;

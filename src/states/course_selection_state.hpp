@@ -44,6 +44,8 @@ class CourseSelectionState extends public fgeal::Game::State
 	void render();
 	void update(float delta);
 
+	fgeal::Image* getSelectedCoursePreview();
+
 	private:
 	void handleInput();
 	void onMenuSelect();

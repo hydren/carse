@@ -11,6 +11,11 @@
 
 #include "futil/string_extra_operators.hpp"
 
+#include "vehicle_selection_state.hpp"
+#include "course_selection_state.hpp"
+
+#include <algorithm>
+
 using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
@@ -27,7 +32,7 @@ int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
-  menu(null), fontDev(null),
+  menu(null), fontDev(null), imgRace(null), imgExit(null),
   layout(null)
 {}
 
@@ -50,6 +55,9 @@ void MainMenuState::initialize()
 	menu->addEntry("Exit");
 
 	fontDev = new Font("assets/font.ttf", 12);
+	imgRace = new Image("assets/race.png");
+	imgExit = new Image("assets/exit.png");
+
 	layout = new PrototypeGridLayout(*this);
 }
 
@@ -269,6 +277,32 @@ void MainMenuState::PrototypeGridLayout::draw()
 		Image::drawFilledRectangle(slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f, isSelected? Color::BLUE : Color::AZURE);
 		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
 		fontMain.drawText(state.menu->at(i).label, slot[i].x + 0.5*(slot[i].w - textWidth), slot[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
+
+		switch(i)
+		{
+			case 0:
+			{
+				state.imgRace->drawScaled(slot[i].x*1.01, slot[i].y*1.01, slot[i].w * 0.98f / state.imgRace->getWidth(), slot[i].h * 0.98f / state.imgRace->getHeight());
+				break;
+			}
+			case 1:
+			{
+				static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawSelectedVehiclePreview(slot[i].x*1.4, slot[i].y*1.75, 0.75);
+				break;
+			}
+			case 2:
+			{
+				Image* portrait = static_cast<CourseSelectionState*>(state.game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
+				portrait->drawScaled(slot[i].x*3, slot[i].y*1.1, slot[i].w * 0.75f / portrait->getWidth(), slot[i].h * 0.75f / portrait->getHeight());
+				break;
+			}
+			case 3:
+			{
+				state.imgExit->drawScaled(slot[i].x*1.01, slot[i].y*1.01, slot[i].w * 0.98f / state.imgRace->getWidth(), slot[i].h * 0.98f / state.imgRace->getHeight());
+				break;
+			}
+			default:break;
+		}
 	}
 
 	const string title("Carse Project");

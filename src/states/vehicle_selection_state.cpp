@@ -190,22 +190,29 @@ void VehicleSelectionState::onMenuSelect()
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }
 
+void VehicleSelectionState::drawSelectedVehiclePreview(float x, float y, float scale)
+{
+	Display& display = game.getDisplay();
+	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
+	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+
+	const float scalex = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.x,
+				scaley = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.y,
+				posX = x - 0.5*vehicle.sprite.frameWidth * scalex,
+				posY = y - 0.5*vehicle.sprite.frameHeight * scaley,
+				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+
+	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+}
+
 void VehicleSelectionState::renderMenuPrototypeList()
 {
 	Display& display = Display::getInstance();
 	menu->draw();
 	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
+	drawSelectedVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
 
-	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
 	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
-
-	const float scalex = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.x,
-				scaley = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.y,
-				posX = 0.7*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
-				posY = 0.35*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
-				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
-
-	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
 
 	// info sheet
 	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();

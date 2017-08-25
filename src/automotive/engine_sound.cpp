@@ -181,7 +181,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 
 		currentSound.setVolume(1.0f);
 		if(not profile.ranges[currentRangeIndex].isRedline)
-			currentSound.setPlaybackSpeed(calculatePitch(currentRpm - lowerRpmCurrent));
+			currentSound.setPlaybackSpeed(calculatePitch(currentRpm - lowerRpmCurrent), true);
 
 		if(not currentSound.isPlaying())
 			currentSound.loop();
@@ -203,7 +203,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 //				snd.setVolume(1.0 - 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade out
 				rangeSound.setVolume(sqrt(1-16*pow((currentRpm - lowerRpmCurrent)/rangeSizeCurrent, 2))); // quadratic fade out
 
-				rangeSound.setPlaybackSpeed(calculatePitch(currentRpm - rangeRpm));
+				rangeSound.setPlaybackSpeed(calculatePitch(currentRpm - rangeRpm), true);
 				if(not rangeSound.isPlaying())
 					rangeSound.loop();
 			}
@@ -216,7 +216,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 //				snd.setVolume(-3.0 + 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade in
 				rangeSound.setVolume(sqrt(1-pow(4*((currentRpm - lowerRpmCurrent)/rangeSizeCurrent)-4, 2)) ); // quadratic fade in
 
-				rangeSound.setPlaybackSpeed(calculatePitch(currentRpm - rangeRpm));
+				rangeSound.setPlaybackSpeed(calculatePitch(currentRpm - rangeRpm), true);
 				if(not rangeSound.isPlaying())
 					rangeSound.loop();
 			}

@@ -40,7 +40,7 @@ CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
   imgRandom(null), imgCircuit(null),
   fontMain(null), fontInfo(null), fontTab(null),
   menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
-  isLoadedCourseSelected(true), isDebugCourseSelected(false)
+  isLoadedCourseSelected(false), isDebugCourseSelected(false)
 {}
 
 CourseSelectionState::~CourseSelectionState()
@@ -86,6 +86,9 @@ void CourseSelectionState::initialize()
 			menu->addEntry(courseFiles[i]);
 		}
 	}
+
+	// default course
+	Pseudo3DRaceState::getInstance(game)->setCourse(Course::createRandomCourse(200, 3000, 6400, 1.5));
 }
 
 void CourseSelectionState::onEnter()

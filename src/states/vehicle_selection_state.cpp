@@ -116,6 +116,9 @@ void VehicleSelectionState::initialize()
 		menu->addEntry(vehicles[i].name);
 		vehiclePreview.push_back(new Image(vehicles[i].sprite.sheetFilename));
 	}
+
+	// default vehicle
+	Pseudo3DRaceState::getInstance(game)->setVehicle(vehicles[0]);
 }
 
 void VehicleSelectionState::onEnter()

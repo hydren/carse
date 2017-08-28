@@ -92,17 +92,22 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	sprite = Pseudo3DVehicleAnimationProfile(prop);
 }
 
+static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s == 79,2km/h
+
 /** Returns the current driving force. */
 float Vehicle::getDriveForce()
 {
-	return engine.getDriveTorque() / tireRadius;
+	if(speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
+		return std::min(engine.getDriveTorque() / tireRadius, 2*getTireLoad());
+	else
+		return engine.getDriveTorque() / tireRadius;
 }
 
 /** Updates the simulation state of this vehicle (RPM, gear, etc). */
 void Vehicle::update(float delta)
 {
-	resolveSimulationSimple(delta);
-//	resolveSimulationAdvanced(delta);
+//	resolveSimulationSimple(delta);
+	resolveSimulationAdvanced(delta);
 }
 
 void Vehicle::resolveSimulationSimple(float delta)
@@ -117,9 +122,15 @@ float Vehicle::getTireLoad()
 	return (mass * GRAVITY_ACCELERATION)/(float) 4;  // xxx this formula assumes 4 wheels. this is not always the case (ex: bikes).
 }
 
+float Vehicle::getDrivenWheelsTireLoad()
+{
+	return getTireLoad() * 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+}
+
 float Vehicle::getLongitudinalSlipRatio()
 {
-	return fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius)/fabs(speed) - 1.0; // or (wheelAngularSpeed*tireRadius - speed)/fabs(speed)
+//	return fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius)/fabs(speed) - 1.0;
+	return fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius - speed)/fabs(speed);
 }
 
 /*
@@ -133,8 +144,6 @@ float Vehicle::getLongitudinalSlipRatio()
  * http://white-smoke.wikifoundry.com/page/Tyre+curve+fitting+and+validation
 */
 
-static bool USING_PACEJKA_MAGIC_FORMULA = false;
-static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s == 79,2km/h
 float Vehicle::getNormalizedTractionForce()
 {
 	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
@@ -159,38 +168,21 @@ void Vehicle::resolveSimulationAdvanced(float delta)
 
 	float wheelAngularAcceleration = 0;
 
-	if(USING_PACEJKA_MAGIC_FORMULA)
-	{
-		const float tractionForce = getNormalizedTractionForce() * getTireLoad();
-		const float tractionTorque = tractionForce / tireRadius;
+	const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
+	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
 
-		//fixme how to do this formula right? remove from ingame state braking calculation
-	//	const float brakingTorque = -brakePedalPosition*30;
-		const float brakingTorque = 0;
+	const float tractionForce = getNormalizedTractionForce() * getTireLoad();
+	const float tractionTorque = tractionForce / tireRadius;
 
-		const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+	//fixme how to do this formula right? remove from ingame state braking calculation
+//	const float brakingTorque = -brakePedalPosition*30;
+	const float brakingTorque = 0;
 
-		const float totalTorque = engine.getDriveTorque() - tractionTorque*drivenWheelsCount + brakingTorque;
+	const float totalTorque = engine.getDriveTorque() - tractionTorque*drivenWheelsCount + brakingTorque;
 
-		const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
-		const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
-		const float arbitraryAdjustmentFactor = 0.001;
-		wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
-	}
-	else
-	{
-		// fixme to make this way work, we need to modify how speed is gained
-		const float tractionForce = 0.85 * getTireLoad();
-		const float tractionTorque = tractionForce / tireRadius;
-		const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
-
-		const float totalTorque = std::min(engine.getDriveTorque(), tractionTorque*drivenWheelsCount);
-
-		const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
-		const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
-		const float arbitraryAdjustmentFactor = 0.001;
-		wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
-	}
+	const float arbitraryAdjustmentFactor = 0.001;
+	wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
 
 	engine.update(engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
 }

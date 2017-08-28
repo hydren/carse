@@ -57,6 +57,7 @@ struct Vehicle
 
 	float getLongitudinalSlipRatio();
 	float getTireLoad();
+	float getDrivenWheelsTireLoad();
 	float getNormalizedTractionForce();
 
 	private:

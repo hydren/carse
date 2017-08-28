@@ -31,7 +31,7 @@ static const float
 
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
-  mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
+  mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0), drivenWheels(DRIVEN_WHEELS_ON_REAR),
   engineSoundProfile(), sprite()
 {}
 
@@ -75,6 +75,17 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "tire_diameter";
 	tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
 
+	key = "driven_wheels";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = prop.get(key);
+		if(value == "all") drivenWheels = DRIVEN_WHEELS_ALL;
+		else if(value == "front") drivenWheels = DRIVEN_WHEELS_ON_FRONT;
+		else drivenWheels = DRIVEN_WHEELS_ON_REAR;
+	}
+	else
+		drivenWheels = DRIVEN_WHEELS_ON_REAR;
+
 	engine = Engine(prop);
 
 	speed = 0;
@@ -98,7 +109,7 @@ static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s =
 float Vehicle::getDriveForce()
 {
 	if(speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
-		return std::min(engine.getDriveTorque() / tireRadius, 2*getTireLoad());
+		return std::min(engine.getDriveTorque() / tireRadius, getDrivenWheelsTireLoad());
 	else
 		return engine.getDriveTorque() / tireRadius;
 }
@@ -119,12 +130,12 @@ void Vehicle::resolveSimulationSimple(float delta)
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 float Vehicle::getTireLoad()
 {
-	return (mass * GRAVITY_ACCELERATION)/(float) 4;  // xxx this formula assumes 4 wheels. this is not always the case (ex: bikes).
+	return (mass * GRAVITY_ACCELERATION)/(float) (type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1);
 }
 
 float Vehicle::getDrivenWheelsTireLoad()
 {
-	return getTireLoad() * 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+	return (mass * GRAVITY_ACCELERATION) * (drivenWheels != DRIVEN_WHEELS_ALL? 0.5f : 1.0f);
 }
 
 float Vehicle::getLongitudinalSlipRatio()
@@ -168,7 +179,7 @@ void Vehicle::resolveSimulationAdvanced(float delta)
 
 	float wheelAngularAcceleration = 0;
 
-	const unsigned drivenWheelsCount = 2;  // fixme driven wheels count should be retrieved by vehicle specification.
+	const unsigned drivenWheelsCount = (type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1) * (drivenWheels != DRIVEN_WHEELS_ALL? 0.5f : 1.0f);
 	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
 	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
 

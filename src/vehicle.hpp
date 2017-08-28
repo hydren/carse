@@ -37,6 +37,8 @@ struct Vehicle
 	Engine engine;
 	float speed, brakePedalPosition;
 
+	enum DrivenWheels { DRIVEN_WHEELS_ON_FRONT, DRIVEN_WHEELS_ON_REAR, DRIVEN_WHEELS_ALL } drivenWheels;
+
 	// sound data
 	EngineSoundProfile engineSoundProfile;
 

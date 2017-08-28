@@ -128,14 +128,9 @@ void Vehicle::resolveSimulationSimple(float delta)
 }
 
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-float Vehicle::getTireLoad()
-{
-	return (mass * GRAVITY_ACCELERATION)/(float) (type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1);
-}
-
 float Vehicle::getDrivenWheelsTireLoad()
 {
-	return (mass * GRAVITY_ACCELERATION) * (drivenWheels != DRIVEN_WHEELS_ALL? 0.5f : 1.0f);
+	return (mass * GRAVITY_ACCELERATION) / (float) (drivenWheels != DRIVEN_WHEELS_ALL? 2 : 1);
 }
 
 float Vehicle::getLongitudinalSlipRatio()
@@ -183,14 +178,14 @@ void Vehicle::resolveSimulationAdvanced(float delta)
 	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
 	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(tireRadius) * 0.5;  // I = (mr^2)/2
 
-	const float tractionForce = getNormalizedTractionForce() * getTireLoad();
+	const float tractionForce = getNormalizedTractionForce() * getDrivenWheelsTireLoad();
 	const float tractionTorque = tractionForce / tireRadius;
 
 	//fixme how to do this formula right? remove from ingame state braking calculation
 //	const float brakingTorque = -brakePedalPosition*30;
 	const float brakingTorque = 0;
 
-	const float totalTorque = engine.getDriveTorque() - tractionTorque*drivenWheelsCount + brakingTorque;
+	const float totalTorque = engine.getDriveTorque() - tractionTorque + brakingTorque;
 
 	const float arbitraryAdjustmentFactor = 0.001;
 	wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.

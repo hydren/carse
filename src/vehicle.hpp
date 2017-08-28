@@ -58,7 +58,6 @@ struct Vehicle
 	void update(float delta);
 
 	float getLongitudinalSlipRatio();
-	float getTireLoad();
 	float getDrivenWheelsTireLoad();
 	float getNormalizedTractionForce();
 

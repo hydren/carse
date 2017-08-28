@@ -399,8 +399,8 @@ void Pseudo3DRaceState::render()
 
 
 		offset += 25;
-		fontDebug->drawText("Tire load:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.getTireLoad());
+		fontDebug->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", vehicle.getDrivenWheelsTireLoad());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;

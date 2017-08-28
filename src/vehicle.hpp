@@ -37,6 +37,11 @@ struct Vehicle
 	Engine engine;
 	float speed, brakePedalPosition;
 
+	float approximatedCenterOfGravityHeight, approximatedWheelbase;
+
+	// for querying its value
+	float acceleration;
+
 	enum DrivenWheels { DRIVEN_WHEELS_ON_FRONT, DRIVEN_WHEELS_ON_REAR, DRIVEN_WHEELS_ALL } drivenWheels;
 
 	// sound data

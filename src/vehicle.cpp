@@ -31,7 +31,9 @@ static const float
 
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
-  mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0), drivenWheels(DRIVEN_WHEELS_ON_REAR),
+  mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
+  approximatedCenterOfGravityHeight(0), approximatedWheelbase(0), acceleration(0),
+  drivenWheels(DRIVEN_WHEELS_ON_REAR),
   engineSoundProfile(), sprite()
 {}
 
@@ -91,6 +93,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	speed = 0;
 	brakePedalPosition = 0;
+	acceleration = 0;
 
 	// sound data
 
@@ -102,6 +105,40 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	// sprite data
 
 	sprite = Pseudo3DVehicleAnimationProfile(prop);
+
+	// needs to be loaded after sprite data to make sure that 'depictedVehicleWidth' was parsed
+	key = "vehicle_height";
+	if(isValueSpecified(prop, key))
+		approximatedCenterOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
+	else
+		approximatedCenterOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+
+
+	// attempt to estimate wheelbase
+	{
+		key = "vehicle_wheelbase";
+		if(isValueSpecified(prop, key))
+			approximatedWheelbase = atof(prop.get(key).c_str());
+		else
+			approximatedWheelbase = -1;
+
+		key = "vehicle_length";
+		if(approximatedWheelbase == -1 and isValueSpecified(prop, key))
+			approximatedWheelbase = atof(prop.get(key).c_str());
+
+		key = "vehicle_width";
+		if(approximatedWheelbase == -1 and isValueSpecified(prop, key))
+			approximatedWheelbase = 2.5251f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+
+		key = "vehicle_height";
+		if(approximatedWheelbase == -1 and isValueSpecified(prop, key))
+			approximatedWheelbase = 3.6016f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+
+		if(approximatedWheelbase == -1)
+		{
+			approximatedWheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+		}
+	}
 }
 
 static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s == 79,2km/h
@@ -131,7 +168,14 @@ void Vehicle::resolveSimulationSimple(float delta)
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 float Vehicle::getDrivenWheelsTireLoad()
 {
-	return (mass * GRAVITY_ACCELERATION) / (float) (drivenWheels != DRIVEN_WHEELS_ALL? 2 : 1);
+	float load = mass*GRAVITY_ACCELERATION;
+
+	if(drivenWheels != DRIVEN_WHEELS_ALL)
+		load = 0.5 * load + (drivenWheels == DRIVEN_WHEELS_ON_REAR? 1.0 : -1.0) * (approximatedCenterOfGravityHeight/approximatedWheelbase) * mass * acceleration;
+
+	return load;
+
+//	return (mass * GRAVITY_ACCELERATION) / (float) (drivenWheels != DRIVEN_WHEELS_ALL? 2 : 1);
 }
 
 float Vehicle::getLongitudinalSlipRatio()

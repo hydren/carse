@@ -87,7 +87,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), acceleration(0), bgParallax(),
+  position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
   drawParameters(), coursePositionFactor(500),
   course(0, 0),
@@ -228,10 +228,10 @@ void Pseudo3DRaceState::onEnter()
 	vehicle.engine.rpm = 100;
 
 	bgParallax.x = bgParallax.y = 0;
-	acceleration = 0;
 	position = 0;
 	posX = 0;
 	vehicle.speed = 0;
+	vehicle.acceleration = 0;
 	pseudoAngle = 0;
 
 	isBurningRubber = false;
@@ -342,7 +342,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", acceleration);
+		sprintf(buffer, "%2.2fm/s^2", vehicle.acceleration);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 
@@ -519,7 +519,7 @@ void Pseudo3DRaceState::handleInput()
 					vehicle.speed = 0;
 					pseudoAngle = 0;
 					bgParallax.x = bgParallax.y = 0;
-					acceleration = 0;
+					vehicle.acceleration = 0;
 					break;
 				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;
@@ -566,10 +566,10 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update acceleration
-	acceleration = (wheelAngleFactor*vehicle.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
+	vehicle.acceleration = (wheelAngleFactor*vehicle.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
 
 	// update speed
-	vehicle.speed += delta*acceleration;
+	vehicle.speed += delta*vehicle.acceleration;
 
 	// update position
 	position += vehicle.speed*delta;

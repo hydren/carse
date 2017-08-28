@@ -32,7 +32,7 @@ int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game),
-  menu(null), fontDev(null), imgRace(null), imgExit(null),
+  menu(null), fontDev(null), bg(null), imgRace(null), imgExit(null),
   layout(null)
 {}
 
@@ -50,11 +50,12 @@ void MainMenuState::initialize()
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
 	menu->addEntry("Race!");
-	menu->addEntry("Choose vehicle");
-	menu->addEntry("Choose course");
+	menu->addEntry("Vehicle");
+	menu->addEntry("Course");
 	menu->addEntry("Exit");
 
 	fontDev = new Font("assets/font.ttf", 12);
+	bg = new Image("assets/bg-main.jpg");
 	imgRace = new Image("assets/race.png");
 	imgExit = new Image("assets/exit.png");
 
@@ -76,6 +77,7 @@ void MainMenuState::render()
 {
 	Display& display = Display::getInstance();
 	display.clear();
+	bg->drawScaled(0, 0, display.getWidth()/(float)bg->getWidth(), display.getHeight()/(float)bg->getHeight());
 	layout->draw();
 	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - fontDev->getHeight(), Color::CREAM);
 }
@@ -274,7 +276,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 	{
 		const bool isSelected = (i == state.menu->getSelectedIndex());
 		Image::drawFilledRectangle(slot[i].x, slot[i].y, slot[i].w, slot[i].h, Color::BLACK);
-		Image::drawFilledRectangle(slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f, isSelected? Color::BLUE : Color::AZURE);
+		Image::drawFilledRectangle(slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f, isSelected? Color::GREY : Color::DARK_GREY);
 		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
 		fontMain.drawText(state.menu->at(i).label, slot[i].x + 0.5*(slot[i].w - textWidth), slot[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
 

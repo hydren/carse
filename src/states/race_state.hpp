@@ -38,6 +38,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	EngineSoundSimulator engineSound;
 	float position, posX, pseudoAngle, strafeSpeed, curvePull;
+	float acceleration;
 	fgeal::Point bgParallax;
 	float rollingFriction, airFriction, brakingFriction, corneringForceLeechFactor;
 	bool isBurningRubber;

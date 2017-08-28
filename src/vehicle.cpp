@@ -45,11 +45,12 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	key = "vehicle_type";
 	if(prop.containsKey(key))
 	{
-		string t = prop.get(key);
-		if(to_lower(t) == "car") type = TYPE_CAR;
-		else if(to_lower(t) == "bike") type = TYPE_BIKE;
+		string t = to_lower(prop.get(key));
+		if(t == "car" or t == "default") type = TYPE_CAR;
+		else if(t == "bike") type = TYPE_BIKE;
 		else type = TYPE_OTHER;
 	}
+	else type = TYPE_CAR;
 
 	// info data
 

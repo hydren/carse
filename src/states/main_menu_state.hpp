@@ -41,9 +41,6 @@ class MainMenuState extends public fgeal::Game::State
 		// performs any logic-related updates, if needed
 		virtual void update(float delta) abstract;
 
-		// updates all stuff's sizes to fit the display properly, if needed
-		virtual void pack(fgeal::Display& display) abstract;
-
 		enum NavigationDirection { NAV_UP, NAV_DOWN, NAV_LEFT, NAV_RIGHT };
 
 		// action when user navigates
@@ -66,7 +63,6 @@ class MainMenuState extends public fgeal::Game::State
 		PrototypeSimpleLayout(MainMenuState& state);
 		void draw();
 		void update(float delta);
-		void pack(fgeal::Display&);
 		void navigate(NavigationDirection navDir);
 		void onCursorChange();
 		void onCursorAccept();
@@ -77,12 +73,10 @@ class MainMenuState extends public fgeal::Game::State
 	{
 		fgeal::Font fontMain, fontTitle;
 		fgeal::Sound sndCursorMove, sndCursorAccept;
-		fgeal::Rectangle slot[4];
 		fgeal::Color selectedSlotColor;
 		PrototypeGridLayout(MainMenuState& state);
 		void draw();
 		void update(float delta);
-		void pack(fgeal::Display&);
 		void navigate(NavigationDirection navDir);
 		void onCursorAccept();
 	};

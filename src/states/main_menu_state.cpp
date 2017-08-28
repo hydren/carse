@@ -64,7 +64,6 @@ void MainMenuState::initialize()
 
 void MainMenuState::onEnter()
 {
-	layout->pack(game.getDisplay());
 	menu->setSelectedIndex(0);
 }
 
@@ -184,18 +183,14 @@ MainMenuState::PrototypeSimpleLayout::PrototypeSimpleLayout(MainMenuState& state
   sndCursorAccept("assets/sound/cursor_accept.ogg")
 {}
 
-void MainMenuState::PrototypeSimpleLayout::pack(Display& display)
-{
-	Rectangle menuBounds = {
-		0.125f*display.getWidth(), 0.5f*display.getHeight(),
-		0.4f*display.getWidth(), 0.4f*display.getHeight()
-	};
-
-	state.menu->bounds = menuBounds;
-}
-
 void MainMenuState::PrototypeSimpleLayout::draw()
 {
+	const float w = state.game.getDisplay().getWidth(),
+				h = state.game.getDisplay().getHeight();
+
+	const Rectangle menuBounds = { 0.125f*w, 0.5f*h, 0.4f*w, 0.4f*h };
+
+	state.menu->bounds = menuBounds;
 	state.menu->draw();
 	fontMain.drawText("Carse Project", 84, 25, Color::WHITE);
 }
@@ -241,42 +236,44 @@ void MainMenuState::PrototypeSimpleLayout::onCursorAccept()
 
 MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
 : Layout(state),
-  fontMain("assets/font.ttf", 24),
-  fontTitle("assets/font2.ttf", 64),
+  fontMain("assets/font.ttf", (1.0/27) * state.game.getDisplay().getHeight()),
+  fontTitle("assets/font2.ttf", (4.0/27) * state.game.getDisplay().getHeight()),
   sndCursorMove("assets/sound/cursor_move.ogg"),
   sndCursorAccept("assets/sound/cursor_accept.ogg")
 {}
 
-void MainMenuState::PrototypeGridLayout::pack(Display& display)
-{
-	slot[0].x = 0.025f*display.getWidth();
-	slot[0].y = 0.275f*display.getHeight();
-	slot[0].w = 0.450f*display.getWidth();
-	slot[0].h = 0.350f*display.getHeight();
-
-	slot[1].x = 0.525f*display.getWidth();
-	slot[1].y = 0.275f*display.getHeight();
-	slot[1].w = 0.450f*display.getWidth();
-	slot[1].h = 0.350f*display.getHeight();
-
-	slot[2].x = 0.025f*display.getWidth();
-	slot[2].y = 0.625f*display.getHeight();
-	slot[2].w = 0.450f*display.getWidth();
-	slot[2].h = 0.350f*display.getHeight();
-
-	slot[3].x = 0.525f*display.getWidth();
-	slot[3].y = 0.625f*display.getHeight();
-	slot[3].w = 0.450f*display.getWidth();
-	slot[3].h = 0.350f*display.getHeight();
-}
-
 void MainMenuState::PrototypeGridLayout::draw()
 {
+	const float w = state.game.getDisplay().getWidth(),
+				h = state.game.getDisplay().getHeight(),
+				marginX = w * 0.005, marginY = h * 0.005;
+
+	Rectangle slot[4];
+	slot[0].x = 0.025f*w;
+	slot[0].y = 0.260f*h;
+	slot[0].w = 0.450f*w;
+	slot[0].h = 0.350f*h;
+
+	slot[1].x = 0.525f*w;
+	slot[1].y = 0.260f*h;
+	slot[1].w = 0.450f*w;
+	slot[1].h = 0.350f*h;
+
+	slot[2].x = 0.025f*w;
+	slot[2].y = 0.635f*h;
+	slot[2].w = 0.450f*w;
+	slot[2].h = 0.350f*h;
+
+	slot[3].x = 0.525f*w;
+	slot[3].y = 0.635f*h;
+	slot[3].w = 0.450f*w;
+	slot[3].h = 0.350f*h;
+
 	for(unsigned i = 0; i < state.menu->getNumberOfEntries(); i++)
 	{
 		const bool isSelected = (i == state.menu->getSelectedIndex());
-		Image::drawFilledRectangle(slot[i].x, slot[i].y, slot[i].w, slot[i].h, Color::BLACK);
-		Image::drawFilledRectangle(slot[i].x * 1.01f, slot[i].y * 1.01f, slot[i].w * 0.98f, slot[i].h * 0.98f, isSelected? Color::GREY : Color::DARK_GREY);
+		Image::drawFilledRectangle(slot[i].x, slot[i].y, slot[i].w, slot[i].h, Color::DARK_GREY);
+		Image::drawFilledRectangle(slot[i].x + marginX, slot[i].y + marginY, slot[i].w - marginX*2, slot[i].h - marginY*2, isSelected? Color::LIGHT_GREY : Color::GREY);
 		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
 		fontMain.drawText(state.menu->at(i).label, slot[i].x + 0.5*(slot[i].w - textWidth), slot[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
 

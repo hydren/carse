@@ -48,6 +48,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	float laptime;
 
+	unsigned lapCurrent;
+
 	Course course;
 	Vehicle vehicle;
 
@@ -55,6 +57,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Hud::NumericalDisplay<float>* hudSpeedDisplay;
 	Hud::NumericalDisplay<int>* hudGearDisplay;
 	Hud::TimerDisplay<float>* hudTimer;
+	Hud::NumericalDisplay<unsigned>* hudCurrentLap;
 
 	bool debugMode;
 

@@ -48,9 +48,9 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
-  drawParameters(), coursePositionFactor(500), laptime(0),
+  drawParameters(), coursePositionFactor(500), laptime(0), lapCurrent(0),
   course(0, 0),
-  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimer(null),
+  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimer(null), hudCurrentLap(null),
   debugMode(true)
 {
 	drawParameters.cameraDepth = 0.84;
@@ -179,6 +179,11 @@ void Pseudo3DRaceState::onEnter()
 	hudTimer->disableBackground = true;
 	hudTimer->displayColor = Color::WHITE;
 
+	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font2);
+	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
+	hudCurrentLap->disableBackground = true;
+	hudCurrentLap->displayColor = Color::WHITE;
+
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
 					spriteSmokeRight->scale.x =
@@ -199,6 +204,7 @@ void Pseudo3DRaceState::onEnter()
 	vehicle.acceleration = 0;
 	pseudoAngle = 0;
 	laptime = 0;
+	lapCurrent = 1;
 
 	isBurningRubber = false;
 	fakeBrakeBuildUp = false;
@@ -215,6 +221,11 @@ void Pseudo3DRaceState::onLeave()
 	sndTireBurnoutLoop->stop();
 	sndTireBurnoutStandIntro->stop();
 	sndTireBurnoutStandLoop->stop();
+//	delete hudRpmGauge;
+//	delete hudSpeedDisplay;
+//	delete hudGearDisplay;
+//	delete hudCurrentLap;
+//	delete hudTimer;
 }
 
 void Pseudo3DRaceState::render()
@@ -280,12 +291,17 @@ void Pseudo3DRaceState::render()
 		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.sprite.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
 
+	hudCurrentLap->draw();
+	font2->drawText("Lap ", hudCurrentLap->bounds.x - font2->getTextWidth("Lap "), hudCurrentLap->bounds.y, Color::WHITE);
+
+	hudTimer->draw();
+	font2->drawText("Time ", hudTimer->bounds.x - font2->getTextWidth("Time "), hudTimer->bounds.y, Color::WHITE);
+
 	hudSpeedDisplay->draw();
+	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
 
 	hudRpmGauge->draw();
 	hudGearDisplay->draw();
-	hudTimer->draw();
-	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
 
 	// DEBUG
 	if(debugMode)
@@ -421,8 +437,13 @@ void Pseudo3DRaceState::update(float delta)
 
 	// course looping control
 	const unsigned N = course.lines.size();
-	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;
-	while(position < 0) position += N*course.roadSegmentLength / coursePositionFactor;
+	while(position * coursePositionFactor >= N*course.roadSegmentLength)
+	{
+		position -= N*course.roadSegmentLength / coursePositionFactor;
+		lapCurrent++;
+	}
+	while(position < 0)
+		position += N*course.roadSegmentLength / coursePositionFactor;
 
 	// xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN) and fabs(vehicle.speed) > 5.0)
@@ -496,6 +517,7 @@ void Pseudo3DRaceState::handleInput()
 					bgParallax.x = bgParallax.y = 0;
 					vehicle.acceleration = 0;
 					laptime = 0;
+					lapCurrent = 1;
 					break;
 				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;

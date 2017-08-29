@@ -48,9 +48,9 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
-  drawParameters(), coursePositionFactor(500),
+  drawParameters(), coursePositionFactor(500), laptime(0),
   course(0, 0),
-  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null),
+  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimer(null),
   debugMode(true)
 {
 	drawParameters.cameraDepth = 0.84;
@@ -173,6 +173,12 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
 
+	hudTimer = new Hud::TimerDisplay<float>(laptime, gaugeSize, font2);
+	hudTimer->bounds.y = display.getHeight() * 0.1;
+	hudTimer->valueScale = 1000;
+	hudTimer->disableBackground = true;
+	hudTimer->displayColor = Color::WHITE;
+
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
 					spriteSmokeRight->scale.x =
@@ -192,6 +198,7 @@ void Pseudo3DRaceState::onEnter()
 	vehicle.speed = 0;
 	vehicle.acceleration = 0;
 	pseudoAngle = 0;
+	laptime = 0;
 
 	isBurningRubber = false;
 	fakeBrakeBuildUp = false;
@@ -277,6 +284,7 @@ void Pseudo3DRaceState::render()
 
 	hudRpmGauge->draw();
 	hudGearDisplay->draw();
+	hudTimer->draw();
 	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
 
 	// DEBUG
@@ -454,6 +462,8 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
 		isBurningRubber = false;
 	}
+
+	laptime += delta;
 }
 
 void Pseudo3DRaceState::handleInput()
@@ -480,6 +490,7 @@ void Pseudo3DRaceState::handleInput()
 					pseudoAngle = 0;
 					bgParallax.x = bgParallax.y = 0;
 					vehicle.acceleration = 0;
+					laptime = 0;
 					break;
 				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;

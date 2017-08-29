@@ -259,7 +259,7 @@ namespace Hud
 		/** If true, indicates that the font is shared, and thus, should not be deleted when this display is deleted. */
 		bool fontIsShared;
 
-		private:
+		protected:
 
 		/** A buffer to convert value to string. */
 		char stringBuffer[32];
@@ -290,6 +290,34 @@ namespace Hud
 
 			sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
 			font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+		}
+	};
+
+	/** A widget that displays a time, possibly stylised. The variable is expected to be in millisec. If not, assign a proper value scale to match. */
+	template<typename TimeType>
+	struct TimerDisplay extends NumericalDisplay<TimeType>
+	{
+		TimerDisplay(const TimeType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
+		: NumericalDisplay<TimeType>(var, bounds, font),
+		  showMillisec(false)
+		{}
+
+		bool showMillisec;
+
+		void draw()
+		{
+			if(not this->disableBackground)
+			{
+				fgeal::Image::drawFilledRectangle(this->bounds.x, this->bounds.y, this->bounds.w, this->bounds.h, this->borderColor);
+				fgeal::Image::drawFilledRectangle(this->bounds.x + 0.5*this->borderThickness, this->bounds.y + 0.5*this->borderThickness,
+						this->bounds.w - this->borderThickness, this->bounds.h - this->borderThickness, this->backgroundColor);
+			}
+
+			int timeMs = this->value*this->valueScale;
+			int timeSec = timeMs/1000; timeMs -= timeSec*1000;
+			int timeMin = timeSec/60; timeSec -= timeMin*60;
+			sprintf(this->stringBuffer, "%02d:%02d:%03d", timeMin, timeSec, timeMs);
+			this->font->drawText(std::string(this->stringBuffer), this->bounds.x + this->borderThickness, this->bounds.y + 0.5*this->borderThickness, this->displayColor);
 		}
 	};
 }

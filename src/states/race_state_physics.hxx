@@ -109,8 +109,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(strafeSpeed >  MAXIMUM_STRAFE_SPEED) strafeSpeed = MAXIMUM_STRAFE_SPEED;
 	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED) strafeSpeed =-MAXIMUM_STRAFE_SPEED;
 
-	const unsigned N = course.lines.size();
-	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N];
+	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
 
 	// update curve pull
 	curvePull = segment.curve * vehicle.speed * coursePositionFactor * CURVE_PULL_FACTOR;
@@ -127,10 +126,6 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	if(bgParallax.x > 0)
 		bgParallax.x -= bg->getWidth();
-
-	// course looping control
-	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;
-	while(position < 0) position += N*course.roadSegmentLength / coursePositionFactor;
 }
 
 /*

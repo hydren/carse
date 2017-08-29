@@ -419,6 +419,11 @@ void Pseudo3DRaceState::update(float delta)
 	handleInput();
 	handlePhysics(delta);
 
+	// course looping control
+	const unsigned N = course.lines.size();
+	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;
+	while(position < 0) position += N*course.roadSegmentLength / coursePositionFactor;
+
 	// xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN) and fabs(vehicle.speed) > 5.0)
 		fakeBrakeBuildUp += delta;

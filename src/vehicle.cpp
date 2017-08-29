@@ -33,7 +33,7 @@ Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
   mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
   approximatedCenterOfGravityHeight(0), approximatedWheelbase(0), acceleration(0),
-  drivenWheels(DRIVEN_WHEELS_ON_REAR),
+  engineLocation(ENGINE_LOCATION_ON_FRONT), drivenWheels(DRIVEN_WHEELS_ON_REAR),
   engineSoundProfile(), sprite()
 {}
 
@@ -77,6 +77,17 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	key = "tire_diameter";
 	tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
+
+	key = "engine_location";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = prop.get(key);
+		if(value == "mid" or value == "middle") engineLocation = ENGINE_LOCATION_ON_MIDDLE;
+		else if(value == "rear") engineLocation = ENGINE_LOCATION_ON_REAR;
+		else engineLocation = ENGINE_LOCATION_ON_FRONT;
+	}
+	else
+		engineLocation = ENGINE_LOCATION_ON_FRONT;
 
 	key = "driven_wheels";
 	if(isValueSpecified(prop, key))
@@ -165,13 +176,29 @@ void Vehicle::resolveSimulationSimple(float delta)
 	engine.update(speed/tireRadius);  // set new wheel angular speed
 }
 
+static const float FR_DRIVEN_WHEELS_LOAD = 0.45,
+				   MR_DRIVEN_WHEELS_LOAD = 0.55,
+				   RR_DRIVEN_WHEELS_LOAD = 0.65,
+				   FF_DRIVEN_WHEELS_LOAD = 0.60;
+
+static const float engineLocationFactorRWD(Vehicle::EngineLocation loc)
+{
+	if(loc == Vehicle::ENGINE_LOCATION_ON_REAR) return RR_DRIVEN_WHEELS_LOAD;
+	if(loc == Vehicle::ENGINE_LOCATION_ON_MIDDLE) return MR_DRIVEN_WHEELS_LOAD;
+	else return FR_DRIVEN_WHEELS_LOAD;
+}
+
 static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 float Vehicle::getDrivenWheelsTireLoad()
 {
+	const float loadTransfered =  mass * acceleration * (approximatedCenterOfGravityHeight/approximatedWheelbase);
 	float load = mass*GRAVITY_ACCELERATION;
 
-	if(drivenWheels != DRIVEN_WHEELS_ALL)
-		load = 0.5 * load + (drivenWheels == DRIVEN_WHEELS_ON_REAR? 1.0 : -1.0) * (approximatedCenterOfGravityHeight/approximatedWheelbase) * mass * acceleration;
+	if(drivenWheels == DRIVEN_WHEELS_ON_REAR)
+		load = engineLocationFactorRWD(engineLocation)*load + loadTransfered;
+
+	else if(drivenWheels == DRIVEN_WHEELS_ON_FRONT)
+		load = FF_DRIVEN_WHEELS_LOAD*load - loadTransfered;
 
 	return load;
 

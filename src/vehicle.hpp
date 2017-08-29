@@ -42,7 +42,17 @@ struct Vehicle
 	// for querying its value
 	float acceleration;
 
-	enum DrivenWheels { DRIVEN_WHEELS_ON_FRONT, DRIVEN_WHEELS_ON_REAR, DRIVEN_WHEELS_ALL } drivenWheels;
+	enum EngineLocation {
+		ENGINE_LOCATION_ON_FRONT,
+		ENGINE_LOCATION_ON_MIDDLE,
+		ENGINE_LOCATION_ON_REAR
+	} engineLocation;
+
+	enum DrivenWheels {
+		DRIVEN_WHEELS_ON_FRONT,
+		DRIVEN_WHEELS_ON_REAR,
+		DRIVEN_WHEELS_ALL
+	} drivenWheels;
 
 	// sound data
 	EngineSoundProfile engineSoundProfile;

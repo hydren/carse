@@ -44,6 +44,7 @@ static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 static const float MINIMUM_SPEED_ENABLING_TURN = 0.5556;
+static const float MINIMUM_SPEED_BURNING_RUBBER_ON_TURN = 5.5556;
 
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
@@ -474,8 +475,9 @@ void Pseudo3DRaceState::update(float delta)
 
 		isBurningRubber = true;
 	}
-	else if(fabs(pseudoAngle) == PSEUDO_ANGLE_MAX
-			or fakeBrakeBuildUp > 0.75)  // xxx fake braking burnout
+	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURNING_RUBBER_ON_TURN
+			and (fabs(pseudoAngle) == PSEUDO_ANGLE_MAX
+				            or fakeBrakeBuildUp > 0.75))  // xxx fake braking buildup
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();

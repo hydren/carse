@@ -283,7 +283,7 @@ void Pseudo3DRaceState::render()
 	if(animationIndex > vehicle.sprite.stateCount - 1)
 		animationIndex = vehicle.sprite.stateCount - 1;
 
-	const bool isLeanRight = (strafeSpeed > 0 and animationIndex != 0);
+	const bool isLeanRight = (pseudoAngle > 0 and animationIndex != 0);
 
 	// if asymmetrical, right-leaning sprites are after all left-leaning ones
 	if(isLeanRight and vehicle.sprite.asymmetrical)

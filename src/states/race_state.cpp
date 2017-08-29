@@ -43,8 +43,8 @@ static const float CURVE_PULL_FACTOR = 0.2;
 static const float STEERING_SPEED = 2.0;
 static const float PSEUDO_ANGLE_MAX = 1.0;
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
-static const float MINIMUM_SPEED_ENABLING_TURN = 0.5556;
-static const float MINIMUM_SPEED_BURNING_RUBBER_ON_TURN = 5.5556;
+static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
+static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
 
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
@@ -475,7 +475,7 @@ void Pseudo3DRaceState::update(float delta)
 
 		isBurningRubber = true;
 	}
-	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURNING_RUBBER_ON_TURN
+	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
 			and (fabs(pseudoAngle) == PSEUDO_ANGLE_MAX
 				            or fakeBrakeBuildUp > 0.75))  // xxx fake braking buildup
 	{
@@ -578,12 +578,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	position += vehicle.speed*delta;
 
 	// update steering
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT) and fabs(vehicle.speed) >= MINIMUM_SPEED_ENABLING_TURN)
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT) and fabs(vehicle.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
 		if(pseudoAngle < 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle += delta * STEERING_SPEED;
 	}
-	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT) and fabs(vehicle.speed) >= MINIMUM_SPEED_ENABLING_TURN)
+	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT) and fabs(vehicle.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
 		if(pseudoAngle > 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle -= delta * STEERING_SPEED;

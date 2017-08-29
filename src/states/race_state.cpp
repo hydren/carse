@@ -45,6 +45,7 @@ static const float PSEUDO_ANGLE_MAX = 1.0;
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
+static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
@@ -601,8 +602,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 //	if(strafeSpeed < -tireFriction) strafeSpeed =-tireFriction;
 
 	// limit strafing speed by magic constant
-	if(strafeSpeed >  15000) strafeSpeed = 15000;
-	if(strafeSpeed < -15000) strafeSpeed =-15000;
+	if(strafeSpeed >  MAXIMUM_STRAFE_SPEED) strafeSpeed = MAXIMUM_STRAFE_SPEED;
+	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED) strafeSpeed =-MAXIMUM_STRAFE_SPEED;
 
 	const unsigned N = course.lines.size();
 	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%N];

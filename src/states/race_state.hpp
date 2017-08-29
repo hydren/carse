@@ -72,8 +72,14 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	void render();
 
 	private:
-	void handlePhysics(float delta);
 	void handleInput();
+	void handlePhysics(float delta);
+
+	void updateDrivetrain(float delta);
+	float getDriveForce();
+	float getLongitudinalSlipRatio();
+	float getDrivenWheelsTireLoad();
+	float getNormalizedTractionForce();
 
 	public://menu accessed methods
 	void setVehicle(const Vehicle& v);

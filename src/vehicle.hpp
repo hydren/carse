@@ -65,21 +65,6 @@ struct Vehicle
 
 	/** Creates a vehicle with definitions taken from the given properties. */
 	Vehicle(const futil::Properties& properties, Pseudo3DCarseGame& game);
-
-	/** Returns the current driving force. */
-	float getDriveForce();
-
-	/** Updates the simulation state of this vehicle (engine, speed, etc). */
-	void update(float delta);
-
-	float getLongitudinalSlipRatio();
-	float getDrivenWheelsTireLoad();
-	float getNormalizedTractionForce();
-
-	private:
-
-	void resolveSimulationSimple(float delta);
-	void resolveSimulationAdvanced(float delta);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

@@ -344,7 +344,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.getDriveForce());
+		sprintf(buffer, "%2.2fN", getDriveForce());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -365,17 +365,17 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.getDrivenWheelsTireLoad());
+		sprintf(buffer, "%2.2fN", getDrivenWheelsTireLoad());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Longit. Slip Ratio:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.0*vehicle.getLongitudinalSlipRatio());
+		sprintf(buffer, "%2.2f%%", 100.0*getLongitudinalSlipRatio());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Normaliz. Traction Force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", vehicle.getNormalizedTractionForce());
+		sprintf(buffer, "%2.2f", getNormalizedTractionForce());
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
@@ -420,7 +420,7 @@ void Pseudo3DRaceState::update(float delta)
 	engineSound.updateSound(vehicle.engine.rpm);
 
 //	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-	if(vehicle.getDriveForce() == vehicle.getDrivenWheelsTireLoad())
+	if(getDriveForce() == getDrivenWheelsTireLoad())
 	{
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();

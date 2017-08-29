@@ -51,11 +51,16 @@ static const float CURVE_PULL_FACTOR = 0.2;
 static const float STEERING_SPEED = 2.0;
 static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 
+static const float FR_DRIVEN_WHEELS_LOAD = 0.45,
+				   MR_DRIVEN_WHEELS_LOAD = 0.55,
+				   RR_DRIVEN_WHEELS_LOAD = 0.65,
+				   FF_DRIVEN_WHEELS_LOAD = 0.60;
+
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	vehicle.engine.throttlePosition = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
 	vehicle.brakePedalPosition =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
-	vehicle.update(delta);
+	updateDrivetrain(delta);
 
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
@@ -69,7 +74,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update acceleration
-	vehicle.acceleration = (wheelAngleFactor*vehicle.getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
+	vehicle.acceleration = (wheelAngleFactor*getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
 
 	// update speed
 	vehicle.speed += delta*vehicle.acceleration;
@@ -126,4 +131,94 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// course looping control
 	while(position * coursePositionFactor >= N*course.roadSegmentLength) position -= N*course.roadSegmentLength / coursePositionFactor;
 	while(position < 0) position += N*course.roadSegmentLength / coursePositionFactor;
+}
+
+/*
+ * More info
+ * http://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
+ * http://vehiclephysics.com/advanced/misc-topics-explained/#tire-friction
+ * https://en.wikipedia.org/wiki/Friction#Coefficient_of_friction
+ * https://en.wikipedia.org/wiki/Downforce
+ * http://www3.wolframalpha.com/input/?i=r(v,+w)+%3D+(w+-+v)%2Fv
+ * http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
+ * http://white-smoke.wikifoundry.com/page/Tyre+curve+fitting+and+validation
+*/
+static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s == 79,2km/h
+
+//xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
+static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
+
+void Pseudo3DRaceState::updateDrivetrain(float delta)
+{
+	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
+	{
+		// xxx this formula assumes no wheel spin.
+		vehicle.engine.update(vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
+		return;
+	}
+
+	const unsigned drivenWheelsCount = (vehicle.type == Vehicle::TYPE_CAR? 4 : vehicle.type == Vehicle::TYPE_BIKE? 2 : 1) * (vehicle.drivenWheels != Vehicle::DRIVEN_WHEELS_ALL? 0.5f : 1.0f);
+	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(vehicle.tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
+	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(vehicle.tireRadius) * 0.5;  // I = (mr^2)/2
+
+	const float tractionForce = getNormalizedTractionForce() * getDrivenWheelsTireLoad();
+	const float tractionTorque = tractionForce / vehicle.tireRadius;
+
+	//fixme how to do this formula right? remove from ingame state braking calculation
+//	const float brakingTorque = -brakePedalPosition*30;
+	const float brakingTorque = 0;
+
+	const float totalTorque = vehicle.engine.getDriveTorque() - tractionTorque + brakingTorque;
+
+	const float arbitraryAdjustmentFactor = 0.001;
+	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
+
+	vehicle.engine.update(vehicle.engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
+}
+
+float Pseudo3DRaceState::getLongitudinalSlipRatio()
+{
+//	return fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius)/fabs(speed) - 1.0;
+	return fabs(vehicle.speed)==0? 0 : (vehicle.engine.getAngularSpeed()*vehicle.tireRadius - vehicle.speed)/fabs(vehicle.speed);
+}
+
+float Pseudo3DRaceState::getNormalizedTractionForce()
+{
+	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
+	// this formula don't work properly on low speeds (numerical instability)
+	const float longitudinalSlipRatio = getLongitudinalSlipRatio();
+	return longitudinalSlipRatio < 0.06? (20.0*longitudinalSlipRatio)  // 0 to 6% slip ratio gives traction from 0 up to 120%
+			: longitudinalSlipRatio < 0.20? (7.2 - longitudinalSlipRatio)/7.0  // 6 to 20% slip ratio gives traction from 120% up to 100%
+					: longitudinalSlipRatio < 1.00? (1.075 - 0.375*longitudinalSlipRatio)  // 20% to 100% slip ratio gives traction from 100 down to 70%
+							: 0.7;  // over 100% slip ratio gives traction 70%
+}
+
+/** Returns the current driving force. */
+float Pseudo3DRaceState::getDriveForce()
+{
+	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
+		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
+	else
+		return vehicle.engine.getDriveTorque() / vehicle.tireRadius;
+}
+
+static const float engineLocationFactorRWD(Vehicle::EngineLocation loc)
+{
+	if(loc == Vehicle::ENGINE_LOCATION_ON_REAR) return RR_DRIVEN_WHEELS_LOAD;
+	if(loc == Vehicle::ENGINE_LOCATION_ON_MIDDLE) return MR_DRIVEN_WHEELS_LOAD;
+	else return FR_DRIVEN_WHEELS_LOAD;
+}
+
+float Pseudo3DRaceState::getDrivenWheelsTireLoad()
+{
+	const float loadTransfered =  vehicle.mass * vehicle.acceleration * (vehicle.approximatedCenterOfGravityHeight/vehicle.approximatedWheelbase);
+	float load = vehicle.mass*GRAVITY_ACCELERATION;
+
+	if(vehicle.drivenWheels == Vehicle::DRIVEN_WHEELS_ON_REAR)
+		load = engineLocationFactorRWD(vehicle.engineLocation)*load + loadTransfered;
+
+	else if(vehicle.drivenWheels == Vehicle::DRIVEN_WHEELS_ON_FRONT)
+		load = FF_DRIVEN_WHEELS_LOAD*load - loadTransfered;
+
+	return load;
 }

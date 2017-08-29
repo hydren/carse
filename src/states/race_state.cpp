@@ -477,7 +477,7 @@ void Pseudo3DRaceState::update(float delta)
 		isBurningRubber = true;
 	}
 	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
-			and (fabs(pseudoAngle) == PSEUDO_ANGLE_MAX
+			and (/*fabs(pseudoAngle) == PSEUDO_ANGLE_MAX*/ fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED
 				            or fakeBrakeBuildUp > 0.75))  // xxx fake braking buildup
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();

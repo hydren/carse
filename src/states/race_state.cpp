@@ -43,7 +43,7 @@ Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return st
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), fontDebug(null), bg(null), music(null),
+  font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
@@ -62,6 +62,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	delete font;
 	delete font2;
+	delete font3;
 	delete fontDebug;
 	delete bg;
 	delete music;
@@ -75,6 +76,7 @@ void Pseudo3DRaceState::initialize()
 {
 	font = new Font("assets/font.ttf");
 	font2 = new Font("assets/font2.ttf", 40);
+	font3 = new Font("assets/font2.ttf", 24);
 	fontDebug = new Font("assets/font.ttf");
 	bg = new Image("assets/bg.png");
 	music = new Music("assets/music_sample.ogg");
@@ -173,19 +175,19 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
 
-	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font2);
+	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font3);
 	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
 	hudCurrentLap->disableBackground = true;
 	hudCurrentLap->displayColor = Color::WHITE;
 
-	hudTimerCurrentLap = new Hud::TimerDisplay<float>(laptime, gaugeSize, font2);
-	hudTimerCurrentLap->bounds.y = hudCurrentLap->bounds.y + font2->getHeight()*1.05;
+	hudTimerCurrentLap = new Hud::TimerDisplay<float>(laptime, gaugeSize, font3);
+	hudTimerCurrentLap->bounds.y = hudCurrentLap->bounds.y + font3->getHeight()*1.05;
 	hudTimerCurrentLap->valueScale = 1000;
 	hudTimerCurrentLap->disableBackground = true;
 	hudTimerCurrentLap->displayColor = Color::WHITE;
 
-	hudTimerBestLap = new Hud::TimerDisplay<float>(laptimeBest, gaugeSize, font2);
-	hudTimerBestLap->bounds.y = hudTimerCurrentLap->bounds.y + font2->getHeight()*1.05;
+	hudTimerBestLap = new Hud::TimerDisplay<float>(laptimeBest, gaugeSize, font3);
+	hudTimerBestLap->bounds.y = hudTimerCurrentLap->bounds.y + font3->getHeight()*1.05;
 	hudTimerBestLap->valueScale = 1000;
 	hudTimerBestLap->disableBackground = true;
 	hudTimerBestLap->displayColor = Color::WHITE;
@@ -297,14 +299,18 @@ void Pseudo3DRaceState::render()
 		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.sprite.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
 
+	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("Lap ");
+	font3->drawText("Lap ", rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
 	hudCurrentLap->draw();
-	font2->drawText("Lap ", hudCurrentLap->bounds.x - font2->getTextWidth("Lap "), hudCurrentLap->bounds.y, Color::WHITE);
 
+	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap->bounds.y, Color::WHITE);
 	hudTimerCurrentLap->draw();
-	font2->drawText("Time:", hudTimerCurrentLap->bounds.x - font2->getTextWidth("Time:"), hudTimerCurrentLap->bounds.y, Color::WHITE);
 
-	hudTimerBestLap->draw();
-	font2->drawText("Best: ", hudTimerBestLap->bounds.x - font2->getTextWidth("Best:"), hudTimerBestLap->bounds.y, Color::WHITE);
+	font3->drawText("Best: ", rightHudMargin, hudTimerBestLap->bounds.y, Color::WHITE);
+	if(laptimeBest == 0)
+		font3->drawText("--", hudTimerBestLap->bounds.x, hudTimerBestLap->bounds.y, Color::WHITE);
+	else
+		hudTimerBestLap->draw();
 
 	hudSpeedDisplay->draw();
 	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);

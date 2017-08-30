@@ -25,7 +25,7 @@
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
-	fgeal::Font* font, *font2, *fontDebug;
+	fgeal::Font* font, *font2, *font3, *fontDebug;
 	fgeal::Image* bg;
 	fgeal::Music* music;
 

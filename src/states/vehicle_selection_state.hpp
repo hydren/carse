@@ -44,7 +44,7 @@ class VehicleSelectionState extends public fgeal::Game::State
 	void render();
 	void update(float delta);
 
-	void drawSelectedVehiclePreview(float x, float y, float scale=1.0f);
+	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
 
 	private:
 	void handleInput();

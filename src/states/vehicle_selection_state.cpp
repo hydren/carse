@@ -190,19 +190,23 @@ void VehicleSelectionState::onMenuSelect()
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }
 
-void VehicleSelectionState::drawSelectedVehiclePreview(float x, float y, float scale)
+void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, int index, int angleType)
 {
 	Display& display = game.getDisplay();
-	Image* sheetVehicle = vehiclePreview[menu->getSelectedIndex()];
-	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	if(index < 0)
+		index = menu->getSelectedIndex();
+
+	Image* sheetVehicle = vehiclePreview[index];
+	Vehicle& vehicle = vehicles[index];
 
 	const float scalex = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.x,
 				scaley = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.y,
 				posX = x - 0.5*vehicle.sprite.frameWidth * scalex,
 				posY = y - 0.5*vehicle.sprite.frameHeight * scaley,
-				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+				offsetY = angleType == 0? 0 : vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
 
-	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE),
+									0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
 }
 
 void VehicleSelectionState::renderMenuPrototypeList()
@@ -210,7 +214,7 @@ void VehicleSelectionState::renderMenuPrototypeList()
 	Display& display = Display::getInstance();
 	menu->draw();
 	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
-	drawSelectedVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
+	drawVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
 
 	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
 
@@ -237,53 +241,29 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 	if(vehiclePreview.size() > 2 or (vehiclePreview.size() == 2 and menu->getSelectedIndex() == 1))
 	{
 		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
-		Vehicle& vehicle = vehicles[index];
-		Image& sheetVehicle = *vehiclePreview[index];
-
-		const float scalex = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.x,
-					scaley = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.y,
-					posX = 0.25*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
-					posY = 0.30*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
-					offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
-
-		sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+		drawVehiclePreview(0.25*display.getWidth(), 0.30*display.getHeight(), 0.75, index, -1);
 	}
 
 	// draw next vehicle
 	if(vehiclePreview.size() > 2 or (vehiclePreview.size() == 2 and menu->getSelectedIndex() == 0))
 	{
 		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
-		Vehicle& vehicle = vehicles[index];
-		Image& sheetVehicle = *vehiclePreview[index];
-
-		const float scalex = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.x,
-					scaley = display.getWidth() * 0.0048828125f * 0.75 * vehicle.sprite.scale.y,
-					posX = 0.75*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
-					posY = 0.30*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
-					offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
-
-		sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+		drawVehiclePreview(0.75*display.getWidth(), 0.30*display.getHeight(), 0.75, index, +1);
 	}
 
+	// darkening other vehicles
 	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(),Color(0, 0, 0, 128));
 
 	// draw current vehicle
-	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
-	Image& sheetVehicle = *vehiclePreview[menu->getSelectedIndex()];
+	drawVehiclePreview(0.5*display.getWidth(), 0.35*display.getHeight());
 
-	const float scalex = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.x,
-				scaley = display.getWidth() * 0.0048828125f * vehicle.sprite.scale.y,
-				posX = 0.5*display.getWidth() - 0.5*vehicle.sprite.frameWidth * scalex,
-				posY = 0.35*display.getHeight() - 0.5*vehicle.sprite.frameHeight * scaley,
-				offsetY = vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
-
-	sheetVehicle.drawScaledRegion(posX, posY, scalex, scaley, Image::FLIP_NONE, 0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
-
+	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
 	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
 
 	// info sheet
-	int infoX = 0.333*display.getWidth(), infoY = 0.525*display.getHeight();
+	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	const int infoX = 0.333*display.getWidth(); int infoY = 0.525*display.getHeight();
 	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
 							+ (vehicle.engine.displacement == 0?  "" : vehicle.engine.displacement >= 950? toStrRounded(vehicle.engine.displacement/1000.0) + "L " : to_string(vehicle.engine.displacement)+"cc ")
 							+ (vehicle.engine.valvetrain.empty()? "" : vehicle.engine.valvetrain + " ")

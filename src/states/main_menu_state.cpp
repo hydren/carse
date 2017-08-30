@@ -286,7 +286,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 			}
 			case 1:
 			{
-				static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawSelectedVehiclePreview(slot[i].x*1.4, slot[i].y*1.75, 0.75);
+				static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(slot[i].x*1.4, slot[i].y*1.75, 0.75);
 				break;
 			}
 			case 2:

@@ -39,7 +39,7 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 	string key, key2, key3;
 
 	key = "sprite_sheet_file";
-	sheetFilename = prop.containsKey(key)? prop.get(key) : "assets/car.png";
+	sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "DEFAULT";
 
 	key = "sprite_state_count";
 	stateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;

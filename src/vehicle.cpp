@@ -111,7 +111,24 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 
 	sprite = Pseudo3DVehicleAnimationProfile(prop);
 
-	// needs to be loaded after sprite data to make sure that 'depictedVehicleWidth' was parsed
+	// ########################################################################################################################################################
+	// These properties need to be loaded after sprite data to make sure that some fields are ready ('depictedVehicleWidth', 'sprite_sheet_file', etc)
+
+	if(sprite.sheetFilename == "DEFAULT")
+	{
+		// uncomment when there is a default sprite for bikes
+//		switch(type)
+//		{
+//			case TYPE_BIKE:  sprite.sheetFilename = "assets/bike-sheet-default.png"; break;
+//			default:
+//			case TYPE_OTHER:
+//			case TYPE_CAR:   sprite.sheetFilename = "assets/car-sheet-default.png"; break;
+//		}
+
+		sprite.sheetFilename = "assets/car-sheet-default.png";
+	}
+
+	// attempt to estimate center's of gravity height
 	key = "vehicle_height";
 	if(isValueSpecified(prop, key))
 		approximatedCenterOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height

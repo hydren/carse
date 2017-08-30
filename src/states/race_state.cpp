@@ -48,9 +48,9 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
-  drawParameters(), coursePositionFactor(500), laptime(0), lapCurrent(0),
+  drawParameters(), coursePositionFactor(500), laptime(0), laptimeBest(0), lapCurrent(0),
   course(0, 0),
-  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimer(null), hudCurrentLap(null),
+  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
 {
 	drawParameters.cameraDepth = 0.84;
@@ -173,16 +173,22 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
 
-	hudTimer = new Hud::TimerDisplay<float>(laptime, gaugeSize, font2);
-	hudTimer->bounds.y = display.getHeight() * 0.1;
-	hudTimer->valueScale = 1000;
-	hudTimer->disableBackground = true;
-	hudTimer->displayColor = Color::WHITE;
-
 	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font2);
 	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
 	hudCurrentLap->disableBackground = true;
 	hudCurrentLap->displayColor = Color::WHITE;
+
+	hudTimerCurrentLap = new Hud::TimerDisplay<float>(laptime, gaugeSize, font2);
+	hudTimerCurrentLap->bounds.y = hudCurrentLap->bounds.y + font2->getHeight()*1.05;
+	hudTimerCurrentLap->valueScale = 1000;
+	hudTimerCurrentLap->disableBackground = true;
+	hudTimerCurrentLap->displayColor = Color::WHITE;
+
+	hudTimerBestLap = new Hud::TimerDisplay<float>(laptimeBest, gaugeSize, font2);
+	hudTimerBestLap->bounds.y = hudTimerCurrentLap->bounds.y + font2->getHeight()*1.05;
+	hudTimerBestLap->valueScale = 1000;
+	hudTimerBestLap->disableBackground = true;
+	hudTimerBestLap->displayColor = Color::WHITE;
 
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
@@ -203,7 +209,7 @@ void Pseudo3DRaceState::onEnter()
 	vehicle.speed = 0;
 	vehicle.acceleration = 0;
 	pseudoAngle = 0;
-	laptime = 0;
+	laptime = laptimeBest = 0;
 	lapCurrent = 1;
 
 	isBurningRubber = false;
@@ -294,8 +300,11 @@ void Pseudo3DRaceState::render()
 	hudCurrentLap->draw();
 	font2->drawText("Lap ", hudCurrentLap->bounds.x - font2->getTextWidth("Lap "), hudCurrentLap->bounds.y, Color::WHITE);
 
-	hudTimer->draw();
-	font2->drawText("Time ", hudTimer->bounds.x - font2->getTextWidth("Time "), hudTimer->bounds.y, Color::WHITE);
+	hudTimerCurrentLap->draw();
+	font2->drawText("Time:", hudTimerCurrentLap->bounds.x - font2->getTextWidth("Time:"), hudTimerCurrentLap->bounds.y, Color::WHITE);
+
+	hudTimerBestLap->draw();
+	font2->drawText("Best: ", hudTimerBestLap->bounds.x - font2->getTextWidth("Best:"), hudTimerBestLap->bounds.y, Color::WHITE);
 
 	hudSpeedDisplay->draw();
 	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
@@ -435,12 +444,17 @@ void Pseudo3DRaceState::update(float delta)
 	handleInput();
 	handlePhysics(delta);
 
+	laptime += delta;
+
 	// course looping control
 	const unsigned N = course.lines.size();
 	while(position * coursePositionFactor >= N*course.roadSegmentLength)
 	{
 		position -= N*course.roadSegmentLength / coursePositionFactor;
 		lapCurrent++;
+		if(laptime < laptimeBest or laptimeBest == 0)
+			laptimeBest = laptime;
+		laptime = 0;
 	}
 	while(position < 0)
 		position += N*course.roadSegmentLength / coursePositionFactor;
@@ -488,8 +502,6 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
 		isBurningRubber = false;
 	}
-
-	laptime += delta;
 }
 
 void Pseudo3DRaceState::handleInput()

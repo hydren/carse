@@ -46,7 +46,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
 
-	float laptime;
+	float laptime, laptimeBest;
 
 	unsigned lapCurrent;
 
@@ -56,7 +56,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Hud::DialGauge<float>* hudRpmGauge;
 	Hud::NumericalDisplay<float>* hudSpeedDisplay;
 	Hud::NumericalDisplay<int>* hudGearDisplay;
-	Hud::TimerDisplay<float>* hudTimer;
+	Hud::TimerDisplay<float>* hudTimerCurrentLap, *hudTimerBestLap;
 	Hud::NumericalDisplay<unsigned>* hudCurrentLap;
 
 	bool debugMode;

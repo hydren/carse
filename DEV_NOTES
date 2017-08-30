@@ -1,18 +1,30 @@
-# todo
+# to do
 
+- Add option for vehicle to specify custom smoke
+- Add gear shifting sounds
+- Add optional gear shifting sounds derived from forced induction
+- Add option for vehicle to specify custom gear shifting sound
+- Add optional colors/skins/palletes to cars
+- Create showroom background for vehicle selection mode
+- Add transition effects to each state.
 - Add different terrains.
 - Add traffic cars.
 - Add opponent cars. 
 - Create props to decorate the road.
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
-- Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
 - Add noise for vehicle sliding on grass.
 - Scale the bg to be resolution-independent.
 - Create a new UI.
-- Fix incorrect tire animation speed.
 - Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
 - Howl engine when selecting car (either a default engine howl or one using the car engine profile).
+
+# bugs
+
+- Fix bg scaling on race.
+- Fix incorrect tire animation speed.
+- Fix car names trespassing window size.
+- Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.

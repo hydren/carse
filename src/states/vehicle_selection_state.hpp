@@ -24,6 +24,8 @@ class VehicleSelectionState extends public fgeal::Game::State
 	fgeal::Menu* menu;
 	fgeal::Sound* sndCursorMove, *sndCursorAccept, *sndCursorOut;
 
+	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
+
 	struct VehiclePreview
 	{
 		fgeal::Image* sprite;

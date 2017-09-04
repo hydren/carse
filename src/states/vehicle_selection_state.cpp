@@ -48,6 +48,7 @@ VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
 : State(*game),
   fontMain(null), fontInfo(null),
   menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
+  lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   layout(LAYOUT_PROTOTYPE_SLIDE_STAND)
 {}
 
@@ -132,7 +133,10 @@ void VehicleSelectionState::initialize()
 }
 
 void VehicleSelectionState::onEnter()
-{}
+{
+	lastEnterSelectedVehicleIndex = menu->getSelectedIndex();
+	lastEnterSelectedVehicleAltIndex = previews[menu->getSelectedIndex()].altIndex;
+}
 
 void VehicleSelectionState::onLeave()
 {}
@@ -171,6 +175,8 @@ void VehicleSelectionState::handleInput()
 			{
 				case Keyboard::KEY_ESCAPE:
 					sndCursorOut->play();
+					menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
+					previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_ENTER:

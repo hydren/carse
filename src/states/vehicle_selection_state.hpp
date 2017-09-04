@@ -24,8 +24,15 @@ class VehicleSelectionState extends public fgeal::Game::State
 	fgeal::Menu* menu;
 	fgeal::Sound* sndCursorMove, *sndCursorAccept, *sndCursorOut;
 
+	struct VehiclePreview
+	{
+		fgeal::Image* sprite;
+		std::vector<fgeal::Image*> altSprites;
+		int altIndex;
+	};
+
 	std::vector<Vehicle> vehicles;
-	std::vector<fgeal::Image*> vehiclePreview;
+	std::vector<VehiclePreview> previews;
 
 	enum Layout {
 		LAYOUT_PROTOTYPE_LIST, LAYOUT_PROTOTYPE_SLIDE_STAND

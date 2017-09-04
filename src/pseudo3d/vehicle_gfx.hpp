@@ -22,6 +22,9 @@ struct Pseudo3DVehicleAnimationProfile
 	/** The filename of the image containing the sprite sheet. */
 	std::string sheetFilename;
 
+	/** The filenames of extra sprite sheets. */
+	std::vector<std::string> sheetFilenameExtra;
+
 	/** The amount of states of this animation. */
 	unsigned stateCount;
 

@@ -41,6 +41,14 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 	key = "sprite_sheet_file";
 	sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "DEFAULT";
 
+	// attempt to read up to 9 alternative sheets
+	for(unsigned i = 2; i <= 9; i++)
+	{
+		key = "sprite_sheet" + futil::to_string(i) + "_file";
+		if(isValueSpecified(prop, key))
+			sheetFilenameExtra.push_back(prop.get(key));
+	}
+
 	key = "sprite_state_count";
 	stateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 

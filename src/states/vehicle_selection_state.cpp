@@ -60,8 +60,12 @@ VehicleSelectionState::~VehicleSelectionState()
 	if(sndCursorAccept != null) delete sndCursorAccept;
 	if(sndCursorOut != null) delete sndCursorOut;
 
-	for(unsigned i = 0; i < vehiclePreview.size(); i++)
-		delete vehiclePreview[i];
+	for(unsigned i = 0; i < vehicles.size(); i++)
+	{
+		delete previews[i].sprite;
+		for(unsigned j = 0; j < previews[i].altSprites.size(); j++)
+			delete previews[i].altSprites[j];
+	}
 }
 
 void VehicleSelectionState::initialize()
@@ -114,7 +118,13 @@ void VehicleSelectionState::initialize()
 	for(unsigned i = 0; i < vehicles.size(); i++)
 	{
 		menu->addEntry(vehicles[i].name);
-		vehiclePreview.push_back(new Image(vehicles[i].sprite.sheetFilename));
+		previews.push_back(VehiclePreview());
+		previews.back().sprite = new Image(vehicles[i].sprite.sheetFilename);
+		previews.back().altIndex = -1;
+
+		if(not vehicles[i].sprite.sheetFilenameExtra.empty())
+			for(unsigned j = 0; j < vehicles[i].sprite.sheetFilenameExtra.size(); j++)
+				previews.back().altSprites.push_back(new Image(vehicles[i].sprite.sheetFilenameExtra[j]));
 	}
 
 	// default vehicle
@@ -177,6 +187,32 @@ void VehicleSelectionState::handleInput()
 					sndCursorMove->play();
 					menu->cursorDown();
 					break;
+				case Keyboard::KEY_PAGE_UP:
+				{
+					VehiclePreview& preview = previews[menu->getSelectedIndex()];
+					if(not preview.altSprites.empty())
+					{
+						sndCursorMove->play();
+						if(preview.altIndex == -1)
+							preview.altIndex = preview.altSprites.size() - 1;
+						else
+							preview.altIndex--;
+					}
+					break;
+				}
+				case Keyboard::KEY_PAGE_DOWN:
+				{
+					VehiclePreview& preview = previews[menu->getSelectedIndex()];
+					if(not preview.altSprites.empty())
+					{
+						sndCursorMove->play();
+						if(preview.altIndex == (int) preview.altSprites.size() - 1)
+							preview.altIndex = -1;
+						else
+							preview.altIndex++;
+					}
+					break;
+				}
 				default:
 					break;
 			}
@@ -196,7 +232,9 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 	if(index < 0)
 		index = menu->getSelectedIndex();
 
-	Image* sheetVehicle = vehiclePreview[index];
+
+	VehiclePreview& preview = previews[index];
+	Image& sprite = (preview.altIndex == -1 or preview.altSprites.empty()? *preview.sprite : *preview.altSprites[preview.altIndex]);
 	Vehicle& vehicle = vehicles[index];
 
 	const float scalex = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.x,
@@ -205,7 +243,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 				posY = y - 0.5*vehicle.sprite.frameHeight * scaley,
 				offsetY = angleType == 0? 0 : vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
 
-	sheetVehicle->drawScaledRegion(posX, posY, scalex, scaley, (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE),
+	sprite.drawScaledRegion(posX, posY, scalex, scaley, (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE),
 									0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
 }
 
@@ -238,14 +276,14 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 	Display& display = Display::getInstance();
 
 	// draw previous vehicle
-	if(vehiclePreview.size() > 2 or (vehiclePreview.size() == 2 and menu->getSelectedIndex() == 1))
+	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
 	{
 		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
 		drawVehiclePreview(0.25*display.getWidth(), 0.30*display.getHeight(), 0.75, index, -1);
 	}
 
 	// draw next vehicle
-	if(vehiclePreview.size() > 2 or (vehiclePreview.size() == 2 and menu->getSelectedIndex() == 0))
+	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 0))
 	{
 		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
 		drawVehiclePreview(0.75*display.getWidth(), 0.30*display.getHeight(), 0.75, index, +1);

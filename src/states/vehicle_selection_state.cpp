@@ -228,7 +228,7 @@ void VehicleSelectionState::handleInput()
 
 void VehicleSelectionState::onMenuSelect()
 {
-	Pseudo3DRaceState::getInstance(game)->setVehicle(vehicles[menu->getSelectedIndex()]);
+	Pseudo3DRaceState::getInstance(game)->setVehicle(vehicles[menu->getSelectedIndex()], previews[menu->getSelectedIndex()].altIndex);
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }
 

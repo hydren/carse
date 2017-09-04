@@ -52,6 +52,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Course course;
 	Vehicle vehicle;
+	int altSkin;
 
 	Hud::DialGauge<float>* hudRpmGauge;
 	Hud::NumericalDisplay<float>* hudSpeedDisplay;
@@ -88,7 +89,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float getNormalizedTractionForce();
 
 	public://menu accessed methods
-	void setVehicle(const Vehicle& v);
+	void setVehicle(const Vehicle& v, int altSkin=-1);
 	void setCourse(const Course& c);
 };
 

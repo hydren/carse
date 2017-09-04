@@ -49,7 +49,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
   drawParameters(), coursePositionFactor(500), laptime(0), laptimeBest(0), lapCurrent(0),
-  course(0, 0),
+  course(0, 0), altSkin(-1),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
 {
@@ -95,9 +95,10 @@ void Pseudo3DRaceState::initialize()
 	drawParameters.drawAreaHeight = Display::getInstance().getHeight();
 }
 
-void Pseudo3DRaceState::setVehicle(const Vehicle& v)
+void Pseudo3DRaceState::setVehicle(const Vehicle& v, int altSkin)
 {
-	vehicle = v;
+	this->vehicle = v;
+	this->altSkin = altSkin;
 }
 
 void Pseudo3DRaceState::setCourse(const Course& c)
@@ -118,7 +119,7 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	Display& display = Display::getInstance();
-	Image* sheet = new Image(vehicle.sprite.sheetFilename);
+	Image* sheet = new Image(altSkin == -1? vehicle.sprite.sheetFilename : vehicle.sprite.sheetFilenameExtra[altSkin]);
 
 	if(sheet->getWidth() < (int) vehicle.sprite.frameWidth)
 		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");

@@ -23,6 +23,7 @@
 using fgeal::Color;
 using fgeal::Display;
 using fgeal::Image;
+using fgeal::Sprite;
 using futil::Properties;
 using std::string;
 using std::vector;
@@ -38,31 +39,34 @@ void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float 
 }
 
 // needed to ensure consistency
-Course::Segment::Segment() : x(0), y(0), z(0), curve(0) {}
+Course::Segment::Segment() : x(0), y(0), z(0), curve(0),
+		spriteX(0), clip(0), spriteType(-1) {}
 
 Course::Course(float segmentLength, float roadWidth)
-: lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth)
+: lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth), spritesFilenames()
 {}
+
+struct ScreenCoordCache
+{
+	float X, Y, W, scale;
+};
 
 void Course::draw(int pos, int posX, const DrawParameters& param)
 {
 	Display& display = Display::getInstance();
 	const unsigned N = lines.size(), fromPos = pos/roadSegmentLength;
-	float camHeight = 1500 + lines[fromPos].y;
+	const float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
 
 	float maxY = param.drawAreaHeight;
 
-	// screen coordinates
-	float lX = 0, lY = 0, lW = 0;  // current segment
-	float pX = 0, pY = 0, pW = 0;  // previous segment
+	// screen coordinates cache
+	vector<ScreenCoordCache> lts(N, ScreenCoordCache());
 
 	for(unsigned n = fromPos+1; n < fromPos + param.drawDistance; n++)
 	{
 		Segment& l = lines[n%N];
-
-		// shift current values to previous before fetching new coordinates
-		pX = lX; pY = lY; pW = lW;
+		ScreenCoordCache& lt = lts[n%N];
 
 		// project from "world" to "screen" coordinates
 		const int camX = posX - x,
@@ -71,24 +75,55 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		const float scale = param.cameraDepth / (l.z - camZ);
 
 		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
-		lX = (1 + scale*(l.x - camX)) * display.getWidth()/2;
-		lY = (1 - scale*(l.y - camY)) * display.getHeight()/2;
-		lW = scale * roadWidth * display.getWidth()/2;
+		lt.X = (1 + scale*(l.x - camX)) * display.getWidth()/2;
+		lt.Y = (1 - scale*(l.y - camY)) * display.getHeight()/2;
+		lt.W = scale * roadWidth * display.getWidth()/2;
+		lt.scale = scale;
 
 		// update curve
 		x += dx;
 		dx += l.curve;
 
-		if(lY > maxY) continue;
-		maxY = lY;
+		l.clip=maxY;
+		if(lt.Y > maxY) continue;
+		maxY = lt.Y;
 
 		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
 		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
 		Color road   = (n/3)%2? Color( 64, 80, 80) : Color( 40, 64, 64);
 
-		drawRoadQuad(grass,  0,   pY, param.drawAreaWidth, 0, lY, param.drawAreaWidth);
-		drawRoadQuad(rumble, pX, pY, pW*1.2, lX, lY, lW*1.2);
-		drawRoadQuad(road,   pX, pY, pW, lX, lY, lW);
+		ScreenCoordCache& p = lts[(n-1)%N];
+
+		drawRoadQuad(grass,  0,  p.Y, param.drawAreaWidth, 0, lt.Y, param.drawAreaWidth);
+		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, lt.X, lt.Y, lt.W*1.2);
+		drawRoadQuad(road,   p.X, p.Y, p.W, lt.X, lt.Y, lt.W);
+	}
+
+	for(unsigned n = fromPos + param.drawDistance; n >= fromPos+1; n--)
+	{
+		Segment& l = lines[n%N];
+		if(l.spriteType == -1)
+			continue;
+
+	    Image& s = *param.sprites[l.spriteType];
+	    int w = s.getWidth();
+	    int h = s.getHeight();
+
+	    ScreenCoordCache& lt = lts[n%N];
+
+	    float destX = lt.X + lt.scale * l.spriteX * display.getWidth()/2;
+	    float destY = lt.Y + 4;
+	    float destW  = w * lt.W / 150;
+	    float destH  = h * lt.W / 150;
+
+	    destX += destW * l.spriteX; //offsetX
+	    destY += destH * (-1);    //offsetY
+
+	    float clipH = destY+destH-l.clip;
+	    if (clipH<0) clipH=0;
+
+	    if (clipH>=destH) continue;
+	    s.drawScaledRegion(destX, destY, destW/w, destH/h, Image::FLIP_NONE, 0, 0, w, h-h*clipH/destH);
 	}
 }
 
@@ -104,8 +139,11 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 		if(i > 500 && i < 700) line.curve = -0.3;
 		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
+		if(i % 17==0) { line.spriteX=2.0; line.spriteType=0; }
 		course.lines.push_back(line);
 	}
+	course.spritesFilenames.push_back("assets/bush.png");  // type 0
+
 	return course;
 }
 
@@ -138,6 +176,7 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 
 		// fixme this should be parametrized, or at least random
 		if(i > 750 and i < 1350) line.y = sin(i/30.0)*1500;
+
 		course.lines.push_back(line);
 	}
 

@@ -107,6 +107,8 @@ void Pseudo3DRaceState::setCourse(const Course& c)
 
 void Pseudo3DRaceState::onEnter()
 {
+	Display& display = Display::getInstance();
+
 	if(not spritesVehicle.empty())
 	{
 		delete spritesVehicle[0]->image;
@@ -117,7 +119,6 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.clear();
 	}
 
-	Display& display = Display::getInstance();
 	Image* sheet = new Image(vehicle.activeSkin == -1? vehicle.sprite.sheetFilename : vehicle.sprite.sheetFilenameExtra[vehicle.activeSkin]);
 
 	if(sheet->getWidth() < (int) vehicle.sprite.frameWidth)
@@ -144,6 +145,17 @@ void Pseudo3DRaceState::onEnter()
 		sprite->referencePixelY = - (int) vehicle.sprite.contactOffset;
 		spritesVehicle.push_back(sprite);
 	}
+
+	if(not drawParameters.sprites.empty())
+	{
+		for(unsigned i = 0; i < drawParameters.sprites.size(); i++)
+			delete drawParameters.sprites[i];
+
+		drawParameters.sprites.clear();
+	}
+
+	for(unsigned i = 0; i < course.spritesFilenames.size(); i++)
+		drawParameters.sprites.push_back(new Image(course.spritesFilenames[i]));
 
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 

@@ -10,6 +10,7 @@
 #include <ciso646>
 
 #include "fgeal/fgeal.hpp"
+#include "fgeal/extra/sprite.hpp"
 #include "futil/properties.hpp"
 
 #include <vector>
@@ -23,11 +24,16 @@ struct Course
 
 		//todo add a slope field to control y-variation
 
+		float spriteX, clip;
+		int spriteType;
+
 		Segment();
 	};
 
 	std::vector<Segment> lines;
 	float roadSegmentLength, roadWidth;
+
+	std::vector<std::string> spritesFilenames;
 
 	Course(float segmentLength, float roadWidth);
 
@@ -36,6 +42,8 @@ struct Course
 		int drawAreaWidth, drawAreaHeight;
 		unsigned drawDistance;
 		float cameraDepth;
+
+		std::vector<fgeal::Image*> sprites;
 	};
 
 	void draw(int positionZ, int positionX, const DrawParameters& param);

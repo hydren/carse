@@ -71,7 +71,7 @@ VehicleSelectionState::~VehicleSelectionState()
 
 void VehicleSelectionState::initialize()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font2.ttf", 48 * 0.0015625*display.getHeight());
 	fontInfo = new Font("assets/font.ttf", 12);
@@ -143,7 +143,7 @@ void VehicleSelectionState::onLeave()
 
 void VehicleSelectionState::render()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
 	display.clear();
 	switch(layout)
 	{
@@ -255,7 +255,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 
 void VehicleSelectionState::renderMenuPrototypeList()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
 	menu->draw();
 	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
 	drawVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
@@ -279,7 +279,7 @@ void VehicleSelectionState::renderMenuPrototypeList()
 
 void VehicleSelectionState::renderMenuPrototypeSlideStand()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
 
 	// draw previous vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))

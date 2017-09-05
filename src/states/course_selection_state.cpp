@@ -99,7 +99,7 @@ void CourseSelectionState::onLeave()
 
 void CourseSelectionState::render()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
 	display.clear();
 
 	const float displayWidth = display.getWidth(),

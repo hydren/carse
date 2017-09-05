@@ -121,7 +121,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	bgParallax.x += segment.curve*vehicle.speed*0.025;
 	bgParallax.y = -segment.y*0.01;
 
-	if(bgParallax.x < -(2.0f*bg->getWidth()-Display::getInstance().getWidth()))
+	if(bgParallax.x < -(2.0f*bg->getWidth()-game.getDisplay().getWidth()))
 		bgParallax.x += bg->getWidth();
 
 	if(bgParallax.x > 0)

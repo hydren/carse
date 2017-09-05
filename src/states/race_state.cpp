@@ -89,9 +89,6 @@ void Pseudo3DRaceState::initialize()
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
 	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
 	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
-
-	drawParameters.drawAreaWidth = Display::getInstance().getWidth();
-	drawParameters.drawAreaHeight = Display::getInstance().getHeight();
 }
 
 void Pseudo3DRaceState::setVehicle(const Vehicle& v, int altSkin)
@@ -107,7 +104,9 @@ void Pseudo3DRaceState::setCourse(const Course& c)
 
 void Pseudo3DRaceState::onEnter()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
+	drawParameters.drawAreaWidth = display.getWidth();
+	drawParameters.drawAreaHeight = display.getHeight();
 
 	if(not spritesVehicle.empty())
 	{
@@ -250,12 +249,14 @@ void Pseudo3DRaceState::onLeave()
 
 void Pseudo3DRaceState::render()
 {
-	Display& display = Display::getInstance();
-	display.clear();
+	const float displayWidth = drawParameters.drawAreaWidth,
+				displayHeight = drawParameters.drawAreaHeight;
 
-	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(), bgColor);
-	bg->draw(bgParallax.x, bgParallax.y + 0.55*display.getHeight() - bg->getHeight());
-	bg->draw(bgParallax.x + bg->getWidth(), bgParallax.y + 0.55*display.getHeight() - bg->getHeight());
+	game.getDisplay().clear();
+
+	Image::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
+	bg->draw(bgParallax.x, bgParallax.y + 0.55*displayHeight - bg->getHeight());
+	bg->draw(bgParallax.x + bg->getWidth(), bgParallax.y + 0.55*displayHeight - bg->getHeight());
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 
@@ -291,8 +292,8 @@ void Pseudo3DRaceState::render()
 //	sprite.duration = vehicle.speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(vehicle.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
 
-	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.sprite.frameWidth),
-										0.825f*(display.getHeight()- sprite.scale.y*vehicle.sprite.frameHeight) - sprite.scale.y*vehicle.sprite.contactOffset };
+	const Point vehicleSpritePosition = { 0.5f*(displayWidth - sprite.scale.x*vehicle.sprite.frameWidth),
+										0.825f*(displayHeight- sprite.scale.y*vehicle.sprite.frameHeight) - sprite.scale.y*vehicle.sprite.contactOffset };
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
@@ -452,7 +453,7 @@ void Pseudo3DRaceState::render()
 		{
 			const std::string format = std::string(engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
 			sprintf(buffer, format.c_str(), i, engineSound.getSoundData()[i]->getVolume(), engineSound.getSoundData()[i]->getPlaybackSpeed());
-			font->drawText(std::string(buffer), display.getWidth() - 200, display.getHeight()/2.0 - i*font->getHeight(), fgeal::Color::WHITE);
+			font->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*font->getHeight(), fgeal::Color::WHITE);
 		}
 	}
 }

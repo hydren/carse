@@ -53,7 +53,6 @@ struct ScreenCoordCache
 
 void Course::draw(int pos, int posX, const DrawParameters& param)
 {
-	Display& display = Display::getInstance();
 	const unsigned N = lines.size(), fromPos = pos/roadSegmentLength;
 	const float camHeight = 1500 + lines[fromPos].y;
 	float x = 0, dx = 0;
@@ -75,9 +74,9 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		const float scale = param.cameraDepth / (l.z - camZ);
 
 		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
-		lt.X = (1 + scale*(l.x - camX)) * display.getWidth()/2;
-		lt.Y = (1 - scale*(l.y - camY)) * display.getHeight()/2;
-		lt.W = scale * roadWidth * display.getWidth()/2;
+		lt.X = (1 + scale*(l.x - camX)) * param.drawAreaWidth/2;
+		lt.Y = (1 - scale*(l.y - camY)) * param.drawAreaHeight/2;
+		lt.W = scale * roadWidth * param.drawAreaWidth/2;
 		lt.scale = scale;
 
 		// update curve
@@ -111,7 +110,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 
 	    ScreenCoordCache& lt = lts[n%N];
 
-	    float destX = lt.X + lt.scale * l.spriteX * display.getWidth()/2;
+	    float destX = lt.X + lt.scale * l.spriteX * param.drawAreaWidth/2;
 	    float destY = lt.Y + 4;
 	    float destW  = w * lt.W / 150;
 	    float destH  = h * lt.W / 150;

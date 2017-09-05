@@ -74,11 +74,11 @@ void MainMenuState::onLeave()
 
 void MainMenuState::render()
 {
-	Display& display = Display::getInstance();
+	Display& display = game.getDisplay();
 	display.clear();
 	bg->drawScaled(0, 0, display.getWidth()/(float)bg->getWidth(), display.getHeight()/(float)bg->getHeight());
 	layout->draw();
-	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, fgeal::Display::getInstance().getHeight() - fontDev->getHeight(), Color::CREAM);
+	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, display.getHeight() - fontDev->getHeight(), Color::CREAM);
 }
 
 void MainMenuState::update(float delta)

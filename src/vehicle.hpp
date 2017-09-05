@@ -59,6 +59,7 @@ struct Vehicle
 
 	// graphics data
 	Pseudo3DVehicleAnimationProfile sprite;
+	int activeSkin;  // the active skin (-1 means no skin; original sheet)
 
 	/** Creates a empty vehicle object. */
 	Vehicle();

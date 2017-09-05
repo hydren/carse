@@ -28,7 +28,7 @@ Vehicle::Vehicle()
   mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
   approximatedCenterOfGravityHeight(0), approximatedWheelbase(0), acceleration(0),
   engineLocation(ENGINE_LOCATION_ON_FRONT), drivenWheels(DRIVEN_WHEELS_ON_REAR),
-  engineSoundProfile(), sprite()
+  engineSoundProfile(), sprite(), activeSkin(-1)
 {}
 
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
@@ -110,6 +110,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	// sprite data
 
 	sprite = Pseudo3DVehicleAnimationProfile(prop);
+	activeSkin = -1;
 
 	// ########################################################################################################################################################
 	// These properties need to be loaded after sprite data to make sure that some fields are ready ('depictedVehicleWidth', 'sprite_sheet_file', etc)

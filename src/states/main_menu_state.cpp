@@ -132,6 +132,11 @@ void MainMenuState::handleInput()
 					layout->navigate(Layout::NAV_RIGHT);
 					break;
 				}
+				case Keyboard::KEY_O:
+				{
+					game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID);
+					break;
+				}
 				default:break;
 			}
 		}

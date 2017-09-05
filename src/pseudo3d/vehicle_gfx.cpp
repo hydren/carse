@@ -12,10 +12,13 @@
 
 #include <cstdlib>
 #include <stdexcept>
+#include <cmath>
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
 using std::string;
+using fgeal::Image;
+using fgeal::Sprite;
 using futil::Properties;
 using futil::to_lower;
 using futil::trim;
@@ -144,5 +147,101 @@ Pseudo3DVehicleAnimationProfile::Pseudo3DVehicleAnimationProfile(const Propertie
 		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
 		const unsigned frameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 		stateFrameCount.push_back(frameCount);
+	}
+}
+
+void Pseudo3DVehicleAnimation::setProfile(const Pseudo3DVehicleAnimationProfile& profile, float scaleFactor, int skin)
+{
+	this->profile = profile;
+
+	// delete previous sprites
+	clearSprites();
+
+	Image* sheet = new Image(skin == -1? profile.sheetFilename : profile.sheetFilenameExtra[skin]);
+
+	if(sheet->getWidth() < (int) profile.frameWidth)
+		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
+
+	for(unsigned i = 0; i < profile.stateCount; i++)
+	{
+		Sprite* sprite = new Sprite(sheet, profile.frameWidth, profile.frameHeight,
+									profile.frameDuration, profile.stateFrameCount[i],
+									0, i*profile.frameHeight);
+
+		sprite->scale = profile.scale * scaleFactor;
+		sprite->referencePixelY = - (int) profile.contactOffset;
+		sprites.push_back(sprite);
+	}
+
+	if(profile.asymmetrical) for(unsigned i = 1; i < profile.stateCount; i++)
+	{
+		Sprite* sprite = new Sprite(sheet, profile.frameWidth, profile.frameHeight,
+									profile.frameDuration, profile.stateFrameCount[i],
+									0, (profile.stateCount-1 + i)*profile.frameHeight);
+
+		sprite->scale = profile.scale * scaleFactor;
+		sprite->referencePixelY = - (int) profile.contactOffset;
+		sprites.push_back(sprite);
+	}
+}
+
+void Pseudo3DVehicleAnimation::setFrameDuration(float duration)
+{
+	for(unsigned i = 0; i < sprites.size(); i++)
+		sprites[i]->duration = duration;
+}
+
+static const float LEAN_RATIO_MAGNITUDE_THRESHOLD = 0.1f,
+				   LEAN_RATIO_MAX_MAGNITUDE = 1.0f;
+
+void Pseudo3DVehicleAnimation::draw(float cx, float cy, float leanRatio)
+{
+	// the ammount of pseudo angle that will trigger the last sprite
+//	const float PSEUDO_ANGLE_LAST_STATE = LEAN_RATIO_MAX_MAGNITUDE;  // show last sprite when the lean angle is at its max
+	const float LEAN_RATIO_FINAL_STATE = profile.maxDepictedTurnAngle;  // show last sprite when the lean angle is at the specified ammount in the .properties
+
+	// linear sprite progression
+//	const unsigned animationIndex = (profile.stateCount-1)*fabs(leanRatio)/LEAN_RATIO_FINAL_STATE;
+
+	// exponential sprite progression. may be slower.
+//	const unsigned animationIndex = (profile.stateCount-1)*(exp(fabs(leanRatio))-1)/(exp(LEAN_RATIO_FINAL_STATE)-1);
+
+	// linear sprite progression with 1-index advance at threshold angle
+	unsigned animationIndex = 0;
+	if(profile.stateCount > 1 and fabs(leanRatio) > LEAN_RATIO_MAGNITUDE_THRESHOLD)
+		animationIndex = 1 + (profile.stateCount-2)*(fabs(leanRatio) - LEAN_RATIO_MAGNITUDE_THRESHOLD)/(LEAN_RATIO_FINAL_STATE - LEAN_RATIO_MAGNITUDE_THRESHOLD);
+
+	// cap index to max possible
+	if(animationIndex > profile.stateCount - 1)
+		animationIndex = profile.stateCount - 1;
+
+	const bool isLeanRight = (leanRatio > 0 and animationIndex != 0);
+
+	// if asymmetrical, right-leaning sprites are after all left-leaning ones
+	if(isLeanRight and profile.asymmetrical)
+		animationIndex += (profile.stateCount-1);
+
+	Sprite& sprite = *sprites[animationIndex];
+	sprite.flipmode = isLeanRight and not profile.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+	sprite.computeCurrentFrame();
+
+	sprite.draw(cx - 0.5*(sprite.scale.x*profile.frameWidth), cy - 0.5*(sprite.scale.y*profile.frameHeight) - sprite.scale.y*profile.contactOffset);
+}
+
+Pseudo3DVehicleAnimation::~Pseudo3DVehicleAnimation()
+{
+	clearSprites();
+}
+
+void Pseudo3DVehicleAnimation::clearSprites()
+{
+	if(not sprites.empty())
+	{
+		delete sprites[0]->image;
+
+		for(unsigned i = 0; i < sprites.size(); i++)
+			delete sprites[i];
+
+		sprites.clear();
 	}
 }

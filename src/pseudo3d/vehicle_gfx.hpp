@@ -14,6 +14,7 @@
 #include <string>
 
 #include "fgeal/fgeal.hpp"
+#include "fgeal/extra/sprite.hpp"
 #include "futil/properties.hpp"
 
 /** A class containing data used to draw pseudo-3D vehicle animations. */
@@ -64,6 +65,21 @@ struct Pseudo3DVehicleAnimationProfile
 
 	/** Creates a vehicle graphics profile from the given properties data. */
 	Pseudo3DVehicleAnimationProfile(const futil::Properties& properties);
+};
+
+struct Pseudo3DVehicleAnimation
+{
+	Pseudo3DVehicleAnimationProfile profile;
+
+	std::vector<fgeal::Sprite*> sprites;
+
+	void setProfile(const Pseudo3DVehicleAnimationProfile& profile, float scaleFactor, int skin=0);
+	void setFrameDuration(float duration);
+	void draw(float cx, float cy, float leanRatio);
+	~Pseudo3DVehicleAnimation();
+
+	private:
+	void clearSprites();
 };
 
 #endif /* PSEUDO3D_VEHICLE_GFX_HPP_ */

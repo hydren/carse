@@ -108,44 +108,8 @@ void Pseudo3DRaceState::setCourse(const Course& c)
 
 void Pseudo3DRaceState::onEnter()
 {
-	if(not spritesVehicle.empty())
-	{
-		delete spritesVehicle[0]->image;
-
-		for(unsigned i = 0; i < spritesVehicle.size(); i++)
-			delete spritesVehicle[i];
-
-		spritesVehicle.clear();
-	}
-
 	Display& display = Display::getInstance();
-	Image* sheet = new Image(altSkin == -1? vehicle.sprite.sheetFilename : vehicle.sprite.sheetFilenameExtra[altSkin]);
-
-	if(sheet->getWidth() < (int) vehicle.sprite.frameWidth)
-		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
-
-	for(unsigned i = 0; i < vehicle.sprite.stateCount; i++)
-	{
-		Sprite* sprite = new Sprite(sheet, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight,
-									vehicle.sprite.frameDuration, vehicle.sprite.stateFrameCount[i],
-									0, i*vehicle.sprite.frameHeight);
-
-		sprite->scale = vehicle.sprite.scale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.sprite.contactOffset;
-		spritesVehicle.push_back(sprite);
-	}
-
-	if(vehicle.sprite.asymmetrical) for(unsigned i = 1; i < vehicle.sprite.stateCount; i++)
-	{
-		Sprite* sprite = new Sprite(sheet, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight,
-									vehicle.sprite.frameDuration, vehicle.sprite.stateFrameCount[i],
-									0, (vehicle.sprite.stateCount-1 + i)*vehicle.sprite.frameHeight);
-
-		sprite->scale = vehicle.sprite.scale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.sprite.contactOffset;
-		spritesVehicle.push_back(sprite);
-	}
-
+	vehicleAnimation.setProfile(vehicle.sprite, display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR, altSkin);
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
@@ -248,56 +212,27 @@ void Pseudo3DRaceState::render()
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 
-	// the ammount of pseudo angle that will trigger the last sprite
-//	const float PSEUDO_ANGLE_LAST_STATE = PSEUDO_ANGLE_MAX;  // show last sprite when the pseudo angle is at its max
-	const float PSEUDO_ANGLE_LAST_STATE = vehicle.sprite.maxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
+	const Point vehicleSpritePosition = { 0.5*display.getWidth(), 0.8*display.getHeight() };
 
-	// linear sprite progression
-//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
+	vehicleAnimation.setFrameDuration(vehicle.sprite.frameDuration / sqrt(vehicle.speed));  // this formula doesn't present good tire animation results.
+	vehicleAnimation.draw(vehicleSpritePosition.x, vehicleSpritePosition.y, pseudoAngle);
 
-	// exponential sprite progression. may be slower.
-//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
-
-	// linear sprite progression with 1-index advance at threshold angle
-	unsigned animationIndex = 0;
-	if(vehicle.sprite.stateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
-		animationIndex = 1 + (vehicle.sprite.stateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
-
-	// cap index to max possible
-	if(animationIndex > vehicle.sprite.stateCount - 1)
-		animationIndex = vehicle.sprite.stateCount - 1;
-
-	const bool isLeanRight = (pseudoAngle > 0 and animationIndex != 0);
-
-	// if asymmetrical, right-leaning sprites are after all left-leaning ones
-	if(isLeanRight and vehicle.sprite.asymmetrical)
-		animationIndex += (vehicle.sprite.stateCount-1);
-
-	Sprite& sprite = *spritesVehicle[animationIndex];
-	sprite.flipmode = isLeanRight and not vehicle.sprite.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = vehicle.speed != 0? 0.1*400.0/(vehicle.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = vehicle.sprite.frameDuration / sqrt(vehicle.speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = vehicle.speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(vehicle.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
-	sprite.computeCurrentFrame();
-
-	const Point vehicleSpritePosition = { 0.5f*(display.getWidth() - sprite.scale.x*vehicle.sprite.frameWidth),
-										0.825f*(display.getHeight()- sprite.scale.y*vehicle.sprite.frameHeight) - sprite.scale.y*vehicle.sprite.contactOffset };
-
-	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
+	const float spriteScaleX = vehicleAnimation.sprites.back()->scale.x,
+				spriteScaleY = vehicleAnimation.sprites.back()->scale.y;
 
 	if(isBurningRubber)
 	{
 		const Point smokeSpritePosition = {
-				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.sprite.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
+				vehicleSpritePosition.x + 0.5f*(spriteScaleX*(vehicle.sprite.frameHeight - vehicle.sprite.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
 				+ ((pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.sprite.maxDepictedTurnAngle),
-				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
+				vehicleSpritePosition.y + vehicle.sprite.frameHeight*spriteScaleY - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
 		};
 
 		spriteSmokeLeft->computeCurrentFrame();
 		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
 
 		spriteSmokeRight->computeCurrentFrame();
-		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.sprite.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
+		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.sprite.depictedVehicleWidth*spriteScaleX, smokeSpritePosition.y);
 	}
 
 	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("Lap ");

@@ -192,18 +192,25 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 //static
 Course Course::createCourseFromFile(const Properties& prop)
 {
-	string segmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
 	float segmentLength = prop.getParsedCStrAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
 	float roadWidth = prop.getParsedCStrAllowDefault<double, atof>("road_width", 3000);
-	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
 
+	Course course(segmentLength, roadWidth);
+	course.name = prop.get("name");
+	course.author = prop.get("author");
+	course.credits = prop.get("credits");
+	course.comments = prop.get("comments");
+
+	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", 32);
+	for(unsigned id = 0; id < spriteIdCount; id++)
+		course.spritesFilenames.push_back(prop.get("sprite" + futil::to_string(id)));
+
+	string segmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
 	std::ifstream stream(segmentFilename.c_str());
 	if(not stream.is_open())
 		throw std::runtime_error("File could not be opened: " + segmentFilename);
 
-	vector<int> spriteIdsToCheck;
-
-	Course course(segmentLength, roadWidth);
+	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
 	for(unsigned i = 0; i < length; i++)
 	{
 		Segment line;
@@ -242,8 +249,9 @@ Course Course::createCourseFromFile(const Properties& prop)
 			line.spriteID = atoi(tokens[4].c_str());
 			line.spriteX = atof(tokens[5].c_str());
 
-			if(line.spriteID != -1 and not futil::contains_element(spriteIdsToCheck, line.spriteID))
-				spriteIdsToCheck.push_back(line.spriteID);
+			if(line.spriteID != -1 and
+			  (line.spriteID + 1 > (int) course.spritesFilenames.size() or course.spritesFilenames[line.spriteID].empty()))
+				throw std::runtime_error("Error: course indicates usage of an unspecified sprite ID. \n " + segmentFilename);
 		}
 		else if(tokens.size() == 4)
 			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;
@@ -252,21 +260,5 @@ Course Course::createCourseFromFile(const Properties& prop)
 	}
 
 	stream.close();
-
-	if(not spriteIdsToCheck.empty())
-	{
-		if(course.spritesFilenames.empty())
-			throw std::runtime_error("Error: course indicates usage of sprites but no sprite ID was specified on it. \n"+segmentFilename);
-
-		else for(unsigned i = 0; i < spriteIdsToCheck.size(); i++) if(spriteIdsToCheck[i] > (int) course.spritesFilenames.size()-1)
-			throw std::runtime_error("Error: course indicates usage of an unspecified sprite ID. \n " + segmentFilename);
-	}
-
-	course.name = prop.get("name");
-	course.author = prop.get("author");
-	course.credits = prop.get("credits");
-	course.comments = prop.get("comments");
-
-	// todo allow specification of sprite types.
 	return course;
 }

@@ -154,7 +154,10 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	for(unsigned i = 0; i < course.spritesFilenames.size(); i++)
-		drawParameters.sprites.push_back(new Image(course.spritesFilenames[i]));
+		if(not course.spritesFilenames[i].empty())
+			drawParameters.sprites.push_back(new Image(course.spritesFilenames[i]));
+		else
+			drawParameters.sprites.push_back(null);
 
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 

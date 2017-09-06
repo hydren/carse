@@ -126,6 +126,11 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	}
 }
 
+Course::operator std::string()
+{
+	return not name.empty()? name : not filename.empty()? filename : "<unnamed>";
+}
+
 //static
 Course Course::createDebugCourse(float segmentLength, float roadWidth)
 {
@@ -232,5 +237,9 @@ Course Course::createCourseFromFile(const Properties& prop)
 
 	stream.close();
 
+	course.name = prop.get("name");
+	course.author = prop.get("author");
+	course.credits = prop.get("credits");
+	course.comments = prop.get("comments");
 	return course;
 }

@@ -33,6 +33,8 @@ struct Course
 	std::vector<Segment> lines;
 	float roadSegmentLength, roadWidth;
 
+	std::string name, filename, author, credits, comments;
+
 	std::vector<std::string> spritesFilenames;
 
 	Course(float segmentLength, float roadWidth);
@@ -47,6 +49,8 @@ struct Course
 	};
 
 	void draw(int positionZ, int positionX, const DrawParameters& param);
+
+	operator std::string();
 
 	/** Creates a debug course. */
 	static Course createDebugCourse(float segmentLength, float roadWidth);

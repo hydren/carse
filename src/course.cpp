@@ -144,6 +144,7 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
 		if(i % 17==0) { line.spriteX=2.0; line.spriteType=0; }
+		if(i % 17==1) { line.spriteX=-3.0; line.spriteType=0; }
 		course.lines.push_back(line);
 	}
 	course.spritesFilenames.push_back("assets/bush.png");  // type 0

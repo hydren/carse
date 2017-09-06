@@ -45,7 +45,7 @@ string toStrRounded(float value, unsigned placesCount=1)
 int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID; }
 
 VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
-: State(*game),
+: State(*game), gameLogic(game->logic),
   fontMain(null), fontInfo(null),
   menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
@@ -61,7 +61,7 @@ VehicleSelectionState::~VehicleSelectionState()
 	if(sndCursorAccept != null) delete sndCursorAccept;
 	if(sndCursorOut != null) delete sndCursorOut;
 
-	for(unsigned i = 0; i < vehicles.size(); i++)
+	for(unsigned i = 0; i < previews.size(); i++)
 	{
 		delete previews[i].sprite;
 		for(unsigned j = 0; j < previews[i].altSprites.size(); j++)
@@ -86,36 +86,7 @@ void VehicleSelectionState::initialize()
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
 
-	cout << "reading vehicles..." << endl;
-	vector<string> vehicleFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
-	for(unsigned i = 0; i < vehicleFiles.size(); i++)
-	{
-		const string& filename = vehicleFiles[i];
-		if(fgeal::filesystem::isFilenameDirectory(filename))
-		{
-			vector<string> subfolderFiles = fgeal::filesystem::getFilenamesWithinDirectory(filename);
-			for(unsigned j = 0; j < subfolderFiles.size(); j++)
-			{
-				const string& subfolderFile = subfolderFiles[j];
-				if(ends_with(subfolderFile, ".properties"))
-				{
-					Properties prop;
-					prop.load(subfolderFile);
-					vehicles.push_back(Vehicle(prop, static_cast<Pseudo3DCarseGame&>(this->game)));
-					cout << "read vehicle: " << subfolderFile << endl;
-					break;
-				}
-			}
-		}
-		else if(ends_with(filename, ".properties"))
-		{
-			Properties prop;
-			prop.load(filename);
-			vehicles.push_back(Vehicle(prop, static_cast<Pseudo3DCarseGame&>(this->game)));
-			cout << "read vehicle: " << filename << endl;
-		}
-	}
-
+	const vector<Vehicle>& vehicles = gameLogic.getVehicleList();
 	for(unsigned i = 0; i < vehicles.size(); i++)
 	{
 		menu->addEntry(vehicles[i].name);
@@ -127,9 +98,6 @@ void VehicleSelectionState::initialize()
 			for(unsigned j = 0; j < vehicles[i].sprite.sheetFilenameExtra.size(); j++)
 				previews.back().altSprites.push_back(new Image(vehicles[i].sprite.sheetFilenameExtra[j]));
 	}
-
-	// default vehicle
-	Pseudo3DRaceState::getInstance(game)->setVehicle(vehicles[0]);
 }
 
 void VehicleSelectionState::onEnter()
@@ -228,7 +196,7 @@ void VehicleSelectionState::handleInput()
 
 void VehicleSelectionState::onMenuSelect()
 {
-	Pseudo3DRaceState::getInstance(game)->setVehicle(vehicles[menu->getSelectedIndex()], previews[menu->getSelectedIndex()].altIndex);
+	gameLogic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }
 
@@ -241,7 +209,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 
 	VehiclePreview& preview = previews[index];
 	Image& sprite = (preview.altIndex == -1 or preview.altSprites.empty()? *preview.sprite : *preview.altSprites[preview.altIndex]);
-	Vehicle& vehicle = vehicles[index];
+	const Vehicle& vehicle = gameLogic.getVehicleList()[index];
 
 	const float scalex = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.x,
 				scaley = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.y,
@@ -260,7 +228,7 @@ void VehicleSelectionState::renderMenuPrototypeList()
 	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
 	drawVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
 
-	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	const Vehicle& vehicle = gameLogic.getVehicleList()[menu->getSelectedIndex()];
 
 	// info sheet
 	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
@@ -280,6 +248,7 @@ void VehicleSelectionState::renderMenuPrototypeList()
 void VehicleSelectionState::renderMenuPrototypeSlideStand()
 {
 	Display& display = game.getDisplay();
+	const vector<Vehicle>& vehicles = gameLogic.getVehicleList();
 
 	// draw previous vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
@@ -306,7 +275,7 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
 
 	// info sheet
-	Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	const Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
 	const int infoX = 0.333*display.getWidth(); int infoY = 0.525*display.getHeight();
 	const string engineDesc = (vehicle.engine.aspiration.empty()? "" : vehicle.engine.aspiration + " ")
 							+ (vehicle.engine.displacement == 0?  "" : vehicle.engine.displacement >= 950? toStrRounded(vehicle.engine.displacement/1000.0) + "L " : to_string(vehicle.engine.displacement)+"cc ")

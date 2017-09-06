@@ -50,7 +50,7 @@ struct Course
 
 	void draw(int positionZ, int positionX, const DrawParameters& param);
 
-	operator std::string();
+	operator std::string() const;
 
 	/** Creates a debug course. */
 	static Course createDebugCourse(float segmentLength, float roadWidth);

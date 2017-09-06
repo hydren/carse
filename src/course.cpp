@@ -126,7 +126,7 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	}
 }
 
-Course::operator std::string()
+Course::operator std::string() const
 {
 	return not name.empty()? name : not filename.empty()? filename : "<unnamed>";
 }

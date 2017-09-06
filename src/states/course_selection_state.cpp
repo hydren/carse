@@ -36,7 +36,7 @@ using futil::ends_with;
 int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
-: State(*game),
+: State(*game), gameLogic(game->logic),
   imgRandom(null), imgCircuit(null),
   fontMain(null), fontInfo(null), fontTab(null),
   menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
@@ -72,23 +72,9 @@ void CourseSelectionState::initialize()
 	menu->bgColor = Color::GREEN;
 	menu->focusedEntryFontColor = Color::WHITE;
 
-	cout << "reading courses..." << endl;
-
-	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/courses");
-	for(unsigned i = 0; i < courseFiles.size(); i++)
-	{
-		if(ends_with(courseFiles[i], ".properties"))
-		{
-			Properties prop;
-			prop.load(courseFiles[i]);
-			courses.push_back(Course::createCourseFromFile(prop));
-			cout << "read course: " << courseFiles[i] << endl;
-			menu->addEntry(courseFiles[i]);
-		}
-	}
-
-	// default course
-	Pseudo3DRaceState::getInstance(game)->setCourse(Course::createRandomCourse(200, 3000, 6400, 1.5));
+	const vector<Course>& courses = gameLogic.getCourseList();
+	for(unsigned i = 0; i < courses.size(); i++)
+		menu->addEntry((string) courses[i]);
 }
 
 void CourseSelectionState::onEnter()
@@ -150,7 +136,7 @@ void CourseSelectionState::render()
 	{
 		menu->draw();
 		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
-		Course& course = courses[menu->getSelectedIndex()];
+		const Course& course = gameLogic.getCourseList()[menu->getSelectedIndex()];
 		fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", menu->bounds.x + menu->bounds.w + 32, menu->bounds.y + menu->bounds.h, Color::WHITE);
 	}
 	else
@@ -232,12 +218,12 @@ void CourseSelectionState::handleInput()
 void CourseSelectionState::onMenuSelect()
 {
 	if(isLoadedCourseSelected)
-		Pseudo3DRaceState::getInstance(game)->setCourse(courses[menu->getSelectedIndex()]);
+		gameLogic.setNextCourse(menu->getSelectedIndex());
 	else
 		if(isDebugCourseSelected)
-			Pseudo3DRaceState::getInstance(game)->setCourse(Course::createDebugCourse(200, 3000));
+			gameLogic.setNextCourseDebug();
 		else
-			Pseudo3DRaceState::getInstance(game)->setCourse(Course::createRandomCourse(200, 3000, 6400, 1.5));
+			gameLogic.setNextCourseRandom();
 
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }

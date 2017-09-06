@@ -20,12 +20,12 @@
 
 class CourseSelectionState extends public fgeal::Game::State
 {
+	CarseGame::Logic& gameLogic;
+
 	fgeal::Image* imgRandom, *imgCircuit;
 	fgeal::Font* fontMain, *fontInfo, *fontTab;
 	fgeal::Menu* menu;
 	fgeal::Sound* sndCursorMove, *sndCursorAccept, *sndCursorOut;
-
-	std::vector<Course> courses;
 
 	bool isLoadedCourseSelected;
 

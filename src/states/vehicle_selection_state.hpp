@@ -20,6 +20,8 @@
 
 class VehicleSelectionState extends public fgeal::Game::State
 {
+	CarseGame::Logic& gameLogic;
+
 	fgeal::Font* fontMain, *fontInfo;
 	fgeal::Menu* menu;
 	fgeal::Sound* sndCursorMove, *sndCursorAccept, *sndCursorOut;
@@ -33,7 +35,6 @@ class VehicleSelectionState extends public fgeal::Game::State
 		int altIndex;
 	};
 
-	std::vector<Vehicle> vehicles;
 	std::vector<VehiclePreview> previews;
 
 	enum Layout {

@@ -31,6 +31,9 @@ using std::vector;
 using std::string;
 using std::map;
 
+// to reduce typing is good
+#define getRaceState() static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID))
+
 const int  // states IDs
 	Pseudo3DCarseGame::RACE_STATE_ID = 0,
 	Pseudo3DCarseGame::MAIN_MENU_STATE_ID = 1,
@@ -39,14 +42,14 @@ const int  // states IDs
 	Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID = 4;
 
 Pseudo3DCarseGame::Pseudo3DCarseGame()
-: Game("Carse", null, 800, 600)
+: Game("Carse", null, 800, 600), logic(*this)
 {
 	this->maxFps = 60;
 }
 
 void Pseudo3DCarseGame::initializeStatesList()
 {
-	this->loadPresetEngineSoundProfiles();
+	this->logic.initialize();
 
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
@@ -55,17 +58,26 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->addState(new OptionsMenuState(this));
 
 	this->setInitialState(MAIN_MENU_STATE_ID);
+
+	this->logic.onStatesListInitFinished();
 }
 
-EngineSoundProfile& Pseudo3DCarseGame::getPresetEngineSoundProfile(const std::string presetName)
+Pseudo3DCarseGame::Logic::Logic(Pseudo3DCarseGame& game) : game(game) {}
+
+void Pseudo3DCarseGame::Logic::initialize()
 {
-	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
-		return presetEngineSoundProfiles[presetName];
-	else
-		return presetEngineSoundProfiles["default"];
+	this->loadPresetEngineSoundProfiles();
+	this->loadCourses();
+	this->loadVehicles();
 }
 
-void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
+void Pseudo3DCarseGame::Logic::onStatesListInitFinished()
+{
+	this->setNextCourseRandom();  // set default course
+	this->setPickedVehicle(vehicles[0]);  // set default vehicle
+}
+
+void Pseudo3DCarseGame::Logic::loadPresetEngineSoundProfiles()
 {
 	cout << "reading preset engine sound profiles..." << endl;
 	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory("assets/sound/engine");
@@ -129,4 +141,103 @@ void Pseudo3DCarseGame::loadPresetEngineSoundProfiles()
 		}
 		else previousCount = pendingPresetFiles.size();
 	}
+}
+
+EngineSoundProfile& Pseudo3DCarseGame::Logic::getPresetEngineSoundProfile(const std::string presetName)
+{
+	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
+		return presetEngineSoundProfiles[presetName];
+	else
+		return presetEngineSoundProfiles["default"];
+}
+
+void Pseudo3DCarseGame::Logic::loadCourses()
+{
+	cout << "reading courses..." << endl;
+
+	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/courses");
+	for(unsigned i = 0; i < courseFiles.size(); i++)
+	{
+		if(ends_with(courseFiles[i], ".properties"))
+		{
+			Properties prop;
+			prop.load(courseFiles[i]);
+			courses.push_back(Course::createCourseFromFile(prop));
+			courses.back().filename = courseFiles[i];
+			cout << "read course: " << courseFiles[i] << endl;
+		}
+	}
+}
+
+const vector<Course>& Pseudo3DCarseGame::Logic::getCourseList()
+{
+	return courses;
+}
+
+void Pseudo3DCarseGame::Logic::setNextCourse(unsigned courseIndex)
+{
+	getRaceState()->setCourse(courses[courseIndex]);
+}
+
+void Pseudo3DCarseGame::Logic::setNextCourse(const Course& c)
+{
+	getRaceState()->setCourse(c);
+}
+
+void Pseudo3DCarseGame::Logic::setNextCourseRandom()
+{
+	getRaceState()->setCourse(Course::createRandomCourse(200, 3000, 6400, 1.5));
+}
+
+void Pseudo3DCarseGame::Logic::setNextCourseDebug()
+{
+	getRaceState()->setCourse(Course::createDebugCourse(200, 3000));
+}
+
+void Pseudo3DCarseGame::Logic::loadVehicles()
+{
+	cout << "reading vehicles..." << endl;
+	vector<string> vehicleFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
+	for(unsigned i = 0; i < vehicleFiles.size(); i++)
+	{
+		const string& filename = vehicleFiles[i];
+		if(fgeal::filesystem::isFilenameDirectory(filename))
+		{
+			vector<string> subfolderFiles = fgeal::filesystem::getFilenamesWithinDirectory(filename);
+			for(unsigned j = 0; j < subfolderFiles.size(); j++)
+			{
+				const string& subfolderFile = subfolderFiles[j];
+				if(ends_with(subfolderFile, ".properties"))
+				{
+					Properties prop;
+					prop.load(subfolderFile);
+					vehicles.push_back(Vehicle(prop, game));
+					cout << "read vehicle: " << subfolderFile << endl;
+					break;
+				}
+			}
+		}
+		else if(ends_with(filename, ".properties"))
+		{
+			Properties prop;
+			prop.load(filename);
+			vehicles.push_back(Vehicle(prop, game));
+			cout << "read vehicle: " << filename << endl;
+		}
+	}
+}
+
+const std::vector<Vehicle>& Pseudo3DCarseGame::Logic::getVehicleList()
+{
+	return vehicles;
+}
+
+void Pseudo3DCarseGame::Logic::setPickedVehicle(unsigned vehicleIndex, int skin)
+{
+	getRaceState()->setVehicle(vehicles[vehicleIndex], skin);
+}
+
+void Pseudo3DCarseGame::Logic::setPickedVehicle(const Vehicle& v, int skin)
+{
+	getRaceState()->setVehicle(v, skin);
 }

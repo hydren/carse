@@ -103,7 +103,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	// sound data
 
 	if(EngineSoundProfile::requestsPresetProfile(prop))
-		engineSoundProfile = game.getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
+		engineSoundProfile = game.logic.getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
 	else
 		engineSoundProfile = EngineSoundProfile::loadFromProperties(prop);
 

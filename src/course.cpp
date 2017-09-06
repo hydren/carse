@@ -10,6 +10,7 @@
 #include "futil/random.h"
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"
+#include "futil/collection_actions.hpp"
 
 #include <stdexcept>
 #include <iostream>
@@ -39,8 +40,8 @@ void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float 
 }
 
 // needed to ensure consistency
-Course::Segment::Segment() : x(0), y(0), z(0), curve(0),
-		spriteX(0), clip(0), spriteType(-1) {}
+Course::Segment::Segment() : x(0), y(0), z(0), curve(0), slope(0),
+		clip(0), spriteID(-1), spriteX(0)  {}
 
 Course::Course(float segmentLength, float roadWidth)
 : lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth), spritesFilenames()
@@ -101,10 +102,10 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	for(unsigned n = fromPos + param.drawDistance; n >= fromPos+1; n--)
 	{
 		Segment& l = lines[n%N];
-		if(l.spriteType == -1)
+		if(l.spriteID == -1)
 			continue;
 
-	    Image& s = *param.sprites[l.spriteType];
+	    Image& s = *param.sprites[l.spriteID];
 	    int w = s.getWidth();
 	    int h = s.getHeight();
 
@@ -143,8 +144,8 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 		if(i > 500 && i < 700) line.curve = -0.3;
 		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
-		if(i % 17==0) { line.spriteX=2.0; line.spriteType=0; }
-		if(i % 17==1) { line.spriteX=-3.0; line.spriteType=0; }
+		if(i % 17==0) { line.spriteX=2.0; line.spriteID=0; }
+		if(i % 17==1) { line.spriteX=-3.0; line.spriteID=0; }
 		course.lines.push_back(line);
 	}
 	course.spritesFilenames.push_back("assets/bush.png");  // type 0
@@ -200,6 +201,8 @@ Course Course::createCourseFromFile(const Properties& prop)
 	if(not stream.is_open())
 		throw std::runtime_error("File could not be opened: " + segmentFilename);
 
+	vector<int> spriteIdsToCheck;
+
 	Course course(segmentLength, roadWidth);
 	for(unsigned i = 0; i < length; i++)
 	{
@@ -222,25 +225,48 @@ Course Course::createCourseFromFile(const Properties& prop)
 		while(str.empty() or starts_with(str, "#") or starts_with(str, "!")); // ignore empty lines or commented out ones
 
 		vector<string> tokens = split(str, ',');
-		if(tokens.size() < 2)
-		{
-			std::cout << "ill formed segment file line " << i << std::endl;
-			line.curve = line.y = 0;
-		}
-		else
-		{
-			line.curve = atof(tokens[0].c_str());
+
+		line.x = atof(tokens[0].c_str());
+
+		if(tokens.size() > 1)
 			line.y = atof(tokens[1].c_str());
+
+		if(tokens.size() > 2)
+			line.curve = atof(tokens[2].c_str());
+
+		if(tokens.size() >= 3)
+			line.slope = atof(tokens[3].c_str());
+
+		if(tokens.size() >= 5)
+		{
+			line.spriteID = atoi(tokens[4].c_str());
+			line.spriteX = atof(tokens[5].c_str());
+
+			if(line.spriteID != -1 and not futil::contains_element(spriteIdsToCheck, line.spriteID))
+				spriteIdsToCheck.push_back(line.spriteID);
 		}
+		else if(tokens.size() == 4)
+			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;
 
 		course.lines.push_back(line);
 	}
 
 	stream.close();
 
+	if(not spriteIdsToCheck.empty())
+	{
+		if(course.spritesFilenames.empty())
+			throw std::runtime_error("Error: course indicates usage of sprites but no sprite ID was specified on it. \n"+segmentFilename);
+
+		else for(unsigned i = 0; i < spriteIdsToCheck.size(); i++) if(spriteIdsToCheck[i] > (int) course.spritesFilenames.size()-1)
+			throw std::runtime_error("Error: course indicates usage of an unspecified sprite ID. \n " + segmentFilename);
+	}
+
 	course.name = prop.get("name");
 	course.author = prop.get("author");
 	course.credits = prop.get("credits");
 	course.comments = prop.get("comments");
+
+	// todo allow specification of sprite types.
 	return course;
 }

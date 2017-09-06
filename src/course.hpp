@@ -21,11 +21,13 @@ struct Course
 	{
 		float x, y, z;  // 3d center of line (delta coordinates)
 		float curve;  //fixme this "curve" field completely renders the "x" field useless
+		float slope;
 
 		//todo add a slope field to control y-variation
 
-		float spriteX, clip;
-		int spriteType;
+		float clip;
+		int spriteID;  // the "ID" of the sprite to show. -1 means no sprite.
+		float spriteX;   // the position of this segment's sprite
 
 		Segment();
 	};

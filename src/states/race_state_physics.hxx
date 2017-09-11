@@ -183,7 +183,7 @@ float Pseudo3DRaceState::getNormalizedTractionForce()
 	// this formula don't work properly on low speeds (numerical instability)
 	const float longitudinalSlipRatio = getLongitudinalSlipRatio();
 	return longitudinalSlipRatio < 0.06? (20.0*longitudinalSlipRatio)  // 0 to 6% slip ratio gives traction from 0 up to 120%
-			: longitudinalSlipRatio < 0.20? (7.2 - longitudinalSlipRatio)/7.0  // 6 to 20% slip ratio gives traction from 120% up to 100%
+			: longitudinalSlipRatio < 0.20? (9.0 - 10.0*longitudinalSlipRatio)/7.0  // 6 to 20% slip ratio gives traction from 120% up to 100%
 					: longitudinalSlipRatio < 1.00? (1.075 - 0.375*longitudinalSlipRatio)  // 20% to 100% slip ratio gives traction from 100 down to 70%
 							: 0.7;  // over 100% slip ratio gives traction 70%
 }

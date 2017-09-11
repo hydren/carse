@@ -145,12 +145,12 @@ static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, ass
 
 void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
-	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
-	{
-		// xxx this formula assumes no wheel spin.
-		vehicle.engine.update(vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
-		return;
-	}
+//	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
+//	{
+//		// xxx this formula assumes no wheel spin.
+//		vehicle.engine.update(vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
+//		return;
+//	}
 
 	const unsigned drivenWheelsCount = (vehicle.type == Vehicle::TYPE_CAR? 4 : vehicle.type == Vehicle::TYPE_BIKE? 2 : 1) * (vehicle.drivenWheels != Vehicle::DRIVEN_WHEELS_ALL? 0.5f : 1.0f);
 	const float wheelMass = AVERAGE_WHEEL_DENSITY * squared(vehicle.tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
@@ -179,6 +179,53 @@ float Pseudo3DRaceState::getLongitudinalSlipRatio()
 
 float Pseudo3DRaceState::getNormalizedTractionForce()
 {
+	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
+	{
+		const float rollingSpeed = vehicle.engine.getAngularSpeed()*vehicle.tireRadius;
+
+		float slip = 0, step = -1;
+		while(slip < 1.0)
+		{
+			if(rollingSpeed < slip*fabs(vehicle.speed) + vehicle.speed)
+			{
+				return step==-1? slip*20.0
+					 : step==0.01? (9.0 - 10.0*slip)/7.0
+					 :             (1.075 - 0.375*slip);
+			}
+			if(slip == 0) slip = 0.0003125;
+			if(slip >= 0.06) step = 0.01;
+			if(slip >= 0.1) step = 0.10;
+
+			step==-1? slip *= 2 : slip += step;
+		}
+		return 0.7;
+
+//		return rollingSpeed < 0.0003125*fabs(vehicle.speed) + vehicle.speed? 0
+//			 : rollingSpeed < 0.000625*fabs(vehicle.speed) + vehicle.speed? 0.0125
+//			 : rollingSpeed < 0.00125*fabs(vehicle.speed) + vehicle.speed? 0.025
+//			 : rollingSpeed < 0.0025*fabs(vehicle.speed) + vehicle.speed? 0.05
+//			 : rollingSpeed < 0.005*fabs(vehicle.speed) + vehicle.speed? 0.1
+//			 : rollingSpeed < 0.01*fabs(vehicle.speed) + vehicle.speed? 0.2
+//			 : rollingSpeed < 0.02*fabs(vehicle.speed) + vehicle.speed? 0.4
+//			 : rollingSpeed < 0.03*fabs(vehicle.speed) + vehicle.speed? 0.6
+//			 : rollingSpeed < 0.04*fabs(vehicle.speed) + vehicle.speed? 0.8
+//			 : rollingSpeed < 0.05*fabs(vehicle.speed) + vehicle.speed? 1.0
+//			 : rollingSpeed < 0.06*fabs(vehicle.speed) + vehicle.speed? 1.2
+//			 : rollingSpeed < 0.07*fabs(vehicle.speed) + vehicle.speed? 1.1857
+//			 : rollingSpeed < 0.08*fabs(vehicle.speed) + vehicle.speed? 1.1714
+//			 : rollingSpeed < 0.09*fabs(vehicle.speed) + vehicle.speed? 1.1571
+//			 : rollingSpeed < 0.10*fabs(vehicle.speed) + vehicle.speed? 1.1428
+//			 : rollingSpeed < 0.20*fabs(vehicle.speed) + vehicle.speed? 1.0
+//			 : rollingSpeed < 0.30*fabs(vehicle.speed) + vehicle.speed? 0.9625
+//			 : rollingSpeed < 0.40*fabs(vehicle.speed) + vehicle.speed? 0.9250
+//			 : rollingSpeed < 0.50*fabs(vehicle.speed) + vehicle.speed? 0.8875
+//			 : rollingSpeed < 0.60*fabs(vehicle.speed) + vehicle.speed? 0.8500
+//			 : rollingSpeed < 0.70*fabs(vehicle.speed) + vehicle.speed? 0.8125
+//			 : rollingSpeed < 0.80*fabs(vehicle.speed) + vehicle.speed? 0.7750
+//			 : rollingSpeed < 0.90*fabs(vehicle.speed) + vehicle.speed? 0.7375
+//			 : 0.7;
+	}
+
 	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
 	// this formula don't work properly on low speeds (numerical instability)
 	const float longitudinalSlipRatio = getLongitudinalSlipRatio();
@@ -191,9 +238,9 @@ float Pseudo3DRaceState::getNormalizedTractionForce()
 /** Returns the current driving force. */
 float Pseudo3DRaceState::getDriveForce()
 {
-	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
-		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
-	else
+//	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)
+//		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
+//	else
 		return vehicle.engine.getDriveTorque() / vehicle.tireRadius;
 }
 

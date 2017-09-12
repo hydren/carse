@@ -29,6 +29,7 @@ using fgeal::Point;
 
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
+static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.005;  // 0.5%
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
 static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 
@@ -47,7 +48,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
-  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), fakeBrakeBuildUp(0),
+  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
   drawParameters(), coursePositionFactor(500), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
@@ -229,7 +230,6 @@ void Pseudo3DRaceState::onEnter()
 	lapCurrent = 1;
 
 	isBurningRubber = false;
-	fakeBrakeBuildUp = false;
 
 	music->loop();
 	engineSound.playIdle();
@@ -481,16 +481,11 @@ void Pseudo3DRaceState::update(float delta)
 	while(position < 0)
 		position += N*course.roadSegmentLength / coursePositionFactor;
 
-	// xxx this should be removed once the simulation allows tire slipping, and thus, car slides when braking when its tires are slipping
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN) and fabs(vehicle.speed) > 5.0)
-		fakeBrakeBuildUp += delta;
-	else
-		fakeBrakeBuildUp = 0;
-
 	engineSound.updateSound(vehicle.engine.rpm);
 
-//	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-	if(getDriveForce() == getDrivenWheelsTireLoad())
+//	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))  // fake burnout mode
+//	if(getDriveForce() == getDrivenWheelsTireLoad())  // burnout based on capped drive force
+	if(fabs(getLongitudinalSlipRatio()) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER and fabs(vehicle.speed)>1)  // burnout based on real slip ratio
 	{
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
@@ -502,9 +497,7 @@ void Pseudo3DRaceState::update(float delta)
 
 		isBurningRubber = true;
 	}
-	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
-			and (/*fabs(pseudoAngle) == PSEUDO_ANGLE_MAX*/ fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED
-				            or fakeBrakeBuildUp > 0.75))  // xxx fake braking buildup
+	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN and (fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED))
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();

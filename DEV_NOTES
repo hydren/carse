@@ -15,6 +15,7 @@
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
 - Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
 - Add noise for vehicle sliding on grass.
+- Add vehicle shaking animation (when off-roading or in rough terrain)
 - Scale the bg to be resolution-independent.
 - Create a new UI.
 - Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
@@ -30,3 +31,4 @@
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
 - Fix gear shifting. It should change when the next/previous gear provides more torque/power than the current one.
+- Fix tire grip formula to account for terrain type (currently just the rolling resistance accounts for terrain)

@@ -15,6 +15,10 @@
 using std::string;
 using std::map;
 
+// xxx debug
+#include <iostream>
+using std::cout; using std::endl;
+
 using fgeal::Display;
 using fgeal::Image;
 using fgeal::Font;
@@ -29,7 +33,7 @@ using fgeal::Point;
 
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
-static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.005;  // 0.5%
+static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
 static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 
@@ -540,6 +544,8 @@ void Pseudo3DRaceState::handleInput()
 					position = 0;
 					posX = 0;
 					vehicle.speed = 0;
+					vehicle.engine.rpm = 1000;
+					vehicle.engine.gear = 1;
 					pseudoAngle = 0;
 					bgParallax.x = bgParallax.y = 0;
 					vehicle.acceleration = 0;

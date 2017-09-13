@@ -85,6 +85,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float getLongitudinalSlipRatio();
 	float getDrivenWheelsTireLoad();
 	float getNormalizedTractionForce();
+	bool isSlipRatioUnstable();
 
 	public://menu accessed methods
 	void setVehicle(const Vehicle& v, int skin=-1);

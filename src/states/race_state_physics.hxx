@@ -155,11 +155,18 @@ static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  // increasing this 
 //xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
 static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
 
+bool Pseudo3DRaceState::isSlipRatioUnstable()
+{
+	// assume unstable if speed is this slow (actual speed varies with vehicle's characteristics)
+//	return (vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD);
+
+	// assume unstable if slip ratio is too low
+	return (vehicle.engine.getAngularSpeed()*vehicle.tireRadius - vehicle.speed < LOWEST_STABLE_SLIP*fabs(vehicle.speed));
+}
+
 void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
-//	const bool unstable = (vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD);  // assume unstable if speed is this slow (actual speed varies with vehicle's characteristics)
-	const bool unstable = (vehicle.engine.getAngularSpeed()*vehicle.tireRadius - vehicle.speed < LOWEST_STABLE_SLIP*fabs(vehicle.speed));  // assume unstable if slip ratio is too low
-
+	const bool unstable = isSlipRatioUnstable();
 	if(unstable)  // assume no tire slipping when unstable
 	{
 		// xxx this formula assumes no wheel slipping.
@@ -173,7 +180,7 @@ void Pseudo3DRaceState::updateDrivetrain(float delta)
 
 //	const float tractionForce = unstable? 0 : getNormalizedTractionForce() * getDrivenWheelsTireLoad();  // assume zero traction when unstable
 	const float tractionForce = getNormalizedTractionForce() * getDrivenWheelsTireLoad();
-	const float tractionTorque = tractionForce / vehicle.tireRadius;
+	const float tractionTorque = tractionForce * vehicle.tireRadius;
 
 	//fixme how to do this formula right? remove from ingame state braking calculation
 //	const float brakingTorque = -brakePedalPosition*30;
@@ -207,10 +214,18 @@ float Pseudo3DRaceState::getNormalizedTractionForce()
 /** Returns the current driving force. */
 float Pseudo3DRaceState::getDriveForce()
 {
-//	if(vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD)  // returns the current drive force, up to the driven wheels tire load
-//		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
-//	else
-		return vehicle.engine.getDriveTorque() / vehicle.tireRadius;  // returns the current drive force, assuming the drive torque is accounting for tire load/slip
+	if(isSlipRatioUnstable() or vehicle.speed == 0)
+	{
+		cout << "using drive torque: " << vehicle.engine.getDriveTorque() << endl ;
+		// returns the current drive force as the one directly from the engine, up to the driven wheels tire load (prevent tire slip altogether)
+		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
+	}
+	else
+	{
+		cout << "using traction torque. driven wheels tire load: " << getDrivenWheelsTireLoad() << endl ;
+		// returns the current drive force as the longitudinal/traction force
+		return getNormalizedTractionForce() * getDrivenWheelsTireLoad();
+	}
 }
 
 static const float engineLocationFactorRWD(Vehicle::EngineLocation loc)

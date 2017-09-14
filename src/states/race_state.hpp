@@ -58,6 +58,26 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Hud::TimerDisplay<float>* hudTimerCurrentLap, *hudTimerBestLap;
 	Hud::NumericalDisplay<unsigned>* hudCurrentLap;
 
+	//todo make these types parametrizable (and thus, not hardcoded) so they can be externally specified to allow custom, user-defined types.
+	enum SurfaceType
+	{
+		SURFACE_TYPE_DRY_ASPHALT,
+		SURFACE_TYPE_WET_ASPHALT,
+
+		SURFACE_TYPE_CONCRETE,
+		SURFACE_TYPE_GRAVEL,
+
+		SURFACE_TYPE_GRASS,
+		SURFACE_TYPE_DIRT,
+		SURFACE_TYPE_MUD,
+
+		SURFACE_TYPE_SAND,
+		SURFACE_TYPE_SNOW,
+		SURFACE_TYPE_ICE,
+
+		SURFACE_TYPE_WATER
+	};
+
 	bool debugMode;
 
 	public:
@@ -80,12 +100,24 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	void handleInput();
 	void handlePhysics(float delta);
 
+	SurfaceType getCurrentSurfaceType();
+	float getTireKineticFrictionCoefficient();
+	float getTireRollingResistanceCoefficient();
+
 	void updateDrivetrain(float delta);
 	float getDriveForce();
+
+	void updateDrivetrainSimpleModel();
+	float getDriveForceSimpleModel();
+
+	void updateDrivetrainSlipRatioModel(float delta);
+	float getDriveForceSlipRatioModel();
+
 	float getLongitudinalSlipRatio();
-	float getDrivenWheelsTireLoad();
 	float getNormalizedTractionForce();
 	bool isSlipRatioUnstable();
+
+	float getDrivenWheelsTireLoad();
 
 	public://menu accessed methods
 	void setVehicle(const Vehicle& v, int skin=-1);

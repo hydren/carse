@@ -65,13 +65,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
-	const bool onGrass = (fabs(posX) > 1.2*course.roadWidth);
-	const float tireFrictionCoefficient = onGrass? TIRE_FRICTION_COEFFICIENT_GRASS : TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT,
-				rollingResistanceCoefficient = onGrass? ROLLING_RESISTANCE_COEFFICIENT_GRASS : ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
-
-	const float tireFriction = tireFrictionCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed);
+	const float tireFriction = getTireKineticFrictionCoefficient() * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed);
 	brakingFriction = vehicle.brakePedalPosition * tireFriction;  // a multiplier here could be added for stronger and easier braking
-	rollingFriction = rollingResistanceCoefficient * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * 4;  // fixme this formula assumes 4 wheels
+	rollingFriction = getTireRollingResistanceCoefficient() * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * 4;  // fixme this formula assumes 4 wheels
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update acceleration
@@ -129,6 +125,34 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		bgParallax.x -= bg->getWidth();
 }
 
+Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()
+{
+	if(fabs(posX) > 1.2*course.roadWidth)
+		return SURFACE_TYPE_GRASS;
+	else
+		return SURFACE_TYPE_DRY_ASPHALT;
+}
+
+float Pseudo3DRaceState::getTireKineticFrictionCoefficient()
+{
+	switch(getCurrentSurfaceType())
+	{
+		default:
+		case SURFACE_TYPE_DRY_ASPHALT: return TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT;
+		case SURFACE_TYPE_GRASS:       return TIRE_FRICTION_COEFFICIENT_GRASS;
+	}
+}
+
+float Pseudo3DRaceState::getTireRollingResistanceCoefficient()
+{
+	switch(getCurrentSurfaceType())
+	{
+		default:
+		case SURFACE_TYPE_DRY_ASPHALT: return ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
+		case SURFACE_TYPE_GRASS:       return ROLLING_RESISTANCE_COEFFICIENT_GRASS;
+	}
+}
+
 /*
  * More info about car physics
  * http://www.asawicki.info/Mirror/Car%20Physics%20for%20Games/Car%20Physics%20for%20Games.html
@@ -142,12 +166,16 @@ void Pseudo3DRaceState::handlePhysics(float delta)
  	What to do when slip ratio is unstable (low speeds)? Options include:
  	 - Use non-sliping, simplified formula.
  	 - Assume zero traction torque.
+ 	 - Use Vinicius Martins idea to tamper the speed to maintain it at a minimum stable value, when it's not zero.
  	 - ... (research another formula).
 
  	When is the slip ratio unstable, exactly?
  	- Low speed. See PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD
  	- Low slip ratio. See LOWEST_STABLE_SLIP
  	- ... (don't know, really)
+
+ 	Needs neutral gear implementation, specially to avoid powershifting in slip ratio model.
+ 	Also needs a proper shift time. Specially when using slip ratio mode because, without it, the vehicle appears to be powershifting.
 */
 static const float PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD = 22;  // 22m/s == 79,2km/h
 static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  // increasing this constant degrades simulation quality
@@ -155,16 +183,41 @@ static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  // increasing this 
 //xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
 static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
 
-bool Pseudo3DRaceState::isSlipRatioUnstable()
+void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
-	// assume unstable if speed is this slow (actual speed varies with vehicle's characteristics)
-//	return (vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD);
-
-	// assume unstable if slip ratio is too low
-	return (vehicle.engine.getAngularSpeed()*vehicle.tireRadius - vehicle.speed < LOWEST_STABLE_SLIP*fabs(vehicle.speed));
+//	updateDrivetrainSimpleModel();
+	updateDrivetrainSlipRatioModel(delta);
 }
 
-void Pseudo3DRaceState::updateDrivetrain(float delta)
+/** Returns the current driving force. */
+float Pseudo3DRaceState::getDriveForce()
+{
+//	return getDriveForceSimpleModel();
+	return getDriveForceSlipRatioModel();
+}
+
+// ==================================================================================================================================================
+// simple model
+
+void Pseudo3DRaceState::updateDrivetrainSimpleModel()
+{
+	// this formula assumes no wheel slipping.
+	vehicle.engine.update(vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
+}
+
+float Pseudo3DRaceState::getDriveForceSimpleModel()
+{
+	// all engine power
+//	return vehicle.engine.getDriveTorque() / vehicle.tireRadius;
+
+	// all engine power, up to the maximum allowed by tire grip (driven wheels load)
+	return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad() * getTireKineticFrictionCoefficient());
+}
+
+// ==================================================================================================================================================
+// slip ratio model
+
+void Pseudo3DRaceState::updateDrivetrainSlipRatioModel(float delta)
 {
 	const bool unstable = isSlipRatioUnstable();
 	if(unstable)  // assume no tire slipping when unstable
@@ -179,7 +232,7 @@ void Pseudo3DRaceState::updateDrivetrain(float delta)
 	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * squared(vehicle.tireRadius) * 0.5;  // I = (mr^2)/2
 
 //	const float tractionForce = unstable? 0 : getNormalizedTractionForce() * getDrivenWheelsTireLoad();  // assume zero traction when unstable
-	const float tractionForce = getNormalizedTractionForce() * getDrivenWheelsTireLoad();
+	const float tractionForce = getNormalizedTractionForce() * getTireKineticFrictionCoefficient() * getDrivenWheelsTireLoad();
 	const float tractionTorque = tractionForce * vehicle.tireRadius;
 
 	//fixme how to do this formula right? remove from ingame state braking calculation
@@ -192,6 +245,22 @@ void Pseudo3DRaceState::updateDrivetrain(float delta)
 	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
 
 	vehicle.engine.update(vehicle.engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
+}
+
+float Pseudo3DRaceState::getDriveForceSlipRatioModel()
+{
+	if(isSlipRatioUnstable() or vehicle.speed == 0)
+	{
+		cout << "using drive torque: " << (vehicle.engine.getDriveTorque() / vehicle.tireRadius) << endl ;
+		// returns the current drive force as the one directly from the engine, up to the driven wheels tire load (prevent tire slip altogether)
+		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
+	}
+	else
+	{
+		cout << "using traction torque. driven wheels tire load: " << getDrivenWheelsTireLoad() << endl ;
+		// returns the current drive force as the longitudinal/traction force
+		return getNormalizedTractionForce() * getDrivenWheelsTireLoad() * getTireKineticFrictionCoefficient();
+	}
 }
 
 float Pseudo3DRaceState::getLongitudinalSlipRatio()
@@ -211,22 +280,16 @@ float Pseudo3DRaceState::getNormalizedTractionForce()
 							: 0.7;  // over 100% slip ratio gives traction 70%
 }
 
-/** Returns the current driving force. */
-float Pseudo3DRaceState::getDriveForce()
+bool Pseudo3DRaceState::isSlipRatioUnstable()
 {
-	if(isSlipRatioUnstable() or vehicle.speed == 0)
-	{
-		cout << "using drive torque: " << vehicle.engine.getDriveTorque() << endl ;
-		// returns the current drive force as the one directly from the engine, up to the driven wheels tire load (prevent tire slip altogether)
-		return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad());
-	}
-	else
-	{
-		cout << "using traction torque. driven wheels tire load: " << getDrivenWheelsTireLoad() << endl ;
-		// returns the current drive force as the longitudinal/traction force
-		return getNormalizedTractionForce() * getDrivenWheelsTireLoad();
-	}
+	// assume unstable if speed is this slow (actual speed varies with vehicle's characteristics)
+//	return (vehicle.speed < PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD);
+
+	// assume unstable if slip ratio is too low
+	return (vehicle.engine.getAngularSpeed()*vehicle.tireRadius - vehicle.speed < LOWEST_STABLE_SLIP*fabs(vehicle.speed));
 }
+
+// ==================================================================================================================================================
 
 static const float engineLocationFactorRWD(Vehicle::EngineLocation loc)
 {

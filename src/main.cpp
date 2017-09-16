@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
-		Display::create(screenWidth, screenHeight, string("carse ")+ CARSE_VERSION + " alpha");
+		Display::create(screenWidth, screenHeight, false, string("carse ")+ CARSE_VERSION + " alpha");
 		runSplash();
 		runGameTest();
 		fgeal::finalize();

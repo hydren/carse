@@ -55,6 +55,7 @@ void runGameTest()
 int main(int argc, char** argv)
 {
 	int screenWidth = 800, screenHeight = 600;
+	bool fullscreen = false, centered=false;
 	for(int i = 0; i < argc; i++)
 	{
 		if(starts_with(string(argv[i]), "-r"))
@@ -78,12 +79,24 @@ int main(int argc, char** argv)
 			}
 			else cout << "Missing argument to -r parameter" << endl;
 		}
+
+		if(string(argv[i]) == "-f" or string(argv[i]) == "--fullscreen")
+			fullscreen = true;
+
+		if(string(argv[i]) == "-c" or string(argv[i]) == "--centered")
+			centered = true;
 	}
 
 	try
 	{
 		fgeal::initialize();
-		Display::create(screenWidth, screenHeight, false, string("carse ")+ CARSE_VERSION + " alpha");
+		Display::Options options;
+		options.title = string("carse ")+ CARSE_VERSION + " alpha";
+		options.fullscreen = fullscreen;
+		options.width = screenWidth;
+		options.height = screenHeight;
+		if(centered) options.positioning = Display::Options::POSITION_CENTERED;
+		Display::create(options);
 		runSplash();
 		runGameTest();
 		fgeal::finalize();

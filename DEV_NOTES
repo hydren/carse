@@ -32,7 +32,6 @@
 
 # bugs
 
-- Fix missing frame animation with assymetric sprites on its final state (F50 bug).
 - Fix bg scaling on race.
 - Fix incorrect tire animation speed.
 - Fix car names trespassing window size.

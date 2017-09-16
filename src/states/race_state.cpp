@@ -319,14 +319,14 @@ void Pseudo3DRaceState::render()
 		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.sprite.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
 
-	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("Lap ");
-	font3->drawText("Lap ", rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
+	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("______");
+	font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
 	hudCurrentLap->draw();
 
 	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap->bounds.y, Color::WHITE);
 	hudTimerCurrentLap->draw();
 
-	font3->drawText("Best: ", rightHudMargin, hudTimerBestLap->bounds.y, Color::WHITE);
+	font3->drawText("Best:", rightHudMargin, hudTimerBestLap->bounds.y, Color::WHITE);
 	if(laptimeBest == 0)
 		font3->drawText("--", hudTimerBestLap->bounds.x, hudTimerBestLap->bounds.y, Color::WHITE);
 	else

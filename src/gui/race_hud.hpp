@@ -12,9 +12,11 @@
 #include "fgeal/fgeal.hpp"
 
 #include "futil/string_extra_operators.hpp"
+#include "futil/map_actions.hpp"
 
 #include <cstdio>
 #include <cmath>
+#include <map>
 
 #ifndef M_PI
 	# define M_PI		3.14159265358979323846	/* pi */
@@ -259,6 +261,9 @@ namespace Hud
 		/** If true, indicates that the font is shared, and thus, should not be deleted when this display is deleted. */
 		bool fontIsShared;
 
+		/** Optional mapping of specific values to its string representations. */
+		std::map<NumberType, std::string> specialCases;
+
 		protected:
 
 		/** A buffer to convert value to string. */
@@ -288,8 +293,14 @@ namespace Hud
 												  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
 			}
 
-			sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
-			font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+			if(specialCases.count(value))
+				font->drawText(specialCases[value], bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+			else
+			{
+				sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
+				font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+			}
+
 		}
 	};
 

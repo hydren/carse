@@ -184,6 +184,8 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay->borderThickness = 6;
 	hudGearDisplay->borderColor = fgeal::Color::LIGHT_GREY;
 	hudGearDisplay->backgroundColor = fgeal::Color::BLACK;
+	hudGearDisplay->specialCases[0] = "N";
+	hudGearDisplay->specialCases[-1] = "R";
 
 	gaugeSize.x = hudRpmGauge->bounds.x - font2->getTextWidth("---");
 	gaugeSize.w *= 3;

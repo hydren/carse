@@ -29,6 +29,9 @@ using std::string;
 const float Engine::TorqueCurveProfile::TORQUE_CURVE_INITIAL_VALUE = 0.55f,
 			Engine::TorqueCurveProfile::TORQUE_CURVE_FINAL_VALUE =   1.f/3.f;  // 0.33333... (one third)
 
+static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
+					RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
+
 // default float constants
 static const float
 	DEFAULT_MAXIMUM_RPM = 7000,
@@ -180,17 +183,23 @@ float Engine::getCurrentTorque()
 
 float Engine::getDriveTorque()
 {
-	return this->getCurrentTorque() * gearRatio[gear-1] * differentialRatio * transmissionEfficiency;
+	return gear==0? 0 : this->getCurrentTorque() * gearRatio[gear-1] * differentialRatio * transmissionEfficiency;
 }
 
 float Engine::getAngularSpeed()
 {
-	return rpm / (gearRatio[gear-1] * differentialRatio * (30.0/M_PI));  // 60/2pi conversion to RPM
+	return rpm / (gearRatio[gear-1] * differentialRatio * RAD_TO_RPM);
 }
 
-void Engine::update(float wheelAngularSpeed)
+void Engine::update(float delta, float wheelAngularSpeed)
 {
-	rpm = wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * (30.0/M_PI);  // 60/2pi conversion to RPM
+	if(gear == 0)
+	{
+		const float rpmRatio = rpm/maxRpm;
+		rpm += (getCurrentTorque()*RAD_TO_RPM - (1-throttlePosition)*rpmRatio*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT)*delta;
+	}
+	else
+		rpm = wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * RAD_TO_RPM;
 
 	if(rpm < minRpm)
 		rpm = minRpm;

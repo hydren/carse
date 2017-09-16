@@ -185,24 +185,25 @@ static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, ass
 
 void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
-	updateDrivetrainSimpleModel();
-//	updateDrivetrainSlipRatioModel(delta);
+//	updateDrivetrainSimpleModel(delta);
+	updateDrivetrainSlipRatioModel(delta);
 }
 
 /** Returns the current driving force. */
 float Pseudo3DRaceState::getDriveForce()
 {
-	return getDriveForceSimpleModel();
-//	return getDriveForceSlipRatioModel();
+//	return getDriveForceSimpleModel();
+	return getDriveForceSlipRatioModel();
 }
 
 // ==================================================================================================================================================
 // simple model
 
-void Pseudo3DRaceState::updateDrivetrainSimpleModel()
+void Pseudo3DRaceState::updateDrivetrainSimpleModel(float delta)
 {
 	// this formula assumes no wheel slipping.
-	vehicle.engine.update(vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
+	vehicle.wheelAngularSpeed = vehicle.speed/vehicle.tireRadius;  // set new wheel angular speed
+	vehicle.engine.update(delta, vehicle.wheelAngularSpeed);
 }
 
 float Pseudo3DRaceState::getDriveForceSimpleModel()
@@ -223,7 +224,7 @@ void Pseudo3DRaceState::updateDrivetrainSlipRatioModel(float delta)
 	if(unstable)  // assume no tire slipping when unstable
 	{
 		// xxx this formula assumes no wheel slipping.
-		vehicle.engine.update(vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
+		vehicle.engine.update(delta, vehicle.speed/vehicle.tireRadius);  // set new wheel angular speed
 		return;
 	}
 
@@ -244,7 +245,7 @@ void Pseudo3DRaceState::updateDrivetrainSlipRatioModel(float delta)
 	const float arbitraryAdjustmentFactor = 0.001;
 	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
 
-	vehicle.engine.update(vehicle.engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
+	vehicle.engine.update(delta, vehicle.engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
 }
 
 float Pseudo3DRaceState::getDriveForceSlipRatioModel()

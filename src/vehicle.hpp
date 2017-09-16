@@ -35,7 +35,7 @@ struct Vehicle
 	float mass;
 	float tireRadius;
 	Engine engine;
-	float speed, brakePedalPosition;
+	float speed, wheelAngularSpeed, brakePedalPosition;
 
 	float approximatedCenterOfGravityHeight, approximatedWheelbase;
 

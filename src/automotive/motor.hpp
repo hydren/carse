@@ -62,7 +62,7 @@ struct Engine
 	float getAngularSpeed();
 
 	/** Updates the engine's state (RPM, gear, etc), given the current wheel angular speed. */
-	void update(float wheelAngularSpeed);
+	void update(float delta, float wheelAngularSpeed);
 };
 
 #endif /* MOTOR_HPP_ */

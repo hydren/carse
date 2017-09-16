@@ -25,7 +25,7 @@ static const float
 
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
-  mass(0), tireRadius(0), engine(), speed(0), brakePedalPosition(0),
+  mass(0), tireRadius(0), engine(), speed(0), wheelAngularSpeed(0), brakePedalPosition(0),
   approximatedCenterOfGravityHeight(0), approximatedWheelbase(0), acceleration(0),
   engineLocation(ENGINE_LOCATION_ON_FRONT), drivenWheels(DRIVEN_WHEELS_ON_REAR),
   engineSoundProfile(), sprite(), activeSkin(-1)
@@ -97,6 +97,7 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	engine = Engine(prop);
 
 	speed = 0;
+	wheelAngularSpeed = 0;
 	brakePedalPosition = 0;
 	acceleration = 0;
 

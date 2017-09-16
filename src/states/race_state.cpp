@@ -569,7 +569,7 @@ void Pseudo3DRaceState::handleInput()
 						vehicle.engine.gear++;
 					break;
 				case Keyboard::KEY_LEFT_CONTROL:
-					if(vehicle.engine.gear > 1)
+					if(vehicle.engine.gear > 0)
 						vehicle.engine.gear--;
 					break;
 				default:

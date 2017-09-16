@@ -107,7 +107,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	void updateDrivetrain(float delta);
 	float getDriveForce();
 
-	void updateDrivetrainSimpleModel();
+	void updateDrivetrainSimpleModel(float delta);
 	float getDriveForceSimpleModel();
 
 	void updateDrivetrainSlipRatioModel(float delta);

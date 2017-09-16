@@ -42,13 +42,14 @@ const int  // states IDs
 	Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID = 4;
 
 Pseudo3DCarseGame::Pseudo3DCarseGame()
-: Game("Carse", null, 800, 600), logic(*this)
+: Game("Carse", null, 800, 600), sharedResources(null), logic(*this)
 {
 	this->maxFps = 60;
 }
 
 void Pseudo3DCarseGame::initializeStatesList()
 {
+	this->sharedResources = new SharedResources();
 	this->logic.initialize();
 
 	this->addState(new Pseudo3DRaceState(this));
@@ -61,6 +62,13 @@ void Pseudo3DCarseGame::initializeStatesList()
 
 	this->logic.onStatesListInitFinished();
 }
+
+Pseudo3DCarseGame::SharedResources::SharedResources()
+: sndCursorMove("assets/sound/cursor_move.ogg"),
+  sndCursorIn("assets/sound/cursor_accept.ogg"),
+  sndCursorOut("assets/sound/cursor_out.ogg"),
+  fontDev("assets/font.ttf", 12)
+{}
 
 Pseudo3DCarseGame::Logic::Logic(Pseudo3DCarseGame& game) : game(game) {}
 

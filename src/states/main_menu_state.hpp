@@ -17,11 +17,10 @@
 
 class MainMenuState extends public fgeal::Game::State
 {
+	CarseGame::SharedResources& shared;
+
 	// the menu
 	fgeal::Menu* menu;
-
-	// a font for debugging
-	fgeal::Font* fontDev;
 
 	// the background image
 	fgeal::Image* bg;
@@ -59,7 +58,6 @@ class MainMenuState extends public fgeal::Game::State
 	struct PrototypeSimpleLayout extends Layout
 	{
 		fgeal::Font fontMain;
-		fgeal::Sound sndCursorMove, sndCursorAccept;
 		PrototypeSimpleLayout(MainMenuState& state);
 		void draw();
 		void update(float delta);
@@ -72,7 +70,6 @@ class MainMenuState extends public fgeal::Game::State
 	struct PrototypeGridLayout extends Layout
 	{
 		fgeal::Font fontMain, fontTitle;
-		fgeal::Sound sndCursorMove, sndCursorAccept;
 		fgeal::Color selectedSlotColor;
 		PrototypeGridLayout(MainMenuState& state);
 		void draw();

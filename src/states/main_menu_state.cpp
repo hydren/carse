@@ -31,15 +31,14 @@ using std::string;
 int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
-: State(*game),
-  menu(null), fontDev(null), bg(null), imgRace(null), imgExit(null),
+: State(*game), shared(*game->sharedResources),
+  menu(null), bg(null), imgRace(null), imgExit(null),
   layout(null)
 {}
 
 MainMenuState::~MainMenuState()
 {
 	if(menu != null) delete menu;
-	if(fontDev != null) delete fontDev;
 	if(layout != null) delete layout;
 }
 
@@ -54,7 +53,6 @@ void MainMenuState::initialize()
 	menu->addEntry("Course");
 	menu->addEntry("Exit");
 
-	fontDev = new Font("assets/font.ttf", 12);
 	bg = new Image("assets/bg-main.jpg");
 	imgRace = new Image("assets/race.png");
 	imgExit = new Image("assets/exit.png");
@@ -78,7 +76,7 @@ void MainMenuState::render()
 	display.clear();
 	bg->drawScaled(0, 0, display.getWidth()/(float)bg->getWidth(), display.getHeight()/(float)bg->getHeight());
 	layout->draw();
-	fontDev->drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, display.getHeight() - fontDev->getHeight(), Color::CREAM);
+	shared.fontDev.drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, display.getHeight() - shared.fontDev.getHeight(), Color::CREAM);
 }
 
 void MainMenuState::update(float delta)
@@ -183,9 +181,7 @@ void MainMenuState::Layout::onQuit()
 
 MainMenuState::PrototypeSimpleLayout::PrototypeSimpleLayout(MainMenuState& state)
 : Layout(state),
-  fontMain("assets/font.ttf", 32),
-  sndCursorMove("assets/sound/cursor_move.ogg"),
-  sndCursorAccept("assets/sound/cursor_accept.ogg")
+  fontMain("assets/font.ttf", 32)
 {}
 
 void MainMenuState::PrototypeSimpleLayout::draw()
@@ -227,12 +223,14 @@ void MainMenuState::PrototypeSimpleLayout::navigate(NavigationDirection navDir)
 
 void MainMenuState::PrototypeSimpleLayout::onCursorChange()
 {
-	sndCursorMove.play();
+	state.shared.sndCursorMove.stop();
+	state.shared.sndCursorMove.play();
 }
 
 void MainMenuState::PrototypeSimpleLayout::onCursorAccept()
 {
-	sndCursorAccept.play();
+	state.shared.sndCursorIn.stop();
+	state.shared.sndCursorIn.play();
 	Layout::onCursorAccept();
 }
 
@@ -242,9 +240,7 @@ void MainMenuState::PrototypeSimpleLayout::onCursorAccept()
 MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
 : Layout(state),
   fontMain("assets/font.ttf", (1.0/27) * state.game.getDisplay().getHeight()),
-  fontTitle("assets/font2.ttf", (4.0/27) * state.game.getDisplay().getHeight()),
-  sndCursorMove("assets/sound/cursor_move.ogg"),
-  sndCursorAccept("assets/sound/cursor_accept.ogg")
+  fontTitle("assets/font2.ttf", (4.0/27) * state.game.getDisplay().getHeight())
 {}
 
 void MainMenuState::PrototypeGridLayout::draw()
@@ -329,7 +325,8 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 			if(index > 1)
 			{
 				state.menu->setSelectedIndex(index-2);
-				sndCursorMove.play();
+				state.shared.sndCursorMove.stop();
+				state.shared.sndCursorMove.play();
 			}
 			break;
 		}
@@ -338,7 +335,8 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 			if(index < 2)
 			{
 				state.menu->setSelectedIndex(index+2);
-				sndCursorMove.play();
+				state.shared.sndCursorMove.stop();
+				state.shared.sndCursorMove.play();
 			}
 			break;
 		}
@@ -347,7 +345,8 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 			if(index % 2 == 1)
 			{
 				state.menu->setSelectedIndex(index-1);
-				sndCursorMove.play();
+				state.shared.sndCursorMove.stop();
+				state.shared.sndCursorMove.play();
 			}
 			break;
 		}
@@ -356,7 +355,8 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 			if(index % 2 == 0)
 			{
 				state.menu->setSelectedIndex(index+1);
-				sndCursorMove.play();
+				state.shared.sndCursorMove.stop();
+				state.shared.sndCursorMove.play();
 			}
 			break;
 		}
@@ -366,6 +366,6 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 
 void MainMenuState::PrototypeGridLayout::onCursorAccept()
 {
-	sndCursorAccept.play();
+	state.shared.sndCursorIn.play();
 	Layout::onCursorAccept();
 }

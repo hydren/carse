@@ -1,6 +1,5 @@
 # to do
 
-- Make menu sounds stop n play
 - Add shift time
 - Optimize velocimeter drawing by caching geometric coordinates
 - Add gear shifting sounds

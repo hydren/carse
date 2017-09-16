@@ -36,6 +36,16 @@ class Pseudo3DCarseGame extends public fgeal::Game
 	Pseudo3DCarseGame();
 	void initializeStatesList();
 
+	/** Wrapper to resources shared between states. */
+	struct SharedResources
+	{
+		fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
+		fgeal::Font fontDev;
+
+		SharedResources();
+	}  *sharedResources;
+
+	/** Class to wrap together all between-states game logic. */
 	class Logic
 	{
 		friend class Pseudo3DCarseGame;

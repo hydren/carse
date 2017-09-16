@@ -36,10 +36,9 @@ using futil::ends_with;
 int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
-: State(*game), gameLogic(game->logic),
+: State(*game), shared(*game->sharedResources), gameLogic(game->logic),
   imgRandom(null), imgCircuit(null),
-  fontMain(null), fontInfo(null), fontTab(null),
-  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
+  fontMain(null), fontInfo(null), fontTab(null), menu(null),
   isLoadedCourseSelected(false), isDebugCourseSelected(false)
 {}
 
@@ -49,9 +48,6 @@ CourseSelectionState::~CourseSelectionState()
 	if(fontInfo != null) delete fontInfo;
 	if(fontTab  != null) delete fontTab;
 	if(menu != null) delete menu;
-	if(sndCursorMove != null) delete sndCursorMove;
-	if(sndCursorAccept != null) delete sndCursorAccept;
-	if(sndCursorOut != null) delete sndCursorOut;
 }
 
 void CourseSelectionState::initialize()
@@ -62,10 +58,6 @@ void CourseSelectionState::initialize()
 	fontMain = new Font("assets/font2.ttf", 32);
 	fontInfo = new Font("assets/font.ttf", 12);
 	fontTab  = new Font("assets/font2.ttf", 16);
-
-	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
-	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
-	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
 	menu = new Menu(Rectangle(), new Font("assets/font.ttf", 12), Color::RED);
 	menu->fontIsOwned = true;
@@ -179,33 +171,39 @@ void CourseSelectionState::handleInput()
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::KEY_ESCAPE:
-					sndCursorOut->play();
+					shared.sndCursorOut.stop();
+					shared.sndCursorOut.play();
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_ENTER:
-					sndCursorAccept->play();
+					shared.sndCursorIn.stop();
+					shared.sndCursorIn.play();
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					if(isLoadedCourseSelected)
 						menu->cursorUp();
 					else
 						isDebugCourseSelected = !isDebugCourseSelected;
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					if(isLoadedCourseSelected)
 						menu->cursorDown();
 					else
 						isDebugCourseSelected = !isDebugCourseSelected;
 					break;
 				case Keyboard::KEY_ARROW_LEFT:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					isLoadedCourseSelected = !isLoadedCourseSelected;
 					break;
 				case Keyboard::KEY_ARROW_RIGHT:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					isLoadedCourseSelected = !isLoadedCourseSelected;
 					break;
 				default:

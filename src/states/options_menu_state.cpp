@@ -21,8 +21,8 @@ using fgeal::Rectangle;
 int OptionsMenuState::getId() { return Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(Pseudo3DCarseGame* game)
-: State(*game), menu(null),
-  fontTitle(null), font(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null)
+: State(*game), shared(*game->sharedResources), menu(null),
+  fontTitle(null), font(null)
 {}
 
 OptionsMenuState::~OptionsMenuState()
@@ -30,19 +30,12 @@ OptionsMenuState::~OptionsMenuState()
 	if(fontTitle != null) delete fontTitle;
 	if(font != null) delete font;
 	if(menu != null) delete menu;
-	if(sndCursorMove != null) delete sndCursorMove;
-	if(sndCursorAccept != null) delete sndCursorAccept;
-	if(sndCursorOut != null) delete sndCursorOut;
 }
 
 void OptionsMenuState::initialize()
 {
 	fontTitle = new Font("assets/font2.ttf", 32);
 	font = new Font("assets/font.ttf", 12);
-
-	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
-	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
-	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
 	menu = new Menu(Rectangle(), font, Color::NAVY);
 	menu->bgColor = Color::BLUE;
@@ -92,19 +85,23 @@ void OptionsMenuState::update(float delta)
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::KEY_ESCAPE:
-					sndCursorOut->play();
+					shared.sndCursorOut.stop();
+					shared.sndCursorOut.play();
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_ENTER:
-					sndCursorAccept->play();
+					shared.sndCursorIn.stop();
+					shared.sndCursorIn.play();
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					menu->cursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					menu->cursorDown();
 					break;
 				default:

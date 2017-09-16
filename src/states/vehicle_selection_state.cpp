@@ -45,9 +45,8 @@ string toStrRounded(float value, unsigned placesCount=1)
 int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID; }
 
 VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
-: State(*game), gameLogic(game->logic),
-  fontMain(null), fontInfo(null),
-  menu(null), sndCursorMove(null), sndCursorAccept(null), sndCursorOut(null),
+: State(*game), shared(*game->sharedResources), gameLogic(game->logic),
+  fontMain(null), fontInfo(null), menu(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   layout(LAYOUT_PROTOTYPE_SLIDE_STAND)
 {}
@@ -57,9 +56,6 @@ VehicleSelectionState::~VehicleSelectionState()
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(menu != null) delete menu;
-	if(sndCursorMove != null) delete sndCursorMove;
-	if(sndCursorAccept != null) delete sndCursorAccept;
-	if(sndCursorOut != null) delete sndCursorOut;
 
 	for(unsigned i = 0; i < previews.size(); i++)
 	{
@@ -75,10 +71,6 @@ void VehicleSelectionState::initialize()
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font("assets/font2.ttf", 48 * 0.0015625*display.getHeight());
 	fontInfo = new Font("assets/font.ttf", 12);
-
-	sndCursorMove = new Sound("assets/sound/cursor_move.ogg");
-	sndCursorAccept = new Sound("assets/sound/cursor_accept.ogg");
-	sndCursorOut = new Sound("assets/sound/cursor_out.ogg");
 
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
 	menu->fontIsOwned = true;
@@ -142,23 +134,27 @@ void VehicleSelectionState::handleInput()
 			switch(event.getEventKeyCode())
 			{
 				case Keyboard::KEY_ESCAPE:
-					sndCursorOut->play();
+					shared.sndCursorOut.stop();
+					shared.sndCursorOut.play();
 					menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
 					previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_ENTER:
-					sndCursorAccept->play();
+					shared.sndCursorIn.stop();
+					shared.sndCursorIn.play();
 					this->onMenuSelect();
 					break;
 				case Keyboard::KEY_ARROW_UP:
 				case Keyboard::KEY_ARROW_LEFT:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					menu->cursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
 				case Keyboard::KEY_ARROW_RIGHT:
-					sndCursorMove->play();
+					shared.sndCursorMove.stop();
+					shared.sndCursorMove.play();
 					menu->cursorDown();
 					break;
 				case Keyboard::KEY_PAGE_UP:
@@ -166,7 +162,8 @@ void VehicleSelectionState::handleInput()
 					VehiclePreview& preview = previews[menu->getSelectedIndex()];
 					if(not preview.altSprites.empty())
 					{
-						sndCursorMove->play();
+						shared.sndCursorMove.stop();
+						shared.sndCursorMove.play();
 						if(preview.altIndex == -1)
 							preview.altIndex = preview.altSprites.size() - 1;
 						else
@@ -179,7 +176,8 @@ void VehicleSelectionState::handleInput()
 					VehiclePreview& preview = previews[menu->getSelectedIndex()];
 					if(not preview.altSprites.empty())
 					{
-						sndCursorMove->play();
+						shared.sndCursorMove.stop();
+						shared.sndCursorMove.play();
 						if(preview.altIndex == (int) preview.altSprites.size() - 1)
 							preview.altIndex = -1;
 						else

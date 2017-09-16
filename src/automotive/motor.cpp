@@ -14,8 +14,6 @@
 
 using std::string;
 
-#define differential 0
-
 #define PARAM_RPM 0
 #define PARAM_SLOPE 1
 #define PARAM_INTERCEPT 2
@@ -130,13 +128,13 @@ Engine::Engine(const futil::Properties& prop)
 
 	key = "gear_count";
 	gearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;
-	gearRatio.resize(gearCount+1);
+	gearRatio.resize(gearCount);
 
 	// first, set default ratios, then override
 	reverseGearRatio = 3.25;
-	gearRatio[0] = 3.0;
-	for(int g = 1; g <= gearCount; g++)
-		gearRatio[g] = 3.0 + 2.0*((g - 1.0)/(1.0 - gearCount)); // generic gear ratio
+	differentialRatio = 4.0;
+	for(int g = 0; g < gearCount; g++)
+		gearRatio[g] = 3.0 + g*2.0/(1.0 - gearCount);  // generic gear ratio
 
 	key = "gear_ratios";
 	if(prop.containsKey(key))
@@ -145,14 +143,16 @@ Engine::Engine(const futil::Properties& prop)
 		if(ratiosTxt == "custom")
 		{
 			key = "gear_differential_ratio";
-			if(prop.containsKey(key)) gearRatio[0] = atof(prop.get(key).c_str());
+			if(prop.containsKey(key))
+				differentialRatio = atof(prop.get(key).c_str());
 
 			key = "gear_reverse_ratio";
-			if(prop.containsKey(key)) reverseGearRatio = atof(prop.get(key).c_str());
+			if(prop.containsKey(key))
+				reverseGearRatio = atof(prop.get(key).c_str());
 
-			for(int g = 1; g <= gearCount; g++)
+			for(int g = 0; g < gearCount; g++)
 			{
-				key = "gear_" + futil::to_string(g) + "_ratio";
+				key = "gear_" + futil::to_string(g+1) + "_ratio";
 				if(prop.containsKey(key))
 					gearRatio[g] = atof(prop.get(key).c_str());
 			}
@@ -180,17 +180,17 @@ float Engine::getCurrentTorque()
 
 float Engine::getDriveTorque()
 {
-	return this->getCurrentTorque() * gearRatio[gear] * gearRatio[differential] * transmissionEfficiency;
+	return this->getCurrentTorque() * gearRatio[gear-1] * differentialRatio * transmissionEfficiency;
 }
 
 float Engine::getAngularSpeed()
 {
-	return rpm / (gearRatio[gear] * gearRatio[differential] * (30.0/M_PI));  // 60/2pi conversion to RPM
+	return rpm / (gearRatio[gear-1] * differentialRatio * (30.0/M_PI));  // 60/2pi conversion to RPM
 }
 
 void Engine::update(float wheelAngularSpeed)
 {
-	rpm = wheelAngularSpeed * gearRatio[gear] * gearRatio[differential] * (30.0/M_PI);  // 60/2pi conversion to RPM
+	rpm = wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * (30.0/M_PI);  // 60/2pi conversion to RPM
 
 	if(rpm < minRpm)
 		rpm = minRpm;

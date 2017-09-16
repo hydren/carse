@@ -22,7 +22,7 @@ struct Engine
 	float transmissionEfficiency;
 	int gear, gearCount;
 	std::vector<float> gearRatio;
-	float reverseGearRatio;
+	float differentialRatio, reverseGearRatio;
 
 	// read-only info fields!
 	std::string configuration, aspiration, valvetrain;

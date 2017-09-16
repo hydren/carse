@@ -185,15 +185,15 @@ static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, ass
 
 void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
-//	updateDrivetrainSimpleModel();
-	updateDrivetrainSlipRatioModel(delta);
+	updateDrivetrainSimpleModel();
+//	updateDrivetrainSlipRatioModel(delta);
 }
 
 /** Returns the current driving force. */
 float Pseudo3DRaceState::getDriveForce()
 {
-//	return getDriveForceSimpleModel();
-	return getDriveForceSlipRatioModel();
+	return getDriveForceSimpleModel();
+//	return getDriveForceSlipRatioModel();
 }
 
 // ==================================================================================================================================================

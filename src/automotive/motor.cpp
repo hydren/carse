@@ -204,6 +204,9 @@ void Engine::update(float delta, float wheelAngularSpeed)
 	if(rpm < minRpm)
 		rpm = minRpm;
 
+	if(rpm > maxRpm+100)
+		rpm = maxRpm+100;
+
 	if(automaticShiftingEnabled)
 	{
 		if(gear < gearCount and rpm > automaticShiftingUpperThreshold*maxRpm)

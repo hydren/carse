@@ -490,7 +490,7 @@ void Pseudo3DRaceState::update(float delta)
 	engineSound.updateSound(vehicle.engine.rpm);
 
 //	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))  // fake burnout mode
-//	if(getDriveForce() == getDrivenWheelsTireLoad())  // burnout based on capped drive force
+//	if(getDriveForce() < 0.75 * vehicle.engine.getDriveTorque() / vehicle.tireRadius)  // burnout based on capped drive force
 	if(fabs(getLongitudinalSlipRatio()) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER and fabs(vehicle.speed)>1)  // burnout based on real slip ratio
 	{
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
@@ -567,12 +567,10 @@ void Pseudo3DRaceState::handleInput()
 					debugMode = !debugMode;
 					break;
 				case Keyboard::KEY_LEFT_SHIFT:
-					if(vehicle.engine.gear < vehicle.engine.gearCount)
-						vehicle.engine.gear++;
+					shiftGear(vehicle.engine.gear+1);
 					break;
 				case Keyboard::KEY_LEFT_CONTROL:
-					if(vehicle.engine.gear > 0)
-						vehicle.engine.gear--;
+					shiftGear(vehicle.engine.gear-1);
 					break;
 				default:
 					break;

@@ -125,6 +125,18 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		bgParallax.x -= bg->getWidth();
 }
 
+static const float RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
+
+void Pseudo3DRaceState::shiftGear(int gear)
+{
+	if(gear < 0 or gear > vehicle.engine.gearCount)
+		return;
+
+	const float angularSpeedDiscrepancy = vehicle.wheelAngularSpeed * vehicle.engine.gearRatio[gear-1] * vehicle.engine.differentialRatio * RAD_TO_RPM - vehicle.engine.rpm;
+	vehicle.engine.rpm += 0.25*angularSpeedDiscrepancy;
+	vehicle.engine.gear = gear;
+}
+
 Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()
 {
 	if(fabs(posX) > 1.2*course.roadWidth)

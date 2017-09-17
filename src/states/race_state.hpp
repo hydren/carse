@@ -100,6 +100,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	void handleInput();
 	void handlePhysics(float delta);
 
+	void shiftGear(int gear);
+
 	SurfaceType getCurrentSurfaceType();
 	float getTireKineticFrictionCoefficient();
 	float getTireRollingResistanceCoefficient();

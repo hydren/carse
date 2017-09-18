@@ -42,6 +42,17 @@ MainMenuState::~MainMenuState()
 	if(layout != null) delete layout;
 }
 
+// xxx THESE ENUM MUST MATCH MENU ENTRIES' ORDER.
+// these guys helps giving semantics to menu indexes.
+enum MenuItem
+{
+	MENU_ITEM_RACE = 0,
+	MENU_ITEM_VEHICLE = 1,
+	MENU_ITEM_COURSE = 2,
+	MENU_ITEM_OPTIONS = 3,
+	MENU_ITEM_EXIT = 4
+};
+
 void MainMenuState::initialize()
 {
 	menu = new Menu(fgeal::Rectangle(), new Font("assets/font.ttf", 18), Color::WHITE);
@@ -51,6 +62,7 @@ void MainMenuState::initialize()
 	menu->addEntry("Race!");
 	menu->addEntry("Vehicle");
 	menu->addEntry("Course");
+	menu->addEntry("Options");
 	menu->addEntry("Exit");
 
 	bg = new Image("assets/bg-main.jpg");
@@ -130,11 +142,6 @@ void MainMenuState::handleInput()
 					layout->navigate(Layout::NAV_RIGHT);
 					break;
 				}
-				case Keyboard::KEY_O:
-				{
-					game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID);
-					break;
-				}
 				default:break;
 			}
 		}
@@ -143,17 +150,15 @@ void MainMenuState::handleInput()
 
 void MainMenuState::menuSelectionAction()
 {
-	if(menu->getSelectedIndex() == 0)
-		game.enterState(Pseudo3DCarseGame::RACE_STATE_ID);
-
-	if(menu->getSelectedIndex() == 1)
-		game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID);
-
-	if(menu->getSelectedIndex() == 2)
-		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID);
-
-	if(menu->getSelectedIndex() == 3)
-		game.running = false;
+	switch(menu->getSelectedIndex())
+	{
+		case MENU_ITEM_RACE: game.enterState(Pseudo3DCarseGame::RACE_STATE_ID); break;
+		case MENU_ITEM_VEHICLE: game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID); break;
+		case MENU_ITEM_COURSE: game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID); break;
+		case MENU_ITEM_OPTIONS: game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID); break;
+		case MENU_ITEM_EXIT: game.running = false; break;
+		default: break;
+	}
 }
 
 // ============================================================================================
@@ -247,58 +252,79 @@ void MainMenuState::PrototypeGridLayout::draw()
 {
 	const float w = state.game.getDisplay().getWidth(),
 				h = state.game.getDisplay().getHeight(),
-				marginX = w * 0.005, marginY = h * 0.005;
+				titleHeaderHeight = 0.2 * w,
+				marginX = w * 0.01, marginY = h * 0.01;
 
-	Rectangle slot[4];
-	slot[0].x = 0.025f*w;
-	slot[0].y = 0.260f*h;
-	slot[0].w = 0.450f*w;
-	slot[0].h = 0.350f*h;
-
-	slot[1].x = 0.525f*w;
-	slot[1].y = 0.260f*h;
-	slot[1].w = 0.450f*w;
-	slot[1].h = 0.350f*h;
-
-	slot[2].x = 0.025f*w;
-	slot[2].y = 0.635f*h;
-	slot[2].w = 0.450f*w;
-	slot[2].h = 0.350f*h;
-
-	slot[3].x = 0.525f*w;
-	slot[3].y = 0.635f*h;
-	slot[3].w = 0.450f*w;
-	slot[3].h = 0.350f*h;
+	Rectangle slots[5];
+	{
+		Rectangle& slot = slots[MENU_ITEM_RACE];
+		slot.w = (w - 4*marginX)/3;
+		slot.h = (h - titleHeaderHeight - 3*marginY)/2;
+		slot.x = 0.5*(w - slot.w);
+		slot.y = titleHeaderHeight + 0.5*(h - titleHeaderHeight - slot.h);
+	}
+	{
+		Rectangle& slot = slots[MENU_ITEM_VEHICLE];
+		slot.x = marginX;
+		slot.y = titleHeaderHeight + marginY;
+		slot.w = slots->w;
+		slot.h = slots->h;
+	}
+	{
+		Rectangle& slot = slots[MENU_ITEM_COURSE];
+		slot.x = marginX;
+		slot.y = slots[MENU_ITEM_VEHICLE].y + slots[MENU_ITEM_VEHICLE].h + marginY;
+		slot.w = slots->w;
+		slot.h = slots->h;
+	}
+	{
+		Rectangle& slot = slots[MENU_ITEM_OPTIONS];
+		slot.x = slots[MENU_ITEM_RACE].x + slots[MENU_ITEM_RACE].w + marginX;
+		slot.y = titleHeaderHeight + marginY;
+		slot.w = slots->w;
+		slot.h = slots->h;
+	}
+	{
+		Rectangle& slot = slots[MENU_ITEM_EXIT];
+		slot.x = slots[MENU_ITEM_RACE].x + slots[MENU_ITEM_RACE].w + marginX;
+		slot.y = slots[MENU_ITEM_OPTIONS].y + slots[MENU_ITEM_OPTIONS].h + marginY;
+		slot.w = slots->w;
+		slot.h = slots->h;
+	}
 
 	for(unsigned i = 0; i < state.menu->getNumberOfEntries(); i++)
 	{
 		const bool isSelected = (i == state.menu->getSelectedIndex());
-		Image::drawFilledRectangle(slot[i].x, slot[i].y, slot[i].w, slot[i].h, Color::DARK_GREY);
-		Image::drawFilledRectangle(slot[i].x + marginX, slot[i].y + marginY, slot[i].w - marginX*2, slot[i].h - marginY*2, isSelected? Color::LIGHT_GREY : Color::GREY);
+		Image::drawFilledRectangle(slots[i].x, slots[i].y, slots[i].w, slots[i].h, Color::DARK_GREY);
+		Image::drawFilledRectangle(slots[i].x + marginX, slots[i].y + marginY, slots[i].w - marginX*2, slots[i].h - marginY*2, isSelected? Color::LIGHT_GREY : Color::GREY);
 		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
-		fontMain.drawText(state.menu->at(i).label, slot[i].x + 0.5*(slot[i].w - textWidth), slot[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
+		fontMain.drawText(state.menu->at(i).label, slots[i].x + 0.5*(slots[i].w - textWidth), slots[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
 
 		switch(i)
 		{
-			case 0:
+			case MENU_ITEM_RACE:
 			{
-				state.imgRace->drawScaled(slot[i].x*1.01, slot[i].y*1.01, slot[i].w * 0.98f / state.imgRace->getWidth(), slot[i].h * 0.98f / state.imgRace->getHeight());
+				state.imgRace->drawScaled(slots[i].x*1.01, slots[i].y*1.01, slots[i].w * 0.98f / state.imgRace->getWidth(), slots[i].h * 0.98f / state.imgRace->getHeight());
 				break;
 			}
-			case 1:
+			case MENU_ITEM_VEHICLE:
 			{
-				static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(slot[i].x*1.4, slot[i].y*1.75, 0.75);
+				static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(slots[i].x + 0.5*slots[i].w, slots[i].y + 0.625*slots[i].h, 0.75);
 				break;
 			}
-			case 2:
+			case MENU_ITEM_COURSE:
 			{
 				Image* portrait = static_cast<CourseSelectionState*>(state.game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
-				portrait->drawScaled(slot[i].x*3, slot[i].y*1.1, slot[i].w * 0.75f / portrait->getWidth(), slot[i].h * 0.75f / portrait->getHeight());
+				portrait->drawScaled(slots[i].x*3, slots[i].y*1.1, slots[i].w * 0.75f / portrait->getWidth(), slots[i].h * 0.75f / portrait->getHeight());
 				break;
 			}
-			case 3:
+			case MENU_ITEM_OPTIONS:
 			{
-				state.imgExit->drawScaled(slot[i].x*1.01, slot[i].y*1.01, slot[i].w * 0.98f / state.imgRace->getWidth(), slot[i].h * 0.98f / state.imgRace->getHeight());
+				break;
+			}
+			case MENU_ITEM_EXIT:
+			{
+				state.imgExit->drawScaled(slots[i].x*1.01, slots[i].y*1.01, slots[i].w * 0.98f / state.imgRace->getWidth(), slots[i].h * 0.98f / state.imgRace->getHeight());
 				break;
 			}
 			default:break;
@@ -322,27 +348,7 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 	{
 		case NAV_UP:
 		{
-			if(index > 1)
-			{
-				state.menu->setSelectedIndex(index-2);
-				state.shared.sndCursorMove.stop();
-				state.shared.sndCursorMove.play();
-			}
-			break;
-		}
-		case NAV_DOWN:
-		{
-			if(index < 2)
-			{
-				state.menu->setSelectedIndex(index+2);
-				state.shared.sndCursorMove.stop();
-				state.shared.sndCursorMove.play();
-			}
-			break;
-		}
-		case NAV_LEFT:
-		{
-			if(index % 2 == 1)
+			if(index == 2 or index == 4)
 			{
 				state.menu->setSelectedIndex(index-1);
 				state.shared.sndCursorMove.stop();
@@ -350,11 +356,31 @@ void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
 			}
 			break;
 		}
-		case NAV_RIGHT:
+		case NAV_DOWN:
 		{
-			if(index % 2 == 0)
+			if(index == 1 or index == 3)
 			{
 				state.menu->setSelectedIndex(index+1);
+				state.shared.sndCursorMove.stop();
+				state.shared.sndCursorMove.play();
+			}
+			break;
+		}
+		case NAV_LEFT:
+		{
+			if(index == 0 or index == 3 or index == 4)
+			{
+				state.menu->setSelectedIndex(index==0? 1 : 0);
+				state.shared.sndCursorMove.stop();
+				state.shared.sndCursorMove.play();
+			}
+			break;
+		}
+		case NAV_RIGHT:
+		{
+			if(index == 0 or index == 1 or index == 2)
+			{
+				state.menu->setSelectedIndex(index==0? 3 : 0);
 				state.shared.sndCursorMove.stop();
 				state.shared.sndCursorMove.play();
 			}

@@ -26,7 +26,7 @@ class MainMenuState extends public fgeal::Game::State
 	fgeal::Image* bg;
 
 	// ilustrations
-	fgeal::Image* imgRace, *imgExit;
+	fgeal::Image* imgRace, *imgExit, *imgSettigns;
 
 	struct Layout
 	{

@@ -32,7 +32,7 @@ int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game), shared(*game->sharedResources),
-  menu(null), bg(null), imgRace(null), imgExit(null),
+  menu(null), bg(null), imgRace(null), imgExit(null), imgSettigns(null),
   layout(null)
 {}
 
@@ -49,7 +49,7 @@ enum MenuItem
 	MENU_ITEM_RACE = 0,
 	MENU_ITEM_VEHICLE = 1,
 	MENU_ITEM_COURSE = 2,
-	MENU_ITEM_OPTIONS = 3,
+	MENU_ITEM_SETTINGS = 3,
 	MENU_ITEM_EXIT = 4
 };
 
@@ -62,12 +62,13 @@ void MainMenuState::initialize()
 	menu->addEntry("Race!");
 	menu->addEntry("Vehicle");
 	menu->addEntry("Course");
-	menu->addEntry("Options");
+	menu->addEntry("Settings");
 	menu->addEntry("Exit");
 
 	bg = new Image("assets/bg-main.jpg");
 	imgRace = new Image("assets/race.png");
 	imgExit = new Image("assets/exit.png");
+	imgSettigns = new Image("assets/settings.png");
 
 	layout = new PrototypeGridLayout(*this);
 }
@@ -155,7 +156,7 @@ void MainMenuState::menuSelectionAction()
 		case MENU_ITEM_RACE: game.enterState(Pseudo3DCarseGame::RACE_STATE_ID); break;
 		case MENU_ITEM_VEHICLE: game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID); break;
 		case MENU_ITEM_COURSE: game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID); break;
-		case MENU_ITEM_OPTIONS: game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID); break;
+		case MENU_ITEM_SETTINGS: game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID); break;
 		case MENU_ITEM_EXIT: game.running = false; break;
 		default: break;
 	}
@@ -278,7 +279,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 		slot.h = slots->h;
 	}
 	{
-		Rectangle& slot = slots[MENU_ITEM_OPTIONS];
+		Rectangle& slot = slots[MENU_ITEM_SETTINGS];
 		slot.x = slots[MENU_ITEM_RACE].x + slots[MENU_ITEM_RACE].w + marginX;
 		slot.y = titleHeaderHeight + marginY;
 		slot.w = slots->w;
@@ -287,7 +288,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 	{
 		Rectangle& slot = slots[MENU_ITEM_EXIT];
 		slot.x = slots[MENU_ITEM_RACE].x + slots[MENU_ITEM_RACE].w + marginX;
-		slot.y = slots[MENU_ITEM_OPTIONS].y + slots[MENU_ITEM_OPTIONS].h + marginY;
+		slot.y = slots[MENU_ITEM_SETTINGS].y + slots[MENU_ITEM_SETTINGS].h + marginY;
 		slot.w = slots->w;
 		slot.h = slots->h;
 	}
@@ -315,16 +316,29 @@ void MainMenuState::PrototypeGridLayout::draw()
 			case MENU_ITEM_COURSE:
 			{
 				Image* portrait = static_cast<CourseSelectionState*>(state.game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
-				portrait->drawScaled(slots[i].x*3, slots[i].y*1.1, slots[i].w * 0.75f / portrait->getWidth(), slots[i].h * 0.75f / portrait->getHeight());
+				const float portraitX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/portrait->getWidth()),
+							portraitY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/portrait->getHeight()),
+							portraitScaleX = 0.75f*slots[i].w/portrait->getWidth(),
+							portraitScaleY = 0.75f*slots[i].h/portrait->getHeight();
+				portrait->drawScaled(portraitX, portraitY, portraitScaleX, portraitScaleY);
 				break;
 			}
-			case MENU_ITEM_OPTIONS:
+			case MENU_ITEM_SETTINGS:
 			{
+				const float imgX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/state.imgSettigns->getWidth()),
+							imgY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/state.imgSettigns->getHeight()),
+							imgScaleX = 0.75f*slots[i].w/state.imgSettigns->getWidth(),
+							imgScaleY = 0.75f*slots[i].h/state.imgSettigns->getHeight();
+				state.imgSettigns->drawScaled(imgX, imgY, imgScaleX, imgScaleY);
 				break;
 			}
 			case MENU_ITEM_EXIT:
 			{
-				state.imgExit->drawScaled(slots[i].x*1.01, slots[i].y*1.01, slots[i].w * 0.98f / state.imgRace->getWidth(), slots[i].h * 0.98f / state.imgRace->getHeight());
+				const float imgX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/state.imgExit->getWidth()),
+							imgY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/state.imgExit->getHeight()),
+							imgScaleX = 0.75f*slots[i].w/state.imgExit->getWidth(),
+							imgScaleY = 0.75f*slots[i].h/state.imgExit->getHeight();
+				state.imgExit->drawScaled(imgX, imgY, imgScaleX, imgScaleY);
 				break;
 			}
 			default:break;

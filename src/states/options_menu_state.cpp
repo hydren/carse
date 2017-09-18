@@ -42,6 +42,7 @@ void OptionsMenuState::initialize()
 	menu->focusedEntryFontColor = Color::WHITE;
 
 	menu->addEntry("Resolution: ");
+	menu->addEntry("Fullscreen: ");
 	menu->addEntry("Back to main menu");
 }
 
@@ -67,6 +68,7 @@ void OptionsMenuState::render()
 	fontTitle->drawText("Options", 0.125*display.getWidth(), 0.125*display.getHeight(), Color::WHITE);
 
 	font->drawText(futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight()), menu->bounds.x + 128, menu->bounds.y, Color::WHITE);
+	font->drawText(display.isFullscreen()? " yes" : " no", menu->bounds.x + font->getTextWidth(menu->at(1).label), menu->bounds.y + font->getHeight(), Color::WHITE);
 }
 
 void OptionsMenuState::update(float delta)
@@ -113,6 +115,9 @@ void OptionsMenuState::update(float delta)
 
 void OptionsMenuState::onMenuSelect()
 {
+	if(menu->getSelectedIndex() == 1)
+		game.getDisplay().setFullscreen(game.getDisplay().isFullscreen());
+
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
 		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }

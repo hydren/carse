@@ -161,6 +161,13 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	Course course(segmentLength, roadWidth);
 	float currentCurve = 0;
 
+	const bool range1 = true,//rand()%2,
+			   range2 = true,//rand;()%2,
+			   range3 = true;//rand;()%2;
+	const float range1size = random_between_decimal(0, 1500),
+				range2size = random_between_decimal(0, 1500),
+				range3size = random_between_decimal(0, 1500);
+
 	// generating random course
 	for(unsigned i = 0; i < length; i++)
 	{
@@ -181,7 +188,9 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 		line.curve = currentCurve;
 
 		// fixme this should be parametrized, or at least random
-		if(i > 750 and i < 1350) line.y = sin(i/30.0)*1500;
+		if(i > 750 and i < 1510 and range1) line.y = sin(i/30.0)*range1size;
+		if(i > 1510 and i < 2270 and range2) line.y = sin(i/30.0)*range2size;
+		if(i > 2270 and i < 3030 and range3) line.y = sin(i/30.0)*range3size;
 
 		course.lines.push_back(line);
 	}

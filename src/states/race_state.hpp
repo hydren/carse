@@ -109,15 +109,16 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	void updateDrivetrain(float delta);
 	float getDriveForce();
 
-	void updateDrivetrainSimpleModel(float delta);
-	float getDriveForceSimpleModel();
+	#define TIRE_MODEL_SIMPLE
+	//#define TIRE_MODEL_SLIP_RATIO
 
-	void updateDrivetrainSlipRatioModel(float delta);
-	float getDriveForceSlipRatioModel();
+	#ifdef TIRE_MODEL_SLIP_RATIO
 
 	float getLongitudinalSlipRatio();
 	float getNormalizedTractionForce();
 	bool isSlipRatioUnstable();
+
+	#endif
 
 	float getDrivenWheelsTireLoad();
 

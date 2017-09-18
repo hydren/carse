@@ -195,30 +195,18 @@ static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  // increasing this 
 //xxx An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)
 static const float AVERAGE_WHEEL_DENSITY = 75.0/squared(3.3);  // d = m/r^2, assuming wheel width = 1/PI in the original formula d = m/(PI * r^2 * width)
 
-void Pseudo3DRaceState::updateDrivetrain(float delta)
-{
-//	updateDrivetrainSimpleModel(delta);
-	updateDrivetrainSlipRatioModel(delta);
-}
-
-/** Returns the current driving force. */
-float Pseudo3DRaceState::getDriveForce()
-{
-//	return getDriveForceSimpleModel();
-	return getDriveForceSlipRatioModel();
-}
-
 // ==================================================================================================================================================
 // simple model
+#ifdef TIRE_MODEL_SIMPLE
 
-void Pseudo3DRaceState::updateDrivetrainSimpleModel(float delta)
+void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
 	// this formula assumes no wheel slipping.
 	vehicle.wheelAngularSpeed = vehicle.speed/vehicle.tireRadius;  // set new wheel angular speed
 	vehicle.engine.update(delta, vehicle.wheelAngularSpeed);
 }
 
-float Pseudo3DRaceState::getDriveForceSimpleModel()
+float Pseudo3DRaceState::getDriveForce()
 {
 	// all engine power
 //	return vehicle.engine.getDriveTorque() / vehicle.tireRadius;
@@ -227,10 +215,12 @@ float Pseudo3DRaceState::getDriveForceSimpleModel()
 	return std::min(vehicle.engine.getDriveTorque() / vehicle.tireRadius, getDrivenWheelsTireLoad() * getTireKineticFrictionCoefficient());
 }
 
+#endif
 // ==================================================================================================================================================
 // slip ratio model
+#ifdef TIRE_MODEL_SLIP_RATIO
 
-void Pseudo3DRaceState::updateDrivetrainSlipRatioModel(float delta)
+void Pseudo3DRaceState::updateDrivetrain(float delta)
 {
 	const bool unstable = isSlipRatioUnstable();
 	if(unstable)  // assume no tire slipping when unstable
@@ -260,7 +250,7 @@ void Pseudo3DRaceState::updateDrivetrainSlipRatioModel(float delta)
 	vehicle.engine.update(delta, vehicle.engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
 }
 
-float Pseudo3DRaceState::getDriveForceSlipRatioModel()
+float Pseudo3DRaceState::getDriveForce()
 {
 	if(isSlipRatioUnstable() or vehicle.speed == 0)
 	{
@@ -302,6 +292,7 @@ bool Pseudo3DRaceState::isSlipRatioUnstable()
 	return (vehicle.engine.getAngularSpeed()*vehicle.tireRadius - vehicle.speed < LOWEST_STABLE_SLIP*fabs(vehicle.speed));
 }
 
+#endif
 // ==================================================================================================================================================
 
 static const float engineLocationFactorRWD(Vehicle::EngineLocation loc)

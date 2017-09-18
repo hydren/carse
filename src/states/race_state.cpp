@@ -33,7 +33,6 @@ using fgeal::Point;
 
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
-static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
 static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 
@@ -429,17 +428,6 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fN", getDrivenWheelsTireLoad());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
-		offset += 18;
-		fontDebug->drawText("Longit. Slip Ratio:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.0*getLongitudinalSlipRatio());
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDebug->drawText("Normaliz. Traction Force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", getNormalizedTractionForce());
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-
 		offset += 25;
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2frad/s", vehicle.engine.getAngularSpeed());
@@ -490,8 +478,14 @@ void Pseudo3DRaceState::update(float delta)
 	engineSound.updateSound(vehicle.engine.rpm);
 
 //	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))  // fake burnout mode
-//	if(getDriveForce() < 0.75 * vehicle.engine.getDriveTorque() / vehicle.tireRadius)  // burnout based on capped drive force
+
+#ifdef TIRE_MODEL_SIMPLE
+	if(getDriveForce() < 0.5 * vehicle.engine.getDriveTorque() / vehicle.tireRadius)  // burnout based on capped drive force
+#endif
+#ifdef TIRE_MODEL_SLIP_RATIO
+	static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 	if(fabs(getLongitudinalSlipRatio()) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER and fabs(vehicle.speed)>1)  // burnout based on real slip ratio
+#endif
 	{
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();

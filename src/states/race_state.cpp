@@ -52,7 +52,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
-  drawParameters(), coursePositionFactor(500), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
+  drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
 {
@@ -93,17 +93,6 @@ void Pseudo3DRaceState::initialize()
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
 	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
 	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
-}
-
-void Pseudo3DRaceState::setVehicle(const Vehicle& v, int altSkin)
-{
-	vehicle = v;
-	vehicle.activeSkin = altSkin;
-}
-
-void Pseudo3DRaceState::setCourse(const Course& c)
-{
-	course = c;
 }
 
 void Pseudo3DRaceState::onEnter()
@@ -190,7 +179,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
 	hudSpeedDisplay = new Hud::NumericalDisplay<float>(vehicle.speed, gaugeSize, font2);
-	hudSpeedDisplay->valueScale = 3.6;
+	hudSpeedDisplay->valueScale = isImperialUnit? 2.25 : 3.6;
 	hudSpeedDisplay->disableBackground = true;
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
@@ -334,7 +323,7 @@ void Pseudo3DRaceState::render()
 		hudTimerBestLap->draw();
 
 	hudSpeedDisplay->draw();
-	font->drawText("Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
+	font->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
 
 	hudRpmGauge->draw();
 	hudGearDisplay->draw();

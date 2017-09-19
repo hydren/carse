@@ -184,22 +184,22 @@ const vector<Course>& Pseudo3DCarseGame::Logic::getCourseList()
 
 void Pseudo3DCarseGame::Logic::setNextCourse(unsigned courseIndex)
 {
-	getRaceState()->setCourse(courses[courseIndex]);
+	getRaceState()->course = courses[courseIndex];
 }
 
 void Pseudo3DCarseGame::Logic::setNextCourse(const Course& c)
 {
-	getRaceState()->setCourse(c);
+	getRaceState()->course = c;
 }
 
 void Pseudo3DCarseGame::Logic::setNextCourseRandom()
 {
-	getRaceState()->setCourse(Course::createRandomCourse(200, 3000, 6400, 1.5));
+	getRaceState()->course = Course::createRandomCourse(200, 3000, 6400, 1.5);
 }
 
 void Pseudo3DCarseGame::Logic::setNextCourseDebug()
 {
-	getRaceState()->setCourse(Course::createDebugCourse(200, 3000));
+	getRaceState()->course = Course::createDebugCourse(200, 3000);
 }
 
 void Pseudo3DCarseGame::Logic::loadVehicles()
@@ -242,10 +242,22 @@ const std::vector<Vehicle>& Pseudo3DCarseGame::Logic::getVehicleList()
 
 void Pseudo3DCarseGame::Logic::setPickedVehicle(unsigned vehicleIndex, int skin)
 {
-	getRaceState()->setVehicle(vehicles[vehicleIndex], skin);
+	getRaceState()->vehicle = vehicles[vehicleIndex];
+	getRaceState()->vehicle.activeSkin = skin;
 }
 
 void Pseudo3DCarseGame::Logic::setPickedVehicle(const Vehicle& v, int skin)
 {
-	getRaceState()->setVehicle(v, skin);
+	getRaceState()->vehicle = v;
+	getRaceState()->vehicle.activeSkin = skin;
+}
+
+bool Pseudo3DCarseGame::Logic::isImperialUnitEnabled()
+{
+	return getRaceState()->isImperialUnit;
+}
+
+void Pseudo3DCarseGame::Logic::setImperialUnitEnabled(bool choice)
+{
+	getRaceState()->isImperialUnit = choice;
 }

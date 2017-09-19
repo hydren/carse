@@ -21,7 +21,7 @@ using fgeal::Rectangle;
 int OptionsMenuState::getId() { return Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(Pseudo3DCarseGame* game)
-: State(*game), shared(*game->sharedResources), menu(null),
+: State(*game), logic(game->logic), shared(*game->sharedResources), menu(null),
   fontTitle(null), font(null)
 {}
 
@@ -43,6 +43,7 @@ void OptionsMenuState::initialize()
 
 	menu->addEntry("Resolution: ");
 	menu->addEntry("Fullscreen: ");
+	menu->addEntry("Unit: ");
 	menu->addEntry("Back to main menu");
 }
 
@@ -69,6 +70,7 @@ void OptionsMenuState::render()
 
 	font->drawText(futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight()), menu->bounds.x + 128, menu->bounds.y, Color::WHITE);
 	font->drawText(display.isFullscreen()? " yes" : " no", menu->bounds.x + font->getTextWidth(menu->at(1).label), menu->bounds.y + font->getHeight(), Color::WHITE);
+	font->drawText(logic.isImperialUnitEnabled()? " imperial" : " metric", menu->bounds.x + font->getTextWidth(menu->at(2).label), menu->bounds.y + 2*font->getHeight(), Color::WHITE);
 }
 
 void OptionsMenuState::update(float delta)
@@ -116,7 +118,10 @@ void OptionsMenuState::update(float delta)
 void OptionsMenuState::onMenuSelect()
 {
 	if(menu->getSelectedIndex() == 1)
-		game.getDisplay().setFullscreen(game.getDisplay().isFullscreen());
+		game.getDisplay().setFullscreen(!game.getDisplay().isFullscreen());
+
+	if(menu->getSelectedIndex() == 2)
+		logic.setImperialUnitEnabled(!logic.isImperialUnitEnabled());
 
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
 		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);

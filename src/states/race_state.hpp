@@ -25,6 +25,8 @@
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
+	friend class Pseudo3DCarseGame;
+
 	fgeal::Font* font, *font2, *font3, *fontDebug;
 	fgeal::Image* bg;
 	fgeal::Music* music;
@@ -44,6 +46,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
+	bool isImperialUnit;
 
 	float laptime, laptimeBest;
 
@@ -121,10 +124,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	#endif
 
 	float getDrivenWheelsTireLoad();
-
-	public://menu accessed methods
-	void setVehicle(const Vehicle& v, int skin=-1);
-	void setCourse(const Course& c);
 };
 
 

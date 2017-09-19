@@ -86,6 +86,8 @@ class Pseudo3DCarseGame extends public fgeal::Game
 		void setPickedVehicle(unsigned vehicleIndex, int skin=-1);
 		void setPickedVehicle(const Vehicle& v, int skin=-1);
 
+		bool isImperialUnitEnabled();
+		void setImperialUnitEnabled(bool choice=true);
 	} logic;
 };
 

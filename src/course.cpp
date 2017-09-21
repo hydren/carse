@@ -192,8 +192,22 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 		if(i > 1510 and i < 2270 and range2) line.y = sin(i/30.0)*range2size;
 		if(i > 2270 and i < 3030 and range3) line.y = sin(i/30.0)*range3size;
 
+		if(rand() % 10 == 0)
+		{
+			line.spriteID = 0;
+			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.5, 3.0);
+		}
+		else if(rand() % 100 == 0)
+		{
+			line.spriteID = 1;
+			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
+		}
+
 		course.lines.push_back(line);
 	}
+
+	course.spritesFilenames.push_back("assets/bush.png");
+	course.spritesFilenames.push_back("assets/tree.png");
 
 	return course;
 }

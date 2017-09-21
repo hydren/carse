@@ -514,7 +514,8 @@ void Pseudo3DRaceState::update(float delta)
 
 		isBurningRubber = true;
 	}
-	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN and (fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED))
+	else if(fabs(vehicle.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN and (fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED)
+	 	 	 and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();

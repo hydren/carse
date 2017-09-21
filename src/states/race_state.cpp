@@ -466,15 +466,23 @@ void Pseudo3DRaceState::update(float delta)
 
 	engineSound.updateSound(vehicle.engine.rpm);
 
-//	if(vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))  // fake burnout mode
+	// fake burnout mode
+//	const bool tireBurnoutAnimRequired = vehicle.engine.gear == 1 and vehicle.engine.rpm < 0.5*vehicle.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP);
 
-#ifdef TIRE_MODEL_SIMPLE
-	if(getDriveForce() < 0.5 * vehicle.engine.getDriveTorque() / vehicle.tireRadius)  // burnout based on capped drive force
-#endif
-#ifdef TIRE_MODEL_SLIP_RATIO
+	// burnout based on capped drive force
+	#ifdef TIRE_MODEL_SIMPLE
+	const bool tireBurnoutAnimRequired = (getDriveForce() < 0.5 * vehicle.engine.getDriveTorque() / vehicle.tireRadius)
+											and vehicle.engine.gear == 1;  // but limited to first gear.
+	#endif
+
+	// burnout based on real slip ratio
+	#ifdef TIRE_MODEL_SLIP_RATIO
 	static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
-	if(fabs(getLongitudinalSlipRatio()) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER and fabs(vehicle.speed)>1)  // burnout based on real slip ratio
-#endif
+	const bool tireBurnoutAnimRequired = fabs(getLongitudinalSlipRatio()) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
+											and fabs(vehicle.speed) > 1.0;
+	#endif
+
+	if(tireBurnoutAnimRequired and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();

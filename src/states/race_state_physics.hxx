@@ -71,7 +71,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update acceleration
-	vehicle.acceleration = (wheelAngleFactor*getDriveForce() - brakingFriction - rollingFriction - airFriction)/vehicle.mass;
+	vehicle.acceleration = ((onAir? 0 : wheelAngleFactor*getDriveForce() - brakingFriction - rollingFriction) - airFriction)/vehicle.mass;
 
 	// update speed
 	vehicle.speed += delta*vehicle.acceleration;
@@ -96,7 +96,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(pseudoAngle <-PSEUDO_ANGLE_MAX) pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	strafeSpeed = pseudoAngle * vehicle.speed * coursePositionFactor;
+	strafeSpeed = onAir? 0 : pseudoAngle * vehicle.speed * coursePositionFactor;
 
 	// limit strafing speed by tire friction
 //	if(strafeSpeed >  tireFriction) strafeSpeed = tireFriction;
@@ -117,12 +117,21 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update vertical position
 	if(segment.y >= posY)
 	{
-		verticalSpeed = (segment.y - posY)/delta ;
-		posY += 10*delta*(segment.y - posY);
+		verticalSpeed = (segment.y - posY)/delta;
+		posY = segment.y;
+		if(onLongAir)
+		{
+			onLongAir = false;
+			sndJumpImpact->stop();
+			sndJumpImpact->play();
+		}
+		onAir = false;
 	}
 	else if(segment.y < posY)
 	{
 		verticalSpeed += 2500*GRAVITY_ACCELERATION * delta;
+		if(verticalSpeed > 1000) onAir = true;
+		if(verticalSpeed > 6000) onLongAir = true;
 		posY -= verticalSpeed*delta;
 	}
 

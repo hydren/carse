@@ -32,7 +32,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Music* music;
 
 	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
-				 *sndTireBurnoutIntro, *sndTireBurnoutLoop;
+				 *sndTireBurnoutIntro, *sndTireBurnoutLoop,
+				 *sndJumpImpact;
 
 	fgeal::Color bgColor;
 	std::vector<fgeal::Sprite*> spritesVehicle;
@@ -42,7 +43,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float position, posX, posY, pseudoAngle, strafeSpeed, verticalSpeed, curvePull;
 	fgeal::Point bgParallax;
 	float rollingFriction, airFriction, brakingFriction, corneringForceLeechFactor;
-	bool isBurningRubber;
+	bool isBurningRubber, onAir, onLongAir;
 
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;

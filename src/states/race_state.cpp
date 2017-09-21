@@ -48,10 +48,10 @@ Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return st
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
-  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
+  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndJumpImpact(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), posY(0), pseudoAngle(0), strafeSpeed(0), verticalSpeed(0), curvePull(0), bgParallax(),
-  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
+  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), onAir(false), onLongAir(false),
   drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
@@ -63,6 +63,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
+	// todo delete sounds
 	delete font;
 	delete font2;
 	delete font3;
@@ -88,6 +89,7 @@ void Pseudo3DRaceState::initialize()
 	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
 	sndTireBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");
 	sndTireBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
+	sndJumpImpact = new Sound("assets/sound/landing.ogg");
 
 	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
@@ -224,7 +226,7 @@ void Pseudo3DRaceState::onEnter()
 	laptime = laptimeBest = 0;
 	lapCurrent = 1;
 
-	isBurningRubber = false;
+	isBurningRubber = onAir = onLongAir = false;
 
 	music->loop();
 	engineSound.playIdle();
@@ -563,6 +565,7 @@ void Pseudo3DRaceState::handleInput()
 					vehicle.acceleration = 0;
 					laptime = 0;
 					lapCurrent = 1;
+					isBurningRubber = onAir = onLongAir = false;
 					break;
 				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;

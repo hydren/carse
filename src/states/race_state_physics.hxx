@@ -114,6 +114,18 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update strafe position
 	posX += (strafeSpeed - curvePull)*delta;
 
+	// update vertical position
+	if(segment.y >= posY)
+	{
+		verticalSpeed = (segment.y - posY)/delta ;
+		posY += 10*delta*(segment.y - posY);
+	}
+	else if(segment.y < posY)
+	{
+		verticalSpeed += 2500*GRAVITY_ACCELERATION * delta;
+		posY -= verticalSpeed*delta;
+	}
+
 	// update bg parallax
 	bgParallax.x -= segment.curve*vehicle.speed*0.025;
 	bgParallax.y = -segment.y*0.01;

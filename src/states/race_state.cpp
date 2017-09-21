@@ -50,7 +50,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), pseudoAngle(0), strafeSpeed(0), curvePull(0), bgParallax(),
+  position(0), posX(0), posY(0), pseudoAngle(0), strafeSpeed(0), verticalSpeed(0), curvePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false),
   drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
@@ -216,8 +216,9 @@ void Pseudo3DRaceState::onEnter()
 
 	bgParallax.x = bgParallax.y = 0;
 	position = 0;
-	posX = 0;
+	posX = posY = 0;
 	vehicle.speed = 0;
+	verticalSpeed = 0;
 	vehicle.acceleration = 0;
 	pseudoAngle = 0;
 	laptime = laptimeBest = 0;
@@ -289,8 +290,15 @@ void Pseudo3DRaceState::render()
 //	sprite.duration = vehicle.speed != 0? 2.0*M_PI*vehicle.engine.tireRadius/(vehicle.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
 	sprite.computeCurrentFrame();
 
-	const Point vehicleSpritePosition = { 0.5f*(displayWidth - sprite.scale.x*vehicle.sprite.frameWidth),
-										0.825f*(displayHeight- sprite.scale.y*vehicle.sprite.frameHeight) - sprite.scale.y*vehicle.sprite.contactOffset };
+	const Point vehicleSpritePosition = {
+			// x coord
+			0.5f*(displayWidth - sprite.scale.x*vehicle.sprite.frameWidth),
+
+			// y coord
+			0.825f*(displayHeight- sprite.scale.y*vehicle.sprite.frameHeight)
+			- sprite.scale.y*vehicle.sprite.contactOffset
+			- posY*0.01f
+	};
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
@@ -351,6 +359,16 @@ void Pseudo3DRaceState::render()
 		offset += 18;
 		fontDebug->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s^2", vehicle.acceleration);
+		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+
+		offset += 25;
+		fontDebug->drawText("Height:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm", posY);
+		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm/s", verticalSpeed);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 
@@ -535,8 +553,9 @@ void Pseudo3DRaceState::handleInput()
 					break;
 				case Keyboard::KEY_R:
 					position = 0;
-					posX = 0;
+					posX = posY = 0;
 					vehicle.speed = 0;
+					verticalSpeed = 0;
 					vehicle.engine.rpm = 1000;
 					vehicle.engine.gear = 1;
 					pseudoAngle = 0;

@@ -63,15 +63,19 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	vehicle.brakePedalPosition =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
 	updateDrivetrain(delta);
 
+	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
+	slopeAngle = atan2(segment.y - posY, course.roadSegmentLength);
 
 	const float tireFriction = getTireKineticFrictionCoefficient() * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed);
 	brakingFriction = vehicle.brakePedalPosition * tireFriction;  // a multiplier here could be added for stronger and easier braking
-	rollingFriction = getTireRollingResistanceCoefficient() * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * 4;  // fixme this formula assumes 4 wheels
+	rollingFriction = getTireRollingResistanceCoefficient() * vehicle.mass * GRAVITY_ACCELERATION * sgn(vehicle.speed) * 4;  // fixme this formula assumes 4 wheels,
+	slopePull = vehicle.mass * GRAVITY_ACCELERATION * sin(slopeAngle),
 	airFriction = 0.5 * AIR_DENSITY * AIR_FRICTION_COEFFICIENT * squared(vehicle.speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 
 	// update acceleration
-	vehicle.acceleration = ((onAir? 0 : wheelAngleFactor*getDriveForce() - brakingFriction - rollingFriction) - airFriction)/vehicle.mass;
+	vehicle.acceleration = ((wheelAngleFactor*getDriveForce() - slopePull - brakingFriction - rollingFriction) - airFriction)/vehicle.mass;
+//	vehicle.acceleration = ((onAir? 0 : slopeFactor*wheelAngleFactor*getDriveForce() - brakingFriction - rollingFriction) - airFriction)/vehicle.mass;
 
 	// update speed
 	vehicle.speed += delta*vehicle.acceleration;
@@ -96,7 +100,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(pseudoAngle <-PSEUDO_ANGLE_MAX) pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	strafeSpeed = onAir? 0 : pseudoAngle * vehicle.speed * coursePositionFactor;
+	strafeSpeed = pseudoAngle * vehicle.speed * coursePositionFactor;
+//	strafeSpeed = onAir? 0 : pseudoAngle * vehicle.speed * coursePositionFactor;
 
 	// limit strafing speed by tire friction
 //	if(strafeSpeed >  tireFriction) strafeSpeed = tireFriction;
@@ -106,8 +111,6 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(strafeSpeed >  MAXIMUM_STRAFE_SPEED) strafeSpeed = MAXIMUM_STRAFE_SPEED;
 	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED) strafeSpeed =-MAXIMUM_STRAFE_SPEED;
 
-	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
-
 	// update curve pull
 	curvePull = segment.curve * vehicle.speed * coursePositionFactor * CURVE_PULL_FACTOR;
 
@@ -115,6 +118,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	posX += (strafeSpeed - curvePull)*delta;
 
 	// update vertical position
+	posY = segment.y;
+
+	/*
 	if(segment.y >= posY)
 	{
 		verticalSpeed = (segment.y - posY)/delta;
@@ -134,6 +140,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		if(verticalSpeed > 6000) onLongAir = true;
 		posY -= verticalSpeed*delta;
 	}
+	*/
 
 	// update bg parallax
 	bgParallax.x -= segment.curve*vehicle.speed*0.025;
@@ -334,5 +341,5 @@ float Pseudo3DRaceState::getDrivenWheelsTireLoad()
 	else if(vehicle.drivenWheels == Vehicle::DRIVEN_WHEELS_ON_FRONT)
 		load = FF_DRIVEN_WHEELS_LOAD*load - loadTransfered;
 
-	return load;
+	return load*cos(slopeAngle);
 }

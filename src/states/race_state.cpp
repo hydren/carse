@@ -50,8 +50,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndJumpImpact(null),
   bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), posY(0), pseudoAngle(0), strafeSpeed(0), verticalSpeed(0), curvePull(0), bgParallax(),
-  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), onAir(false), onLongAir(false),
+  position(0), posX(0), posY(0), pseudoAngle(0), slopeAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), slopePull(0), bgParallax(),
+  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
   drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
@@ -220,13 +220,13 @@ void Pseudo3DRaceState::onEnter()
 	position = 0;
 	posX = posY = 0;
 	vehicle.speed = 0;
-	verticalSpeed = 0;
+//	verticalSpeed = 0;
 	vehicle.acceleration = 0;
 	pseudoAngle = 0;
 	laptime = laptimeBest = 0;
 	lapCurrent = 1;
 
-	isBurningRubber = onAir = onLongAir = false;
+	isBurningRubber = /*onAir = onLongAir =*/ false;
 
 	music->loop();
 	engineSound.playIdle();
@@ -368,15 +368,20 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fm", posY);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
-		offset += 18;
-		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", verticalSpeed);
-		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+//		offset += 18;
+//		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
+//		sprintf(buffer, "%2.2fm/s", verticalSpeed);
+//		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f", pseudoAngle);
+		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f", slopeAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -388,6 +393,11 @@ void Pseudo3DRaceState::render()
 		offset += 25;
 		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", curvePull/coursePositionFactor);
+		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm/s^2", slopePull);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -407,7 +417,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + brakingFriction + rollingFriction + airFriction));
+		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + slopePull + brakingFriction + rollingFriction + airFriction));
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
@@ -558,7 +568,7 @@ void Pseudo3DRaceState::handleInput()
 					position = 0;
 					posX = posY = 0;
 					vehicle.speed = 0;
-					verticalSpeed = 0;
+//					verticalSpeed = 0;
 					vehicle.engine.rpm = 1000;
 					vehicle.engine.gear = 1;
 					pseudoAngle = 0;
@@ -566,7 +576,7 @@ void Pseudo3DRaceState::handleInput()
 					vehicle.acceleration = 0;
 					laptime = 0;
 					lapCurrent = 1;
-					isBurningRubber = onAir = onLongAir = false;
+//					isBurningRubber = onAir = onLongAir = false;
 					break;
 				case Keyboard::KEY_T:
 					vehicle.engine.automaticShiftingEnabled = !vehicle.engine.automaticShiftingEnabled;

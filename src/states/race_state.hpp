@@ -35,7 +35,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 				 *sndTireBurnoutIntro, *sndTireBurnoutLoop,
 				 *sndJumpImpact;
 
-	fgeal::Color bgColor;
+	fgeal::Color bgColor, bgColorHorizon;
 	std::vector<fgeal::Sprite*> spritesVehicle;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
 

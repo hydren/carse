@@ -38,6 +38,8 @@ static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
+static const float BACKGROUND_POSITION_FACTOR = 0.509375;
+
 // -------------------------------------------------------------------------------
 
 int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
@@ -49,7 +51,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndJumpImpact(null),
-  bgColor(136, 204, 238), spriteSmokeLeft(null), spriteSmokeRight(null),
+  bgColor(), bgColorHorizon(), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), posY(0), pseudoAngle(0), slopeAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), slopePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
   drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
@@ -154,6 +156,9 @@ void Pseudo3DRaceState::onEnter()
 		else
 			drawParameters.sprites.push_back(null);
 
+	bgColor = Color(136, 204, 238);
+	bgColorHorizon = Color(0, 112, 0);
+
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.engine.maxRpm);
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
@@ -254,9 +259,12 @@ void Pseudo3DRaceState::render()
 
 	game.getDisplay().clear();
 
+	const float parallaxAbsoluteY = bgParallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - bg->getHeight();
+
 	Image::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	bg->draw(bgParallax.x, bgParallax.y + 0.55*displayHeight - bg->getHeight());
-	bg->draw(bgParallax.x + bg->getWidth(), bgParallax.y + 0.55*displayHeight - bg->getHeight());
+	Image::drawFilledRectangle(0, parallaxAbsoluteY + bg->getHeight(), displayWidth, displayHeight, bgColorHorizon);
+	bg->draw(bgParallax.x, parallaxAbsoluteY);
+	bg->draw(bgParallax.x + bg->getWidth(), parallaxAbsoluteY);
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 

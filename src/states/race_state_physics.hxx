@@ -144,7 +144,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	// update bg parallax
 	bgParallax.x -= segment.curve*vehicle.speed*0.025;
-	bgParallax.y = -segment.y*0.01;
+	bgParallax.y -= 2*slopeAngle;
 
 	if(bgParallax.x < -(2.0f*bg->getWidth()-game.getDisplay().getWidth()))
 		bgParallax.x += bg->getWidth();

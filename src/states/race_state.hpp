@@ -32,7 +32,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Music* music;
 
 	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
-				 *sndTireBurnoutIntro, *sndTireBurnoutLoop,
+				 *sndTireBurnoutIntro, *sndTireBurnoutLoop, *sndOnDirtLoop,
 				 *sndJumpImpact;
 
 	fgeal::Color bgColor, bgColorHorizon;

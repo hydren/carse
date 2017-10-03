@@ -50,7 +50,7 @@ Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return st
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
-  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndJumpImpact(null),
+  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
   bgColor(), bgColorHorizon(), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), posY(0), pseudoAngle(0), slopeAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), slopePull(0), bgParallax(),
   rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
@@ -91,6 +91,7 @@ void Pseudo3DRaceState::initialize()
 	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
 	sndTireBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");
 	sndTireBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
+	sndOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");
 	sndJumpImpact = new Sound("assets/sound/landing.ogg");
 
 	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
@@ -245,6 +246,7 @@ void Pseudo3DRaceState::onLeave()
 	sndTireBurnoutLoop->stop();
 	sndTireBurnoutStandIntro->stop();
 	sndTireBurnoutStandLoop->stop();
+	sndOnDirtLoop->stop();
 //	delete hudRpmGauge;
 //	delete hudSpeedDisplay;
 //	delete hudGearDisplay;
@@ -553,6 +555,14 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
 		isBurningRubber = false;
 	}
+
+	if(getCurrentSurfaceType() != SURFACE_TYPE_DRY_ASPHALT and fabs(vehicle.speed) > 1)
+	{
+		if(not sndOnDirtLoop->isPlaying())
+			sndOnDirtLoop->loop();
+	}
+	else if(sndOnDirtLoop->isPlaying())
+		sndOnDirtLoop->stop();
 }
 
 void Pseudo3DRaceState::handleInput()

@@ -1,0 +1,4 @@
+To build, copy to this folder the contents of either one of the folders inside the backend-makefiles/ folder.
+Choose the folder according to the library that you wish to link against.
+After copying these files, run ./configure.sh. If it goes well, just run make afterwards to build the executable.
+The resulting "carse" executable is meant to be run from the folder where the 'assets' and 'data' folders are.

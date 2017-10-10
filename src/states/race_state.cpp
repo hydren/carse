@@ -52,8 +52,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
   bgColor(), bgColorHorizon(), spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), posY(0), pseudoAngle(0), slopeAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), slopePull(0), bgParallax(),
-  rollingFriction(0), airFriction(0), brakingFriction(0), corneringForceLeechFactor(0), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
+  position(0), posX(0), posY(0), pseudoAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), corneringForceLeechFactor(0),
+  bgParallax(), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
   drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
@@ -215,19 +215,13 @@ void Pseudo3DRaceState::onEnter()
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	corneringForceLeechFactor = (vehicle.type == Vehicle::TYPE_BIKE? 0.25 : 0.5);
-	vehicle.body.engine.minRpm = 1000;
-	vehicle.body.engine.automaticShiftingEnabled = true;
-	vehicle.body.engine.automaticShiftingLowerThreshold = 0.5*vehicle.body.engine.maximumTorqueRpm/vehicle.body.engine.maxRpm;
-	vehicle.body.engine.automaticShiftingUpperThreshold = vehicle.body.engine.maximumPowerRpm/vehicle.body.engine.maxRpm;
-	vehicle.body.engine.gear = 1;
-	vehicle.body.engine.rpm = 100;
 
 	bgParallax.x = bgParallax.y = 0;
 	position = 0;
 	posX = posY = 0;
-	vehicle.body.speed = 0;
 //	verticalSpeed = 0;
-	vehicle.body.acceleration = 0;
+	vehicle.body.reset();
+	vehicle.body.engine.automaticShiftingEnabled = true;
 	pseudoAngle = 0;
 	laptime = laptimeBest = 0;
 	lapCurrent = 1;
@@ -391,7 +385,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", slopeAngle);
+		sprintf(buffer, "%2.2f", vehicle.body.slopeAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -407,27 +401,27 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", slopePull);
+		sprintf(buffer, "%2.2fm/s^2", vehicle.body.slopePull);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", brakingFriction);
+		sprintf(buffer, "%2.2fN", vehicle.body.brakingFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", rollingFriction);
+		sprintf(buffer, "%2.2fN", vehicle.body.rollingFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", airFriction);
+		sprintf(buffer, "%2.2fN", vehicle.body.airFriction);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + slopePull + brakingFriction + rollingFriction + airFriction));
+		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + vehicle.body.slopePull + vehicle.body.brakingFriction + vehicle.body.rollingFriction + vehicle.body.airFriction));
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
@@ -472,6 +466,13 @@ void Pseudo3DRaceState::render()
 		const char* autoLabelTxt = (vehicle.body.engine.automaticShiftingEnabled? " (auto)":"");
 		sprintf(buffer, "%d %s", vehicle.body.engine.gear, autoLabelTxt);
 		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
+
+		#ifdef USE_PACEJKA_SCHEME
+		offset += 25;
+		fontDebug->drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2f%%", 100*vehicle.body.slipRatio);
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		#endif
 
 
 		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.body.engine.rpm);
@@ -518,7 +519,7 @@ void Pseudo3DRaceState::update(float delta)
 	// burnout based on real slip ratio
 	#ifdef USE_PACEJKA_SCHEME
 	static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
-	const bool tireBurnoutAnimRequired = fabs(vehicle.body.getSlipRatio()) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
+	const bool tireBurnoutAnimRequired = fabs(vehicle.body.slipRatio) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
 											and fabs(vehicle.body.speed) > 1.0;
 	#endif
 
@@ -585,13 +586,11 @@ void Pseudo3DRaceState::handleInput()
 				case Keyboard::KEY_R:
 					position = 0;
 					posX = posY = 0;
-					vehicle.body.speed = 0;
 //					verticalSpeed = 0;
-					vehicle.body.engine.rpm = 1000;
-					vehicle.body.engine.gear = 1;
+					vehicle.body.reset();
+					vehicle.body.engine.automaticShiftingEnabled = true;
 					pseudoAngle = 0;
 					bgParallax.x = bgParallax.y = 0;
-					vehicle.body.acceleration = 0;
 					laptime = 0;
 					lapCurrent = 1;
 //					isBurningRubber = onAir = onLongAir = false;

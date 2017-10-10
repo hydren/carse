@@ -33,6 +33,7 @@ struct Vehicle
 	// general information
 	std::string name, authors, credits, comments;
 
+	// physics simulation
 	Mechanics body;
 
 	// sound data

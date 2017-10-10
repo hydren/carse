@@ -108,7 +108,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	// update bg parallax
 	bgParallax.x -= segment.curve*vehicle.body.speed*0.025;
-	bgParallax.y -= 2*slopeAngle;
+	bgParallax.y -= 2*vehicle.body.slopeAngle;
 
 	if(bgParallax.x < -(2.0f*bg->getWidth()-game.getDisplay().getWidth()))
 		bgParallax.x += bg->getWidth();
@@ -124,8 +124,16 @@ void Pseudo3DRaceState::shiftGear(int gear)
 	if(gear < 0 or gear > vehicle.body.engine.gearCount)
 		return;
 
-	const float angularSpeedDiscrepancy = vehicle.body.wheelAngularSpeed * vehicle.body.engine.gearRatio[gear-1] * vehicle.body.engine.differentialRatio * RAD_TO_RPM - vehicle.body.engine.rpm;
-	vehicle.body.engine.rpm += 0.25*angularSpeedDiscrepancy;
+	if(gear != 0)
+	{
+		const float driveshaftRpm = vehicle.body.wheelAngularSpeed
+									* vehicle.body.engine.gearRatio[gear-1]
+									* vehicle.body.engine.differentialRatio * RAD_TO_RPM;
+
+		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (acts like a synchromesh)
+		vehicle.body.engine.rpm += 0.25*(driveshaftRpm - vehicle.body.engine.rpm);
+	}
+
 	vehicle.body.engine.gear = gear;
 }
 

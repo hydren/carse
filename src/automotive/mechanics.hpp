@@ -83,14 +83,16 @@ struct Mechanics
 	float getDriveForceBySimplifiedScheme();
 
 	// Pacejka scheme-related
+	#ifdef USE_PACEJKA_SCHEME
+	public:  // make these public when using pacejka scheme, for debugging
+	#endif
 	void updateByPacejkaScheme(float);
 	float getDriveForceByPacejkaScheme();
-	bool isSlipRatioUnstable();  // refers to longitudinal slip ratio
 	float getNormalizedTractionForce();
-	#ifdef USE_PACEJKA_SCHEME
-	public:
-	#endif
-	float getSlipRatio();  // refers to longitudinal slip ratio
+	// these refer to the longitudinal slip ratio
+	double slipRatio, differentialSlipRatio;
+	void updateSlipRatio(float delta);
+	private:
 };
 
 #endif /* AUTOMOTIVE_MECHANICS_HPP_ */

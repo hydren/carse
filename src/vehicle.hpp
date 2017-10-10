@@ -17,6 +17,8 @@
 
 #include "carse_game.hpp"
 
+#include "automotive/mechanics.hpp"
+
 #include <map>
 #include <vector>
 #include <string>
@@ -31,28 +33,7 @@ struct Vehicle
 	// general information
 	std::string name, authors, credits, comments;
 
-	// physics data and simulation
-	float mass;
-	float tireRadius;
-	Engine engine;
-	float speed, wheelAngularSpeed, brakePedalPosition;
-
-	float approximatedCenterOfGravityHeight, approximatedWheelbase;
-
-	// for querying its value
-	float acceleration;
-
-	enum EngineLocation {
-		ENGINE_LOCATION_ON_FRONT,
-		ENGINE_LOCATION_ON_MIDDLE,
-		ENGINE_LOCATION_ON_REAR
-	} engineLocation;
-
-	enum DrivenWheels {
-		DRIVEN_WHEELS_ON_FRONT,
-		DRIVEN_WHEELS_ON_REAR,
-		DRIVEN_WHEELS_ALL
-	} drivenWheels;
+	Mechanics body;
 
 	// sound data
 	EngineSoundProfile engineSoundProfile;

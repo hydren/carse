@@ -111,22 +111,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	SurfaceType getCurrentSurfaceType();
 	float getTireKineticFrictionCoefficient();
 	float getTireRollingResistanceCoefficient();
-
-	void updateDrivetrain(float delta);
-	float getDriveForce();
-
-	#define TIRE_MODEL_SIMPLE
-	//#define TIRE_MODEL_SLIP_RATIO
-
-	#ifdef TIRE_MODEL_SLIP_RATIO
-
-	float getLongitudinalSlipRatio();
-	float getNormalizedTractionForce();
-	bool isSlipRatioUnstable();
-
-	#endif
-
-	float getDrivenWheelsTireLoad();
 };
 
 

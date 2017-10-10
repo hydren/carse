@@ -25,13 +25,12 @@ static const float
 
 Vehicle::Vehicle()
 : type(TYPE_CAR), name(), authors(), credits(), comments(),
-  mass(0), tireRadius(0), engine(), speed(0), wheelAngularSpeed(0), brakePedalPosition(0),
-  approximatedCenterOfGravityHeight(0), approximatedWheelbase(0), acceleration(0),
-  engineLocation(ENGINE_LOCATION_ON_FRONT), drivenWheels(DRIVEN_WHEELS_ON_REAR),
+  body(Engine()),
   engineSoundProfile(), sprite(), activeSkin(-1)
 {}
 
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
+: body(Engine(prop))
 {
 	// aux. var
 	string key;
@@ -67,39 +66,36 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	// physics data
 
 	key = "vehicle_mass";
-	mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
+	body.mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
 
 	key = "tire_diameter";
-	tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
+	body.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
 
 	key = "engine_location";
 	if(isValueSpecified(prop, key))
 	{
 		const string value = prop.get(key);
-		if(value == "mid" or value == "middle") engineLocation = ENGINE_LOCATION_ON_MIDDLE;
-		else if(value == "rear") engineLocation = ENGINE_LOCATION_ON_REAR;
-		else engineLocation = ENGINE_LOCATION_ON_FRONT;
+		if(value == "mid" or value == "middle") body.engineLocation = Mechanics::ENGINE_LOCATION_ON_MIDDLE;
+		else if(value == "rear") body.engineLocation = Mechanics::ENGINE_LOCATION_ON_REAR;
+		else body.engineLocation = Mechanics::ENGINE_LOCATION_ON_FRONT;
 	}
 	else
-		engineLocation = ENGINE_LOCATION_ON_FRONT;
+		body.engineLocation = Mechanics::ENGINE_LOCATION_ON_FRONT;
 
 	key = "driven_wheels";
 	if(isValueSpecified(prop, key))
 	{
 		const string value = prop.get(key);
-		if(value == "all") drivenWheels = DRIVEN_WHEELS_ALL;
-		else if(value == "front") drivenWheels = DRIVEN_WHEELS_ON_FRONT;
-		else drivenWheels = DRIVEN_WHEELS_ON_REAR;
+		if(value == "all") body.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ALL;
+		else if(value == "front") body.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_FRONT;
+		else body.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_REAR;
 	}
 	else
-		drivenWheels = DRIVEN_WHEELS_ON_REAR;
+		body.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_REAR;
 
-	engine = Engine(prop);
+	body.wheelCount = (type == Vehicle::TYPE_CAR? 4 : type == Vehicle::TYPE_BIKE? 2 : 1);
 
-	speed = 0;
-	wheelAngularSpeed = 0;
-	brakePedalPosition = 0;
-	acceleration = 0;
+	body.setSuggestedWeightDistribuition();
 
 	// sound data
 
@@ -133,34 +129,34 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	// attempt to estimate center's of gravity height
 	key = "vehicle_height";
 	if(isValueSpecified(prop, key))
-		approximatedCenterOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
+		body.centerOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
 	else
-		approximatedCenterOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+		body.centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
 
 
 	// attempt to estimate wheelbase
 	{
 		key = "vehicle_wheelbase";
 		if(isValueSpecified(prop, key))
-			approximatedWheelbase = atof(prop.get(key).c_str());
+			body.wheelbase = atof(prop.get(key).c_str());
 		else
-			approximatedWheelbase = -1;
+			body.wheelbase = -1;
 
 		key = "vehicle_length";
-		if(approximatedWheelbase == -1 and isValueSpecified(prop, key))
-			approximatedWheelbase = atof(prop.get(key).c_str());
+		if(body.wheelbase == -1 and isValueSpecified(prop, key))
+			body.wheelbase = atof(prop.get(key).c_str());
 
 		key = "vehicle_width";
-		if(approximatedWheelbase == -1 and isValueSpecified(prop, key))
-			approximatedWheelbase = 2.5251f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+		if(body.wheelbase == -1 and isValueSpecified(prop, key))
+			body.wheelbase = 2.5251f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
 
 		key = "vehicle_height";
-		if(approximatedWheelbase == -1 and isValueSpecified(prop, key))
-			approximatedWheelbase = 3.6016f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+		if(body.wheelbase == -1 and isValueSpecified(prop, key))
+			body.wheelbase = 3.6016f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
 
-		if(approximatedWheelbase == -1)
+		if(body.wheelbase == -1)
 		{
-			approximatedWheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+			body.wheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
 		}
 	}
 }

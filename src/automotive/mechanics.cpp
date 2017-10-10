@@ -199,7 +199,8 @@ void Mechanics::updateByPacejkaScheme(float delta)
 	const float arbitraryAdjustmentFactor = 0.001;
 	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
 
-	engine.update(delta, engine.getAngularSpeed() + delta * wheelAngularAcceleration);  // set new wheel angular speed
+	wheelAngularSpeed += delta * wheelAngularAcceleration;  // update wheel angular speed
+	engine.update(delta, wheelAngularSpeed);  // updated engine RPM based on the wheel angular speed
 }
 
 float Mechanics::getDriveForceByPacejkaScheme()
@@ -215,8 +216,11 @@ void Mechanics::updateSlipRatio(float delta)
 						TAU_CONSTANT = 0.02,   // oscillation period (experimental)
 						LOWEST_STABLE_SPEED = 5.0f;
 
+	if(engine.gear == 0)
+		engine.gear = 0;
+
 	// approach suggested by Bernard and Clover in [SAE950311].
-	double deltaRatio = ((double) engine.getAngularSpeed() * (double) tireRadius - (double) speed) - fabs((double) speed)* differentialSlipRatio;
+	double deltaRatio = ((double) wheelAngularSpeed * (double) tireRadius - (double) speed) - fabs((double) speed)* differentialSlipRatio;
 	delta /= B_CONSTANT;
 	differentialSlipRatio += deltaRatio * delta;
 

@@ -188,7 +188,7 @@ float Engine::getDriveTorque()
 
 float Engine::getAngularSpeed()
 {
-	return rpm / (gearRatio[gear-1] * differentialRatio * RAD_TO_RPM);
+	return rpm / ((gear==0? 1.0 : gearRatio[gear-1]) * differentialRatio * RAD_TO_RPM);
 }
 
 void Engine::update(float delta, float wheelAngularSpeed)

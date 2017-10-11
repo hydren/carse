@@ -11,6 +11,7 @@
 - Add optional gear shifting sounds derived from forced induction
 - Improve UI to choose vehicle skins.
 - Create showroom background for vehicle selection mode
+- Re-attempt to create jumping physics. Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite.
 - Add option for vehicle to specify custom smoke
 - Add option for vehicle to specify custom gear shifting sound
 - Add transition effects to each state.
@@ -37,3 +38,17 @@
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
 - Fix gear shifting prediction. It should change when the next/previous gear provides more torque/power than the current one.
+
+# misc.
+
+A formula to calculate jumping trajectory/speed:
+
+When (PosY > segment.y) immediately after a step with (PosY <= segment.y)
+verticalSpeed = vehicle.body.speed * sin(slopeAngle)
+PosY += verticalSpeed * dt   
+
+Then while (PosY > segment.y), update:
+verticalSpeed += gravity * dt
+PosY += verticalSpeed * dt
+
+from https://physics.stackexchange.com/questions/175381/speed-needed-to-make-a-car-jump-from-a-ramp

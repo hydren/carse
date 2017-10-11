@@ -199,7 +199,12 @@ void Engine::update(float delta, float wheelAngularSpeed)
 		rpm += (getCurrentTorque()*RAD_TO_RPM - (1-throttlePosition)*rpmRatio*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT)*delta;
 	}
 	else
-		rpm = wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * RAD_TO_RPM;
+	{
+		//synchronize both rotations  (acts like a synchromesh)
+		const float rpmDiff = (wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * RAD_TO_RPM) - rpm, synchonizationFactor = 50.0;
+		rpm += delta * synchonizationFactor * rpmDiff;
+		// fixme the wheel angular speed should change as well when syncing, but previous attempts got strange behavior
+	}
 
 	if(rpm < minRpm)
 		rpm = minRpm;

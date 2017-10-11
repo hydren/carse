@@ -124,13 +124,13 @@ void Pseudo3DRaceState::shiftGear(int gear)
 	if(gear < 0 or gear > vehicle.body.engine.gearCount)
 		return;
 
-	if(gear != 0)
+	if(gear != 0 and vehicle.body.engine.gear != 0)
 	{
 		const float driveshaftRpm = vehicle.body.wheelAngularSpeed
 									* vehicle.body.engine.gearRatio[gear-1]
 									* vehicle.body.engine.differentialRatio * RAD_TO_RPM;
 
-		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (acts like a synchromesh)
+		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (simulate losses due to shift time)
 		vehicle.body.engine.rpm += 0.25*(driveshaftRpm - vehicle.body.engine.rpm);
 	}
 

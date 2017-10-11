@@ -34,22 +34,19 @@ static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual va
 
 Mechanics::Mechanics(const Engine& eng)
 : engine(eng),
+  automaticShiftingEnabled(),
+  automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
+  automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),
+  wheelCount(4),
+  surfaceTireFrictionCoefficient(1.0),
+  surfaceTireRollingResistanceCoefficient(0.2),
+  airFrictionCoefficient(0.31        // drag coefficient (Cd) of a Nissan 300ZX (Z32)
+		  	  	  	  	  * 1.81     // frontal area (in square-meters) of a Nissan 300ZX (Z32)
+						  * 1.2041), // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
   rollingFriction(), airFriction(), brakingFriction()
 {
 	engine.minRpm = 1000;
-	engine.automaticShiftingEnabled = true;
-	engine.automaticShiftingLowerThreshold = 0.5*engine.maximumTorqueRpm/engine.maxRpm;
-	engine.automaticShiftingUpperThreshold = engine.maximumPowerRpm/engine.maxRpm;
-
-	wheelCount = 4;
-
 	setSuggestedWeightDistribuition();
-
-	surfaceTireFrictionCoefficient = 1.0;
-	surfaceTireRollingResistanceCoefficient = 0.2;
-	airFrictionCoefficient = 0.31     // drag coefficient (Cd) of a Nissan 300ZX (Z32)
-						   * 1.81     // frontal area (in square-meters) of a Nissan 300ZX (Z32)
-						   * 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 	reset();
 }
 
@@ -69,6 +66,15 @@ void Mechanics::reset()
 
 void Mechanics::updatePowertrain(float delta)
 {
+	if(automaticShiftingEnabled and slipRatio < 0.1)
+	{
+		if(engine.gear < engine.gearCount and engine.rpm > automaticShiftingUpperThreshold*engine.maxRpm)
+			engine.gear++;
+
+		if(engine.gear > 1 and engine.rpm < automaticShiftingLowerThreshold*engine.maxRpm)
+			engine.gear--;
+	}
+
 	updateMethod(delta);
 
 	brakingFriction = brakePedalPosition * surfaceTireFrictionCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);  // a multiplier here could be added for stronger and easier braking

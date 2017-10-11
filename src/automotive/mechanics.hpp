@@ -26,6 +26,10 @@ struct Mechanics
 {
 	Engine engine;
 
+	bool automaticShiftingEnabled;
+	float automaticShiftingLowerThreshold;
+	float automaticShiftingUpperThreshold;
+
 	float mass;
 	float tireRadius;
 	unsigned wheelCount;

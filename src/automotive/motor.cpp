@@ -166,9 +166,6 @@ Engine::Engine(const futil::Properties& prop)
 	rpm = 0;
 	minRpm = 1000;
 	gear = 1;
-	automaticShiftingEnabled = true;
-	automaticShiftingLowerThreshold = 0.4 * maxRpm;
-	automaticShiftingUpperThreshold = 0.8 * maxRpm;
 }
 
 float Engine::getCurrentTorque()
@@ -211,13 +208,4 @@ void Engine::update(float delta, float wheelAngularSpeed)
 
 	if(rpm > maxRpm+100)
 		rpm = maxRpm+100;
-
-	if(automaticShiftingEnabled)
-	{
-		if(gear < gearCount and rpm > automaticShiftingUpperThreshold*maxRpm)
-			gear++;
-
-		if(gear > 1 and rpm < automaticShiftingLowerThreshold*maxRpm)
-			gear--;
-	}
 }

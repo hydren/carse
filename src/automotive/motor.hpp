@@ -42,10 +42,6 @@ struct Engine
 
 	TorqueCurveProfile torqueCurveProfile;
 
-	bool automaticShiftingEnabled;
-	float automaticShiftingLowerThreshold;
-	float automaticShiftingUpperThreshold;
-
 	/** Empty constructor */
 	Engine();
 

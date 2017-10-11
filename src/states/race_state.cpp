@@ -221,7 +221,7 @@ void Pseudo3DRaceState::onEnter()
 	posX = posY = 0;
 //	verticalSpeed = 0;
 	vehicle.body.reset();
-	vehicle.body.engine.automaticShiftingEnabled = true;
+	vehicle.body.automaticShiftingEnabled = true;
 	pseudoAngle = 0;
 	laptime = laptimeBest = 0;
 	lapCurrent = 1;
@@ -463,7 +463,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
-		const char* autoLabelTxt = (vehicle.body.engine.automaticShiftingEnabled? " (auto)":"");
+		const char* autoLabelTxt = (vehicle.body.automaticShiftingEnabled? " (auto)":"");
 		sprintf(buffer, "%d %s", vehicle.body.engine.gear, autoLabelTxt);
 		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
@@ -595,7 +595,7 @@ void Pseudo3DRaceState::handleInput()
 //					isBurningRubber = onAir = onLongAir = false;
 					break;
 				case Keyboard::KEY_T:
-					vehicle.body.engine.automaticShiftingEnabled = !vehicle.body.engine.automaticShiftingEnabled;
+					vehicle.body.automaticShiftingEnabled = !vehicle.body.automaticShiftingEnabled;
 					break;
 				case Keyboard::KEY_M:
 					if(music->isPlaying())

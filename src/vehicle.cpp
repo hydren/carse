@@ -24,13 +24,13 @@ static const float
 	DEFAULT_TIRE_DIAMETER = 678;  // mm
 
 Vehicle::Vehicle()
-: type(TYPE_CAR), name(), authors(), credits(), comments(),
-  body(Engine()),
+: type(Mechanics::TYPE_CAR), name(), authors(), credits(), comments(),
+  body(Engine(), Mechanics::TYPE_OTHER),
   engineSoundProfile(), sprite(), activeSkin(-1)
 {}
 
 Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
-: body(Engine(prop))
+: body(Engine(), Mechanics::TYPE_OTHER)
 {
 	// aux. var
 	string key;
@@ -41,11 +41,13 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	if(prop.containsKey(key))
 	{
 		string t = to_lower(prop.get(key));
-		if(t == "car" or t == "default") type = TYPE_CAR;
-		else if(t == "bike") type = TYPE_BIKE;
-		else type = TYPE_OTHER;
+		if(t == "car" or t == "default") type = Mechanics::TYPE_CAR;
+		else if(t == "bike") type = Mechanics::TYPE_BIKE;
+		else type = Mechanics::TYPE_OTHER;
 	}
-	else type = TYPE_CAR;
+	else type = Mechanics::TYPE_CAR;
+
+	body = Mechanics(Engine(prop), type);
 
 	// info data
 
@@ -92,8 +94,6 @@ Vehicle::Vehicle(const Properties& prop, Pseudo3DCarseGame& game)
 	}
 	else
 		body.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_REAR;
-
-	body.wheelCount = (type == Vehicle::TYPE_CAR? 4 : type == Vehicle::TYPE_BIKE? 2 : 1);
 
 	body.setSuggestedWeightDistribuition();
 

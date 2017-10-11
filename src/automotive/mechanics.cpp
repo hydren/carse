@@ -30,19 +30,24 @@
 	#define getDriveForceMethod getDriveForceBySimplifiedScheme
 #endif
 
-static const float GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+static const float GRAVITY_ACCELERATION = 9.8066, // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+				   AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 
-Mechanics::Mechanics(const Engine& eng)
+static const float DEFAULT_CDA_CAR = 0.31    // drag coefficient (Cd) of a Nissan 300ZX (Z32)
+									* 1.81;  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
+
+static const float DEFAULT_CDA_BIKE = 0.52    // estimated drag coefficient (Cd) of a common sporty bike
+									*  0.85;  // estimated frontal area (in square-meters) of a common sporty bike
+
+Mechanics::Mechanics(const Engine& eng, VehicleType type)
 : engine(eng),
   automaticShiftingEnabled(),
   automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
   automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),
-  wheelCount(4),
+  wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
   surfaceTireFrictionCoefficient(1.0),
   surfaceTireRollingResistanceCoefficient(0.2),
-  airFrictionCoefficient(0.31        // drag coefficient (Cd) of a Nissan 300ZX (Z32)
-		  	  	  	  	  * 1.81     // frontal area (in square-meters) of a Nissan 300ZX (Z32)
-						  * 1.2041), // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+  airFrictionCoefficient((type == TYPE_CAR? DEFAULT_CDA_CAR : type == TYPE_BIKE? DEFAULT_CDA_BIKE : 1.0) * AIR_DENSITY),
   rollingFriction(), airFriction(), brakingFriction()
 {
 	engine.minRpm = 1000;

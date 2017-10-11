@@ -214,7 +214,7 @@ void Pseudo3DRaceState::onEnter()
 					spriteSmokeRight->scale.x =
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
-	corneringForceLeechFactor = (vehicle.type == Vehicle::TYPE_BIKE? 0.25 : 0.5);
+	corneringForceLeechFactor = (vehicle.type == Mechanics::TYPE_BIKE? 0.25 : 0.5);
 
 	bgParallax.x = bgParallax.y = 0;
 	position = 0;

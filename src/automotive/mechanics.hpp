@@ -9,7 +9,7 @@
 #define AUTOMOTIVE_MECHANICS_HPP_
 #include <ciso646>
 
-//#define USE_PACEJKA_SCHEME
+#define USE_PACEJKA_SCHEME
 
 #include "motor.hpp"
 
@@ -24,6 +24,8 @@
  *  */
 struct Mechanics
 {
+	enum VehicleType { TYPE_CAR, TYPE_BIKE, TYPE_OTHER };
+
 	Engine engine;
 
 	bool automaticShiftingEnabled;
@@ -63,7 +65,8 @@ struct Mechanics
 	/** An arbitrary force factor applyied to the net drive force when computing acceleration. Default is 1.0. */
 	float arbitraryForceFactor;
 
-	Mechanics(const Engine& engine);
+	// todo support more types of vehicles (jetskis, motorboats, hovercrafts, hovercars, trikes, etc)
+	Mechanics(const Engine& engine, VehicleType);
 
 	/** Resets the powertrain state to idle. */
 	void reset();

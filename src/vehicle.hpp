@@ -27,8 +27,7 @@ struct Pseudo3DCarseGame;  // foward declaration
 
 struct Vehicle
 {
-	// todo support more types of vehicles (jetskis, motorboats, hovercrafts, hovercars, trikes, etc)
-	enum Type { TYPE_CAR, TYPE_BIKE, TYPE_OTHER } type;
+	Mechanics::VehicleType type;
 
 	// general information
 	std::string name, authors, credits, comments;

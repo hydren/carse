@@ -1,5 +1,11 @@
 # to do
 
+- Add switch to select simulation mode.
+- Fix wrong torque curve generation, torque from 1000rpm is wrong.
+- Needs predefined torque curve profiles. For real.
+- Needs to account for downforce. At least soft-simulation, semi-empirical.
+- Fix getting stuck on grass.
+- Fix braking simulation when using pacejka scheme. Move it to wheel torque calculation.
 - Optimize velocimeter drawing by caching geometric coordinates
 - Add gear shifting sounds
 - Add optional gear shifting sounds derived from forced induction
@@ -11,30 +17,23 @@
 - Add different terrains.
 - Add traffic cars.
 - Add opponent cars. 
-- Create props to decorate the road.
+- Create more props to decorate the road.
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
-- Introduce a speed-independent RPM simulation, to make it possible to simulate tire slipping and slide.
-- Add noise for vehicle sliding on grass.
 - Add vehicle shaking animation (when off-roading or in rough terrain)
 - Add digital display
-- Scale the bg to be resolution-independent.
 - Add menu music
 - Howl engine when selecting car (either a default engine howl or one using the car engine profile).
 - Set resolution/fullscreen mode from options
-- Finish Options menu (including making it properly accessible)
-- Create a new UI.
 - Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
 
-
 # bugs
 
-- Fix bg scaling on race.
+- Fix the ingame background to make it resolution-independent.
 - Fix incorrect tire animation speed.
 - Fix car names trespassing window size.
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
-- Fix gear shifting. It should change when the next/previous gear provides more torque/power than the current one.
-- Fix tire grip formula to account for terrain type (currently just the rolling resistance accounts for terrain)
+- Fix gear shifting prediction. It should change when the next/previous gear provides more torque/power than the current one.

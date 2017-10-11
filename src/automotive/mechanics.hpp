@@ -9,7 +9,7 @@
 #define AUTOMOTIVE_MECHANICS_HPP_
 #include <ciso646>
 
-#define USE_PACEJKA_SCHEME
+//#define USE_PACEJKA_SCHEME
 
 #include "motor.hpp"
 

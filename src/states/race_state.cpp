@@ -588,7 +588,6 @@ void Pseudo3DRaceState::handleInput()
 					posX = posY = 0;
 //					verticalSpeed = 0;
 					vehicle.body.reset();
-					vehicle.body.engine.automaticShiftingEnabled = true;
 					pseudoAngle = 0;
 					bgParallax.x = bgParallax.y = 0;
 					laptime = 0;

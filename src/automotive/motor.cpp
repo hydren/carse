@@ -13,6 +13,7 @@
 #include "futil/string_actions.hpp"
 
 using std::string;
+using std::vector;
 
 #define PARAM_RPM 0
 #define PARAM_SLOPE 1
@@ -21,10 +22,6 @@ using std::string;
 #ifndef M_PI
 	# define M_PI		3.14159265358979323846	/* pi */
 #endif
-
-#define LINEAR_SLOPE(x1, y1, x2, y2) ((y2 - y1)/(x2 - x1))
-#define LINEAR_INTERCEPT(x1, y1, x2, y2) ((x1 * y2 - x2 * y1)/(x1 - x2))
-#define LINEAR_PARAMETERS(x1, y1, x2, y2) { x2, LINEAR_SLOPE(x1, y1, x2, y2), LINEAR_INTERCEPT(x1, y1, x2, y2) }
 
 const float Engine::TorqueCurveProfile::TORQUE_CURVE_INITIAL_VALUE = 0.55f,
 			Engine::TorqueCurveProfile::TORQUE_CURVE_FINAL_VALUE =   1.f/3.f;  // 0.33333... (one third)
@@ -44,16 +41,27 @@ static const float
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
+/**
+ *  Create a linear "curve".
+ * */
+static vector<float> createLinearCurve(float rpm_i, float torque_i, float rpm_f, float torque_f)
+{
+	vector<float> param(3);
+	param[0] = rpm_f;  // RPM range threshold or right bound.
+	param[1] = (torque_f - torque_i)/(rpm_f - rpm_i);  // line slope
+	param[2] = (rpm_f * torque_i - rpm_i * torque_f)/(rpm_f - rpm_i);  // line intercept
+	return param;
+}
+
 Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, float rpmMaxTorque)
 {
 	const float torque_i = TORQUE_CURVE_INITIAL_VALUE,
 				torque_f = TORQUE_CURVE_FINAL_VALUE;
 
-	TorqueCurveProfile profile = {{
-		LINEAR_PARAMETERS(1.0f, 0.0f, 1000.f, torque_i),  // hardcoded linear warmup torque curve in 0-1000rpm range
-		LINEAR_PARAMETERS(1000.f, torque_i, rpmMaxTorque, 1.0f),  // curve that leads to the highest torque point
-		LINEAR_PARAMETERS(rpmMaxTorque, 1.0f, maxRpm, torque_f)  // curve with decrease in torque as it approuches redline
-	}};
+	TorqueCurveProfile profile;
+	profile.parameters.push_back(createLinearCurve(           1,        0,         1000, torque_i));  // hardcoded linear warmup torque curve in 1-1000rpm range
+	profile.parameters.push_back(createLinearCurve(        1000, torque_i, rpmMaxTorque,      1.0));  // curve that leads to the highest torque point (from 1001rpm to rpmMaxTorque)
+	profile.parameters.push_back(createLinearCurve(rpmMaxTorque,      1.0,       maxRpm, torque_f));  // curve with decrease in torque as it approuches redline (from rpmMaxTorque to maxRpm)
 
 	return profile;
 }
@@ -170,12 +178,11 @@ Engine::Engine(const futil::Properties& prop)
 
 float Engine::getCurrentTorque()
 {
-	#define torqueCurve torqueCurveProfile.parameters
+	const vector< vector<float> >& torqueCurve = torqueCurveProfile.parameters;
 	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm :
 					  rpm < torqueCurve[0][PARAM_RPM] ? torqueCurve[0][PARAM_SLOPE]*rpm + torqueCurve[0][PARAM_INTERCEPT] :
 					  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
 							  	  	  	  	  	  	    torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );
-	#undef torqueCurve
 }
 
 float Engine::getDriveTorque()

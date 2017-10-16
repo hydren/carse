@@ -31,7 +31,7 @@ struct Engine
 
 	struct TorqueCurveProfile
 	{
-		float parameters[3][3];
+		std::vector< std::vector<float> > parameters;
 
 		/** Creates a torque curve with some hardcoded values and the given max. RPM and max. torque RPM (Optional) */
 		static TorqueCurveProfile create(float maxRpm, float rpmMaxTorque=-1);

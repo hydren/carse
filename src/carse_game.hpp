@@ -37,63 +37,9 @@ class Pseudo3DCarseGame extends public fgeal::Game
 	Pseudo3DCarseGame();
 	void initializeStatesList();
 
-	/** Wrapper to resources shared between states. */
-	struct SharedResources
-	{
-		fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
-		fgeal::Font fontDev;
-
-		SharedResources();
-	}  *sharedResources;
-
-	/** Class to wrap together all between-states game logic. */
-	class Logic
-	{
-		friend class Pseudo3DCarseGame;
-		Pseudo3DCarseGame& game;
-
-		std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
-		std::vector<Course> courses;
-		std::vector<Vehicle> vehicles;
-
-		Logic(Pseudo3DCarseGame& game);
-
-		// intended to run on startup
-		void initialize();
-
-		// intended to run on startup, after initializing all states
-		void onStatesListInitFinished();
-
-		// intended to run on startup, loads all engine sound presets in assets/sound/engine/
-		void loadPresetEngineSoundProfiles();
-
-		// intended to run on startup, loads all courses in the data/courses folder
-		void loadCourses();
-
-		// intended to run on startup, loads all vehicles in the data/vehicles folder
-		void loadVehicles();
-
-		public:
-		// gets one of the built-in engine sound presets, by name
-		EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
-
-		const std::vector<Course>& getCourseList();
-		void setNextCourse(unsigned courseIndex);
-		void setNextCourse(const Course& c);
-		void setNextCourseRandom();
-		void setNextCourseDebug();
-
-		const std::vector<Vehicle>& getVehicleList();
-		void setPickedVehicle(unsigned vehicleIndex, int skin=-1);
-		void setPickedVehicle(const Vehicle& v, int skin=-1);
-
-		bool isImperialUnitEnabled();
-		void setImperialUnitEnabled(bool choice=true);
-
-		Mechanics::SimulationType getSimulationType();
-		void setSimulationType(Mechanics::SimulationType type);
-
-	} logic;
+	#include "carse_game_logic.hxx"
+	SharedResources* sharedResources;  // @suppress("Type cannot be resolved")
+	Logic logic;					   // @suppress("Type cannot be resolved")
 };
 
 typedef Pseudo3DCarseGame CarseGame;

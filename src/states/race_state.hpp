@@ -113,5 +113,4 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float getTireRollingResistanceCoefficient();
 };
 
-
 #endif /* PSEUDO3D_RACE_STATE_HPP_ */

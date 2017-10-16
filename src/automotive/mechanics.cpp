@@ -22,14 +22,6 @@
 // these arbitrary multipliers don't have foundation in physics, but serves as a fine-tuning for the gameplay
 #define AIR_FRICTION_ARBITRARY_ADJUST 0.8
 
-#ifdef USE_PACEJKA_SCHEME
-	#define updateMethod updateByPacejkaScheme
-	#define getDriveForceMethod getDriveForceByPacejkaScheme
-#else
-	#define updateMethod updateBySimplifiedScheme
-	#define getDriveForceMethod getDriveForceBySimplifiedScheme
-#endif
-
 static const float GRAVITY_ACCELERATION = 9.8066, // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 				   AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 
@@ -40,7 +32,7 @@ static const float DEFAULT_CDA_BIKE = 0.52    // estimated drag coefficient (Cd)
 									*  0.85;  // estimated frontal area (in square-meters) of a common sporty bike
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type)
-: engine(eng),
+: simulationType(SIMULATION_TYPE_FAKESLIP), engine(eng),
   automaticShiftingEnabled(),
   automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
   automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),
@@ -80,7 +72,13 @@ void Mechanics::updatePowertrain(float delta)
 			engine.gear--;
 	}
 
-	updateMethod(delta);
+	switch(simulationType)
+	{
+		default:
+		case SIMULATION_TYPE_SLIPLESS:
+		case SIMULATION_TYPE_FAKESLIP:		updateBySimplifiedScheme(delta); break;
+		case SIMULATION_TYPE_PACEJKA_BASED: updateByPacejkaScheme(delta); break;
+	}
 
 	brakingFriction = brakePedalPosition * surfaceTireFrictionCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);  // a multiplier here could be added for stronger and easier braking
 	rollingFriction = wheelCount * surfaceTireRollingResistanceCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);
@@ -96,7 +94,13 @@ void Mechanics::updatePowertrain(float delta)
 
 float Mechanics::getDriveForce()
 {
-	return getDriveForceMethod();
+	switch(simulationType)
+	{
+		default:
+		case SIMULATION_TYPE_SLIPLESS:  	return getDriveForceBySimplifiedSchemeSlipless();
+		case SIMULATION_TYPE_FAKESLIP:		return getDriveForceBySimplifiedSchemeFakeSlip();
+		case SIMULATION_TYPE_PACEJKA_BASED: return getDriveForceByPacejkaScheme();
+	}
 }
 
 float Mechanics::getDrivenWheelsWeightLoad()
@@ -150,11 +154,14 @@ void Mechanics::updateBySimplifiedScheme(float delta)
 	engine.update(delta, wheelAngularSpeed);
 }
 
-float Mechanics::getDriveForceBySimplifiedScheme()
+float Mechanics::getDriveForceBySimplifiedSchemeSlipless()
 {
 	// all engine power
-//	return engine.getDriveTorque() / tireRadius;
+	return engine.getDriveTorque() / tireRadius;
+}
 
+float Mechanics::getDriveForceBySimplifiedSchemeFakeSlip()
+{
 	// all engine power, up to the maximum allowed by tire grip (driven wheels load)
 	return std::min(engine.getDriveTorque() / tireRadius, getDrivenWheelsWeightLoad() * surfaceTireFrictionCoefficient);
 }
@@ -172,19 +179,6 @@ float Mechanics::getDriveForceBySimplifiedScheme()
  * http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
  * http://white-smoke.wikifoundry.com/page/Tyre+curve+fitting+and+validation
 
- 	What to do when slip ratio is unstable (low speeds)? Options include:
- 	 - Use non-sliping, simplified formula.
- 	 - Assume zero traction torque.
- 	 - Use Vinicius Martins idea to tamper the speed to maintain it at a minimum stable value, when it's not zero.
- 	 - ... (research another formula).
-
- 	When is the slip ratio unstable, exactly?
- 	- Low speed. See PACEJKA_MAGIC_FORMULA_LOWER_SPEED_THRESHOLD
- 	- Low slip ratio. See LOWEST_STABLE_SLIP
- 	- ... (don't know, really)
-
- 	Needs neutral gear implementation, specially to avoid powershifting in slip ratio model.
- 	Also needs a proper shift time. Specially when using slip ratio mode because, without it, the vehicle appears to be powershifting.
 */
 
 // An estimated wheel (tire+rim) density. (33cm radius or 660mm diameter tire with 75kg mass). Actual value varies by tire (brand, weight, type, etc) and rim (brand , weight, shape, material, etc)

@@ -54,7 +54,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   bgColor(), bgColorHorizon(), spriteSmokeLeft(null), spriteSmokeRight(null),
   position(0), posX(0), posY(0), pseudoAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), corneringForceLeechFactor(0),
   bgParallax(), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
-  drawParameters(), coursePositionFactor(500), isImperialUnit(false), laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
+  drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
+  laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
   debugMode(true)
 {
@@ -220,6 +221,7 @@ void Pseudo3DRaceState::onEnter()
 	position = 0;
 	posX = posY = 0;
 //	verticalSpeed = 0;
+	vehicle.body.simulationType = simulationType;
 	vehicle.body.reset();
 	vehicle.body.automaticShiftingEnabled = true;
 	pseudoAngle = 0;
@@ -467,12 +469,10 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%d %s", vehicle.body.engine.gear, autoLabelTxt);
 		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
-		#ifdef USE_PACEJKA_SCHEME
 		offset += 25;
 		fontDebug->drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f%%", 100*vehicle.body.slipRatio);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-		#endif
 
 
 		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.body.engine.rpm);
@@ -484,6 +484,8 @@ void Pseudo3DRaceState::render()
 		}
 	}
 }
+
+static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 
 void Pseudo3DRaceState::update(float delta)
 {
@@ -507,21 +509,36 @@ void Pseudo3DRaceState::update(float delta)
 
 	engineSound.updateSound(vehicle.body.engine.rpm);
 
-	// fake burnout mode
-//	const bool tireBurnoutAnimRequired = vehicle.body.engine.gear == 1 and vehicle.body.engine.rpm < 0.5*vehicle.body.engine.maxRpm and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP);
-
-	// burnout based on capped drive force
-	#ifndef USE_PACEJKA_SCHEME
-	const bool tireBurnoutAnimRequired = (vehicle.body.getDriveForce() < 0.5 * vehicle.body.engine.getDriveTorque() / vehicle.body.tireRadius)
-											and vehicle.body.engine.gear == 1;  // but limited to first gear.
-	#endif
-
-	// burnout based on real slip ratio
-	#ifdef USE_PACEJKA_SCHEME
-	static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
-	const bool tireBurnoutAnimRequired = fabs(vehicle.body.slipRatio) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
-											and fabs(vehicle.body.speed) > 1.0;
-	#endif
+	// lets decide if there is burnout animation
+	const bool tireBurnoutAnimRequired = (
+		(vehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS
+			and
+			(
+				// fake burnout mode
+				vehicle.body.engine.gear == 1
+				and vehicle.body.engine.rpm < 0.5*vehicle.body.engine.maxRpm
+				and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)
+			)
+		)
+		or
+		(vehicle.body.simulationType == Mechanics::SIMULATION_TYPE_FAKESLIP
+			and
+			(
+				// burnout based on capped drive force
+				(vehicle.body.getDriveForce() < 0.5 * vehicle.body.engine.getDriveTorque() / vehicle.body.tireRadius)
+				and vehicle.body.engine.gear == 1  // but limited to first gear.
+			)
+		)
+		or
+		(vehicle.body.simulationType == Mechanics::SIMULATION_TYPE_PACEJKA_BASED
+			and
+			(
+				// burnout based on real slip ratio
+				fabs(vehicle.body.slipRatio) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
+				and fabs(vehicle.body.speed) > 1.0
+			)
+		)
+	);
 
 	if(tireBurnoutAnimRequired and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{

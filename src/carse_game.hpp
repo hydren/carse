@@ -17,6 +17,7 @@
 #include "course.hpp"
 #include "vehicle.hpp"
 #include "automotive/engine_sound.hpp"
+#include "automotive/mechanics.hpp"
 
 #include <map>
 #include <vector>
@@ -88,6 +89,10 @@ class Pseudo3DCarseGame extends public fgeal::Game
 
 		bool isImperialUnitEnabled();
 		void setImperialUnitEnabled(bool choice=true);
+
+		Mechanics::SimulationType getSimulationType();
+		void setSimulationType(Mechanics::SimulationType type);
+
 	} logic;
 };
 

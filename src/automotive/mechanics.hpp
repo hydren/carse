@@ -9,8 +9,6 @@
 #define AUTOMOTIVE_MECHANICS_HPP_
 #include <ciso646>
 
-//#define USE_PACEJKA_SCHEME
-
 #include "motor.hpp"
 
 /** Class that performs simulations of vehicle powertrains and physics.
@@ -24,6 +22,14 @@
  *  */
 struct Mechanics
 {
+	enum SimulationType
+	{
+		SIMULATION_TYPE_SLIPLESS,  // no slip ratio, no fake slip
+		SIMULATION_TYPE_FAKESLIP,  // no slip ratio, fake slip that limits power output to driven tires' load
+		SIMULATION_TYPE_PACEJKA_BASED  // slip ratio simulation, Pacejka friction, scheme based on suggestions from SAE950311 and Gregor Veble
+	}
+	simulationType;
+
 	enum VehicleType { TYPE_CAR, TYPE_BIKE, TYPE_OTHER };
 
 	Engine engine;
@@ -87,19 +93,19 @@ struct Mechanics
 
 	// Simplified scheme-related
 	void updateBySimplifiedScheme(float);
-	float getDriveForceBySimplifiedScheme();
+	float getDriveForceBySimplifiedSchemeSlipless();
+	float getDriveForceBySimplifiedSchemeFakeSlip();
+
+	public:  // make these public for debugging when using pacejka scheme
 
 	// Pacejka scheme-related
-	#ifdef USE_PACEJKA_SCHEME
-	public:  // make these public when using pacejka scheme, for debugging
-	#endif
 	void updateByPacejkaScheme(float);
 	float getDriveForceByPacejkaScheme();
 	float getNormalizedTractionForce();
+
 	// these refer to the longitudinal slip ratio
 	double slipRatio, differentialSlipRatio;
 	void updateSlipRatio(float delta);
-	private:
 };
 
 #endif /* AUTOMOTIVE_MECHANICS_HPP_ */

@@ -37,6 +37,7 @@ class OptionsMenuState extends public fgeal::Game::State
 
 	private:
 	void onMenuSelect();
+	void updateLabels();
 };
 
 #endif /* OPTIONS_MENU_STATE_HPP_ */

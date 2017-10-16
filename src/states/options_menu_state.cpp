@@ -18,6 +18,8 @@ using fgeal::Keyboard;
 using fgeal::Display;
 using fgeal::Rectangle;
 
+using std::string;
+
 int OptionsMenuState::getId() { return Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(Pseudo3DCarseGame* game)
@@ -44,6 +46,7 @@ void OptionsMenuState::initialize()
 	menu->addEntry("Resolution: ");
 	menu->addEntry("Fullscreen: ");
 	menu->addEntry("Unit: ");
+	menu->addEntry("Simulation mode: ");
 	menu->addEntry("Back to main menu");
 }
 
@@ -64,13 +67,10 @@ void OptionsMenuState::render()
 	menu->bounds.w = 0.4f*display.getWidth();
 	menu->bounds.h = 0.5f*display.getHeight();
 
+	updateLabels();
 	menu->draw();
 
 	fontTitle->drawText("Options", 0.125*display.getWidth(), 0.125*display.getHeight(), Color::WHITE);
-
-	font->drawText(futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight()), menu->bounds.x + 128, menu->bounds.y, Color::WHITE);
-	font->drawText(display.isFullscreen()? " yes" : " no", menu->bounds.x + font->getTextWidth(menu->at(1).label), menu->bounds.y + font->getHeight(), Color::WHITE);
-	font->drawText(logic.isImperialUnitEnabled()? " imperial" : " metric", menu->bounds.x + font->getTextWidth(menu->at(2).label), menu->bounds.y + 2*font->getHeight(), Color::WHITE);
 }
 
 void OptionsMenuState::update(float delta)
@@ -123,6 +123,37 @@ void OptionsMenuState::onMenuSelect()
 	if(menu->getSelectedIndex() == 2)
 		logic.setImperialUnitEnabled(!logic.isImperialUnitEnabled());
 
+	if(menu->getSelectedIndex() == 3)
+	{
+		Mechanics::SimulationType newType;
+		switch(logic.getSimulationType())
+		{
+			default:
+			case Mechanics::SIMULATION_TYPE_SLIPLESS:	newType = Mechanics::SIMULATION_TYPE_FAKESLIP; break;
+			case Mechanics::SIMULATION_TYPE_FAKESLIP:	newType = Mechanics::SIMULATION_TYPE_PACEJKA_BASED; break;
+			case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	newType = Mechanics::SIMULATION_TYPE_SLIPLESS; break;
+		}
+		logic.setSimulationType(newType);
+	}
+
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
 		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+}
+
+void OptionsMenuState::updateLabels()
+{
+	Display& display = game.getDisplay();
+	menu->at(0).label = string("Resolution: ") + futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight());
+	menu->at(1).label = string("Fullscreen: ") + (display.isFullscreen()? " yes" : " no");
+	menu->at(2).label = string("Unit: ") + (logic.isImperialUnitEnabled()? " imperial" : " metric");
+
+	string strSimType;
+	switch(logic.getSimulationType())
+	{
+		default:
+		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Simple (slipless)"; break;
+		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Simple (fake slip)"; break;
+		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (Pacejka-Bernard-Clover)"; break;
+	}
+	menu->at(3).label = "Simulation mode: " + strSimType;
 }

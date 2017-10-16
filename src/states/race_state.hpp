@@ -49,6 +49,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
 	bool isImperialUnit;
+	Mechanics::SimulationType simulationType;
 
 	float laptime, laptimeBest;
 

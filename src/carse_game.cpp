@@ -83,6 +83,8 @@ void Pseudo3DCarseGame::Logic::onStatesListInitFinished()
 {
 	this->setNextCourseRandom();  // set default course
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
+	this->setImperialUnitEnabled(false);
+	this->setSimulationType(Mechanics::SIMULATION_TYPE_FAKESLIP);
 }
 
 void Pseudo3DCarseGame::Logic::loadPresetEngineSoundProfiles()
@@ -260,4 +262,14 @@ bool Pseudo3DCarseGame::Logic::isImperialUnitEnabled()
 void Pseudo3DCarseGame::Logic::setImperialUnitEnabled(bool choice)
 {
 	getRaceState()->isImperialUnit = choice;
+}
+
+Mechanics::SimulationType Pseudo3DCarseGame::Logic::getSimulationType()
+{
+	return getRaceState()->simulationType;
+}
+
+void Pseudo3DCarseGame::Logic::setSimulationType(Mechanics::SimulationType type)
+{
+	getRaceState()->simulationType = type;
 }

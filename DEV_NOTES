@@ -1,6 +1,5 @@
 # to do
 
-- Add switch to select simulation mode.
 - Fix wrong torque curve generation, torque from 1000rpm is wrong.
 - Needs predefined torque curve profiles. For real.
 - Needs to account for downforce. At least soft-simulation, semi-empirical.

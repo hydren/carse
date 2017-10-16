@@ -178,6 +178,7 @@ float Mechanics::getDriveForceBySimplifiedSchemeFakeSlip()
  * http://www3.wolframalpha.com/input/?i=r(v,+w)+%3D+(w+-+v)%2Fv
  * http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
  * http://white-smoke.wikifoundry.com/page/Tyre+curve+fitting+and+validation
+ * http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
 
 */
 

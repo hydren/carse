@@ -403,27 +403,27 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", vehicle.body.slopePull);
+		sprintf(buffer, "%2.2fm/s^2", vehicle.body.slopePullForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.brakingFriction);
+		sprintf(buffer, "%2.2fN", vehicle.body.brakingForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.rollingFriction);
+		sprintf(buffer, "%2.2fN", vehicle.body.rollingResistanceForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.airFriction);
+		sprintf(buffer, "%2.2fN", vehicle.body.airDragForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + vehicle.body.slopePull + vehicle.body.brakingFriction + vehicle.body.rollingFriction + vehicle.body.airFriction));
+		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + vehicle.body.slopePullForce + vehicle.body.brakingForce + vehicle.body.rollingResistanceForce + vehicle.body.airDragForce));
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
@@ -451,6 +451,11 @@ void Pseudo3DRaceState::render()
 		offset += 25;
 		fontDebug->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", vehicle.body.getDrivenWheelsWeightLoad());
+		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+
+		offset += 18;
+		fontDebug->drawText("Downforce:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fN", -vehicle.body.downforce);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;

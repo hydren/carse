@@ -19,17 +19,19 @@
 
 #define pow2(x) ((x)*(x))
 
-// these arbitrary multipliers don't have foundation in physics, but serves as a fine-tuning for the gameplay
-#define AIR_FRICTION_ARBITRARY_ADJUST 0.8
+// air friction and downforce arbitrary multipliers. don't have foundation in physics, but serves as a fine-tuning for the gameplay
+#define AIR_DRAG_ARBITRARY_ADJUST 0.8
+#define DOWNFORCE_ARBITRATY_ADJUST 0.5
 
 static const float GRAVITY_ACCELERATION = 9.8066, // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-				   AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+				   AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+				   DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
+				   DEFAULT_FRONTAL_AREA_BIKE = 0.70;  // estimated frontal area (in square-meters) of a common sporty bike
 
-static const float DEFAULT_CDA_CAR = 0.31    // drag coefficient (Cd) of a Nissan 300ZX (Z32)
-									* 1.81;  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
-
-static const float DEFAULT_CDA_BIKE = 0.52    // estimated drag coefficient (Cd) of a common sporty bike
-									*  0.85;  // estimated frontal area (in square-meters) of a common sporty bike
+static const float DEFAULT_CDA_CAR  = 0.31 * DEFAULT_FRONTAL_AREA_CAR,   // drag coefficient (Cd) of a Nissan 300ZX (Z32)
+				   DEFAULT_CDA_BIKE = 0.60 * DEFAULT_FRONTAL_AREA_BIKE,  // estimated drag coefficient (Cd) of a common sporty bike
+				   DEFAULT_CLA_CAR  = 0.20 * DEFAULT_FRONTAL_AREA_CAR,    // estimated lift coefficient (Cl) of a Nissan 300ZX (Z32)
+				   DEFAULT_CLA_BIKE = 0.10 * DEFAULT_FRONTAL_AREA_BIKE;   // estimated lift coefficient (Cl) of a common sporty bike
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type)
 : simulationType(SIMULATION_TYPE_FAKESLIP), engine(eng),
@@ -37,10 +39,11 @@ Mechanics::Mechanics(const Engine& eng, VehicleType type)
   automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
   automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),
   wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
-  surfaceTireFrictionCoefficient(1.0),
-  surfaceTireRollingResistanceCoefficient(0.2),
-  airFrictionCoefficient((type == TYPE_CAR? DEFAULT_CDA_CAR : type == TYPE_BIKE? DEFAULT_CDA_BIKE : 1.0) * AIR_DENSITY),
-  rollingFriction(), airFriction(), brakingFriction()
+  tireFrictionFactor(1.0),
+  rollingResistanceFactor(0.2),
+  airDragFactor((type == TYPE_CAR? DEFAULT_CDA_CAR : type == TYPE_BIKE? DEFAULT_CDA_BIKE : 0.5) * AIR_DENSITY),
+  downforceFactor((type == TYPE_CAR? DEFAULT_CLA_CAR : type == TYPE_BIKE? DEFAULT_CLA_BIKE : 0.5) * AIR_DENSITY),
+  rollingResistanceForce(), airDragForce(), brakingForce(), slopePullForce()
 {
 	engine.minRpm = 1000;
 	setSuggestedWeightDistribuition();
@@ -59,6 +62,11 @@ void Mechanics::reset()
 	brakePedalPosition = 0;
 	slipRatio = 0;
 	differentialSlipRatio = 0;
+	brakingForce = 0;
+	rollingResistanceForce = 0;
+	slopePullForce = 0;
+	airDragForce = 0;
+	downforce = 0;
 }
 
 void Mechanics::updatePowertrain(float delta)
@@ -80,13 +88,14 @@ void Mechanics::updatePowertrain(float delta)
 		case SIMULATION_TYPE_PACEJKA_BASED: updateByPacejkaScheme(delta); break;
 	}
 
-	brakingFriction = brakePedalPosition * surfaceTireFrictionCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);  // a multiplier here could be added for stronger and easier braking
-	rollingFriction = surfaceTireRollingResistanceCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);  // rolling friction is independant on wheel count since the weight will be divided between them
-	slopePull = mass * GRAVITY_ACCELERATION * sin(slopeAngle),
-	airFriction = 0.5 * airFrictionCoefficient * pow2(speed) * AIR_FRICTION_ARBITRARY_ADJUST;
+	brakingForce = brakePedalPosition * tireFrictionFactor * mass * GRAVITY_ACCELERATION * sgn(speed);  // a multiplier here could be added for stronger and easier braking
+	rollingResistanceForce = rollingResistanceFactor * mass * GRAVITY_ACCELERATION * sgn(speed);  // rolling friction is independant on wheel count since the weight will be divided between them
+	slopePullForce = mass * GRAVITY_ACCELERATION * sin(slopeAngle),
+	airDragForce = 0.5 * airDragFactor * pow2(speed) * AIR_DRAG_ARBITRARY_ADJUST,
+	downforce = 0.5 * downforceFactor * pow2(speed) * DOWNFORCE_ARBITRATY_ADJUST;
 
 	// update acceleration
-	acceleration = ((arbitraryForceFactor*getDriveForce() - slopePull - brakingFriction - rollingFriction) - airFriction)/mass;
+	acceleration = ((arbitraryForceFactor*getDriveForce() - slopePullForce - brakingForce - rollingResistanceForce) - airDragForce)/mass;
 
 	// update speed
 	speed += delta*acceleration;
@@ -106,7 +115,7 @@ float Mechanics::getDriveForce()
 float Mechanics::getDrivenWheelsWeightLoad()
 {
 	const float transferedWeightLoad =  mass * acceleration * (centerOfGravityHeight/wheelbase);
-	const float weightLoad = mass*GRAVITY_ACCELERATION;
+	const float weightLoad = mass*GRAVITY_ACCELERATION - downforce;
 
 	// fixme when AWD, wheel weight load transfer are not being accounted for.
 	// this causes inaccurate behavior because weight transfer induces different slip ratios in the front and rear tires'.
@@ -163,7 +172,7 @@ float Mechanics::getDriveForceBySimplifiedSchemeSlipless()
 float Mechanics::getDriveForceBySimplifiedSchemeFakeSlip()
 {
 	// all engine power, up to the maximum allowed by tire grip (driven wheels load)
-	return std::min(engine.getDriveTorque() / tireRadius, getDrivenWheelsWeightLoad() * surfaceTireFrictionCoefficient);
+	return std::min(engine.getDriveTorque() / tireRadius, getDrivenWheelsWeightLoad() * tireFrictionFactor);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -179,6 +188,8 @@ float Mechanics::getDriveForceBySimplifiedSchemeFakeSlip()
  * http://www.edy.es/dev/2011/12/facts-and-myths-on-the-pacejka-curves/
  * http://white-smoke.wikifoundry.com/page/Tyre+curve+fitting+and+validation
  * http://web.archive.org/web/20050308061534/home.planet.nl/~monstrous/tutstab.html
+ * http://hpwizard.com/aerodynamics.html
+ * http://www.vespalabs.org/projects/vespa-cfd-3d-model/openfoam-motorbike-tutorial
 
 */
 
@@ -193,7 +204,7 @@ void Mechanics::updateByPacejkaScheme(float delta)
 	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * pow2(tireRadius) * 0.5;  // I = (mr^2)/2
 
 //	const float tractionForce = unstable? 0 : getNormalizedTractionForce() * getDrivenWheelsTireLoad();  // assume zero traction when unstable
-	const float tractionForce = getNormalizedTractionForce() * surfaceTireFrictionCoefficient * getDrivenWheelsWeightLoad();
+	const float tractionForce = getNormalizedTractionForce() * tireFrictionFactor * getDrivenWheelsWeightLoad();
 	const float tractionTorque = tractionForce * tireRadius;
 
 	//fixme how to do this formula right? remove from ingame state braking calculation
@@ -211,7 +222,7 @@ void Mechanics::updateByPacejkaScheme(float delta)
 
 float Mechanics::getDriveForceByPacejkaScheme()
 {
-	return getNormalizedTractionForce() * getDrivenWheelsWeightLoad() * surfaceTireFrictionCoefficient;
+	return getNormalizedTractionForce() * getDrivenWheelsWeightLoad() * tireFrictionFactor;
 }
 
 static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  // increasing this constant degrades simulation quality

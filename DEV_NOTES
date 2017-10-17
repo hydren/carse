@@ -1,9 +1,7 @@
 # to do
 
-- Fix wrong torque curve generation, torque from 1000rpm is wrong.
+- Fix wrong torque curve generation.
 - Needs predefined torque curve profiles. For real.
-- Needs to account for downforce. At least soft-simulation, semi-empirical.
-- Fix getting stuck on grass.
 - Fix braking simulation when using pacejka scheme. Move it to wheel torque calculation.
 - Optimize velocimeter drawing by caching geometric coordinates
 - Add gear shifting sounds

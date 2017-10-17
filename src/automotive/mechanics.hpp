@@ -50,9 +50,10 @@ struct Mechanics
 	float wheelAngularSpeed;
 	float brakePedalPosition;
 
-	float surfaceTireFrictionCoefficient,
-		  surfaceTireRollingResistanceCoefficient,
-		  airFrictionCoefficient;  // the vehicle's CdA (Cd * surface area) multiplied by air density.
+	float tireFrictionFactor,       // tire friction coefficient
+		  rollingResistanceFactor,  // rolling resistance or rolling friction coefficient (Crr) of the tires
+		  airDragFactor,	// the vehicle's CdA (drag coefficient (Cd) * surface area) multiplied by air density.
+		  downforceFactor;  // the vehicle's ClA (lift coefficient (Cl) * surface area) multiplied by air density.
 
 	enum DrivenWheelsType {
 		DRIVEN_WHEELS_ON_FRONT,
@@ -66,7 +67,7 @@ struct Mechanics
 		ENGINE_LOCATION_ON_REAR
 	} engineLocation;
 
-	float rollingFriction, airFriction, brakingFriction, slopePull;
+	float rollingResistanceForce, airDragForce, brakingForce, slopePullForce, downforce;
 
 	/** An arbitrary force factor applyied to the net drive force when computing acceleration. Default is 1.0. */
 	float arbitraryForceFactor;

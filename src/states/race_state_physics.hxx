@@ -39,8 +39,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
 	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
 
-	vehicle.body.surfaceTireFrictionCoefficient = getTireKineticFrictionCoefficient();
-	vehicle.body.surfaceTireRollingResistanceCoefficient = getTireRollingResistanceCoefficient();
+	vehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
+	vehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
 	vehicle.body.arbitraryForceFactor = wheelAngleFactor;
 	vehicle.body.slopeAngle = atan2(segment.y - posY, course.roadSegmentLength);
 

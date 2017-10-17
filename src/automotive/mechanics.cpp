@@ -81,7 +81,7 @@ void Mechanics::updatePowertrain(float delta)
 	}
 
 	brakingFriction = brakePedalPosition * surfaceTireFrictionCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);  // a multiplier here could be added for stronger and easier braking
-	rollingFriction = wheelCount * surfaceTireRollingResistanceCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);
+	rollingFriction = surfaceTireRollingResistanceCoefficient * mass * GRAVITY_ACCELERATION * sgn(speed);  // rolling friction is independant on wheel count since the weight will be divided between them
 	slopePull = mass * GRAVITY_ACCELERATION * sin(slopeAngle),
 	airFriction = 0.5 * airFrictionCoefficient * pow2(speed) * AIR_FRICTION_ARBITRARY_ADJUST;
 

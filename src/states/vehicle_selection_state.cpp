@@ -270,21 +270,46 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
+	Image::drawFilledRectangle(0.9*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 0, display.getWidth(), 25+fontMain->getHeight(), Color::DARK_GREEN);
 	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
 
 	// info sheet
 	const Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
-	const int infoX = 0.333*display.getWidth(); int infoY = 0.525*display.getHeight();
-	const string engineDesc = (vehicle.body.engine.aspiration.empty()? "" : vehicle.body.engine.aspiration + " ")
+	const int infoX = 0.25*display.getWidth(); int infoY = 0.66*display.getHeight();
+
+	const string name = vehicle.name.empty()? "--" : vehicle.name;
+	const unsigned nameWidth = fontMain->getTextWidth(name);
+	const int nameOffset = nameWidth > display.getWidth()? 0.6*sin(fgeal::uptime())*(nameWidth - display.getWidth()) : 0;
+
+	Image::drawFilledRectangle(0, infoY - 1.1*fontMain->getHeight(), display.getWidth(), fontMain->getHeight(), Color::AZURE);
+	fontMain->drawText(name, 0.5*(display.getWidth()-fontMain->getTextWidth(name)) + nameOffset, infoY - 1.1*fontMain->getHeight(), Color::WHITE);
+
+	Image::drawFilledRectangle(0, infoY - 0.1*fontMain->getHeight(), display.getWidth(), 0.25*display.getHeight(), Color::NAVY);
+	const string txtVehicleType = string("Type: ") + (vehicle.type == Mechanics::TYPE_CAR? "Car" : vehicle.type == Mechanics::TYPE_BIKE? "Bike" : "Other");
+	fontInfo->drawText(txtVehicleType, infoX, infoY, Color::WHITE);
+
+	const string txtEngineDesc = (vehicle.body.engine.aspiration.empty()? "" : vehicle.body.engine.aspiration + " ")
 							+ (vehicle.body.engine.displacement == 0?  "" : vehicle.body.engine.displacement >= 950? toStrRounded(vehicle.body.engine.displacement/1000.0) + "L " : to_string(vehicle.body.engine.displacement)+"cc ")
 							+ (vehicle.body.engine.valvetrain.empty()? "" : vehicle.body.engine.valvetrain + " ")
 							+ (vehicle.body.engine.valveCount == 0?    "" : to_string(vehicle.body.engine.valveCount) + "-valve ")
 							+ (vehicle.body.engine.configuration.empty()? "" : vehicle.body.engine.configuration);
+	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 
-	fontMain->drawText((vehicle.name.empty()? "--" : vehicle.name), infoX, infoY, Color::WHITE);
-	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), infoX, infoY+=48, Color::WHITE);
-	fontInfo->drawText("Power:  " +to_string(vehicle.body.engine.maximumPower) + "hp @" + to_string((int)vehicle.body.engine.maximumPowerRpm)+"rpm", infoX, infoY+=12, Color::WHITE);
-	fontInfo->drawText("Torque: " +toStrRounded(vehicle.body.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.body.engine.maximumTorqueRpm)+"rpm", infoX, infoY+=12, Color::WHITE);
-	fontInfo->drawText(to_string(vehicle.body.engine.gearCount)+"-speed transmission", infoX, infoY+=12, Color::WHITE);
-	fontInfo->drawText("Weight: "+to_string(vehicle.body.mass) + "kg", infoX, infoY+=12, Color::WHITE);
+	const string txtPowerInfo = "Power:  " +to_string(vehicle.body.engine.maximumPower) + "hp @" + to_string((int)vehicle.body.engine.maximumPowerRpm)+"rpm";
+	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+
+	const string txtTorqueInfo = "Torque: " +toStrRounded(vehicle.body.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.body.engine.maximumTorqueRpm)+"rpm";
+	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+
+	const string txtTransmissionInfo = to_string(vehicle.body.engine.gearCount)+"-speed transmission";
+	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+
+	const string txtWeightInfo = "Weight: "+to_string(vehicle.body.mass) + "kg";
+	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+
+	const string txtDrivetrainInfo = "Drivetrain: "+(vehicle.body.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ALL? "AWD"
+															: (  vehicle.body.engineLocation == Mechanics::ENGINE_LOCATION_ON_FRONT? "F"
+															   : vehicle.body.engineLocation == Mechanics::ENGINE_LOCATION_ON_REAR? "R" : "M")
+															+ string(vehicle.body.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
+	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 }

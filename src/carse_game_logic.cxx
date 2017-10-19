@@ -43,7 +43,7 @@ void Pseudo3DCarseGame::Logic::onStatesListInitFinished()
 	this->setNextCourseRandom();  // set default course
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
 	this->setImperialUnitEnabled(false);
-	this->setSimulationType(Mechanics::SIMULATION_TYPE_FAKESLIP);
+	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
 }
 
 void Pseudo3DCarseGame::Logic::loadPresetEngineSoundProfiles()

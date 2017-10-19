@@ -64,7 +64,7 @@ void OptionsMenuState::render()
 	// update menu bounds
 	menu->bounds.x = 0.0625f*display.getWidth();
 	menu->bounds.y = 0.25f*display.getHeight();
-	menu->bounds.w = 0.4f*display.getWidth();
+	menu->bounds.w = display.getWidth() - 2*menu->bounds.x;
 	menu->bounds.h = 0.5f*display.getHeight();
 
 	updateLabels();
@@ -151,9 +151,9 @@ void OptionsMenuState::updateLabels()
 	switch(logic.getSimulationType())
 	{
 		default:
-		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Simple (slipless)"; break;
-		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Simple (fake slip)"; break;
-		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (Pacejka-Bernard-Clover)"; break;
+		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Arcade"; break;
+		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load capped power)"; break;
+		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
 	menu->at(3).label = "Simulation mode: " + strSimType;
 }

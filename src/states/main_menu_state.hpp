@@ -5,8 +5,8 @@
  *      Author: carlosfaruolo
  */
 
-#ifndef PSEUDO3D_MAIN_MENU_STATE_HPP_
-#define PSEUDO3D_MAIN_MENU_STATE_HPP_
+#ifndef MAIN_MENU_STATE_HPP_
+#define MAIN_MENU_STATE_HPP_
 #include <ciso646>
 
 #include "carse_game.hpp"
@@ -96,4 +96,4 @@ class MainMenuState extends public fgeal::Game::State
 	void menuSelectionAction();
 };
 
-#endif /* PSEUDO3D_MAIN_MENU_STATE_HPP_ */
+#endif /* MAIN_MENU_STATE_HPP_ */

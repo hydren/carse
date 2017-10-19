@@ -5,8 +5,8 @@
  *      Author: carlosfaruolo
  */
 
-#ifndef PSEUDO3D_COURSE_SELECTION_STATE_HPP_
-#define PSEUDO3D_COURSE_SELECTION_STATE_HPP_
+#ifndef COURSE_SELECTION_STATE_HPP_
+#define COURSE_SELECTION_STATE_HPP_
 #include <ciso646>
 
 #include <vector>
@@ -51,4 +51,4 @@ class CourseSelectionState extends public fgeal::Game::State
 	void onMenuSelect();
 };
 
-#endif /* PSEUDO3D_COURSE_SELECTION_STATE_HPP_ */
+#endif /* COURSE_SELECTION_STATE_HPP_ */

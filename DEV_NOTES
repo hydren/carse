@@ -31,7 +31,6 @@
 
 - Fix the ingame background to make it resolution-independent.
 - Fix incorrect tire animation speed.
-- Fix car names trespassing window size.
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
 - Fix gear shifting prediction. It should change when the next/previous gear provides more torque/power than the current one.

@@ -5,14 +5,17 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/automotive/engine_sound.cpp \
+../src/automotive/mechanics.cpp \
 ../src/automotive/motor.cpp 
 
 OBJS += \
 ./src/automotive/engine_sound.o \
+./src/automotive/mechanics.o \
 ./src/automotive/motor.o 
 
 CPP_DEPS += \
 ./src/automotive/engine_sound.d \
+./src/automotive/mechanics.d \
 ./src/automotive/motor.d 
 
 

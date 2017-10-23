@@ -31,6 +31,8 @@ using fgeal::Music;
 using fgeal::Sprite;
 using fgeal::Point;
 
+#define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
+
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
@@ -52,8 +54,9 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
   bgColor(), bgColorHorizon(), spriteSmokeLeft(null), spriteSmokeRight(null),
-  position(0), posX(0), posY(0), pseudoAngle(0), strafeSpeed(0), /*verticalSpeed(0),*/ curvePull(0), corneringForceLeechFactor(0),
-  bgParallax(), isBurningRubber(false), /*onAir(false), onLongAir(false),*/
+  position(0), posX(0), posY(0),
+  pseudoAngle(0), strafeSpeed(0), curvePull(0), corneringForceLeechFactor(0), corneringStiffness(0),
+  bgParallax(), isBurningRubber(false), /* verticalSpeed(0), onAir(false), onLongAir(false), */
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
   laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
@@ -216,6 +219,7 @@ void Pseudo3DRaceState::onEnter()
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	corneringForceLeechFactor = (vehicle.type == Mechanics::TYPE_BIKE? 0.25 : 0.5);
+	corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	bgParallax.x = bgParallax.y = 0;
 	position = 0;
@@ -557,7 +561,7 @@ void Pseudo3DRaceState::update(float delta)
 
 		isBurningRubber = true;
 	}
-	else if(fabs(vehicle.body.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN and (fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED)
+	else if(fabs(vehicle.body.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN and (fabs(strafeSpeed) == MAXIMUM_STRAFE_SPEED*corneringStiffness)
 	 	 	 and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();

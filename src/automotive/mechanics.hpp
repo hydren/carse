@@ -22,6 +22,8 @@
  *  */
 struct Mechanics
 {
+	static const float GRAVITY_ACCELERATION;
+
 	enum SimulationType
 	{
 		SIMULATION_TYPE_SLIPLESS,  // no slip ratio, no fake slip

@@ -68,12 +68,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(pseudoAngle <-PSEUDO_ANGLE_MAX) pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	strafeSpeed = pseudoAngle * vehicle.body.speed * coursePositionFactor;
+	strafeSpeed = pseudoAngle * vehicle.body.speed * corneringStiffness * coursePositionFactor;
 //	strafeSpeed = onAir? 0 : pseudoAngle * vehicle.body.speed * coursePositionFactor;
 
 	// limit strafing speed by magic constant
-	if(strafeSpeed >  MAXIMUM_STRAFE_SPEED) strafeSpeed = MAXIMUM_STRAFE_SPEED;
-	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED) strafeSpeed =-MAXIMUM_STRAFE_SPEED;
+	if(strafeSpeed >  MAXIMUM_STRAFE_SPEED * corneringStiffness) strafeSpeed = MAXIMUM_STRAFE_SPEED * corneringStiffness;
+	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED * corneringStiffness) strafeSpeed =-MAXIMUM_STRAFE_SPEED * corneringStiffness;
 
 	// update curve pull
 	curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;

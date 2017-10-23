@@ -23,8 +23,9 @@
 #define AIR_DRAG_ARBITRARY_ADJUST 0.8
 #define DOWNFORCE_ARBITRATY_ADJUST 0.5
 
-static const float GRAVITY_ACCELERATION = 9.8066, // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-				   AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+
+static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 				   DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
 				   DEFAULT_FRONTAL_AREA_BIKE = 0.70;  // estimated frontal area (in square-meters) of a common sporty bike
 

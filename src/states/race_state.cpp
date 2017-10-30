@@ -534,7 +534,7 @@ void Pseudo3DRaceState::update(float delta)
 			and
 			(
 				// burnout based on capped drive force
-				(vehicle.body.getDriveForce() < 0.5 * vehicle.body.engine.getDriveTorque() / vehicle.body.tireRadius)
+				(vehicle.body.getDriveForce() < 0.75 * vehicle.body.engine.getDriveTorque() / vehicle.body.tireRadius)
 				and vehicle.body.engine.gear == 1  // but limited to first gear.
 			)
 		)

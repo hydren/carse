@@ -76,7 +76,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED * corneringStiffness) strafeSpeed =-MAXIMUM_STRAFE_SPEED * corneringStiffness;
 
 	// update curve pull
-	curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;
+	//curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;
+	curvePull = sin(atan2(segment.curve*50, course.roadSegmentLength));
+	curvePull *= vehicle.body.speed * coursePositionFactor;
 
 	// update strafe position
 	posX += (strafeSpeed - curvePull)*delta;

@@ -31,13 +31,26 @@ struct Engine
 
 	struct TorqueCurveProfile
 	{
-		std::vector< std::vector<float> > parameters;
+		enum PowerBandType { POWER_BAND_TORQUEY, POWER_BAND_PEAKY, POWER_BAND_FLEXIBLE };
+
+		std::vector< std::vector<float> > parameters;  // todo this could be a map...
+
+		float getTorqueFactor(float rpm);
+
+		/** Returns the RPM which theorectically give the maximum torque of this curve. */
+		float getRpmMaxTorque();
 
 		/** Creates a torque curve with some hardcoded values and the given max. RPM and max. torque RPM (Optional) */
 		static TorqueCurveProfile create(float maxRpm, float rpmMaxTorque=-1);
 
-		/** Fraction of maximum torque that is available with 1000rpm and max.rpm, respectively. */
-		static const float TORQUE_CURVE_INITIAL_VALUE, TORQUE_CURVE_FINAL_VALUE;
+		/** Creates a torque curve with a simple quadratic equation shape, given the redline RPM and power band type.
+		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.
+		 *  If 'maxPowerPtr' is not null, stores the maximum normalized power on the variable. */
+		static TorqueCurveProfile createSimpleQuadratic(float maxRpm, PowerBandType powerBandtype, float* rpmMaxPowerPtr=NULL, float* maxNormPowerPtr=NULL);
+
+		static const float TORQUE_CURVE_PEAKY_INITIAL_VALUE,    TORQUE_CURVE_PEAKY_REDLINE_VALUE,
+						   TORQUE_CURVE_TORQUEY_INITIAL_VALUE,  TORQUE_CURVE_TORQUEY_REDLINE_VALUE,
+						   TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE, TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE;
 	};
 
 	TorqueCurveProfile torqueCurveProfile;

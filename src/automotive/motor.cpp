@@ -23,13 +23,13 @@ using std::vector;
 	# define M_PI		3.14159265358979323846	/* pi */
 #endif
 
-const float Engine::TorqueCurveProfile::TORQUE_CURVE_PEAKY_INITIAL_VALUE = 0.2,
+const float Engine::TorqueCurveProfile::TORQUE_CURVE_PEAKY_INITIAL_VALUE = 0.4,
 			Engine::TorqueCurveProfile::TORQUE_CURVE_PEAKY_REDLINE_VALUE = 0.8,
 
-			Engine::TorqueCurveProfile::TORQUE_CURVE_TORQUEY_INITIAL_VALUE = 0.5,
-			Engine::TorqueCurveProfile::TORQUE_CURVE_TORQUEY_REDLINE_VALUE = 0.6,
+			Engine::TorqueCurveProfile::TORQUE_CURVE_TORQUEY_INITIAL_VALUE = 0.8,
+			Engine::TorqueCurveProfile::TORQUE_CURVE_TORQUEY_REDLINE_VALUE = 0.4,
 
-			Engine::TorqueCurveProfile::TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE = 0.4,
+			Engine::TorqueCurveProfile::TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE = 0.55,
 			Engine::TorqueCurveProfile::TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE = 0.7;
 
 static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
@@ -81,11 +81,12 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createSimpleQuadratic(flo
 	switch(type)
 	{
 		default:
-		case POWER_BAND_FLEXIBLE:  l = 0.4; u = 0.7; break;
-		case POWER_BAND_PEAKY:     l = 0.2; u = 0.8; break;
-		case POWER_BAND_TORQUEY:   l = 0.5; u = 0.6; break;
+		case POWER_BAND_FLEXIBLE:  l = TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE; u = TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE; break;
+		case POWER_BAND_PEAKY:     l = TORQUE_CURVE_PEAKY_INITIAL_VALUE;    u = TORQUE_CURVE_PEAKY_REDLINE_VALUE;    break;
+		case POWER_BAND_TORQUEY:   l = TORQUE_CURVE_TORQUEY_INITIAL_VALUE;  u = TORQUE_CURVE_TORQUEY_REDLINE_VALUE;  break;
 	}
 
+	//a = (l+u-2)-2sqrt((l-1)(u-1)), b =(2-2l)+2sqrt((l-1)(u-1)), c=l
 	const float a = (l+u-2)-2*sqrt((l-1)*(u-1)), b = (2-2*l)+2*sqrt((l-1)*(u-1)), c = l;
 
 	if(rpmMaxPowerPtr != NULL)

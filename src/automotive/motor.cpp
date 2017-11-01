@@ -23,16 +23,8 @@ using std::vector;
 	# define M_PI		3.14159265358979323846	/* pi */
 #endif
 
-const float Engine::TorqueCurveProfile::TORQUE_CURVE_PEAKY_INITIAL_VALUE = 0.4,
-			Engine::TorqueCurveProfile::TORQUE_CURVE_PEAKY_REDLINE_VALUE = 0.8,
-
-			Engine::TorqueCurveProfile::TORQUE_CURVE_TORQUEY_INITIAL_VALUE = 0.8,
-			Engine::TorqueCurveProfile::TORQUE_CURVE_TORQUEY_REDLINE_VALUE = 0.4,
-
-			Engine::TorqueCurveProfile::TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE = 0.55,
-			Engine::TorqueCurveProfile::TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE = 0.7;
-
-static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
+static const float DEFAULT_TORQUE_CURVE_INITIAL_VALUE = 0.45, DEFAULT_TORQUE_CURVE_REDLINE_VALUE = 0.75,
+				   ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
 		           TORQUE_POWER_CONVERSION_FACTOR = 5252.0 * 1.355818,
                    RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
@@ -40,9 +32,7 @@ static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
 static const float
 	DEFAULT_MAXIMUM_RPM = 7000,
 	DEFAULT_MAXIMUM_POWER = 320,  // bhp
-	DEFAULT_MAXIMUM_POWER_RPM_RANGE = 0.90,  // 90% of redline
 	DEFAULT_GEAR_COUNT = 5,
-	DEFAULT_MAX_TORQUE_RPM_POSITION = 2.f/3.f,  // 0.66666... (two thirds)
 
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
@@ -63,8 +53,8 @@ static vector<float> createLinearCurve(float rpm_i, float torque_i, float rpm_f,
 
 Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, float rpmMaxTorque)
 {
-	const float torque_i = TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE,
-				torque_f = TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE;
+	const float torque_i = DEFAULT_TORQUE_CURVE_INITIAL_VALUE,
+				torque_f = DEFAULT_TORQUE_CURVE_REDLINE_VALUE;
 
 	TorqueCurveProfile profile;
 	profile.parameters.push_back(createLinearCurve(           1,        0,         1000, torque_i));  // hardcoded linear warmup torque curve in 1-1000rpm range
@@ -81,9 +71,11 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createSimpleQuadratic(flo
 	switch(type)
 	{
 		default:
-		case POWER_BAND_FLEXIBLE:  l = TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE; u = TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE; break;
-		case POWER_BAND_PEAKY:     l = TORQUE_CURVE_PEAKY_INITIAL_VALUE;    u = TORQUE_CURVE_PEAKY_REDLINE_VALUE;    break;
-		case POWER_BAND_TORQUEY:   l = TORQUE_CURVE_TORQUEY_INITIAL_VALUE;  u = TORQUE_CURVE_TORQUEY_REDLINE_VALUE;  break;
+		case POWER_BAND_TYPICAL:      l = 0.60; u = 0.75; break;  // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
+		case POWER_BAND_PEAKY:        l = 0.40; u = 0.80; break;  // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
+		case POWER_BAND_TORQUEY:      l = 0.80; u = 0.40; break;  // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
+		case POWER_BAND_SEMI_TORQUEY: l = 0.50; u = 0.65; break;  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
+		case POWER_BAND_WIDE:         l = 0.70; u = 0.80; break;  // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
 	}
 
 	//a = (l+u-2)-2sqrt((l-1)(u-1)), b =(2-2l)+2sqrt((l-1)(u-1)), c=l
@@ -187,12 +179,13 @@ Engine::Engine(const futil::Properties& prop)
 //	key = "engine_maximum_torque_rpm";
 //	maximumTorqueRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1;
 
-	key = "power_band";
-	string powerBandStr = isValueSpecified(prop, key)? prop.get(key) : "flexible";
+	key = "engine_power_band";
+	string powerBandStr = isValueSpecified(prop, key)? prop.get(key) : "typical";
 	Engine::TorqueCurveProfile::PowerBandType powerBand;
-	if(powerBandStr == "torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_TORQUEY;
-	else if(powerBandStr == "peaky") powerBand = Engine::TorqueCurveProfile::POWER_BAND_PEAKY;
-	else powerBand = Engine::TorqueCurveProfile::POWER_BAND_FLEXIBLE;
+	if(powerBandStr == "peaky") powerBand = Engine::TorqueCurveProfile::POWER_BAND_PEAKY;
+	else if(powerBandStr == "torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_TORQUEY;
+	else if(powerBandStr == "semitorquey" or powerBandStr == "semi-torquey" or powerBandStr == "semi torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_SEMI_TORQUEY;
+	else powerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
 
 	float maxPowerNormalized;
 	torqueCurveProfile = Engine::TorqueCurveProfile::createSimpleQuadratic(maxRpm, powerBand, &maximumPowerRpm, &maxPowerNormalized);
@@ -242,11 +235,7 @@ Engine::Engine(const futil::Properties& prop)
 
 float Engine::getCurrentTorque()
 {
-//	const vector< vector<float> >& torqueCurve = torqueCurveProfile.parameters;
 	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm : torqueCurveProfile.getTorqueFactor(rpm));
-//					  rpm < torqueCurve[0][PARAM_RPM] ? torqueCurve[0][PARAM_SLOPE]*rpm + torqueCurve[0][PARAM_INTERCEPT] :
-//					  rpm < torqueCurve[1][PARAM_RPM] ? torqueCurve[1][PARAM_SLOPE]*rpm + torqueCurve[1][PARAM_INTERCEPT] :
-//							  	  	  	  	  	  	    torqueCurve[2][PARAM_SLOPE]*rpm + torqueCurve[2][PARAM_INTERCEPT] );
 }
 
 float Engine::getDriveTorque()

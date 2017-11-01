@@ -31,7 +31,15 @@ struct Engine
 
 	struct TorqueCurveProfile
 	{
-		enum PowerBandType { POWER_BAND_TORQUEY, POWER_BAND_PEAKY, POWER_BAND_FLEXIBLE };
+		enum PowerBandType {
+			POWER_BAND_TYPICAL,       // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
+			POWER_BAND_PEAKY,         // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
+			POWER_BAND_TORQUEY,       // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
+			POWER_BAND_SEMI_TORQUEY,  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
+			POWER_BAND_WIDE,          // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
+			//POWER_BAND_QUASIFLAT      // peak power at 100% of RPM range / constant torque from 1000 RPM on
+			//POWER_BAND_TYPICAL_ELECTRIC
+		};
 
 		std::vector< std::vector<float> > parameters;  // todo this could be a map...
 
@@ -47,10 +55,6 @@ struct Engine
 		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.
 		 *  If 'maxPowerPtr' is not null, stores the maximum normalized power on the variable. */
 		static TorqueCurveProfile createSimpleQuadratic(float maxRpm, PowerBandType powerBandtype, float* rpmMaxPowerPtr=NULL, float* maxNormPowerPtr=NULL);
-
-		static const float TORQUE_CURVE_PEAKY_INITIAL_VALUE,    TORQUE_CURVE_PEAKY_REDLINE_VALUE,
-						   TORQUE_CURVE_TORQUEY_INITIAL_VALUE,  TORQUE_CURVE_TORQUEY_REDLINE_VALUE,
-						   TORQUE_CURVE_FLEXIBLE_INITIAL_VALUE, TORQUE_CURVE_FLEXIBLE_REDLINE_VALUE;
 	};
 
 	TorqueCurveProfile torqueCurveProfile;

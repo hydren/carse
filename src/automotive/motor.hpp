@@ -9,6 +9,7 @@
 #define MOTOR_HPP_
 #include <ciso646>
 
+#include "futil/language.hpp"
 #include "futil/properties.hpp"
 
 #include <string>
@@ -29,8 +30,14 @@ struct Engine
 	unsigned displacement, valveCount;
 	float maximumPower, maximumPowerRpm, maximumTorqueRpm;
 
+	/** A class meant to hold data related to the engine's torque curve.
+	 * 	Data is held as a vector of line sections that interpolate a data table.
+	 * 	There are 2 static methods that work as proper constructors for this class
+	 * */
 	struct TorqueCurveProfile
 	{
+		std::vector< std::vector<float> > parameters;  // todo this could be a map...
+
 		enum PowerBandType {
 			POWER_BAND_TYPICAL,       // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
 			POWER_BAND_PEAKY,         // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
@@ -41,20 +48,23 @@ struct Engine
 			//POWER_BAND_TYPICAL_ELECTRIC
 		};
 
-		std::vector< std::vector<float> > parameters;  // todo this could be a map...
-
 		float getTorqueFactor(float rpm);
 
 		/** Returns the RPM which theorectically give the maximum torque of this curve. */
 		float getRpmMaxTorque();
 
-		/** Creates a torque curve with some hardcoded values and the given max. RPM and max. torque RPM (Optional) */
-		static TorqueCurveProfile create(float maxRpm, float rpmMaxTorque=-1);
-
-		/** Creates a torque curve with a simple quadratic equation shape, given the redline RPM and power band type.
+		/** Creates a torque curve as two linear functions (increasing then decreasing), given the redline RPM, power band type and (optional) RPM of maximum torque.
 		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.
 		 *  If 'maxPowerPtr' is not null, stores the maximum normalized power on the variable. */
-		static TorqueCurveProfile createSimpleQuadratic(float maxRpm, PowerBandType powerBandtype, float* rpmMaxPowerPtr=NULL, float* maxNormPowerPtr=NULL);
+		static TorqueCurveProfile createAsDualLinear(float maxRpm, PowerBandType powerBandtype, float rpmMaxTorque=-1, float* rpmMaxPowerPtr=null, float* maxNormPowerPtr=null);
+
+		/** Creates a torque curve as a simple quadratic function (downward openning), given the redline RPM and power band type.
+		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.
+		 *  If 'maxPowerPtr' is not null, stores the maximum normalized power on the variable. */
+		static TorqueCurveProfile createAsSingleQuadratic(float maxRpm, PowerBandType powerBandtype, float* rpmMaxPowerPtr=null, float* maxNormPowerPtr=null);
+
+		private:
+		static void queryParameters(Engine::TorqueCurveProfile::PowerBandType type, float& initialTorqueFactor, float& redlineTorqueFactor);
 	};
 
 	TorqueCurveProfile torqueCurveProfile;

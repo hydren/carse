@@ -23,8 +23,7 @@ using std::vector;
 	# define M_PI		3.14159265358979323846	/* pi */
 #endif
 
-static const float DEFAULT_TORQUE_CURVE_INITIAL_VALUE = 0.45, DEFAULT_TORQUE_CURVE_REDLINE_VALUE = 0.75,
-				   ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
+static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
 		           TORQUE_POWER_CONVERSION_FACTOR = 5252.0 * 1.355818,
                    RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
@@ -39,10 +38,30 @@ static const float
 
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
-/**
- *  Create a linear "curve".
- * */
-static vector<float> createLinearCurve(float rpm_i, float torque_i, float rpm_f, float torque_f)
+/* todo revise TorqueCurveProfile to be able to specify specific RPMs for max. power or/and max. torque.
+ * The calculation of the torque curves could be more specific to the point that one could specify a torque
+ * curve from a data set, but a proper interface to do this needs to be done; nevertheless, the current
+ * model supports it.
+ *
+ * Also, there is a way to specify a RPM value of the maximum power output and adjust the torque curve
+ * parameters accordingly, to match that specific characteristic, but the formula gets too complicated. */
+
+void Engine::TorqueCurveProfile::queryParameters(PowerBandType type, float& initialTorqueFactor, float& redlineTorqueFactor)
+{
+	float& l = initialTorqueFactor, &u = redlineTorqueFactor;
+	switch(type)
+	{
+		default:
+		case POWER_BAND_TYPICAL:      l = 0.60; u = 0.75; break;  // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
+		case POWER_BAND_PEAKY:        l = 0.40; u = 0.80; break;  // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
+		case POWER_BAND_TORQUEY:      l = 0.80; u = 0.40; break;  // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
+		case POWER_BAND_SEMI_TORQUEY: l = 0.50; u = 0.65; break;  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
+		case POWER_BAND_WIDE:         l = 0.70; u = 0.80; break;  // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
+	}
+}
+
+/// Create a linear "curve".
+static vector<float> createLinearSegment(float rpm_i, float torque_i, float rpm_f, float torque_f)
 {
 	vector<float> param(3);
 	param[0] = rpm_f;  // RPM range threshold or right bound.
@@ -51,20 +70,35 @@ static vector<float> createLinearCurve(float rpm_i, float torque_i, float rpm_f,
 	return param;
 }
 
-Engine::TorqueCurveProfile Engine::TorqueCurveProfile::create(float maxRpm, float rpmMaxTorque)
+Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsDualLinear(float maxRpm, PowerBandType type, float rpmMaxTorque, float* rpmMaxPowerPtr, float* maxNormPowerPtr)
 {
-	const float torque_i = DEFAULT_TORQUE_CURVE_INITIAL_VALUE,
-				torque_f = DEFAULT_TORQUE_CURVE_REDLINE_VALUE;
+	float torque_i, torque_f;
+	TorqueCurveProfile::queryParameters(type, torque_i, torque_f);
+
+	if(rpmMaxTorque == -1)
+		rpmMaxTorque = TorqueCurveProfile::createAsSingleQuadratic(maxRpm, type, null, null).getRpmMaxTorque();
 
 	TorqueCurveProfile profile;
-	profile.parameters.push_back(createLinearCurve(           1,        0,         1000, torque_i));  // hardcoded linear warmup torque curve in 1-1000rpm range
-	profile.parameters.push_back(createLinearCurve(        1000, torque_i, rpmMaxTorque,      1.0));  // curve that leads to the highest torque point (from 1001rpm to rpmMaxTorque)
-	profile.parameters.push_back(createLinearCurve(rpmMaxTorque,      1.0,       maxRpm, torque_f));  // curve with decrease in torque as it approuches redline (from rpmMaxTorque to maxRpm)
+	profile.parameters.push_back(createLinearSegment(           1,        0,         1000, torque_i));  // hardcoded linear warmup torque curve in 1-1000rpm range
+	profile.parameters.push_back(createLinearSegment(        1000, torque_i, rpmMaxTorque,      1.0));  // curve that leads to the highest torque point (from 1001rpm to rpmMaxTorque)
+	profile.parameters.push_back(createLinearSegment(rpmMaxTorque,      1.0,       maxRpm, torque_f));  // curve with decrease in torque as it approuches redline (from rpmMaxTorque to maxRpm)
+
+	float xm = -profile.parameters[2][PARAM_INTERCEPT]/(2*profile.parameters[2][PARAM_SLOPE]);
+	if(xm < rpmMaxTorque)
+		xm = rpmMaxTorque;
+	else if(xm > maxRpm)
+		xm = maxRpm;
+
+	if(rpmMaxPowerPtr != null)
+		*rpmMaxPowerPtr = xm;
+
+	if(maxNormPowerPtr != null)
+		*maxNormPowerPtr = profile.getTorqueFactor(xm)*xm/TORQUE_POWER_CONVERSION_FACTOR;
 
 	return profile;
 }
 
-Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createSimpleQuadratic(float maxRpm, PowerBandType type, float* rpmMaxPowerPtr, float* maxNormPowerPtr)
+Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsSingleQuadratic(float maxRpm, PowerBandType type, float* rpmMaxPowerPtr, float* maxNormPowerPtr)
 {
 	float l;  // the fraction of the engine's maximum torque that is available at 1000RPM
 	float u;  // the fraction of the engine's maximum torque that is available at the redline RPM.
@@ -81,26 +115,26 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createSimpleQuadratic(flo
 	//a = (l+u-2)-2sqrt((l-1)(u-1)), b =(2-2l)+2sqrt((l-1)(u-1)), c=l
 	const float a = (l+u-2)-2*sqrt((l-1)*(u-1)), b = (2-2*l)+2*sqrt((l-1)*(u-1)), c = l;
 
-	if(rpmMaxPowerPtr != NULL)
+	if(rpmMaxPowerPtr != null)
 	{
 		*rpmMaxPowerPtr = ((- b - sqrt(b*b - 3*a*c))/(3*a))*maxRpm;
 	}
 
-	if(maxNormPowerPtr != NULL)
+	if(maxNormPowerPtr != null)
 	{
 		const float phi = sqrt(b*b - 3*a*c);
 		*maxNormPowerPtr = (phi + b)*(b*b + phi*b - 6*a*c)/(27*a*a);
 	}
 
 	TorqueCurveProfile profile;
-	profile.parameters.push_back(createLinearCurve(0001, 0.0, 1000, l));  // hardcoded linear warmup torque curve in 1-1000rpm range
+	profile.parameters.push_back(createLinearSegment(0001, 0.0, 1000, l));  // hardcoded linear warmup torque curve in 1-1000rpm range
 
 	// create piecewise linear curves interpolating the quadratic.
 	float previousTorqueFactor = l, rpmStep = 100;
 	for(float rpm = 1000+rpmStep; rpm < maxRpm; rpm += rpmStep)
 	{
 		const float rpmFactor = (rpm-1000)/maxRpm, torqueFactor = a*pow(rpmFactor, 2) + b*rpmFactor + c;
-		profile.parameters.push_back(createLinearCurve(rpm-rpmStep, previousTorqueFactor, rpm, torqueFactor));
+		profile.parameters.push_back(createLinearSegment(rpm-rpmStep, previousTorqueFactor, rpm, torqueFactor));
 		previousTorqueFactor = torqueFactor;
 	}
 
@@ -188,7 +222,7 @@ Engine::Engine(const futil::Properties& prop)
 	else powerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
 
 	float maxPowerNormalized;
-	torqueCurveProfile = Engine::TorqueCurveProfile::createSimpleQuadratic(maxRpm, powerBand, &maximumPowerRpm, &maxPowerNormalized);
+	torqueCurveProfile = Engine::TorqueCurveProfile::createAsSingleQuadratic(maxRpm, powerBand, &maximumPowerRpm, &maxPowerNormalized);
 	maximumTorqueRpm = torqueCurveProfile.getRpmMaxTorque();
 	maximumTorque = ((maximumPower * TORQUE_POWER_CONVERSION_FACTOR)/maximumPowerRpm)/torqueCurveProfile.getTorqueFactor(maximumPowerRpm);
 

@@ -219,6 +219,7 @@ Engine::Engine(const futil::Properties& prop)
 	if(powerBandStr == "peaky") powerBand = Engine::TorqueCurveProfile::POWER_BAND_PEAKY;
 	else if(powerBandStr == "torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_TORQUEY;
 	else if(powerBandStr == "semitorquey" or powerBandStr == "semi-torquey" or powerBandStr == "semi torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_SEMI_TORQUEY;
+	else if(powerBandStr == "wide") powerBand = Engine::TorqueCurveProfile::POWER_BAND_WIDE;
 	else powerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
 
 	float maxPowerNormalized;

@@ -119,8 +119,8 @@ void Pseudo3DRaceState::initialize()
 	controlJoystickAxisTurn = 0;
 	controlJoystickKeyAccelerate = 2;
 	controlJoystickKeyBrake = 3;
-	controlJoystickKeyShiftUp = 4;
-	controlJoystickKeyShiftDown = 5;
+	controlJoystickKeyShiftDown = 4;
+	controlJoystickKeyShiftUp = 5;
 }
 
 void Pseudo3DRaceState::onEnter()
@@ -664,9 +664,9 @@ void Pseudo3DRaceState::handleInput()
 
 		else if(event.getEventType() == Event::TYPE_JOYSTICK_BUTTON_PRESS)
 		{
-			if(event.getEventKeyCode() == controlJoystickKeyShiftUp)
+			if(event.getEventJoystickButtonIndex() == (int) controlJoystickKeyShiftUp)
 				shiftGear(vehicle.body.engine.gear+1);
-			else if(event.getEventKeyCode() == controlJoystickKeyShiftDown)
+			else if(event.getEventJoystickButtonIndex() == (int) controlJoystickKeyShiftDown)
 				shiftGear(vehicle.body.engine.gear-1);
 		}
 	}

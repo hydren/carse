@@ -2,6 +2,7 @@
 
 - Fix braking simulation when using pacejka scheme. Move it to wheel torque calculation.
 - Optimize velocimeter drawing by caching geometric coordinates
+- Add mouse input on menus
 - Add gear shifting sounds
 - Add optional gear shifting sounds derived from forced induction
 - Improve UI to choose vehicle skins.

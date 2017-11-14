@@ -39,6 +39,12 @@ struct Course
 
 	std::vector<std::string> spritesFilenames;
 
+	std::string landscapeFilename;
+	fgeal::Color colorLandscape, colorHorizon,
+				 colorRoadPrimary, colorRoadSecondary,
+	             colorOffRoadPrimary, colorOffRoadSecondary,
+				 colorHumblePrimary, colorHumbleSecondary;
+
 	Course(float segmentLength, float roadWidth);
 
 	struct DrawParameters

@@ -43,10 +43,10 @@ static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
 static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
-#define isPlayerAccelerating() (Keyboard::isKeyPressed(controlKeyAccelerate) or Joystick::isButtonPressed(0, controlJoystickKeyAccelerate))
-#define isPlayerBraking() (Keyboard::isKeyPressed(controlKeyBrake) or Joystick::isButtonPressed(0, controlJoystickKeyBrake))
-#define isPlayerSteeringLeft() (Keyboard::isKeyPressed(controlKeyTurnLeft) or Joystick::getAxisPosition(0, controlJoystickAxisTurn) < 0)
-#define isPlayerSteeringRight() (Keyboard::isKeyPressed(controlKeyTurnRight) or Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0)
+#define isPlayerAccelerating() (Keyboard::isKeyPressed(controlKeyAccelerate) or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyAccelerate)))
+#define isPlayerBraking() (Keyboard::isKeyPressed(controlKeyBrake) or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyBrake)))
+#define isPlayerSteeringLeft() (Keyboard::isKeyPressed(controlKeyTurnLeft) or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) < 0))
+#define isPlayerSteeringRight() (Keyboard::isKeyPressed(controlKeyTurnRight) or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0))
 
 // -------------------------------------------------------------------------------
 
@@ -94,7 +94,6 @@ void Pseudo3DRaceState::initialize()
 	font2 = new Font("assets/font2.ttf", 40);
 	font3 = new Font("assets/font2.ttf", 24);
 	fontDebug = new Font("assets/font.ttf");
-	bg = new Image("assets/bg.png");
 	music = new Music("assets/music_sample.ogg");
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
@@ -166,6 +165,11 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.push_back(sprite);
 	}
 
+	if(bg != null)
+		delete bg;
+
+	bg = new Image(course.landscapeFilename);
+
 	if(not drawParameters.sprites.empty())
 	{
 		for(unsigned i = 0; i < drawParameters.sprites.size(); i++)
@@ -180,8 +184,8 @@ void Pseudo3DRaceState::onEnter()
 		else
 			drawParameters.sprites.push_back(null);
 
-	bgColor = Color(136, 204, 238);
-	bgColorHorizon = Color(0, 112, 0);
+	bgColor = course.colorLandscape;
+	bgColorHorizon = course.colorHorizon;
 
 	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.body.engine.maxRpm);
 

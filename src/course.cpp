@@ -88,9 +88,9 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		if(lt.Y > maxY) continue;
 		maxY = lt.Y;
 
-		Color grass  = (n/3)%2? Color(  0, 112, 0) : Color(  0, 88,  0);
-		Color rumble = (n/3)%2? Color(200,200,200) : Color(152,  0,  0);
-		Color road   = (n/3)%2? Color( 64, 80, 80) : Color( 40, 64, 64);
+		Color grass  = (n/3)%2? colorOffRoadPrimary : colorOffRoadSecondary;
+		Color rumble = (n/3)%2? colorHumblePrimary : colorHumbleSecondary;
+		Color road   = (n/3)%2? colorRoadPrimary : colorRoadSecondary;
 
 		ScreenCoordCache& p = lts[(n-1)%N];
 
@@ -149,6 +149,16 @@ Course Course::createDebugCourse(float segmentLength, float roadWidth)
 		course.lines.push_back(line);
 	}
 	course.spritesFilenames.push_back("assets/bush.png");  // type 0
+	course.landscapeFilename = "assets/bg.png";
+	course.colorRoadPrimary =      Color( 64, 80, 80);
+	course.colorRoadSecondary =    Color( 40, 64, 64);
+	course.colorOffRoadPrimary =   Color(  0,112,  0);
+	course.colorOffRoadSecondary = Color(  0, 88, 80);
+	course.colorHumblePrimary =    Color(200,200,200);
+	course.colorHumbleSecondary =  Color(152,  0,  0);
+
+	course.colorLandscape = Color(136,204,238);
+	course.colorHorizon = course.colorOffRoadPrimary;
 
 	return course;
 }
@@ -208,13 +218,34 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 
 	course.spritesFilenames.push_back("assets/bush.png");
 	course.spritesFilenames.push_back("assets/tree.png");
+	course.landscapeFilename = "assets/bg.png";
+
+	course.colorRoadPrimary =      Color( 64, 80, 80);
+	course.colorRoadSecondary =    Color( 40, 64, 64);
+	course.colorOffRoadPrimary =   Color(  0,112,  0);
+	course.colorOffRoadSecondary = Color(  0, 88, 80);
+	course.colorHumblePrimary =    Color(200,200,200);
+	course.colorHumbleSecondary =  Color(152,  0,  0);
+
+	course.colorLandscape = Color(136,204,238);
+	course.colorHorizon = course.colorOffRoadPrimary;
 
 	return course;
+}
+
+
+namespace carse_details
+{
+	Color parseColor(const char* cstr)
+	{
+		return Color::parseCStr(cstr);
+	}
 }
 
 //static
 Course Course::createCourseFromFile(const Properties& prop)
 {
+	using carse_details::parseColor;
 	float segmentLength = prop.getParsedCStrAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
 	float roadWidth = prop.getParsedCStrAllowDefault<double, atof>("road_width", 3000);
 
@@ -223,6 +254,19 @@ Course Course::createCourseFromFile(const Properties& prop)
 	course.author = prop.get("author");
 	course.credits = prop.get("credits");
 	course.comments = prop.get("comments");
+
+	course.landscapeFilename = prop.get("landscape_image");
+	if(course.landscapeFilename.empty() or futil::trim(course.landscapeFilename) == "default")
+		course.landscapeFilename = "assets/bg.png";
+
+	course.colorRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_primary", Color( 64, 80, 80));
+	course.colorRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_secondary", Color( 40, 64, 64));
+	course.colorOffRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_primary", Color(  0,112,  0));
+	course.colorOffRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_secondary", Color(  0, 88, 80));
+	course.colorHumblePrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_primary", Color(200,200,200));
+	course.colorHumbleSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_secondary", Color(152,  0,  0));
+	course.colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
+	course.colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", course.colorOffRoadPrimary);
 
 	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", 32);
 	for(unsigned id = 0; id < spriteIdCount; id++)
@@ -285,3 +329,4 @@ Course Course::createCourseFromFile(const Properties& prop)
 	stream.close();
 	return course;
 }
+

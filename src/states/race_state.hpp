@@ -65,6 +65,21 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Hud::TimerDisplay<float>* hudTimerCurrentLap, *hudTimerBestLap;
 	Hud::NumericalDisplay<unsigned>* hudCurrentLap;
 
+	// keybindings
+	fgeal::Keyboard::Key controlKeyAccelerate,
+						 controlKeyBrake,
+						 controlKeyTurnLeft,
+						 controlKeyTurnRight,
+						 controlKeyShiftUp,
+						 controlKeyShiftDown;
+
+	unsigned controlJoystickKeyAccelerate,
+	 	 	 controlJoystickKeyBrake,
+			 controlJoystickKeyShiftUp,
+			 controlJoystickKeyShiftDown;
+
+	unsigned controlJoystickAxisTurn;
+
 	//todo make these types parametrizable (and thus, not hardcoded) so they can be externally specified to allow custom, user-defined types.
 	enum SurfaceType
 	{

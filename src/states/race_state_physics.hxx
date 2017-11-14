@@ -44,20 +44,20 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	vehicle.body.arbitraryForceFactor = wheelAngleFactor;
 	vehicle.body.slopeAngle = atan2(segment.y - posY, course.roadSegmentLength);
 
-	vehicle.body.engine.throttlePosition = Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)? 1.0 : 0.0;
-	vehicle.body.brakePedalPosition =  Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN)? 1.0 : 0.0;
+	vehicle.body.engine.throttlePosition = isPlayerAccelerating()? 1.0 : 0.0;
+	vehicle.body.brakePedalPosition = isPlayerBraking()? 1.0 : 0.0;
 	vehicle.body.updatePowertrain(delta);
 
 	// update position
 	position += vehicle.body.speed*delta;
 
 	// update steering
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT) and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
+	if(isPlayerSteeringRight() and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
 		if(pseudoAngle < 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle += delta * STEERING_SPEED;
 	}
-	else if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT) and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
+	else if(isPlayerSteeringLeft() and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
 		if(pseudoAngle > 0) pseudoAngle *= 1/(1+5*delta);
 		pseudoAngle -= delta * STEERING_SPEED;

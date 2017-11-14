@@ -30,6 +30,7 @@ using fgeal::Sound;
 using fgeal::Music;
 using fgeal::Sprite;
 using fgeal::Point;
+using fgeal::Joystick;
 
 #define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
 
@@ -41,6 +42,11 @@ static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
 static const float BACKGROUND_POSITION_FACTOR = 0.509375;
+
+#define isPlayerAccelerating() (Keyboard::isKeyPressed(controlKeyAccelerate) or Joystick::isButtonPressed(0, controlJoystickKeyAccelerate))
+#define isPlayerBraking() (Keyboard::isKeyPressed(controlKeyBrake) or Joystick::isButtonPressed(0, controlJoystickKeyBrake))
+#define isPlayerSteeringLeft() (Keyboard::isKeyPressed(controlKeyTurnLeft) or Joystick::getAxisPosition(0, controlJoystickAxisTurn) < 0)
+#define isPlayerSteeringRight() (Keyboard::isKeyPressed(controlKeyTurnRight) or Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0)
 
 // -------------------------------------------------------------------------------
 
@@ -102,6 +108,19 @@ void Pseudo3DRaceState::initialize()
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
 	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
 	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
+
+	controlKeyAccelerate = fgeal::Keyboard::KEY_ARROW_UP;
+	controlKeyBrake = fgeal::Keyboard::KEY_ARROW_DOWN;
+	controlKeyTurnLeft = fgeal::Keyboard::KEY_ARROW_LEFT;
+	controlKeyTurnRight = fgeal::Keyboard::KEY_ARROW_RIGHT;
+	controlKeyShiftUp = fgeal::Keyboard::KEY_LEFT_SHIFT;
+	controlKeyShiftDown = fgeal::Keyboard::KEY_LEFT_CONTROL;
+
+	controlJoystickAxisTurn = 0;
+	controlJoystickKeyAccelerate = 2;
+	controlJoystickKeyBrake = 3;
+	controlJoystickKeyShiftUp = 4;
+	controlJoystickKeyShiftDown = 5;
 }
 
 void Pseudo3DRaceState::onEnter()
@@ -526,7 +545,7 @@ void Pseudo3DRaceState::update(float delta)
 				// fake burnout mode
 				vehicle.body.engine.gear == 1
 				and vehicle.body.engine.rpm < 0.5*vehicle.body.engine.maxRpm
-				and Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP)
+				and isPlayerAccelerating()
 			)
 		)
 		or
@@ -605,7 +624,12 @@ void Pseudo3DRaceState::handleInput()
 
 		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
-			switch(event.getEventKeyCode())
+			if(event.getEventKeyCode() == controlKeyShiftUp)
+				shiftGear(vehicle.body.engine.gear+1);
+			else if(event.getEventKeyCode() == controlKeyShiftDown)
+				shiftGear(vehicle.body.engine.gear-1);
+
+			else switch(event.getEventKeyCode())
 			{
 				case Keyboard::KEY_ESCAPE:
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
@@ -633,15 +657,17 @@ void Pseudo3DRaceState::handleInput()
 				case Keyboard::KEY_D:
 					debugMode = !debugMode;
 					break;
-				case Keyboard::KEY_LEFT_SHIFT:
-					shiftGear(vehicle.body.engine.gear+1);
-					break;
-				case Keyboard::KEY_LEFT_CONTROL:
-					shiftGear(vehicle.body.engine.gear-1);
-					break;
 				default:
 					break;
 			}
+		}
+
+		else if(event.getEventType() == Event::TYPE_JOYSTICK_BUTTON_PRESS)
+		{
+			if(event.getEventKeyCode() == controlJoystickKeyShiftUp)
+				shiftGear(vehicle.body.engine.gear+1);
+			else if(event.getEventKeyCode() == controlJoystickKeyShiftDown)
+				shiftGear(vehicle.body.engine.gear-1);
 		}
 	}
 }

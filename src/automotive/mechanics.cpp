@@ -22,6 +22,8 @@
 // air friction and downforce arbitrary multipliers. don't have foundation in physics, but serves as a fine-tuning for the gameplay
 #define AIR_DRAG_ARBITRARY_ADJUST 0.8
 #define DOWNFORCE_ARBITRATY_ADJUST 0.5
+#define BRAKE_PAD_TORQUE_ARBITRARY_ADJUST 7500
+#define ROLLING_RESISTANCE_TORQUE_ARBITRARY_ADJUST 0.25
 
 const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 
@@ -81,22 +83,35 @@ void Mechanics::updatePowertrain(float delta)
 			engine.gear--;
 	}
 
-	switch(simulationType)
-	{
-		default:
-		case SIMULATION_TYPE_SLIPLESS:
-		case SIMULATION_TYPE_FAKESLIP:		updateBySimplifiedScheme(delta); break;
-		case SIMULATION_TYPE_PACEJKA_BASED: updateByPacejkaScheme(delta); break;
-	}
+	const float weight = mass * GRAVITY_ACCELERATION;
+	brakingForce = brakePedalPosition * tireFrictionFactor * weight * sgn(speed);  // a multiplier here could be added for stronger and easier braking
+	rollingResistanceForce = rollingResistanceFactor * weight * sgn(speed);  // rolling friction is independant on wheel count since the weight will be divided between them
+	slopePullForce = weight * sin(slopeAngle);
+	airDragForce = 0.5 * airDragFactor * pow2(speed) * AIR_DRAG_ARBITRARY_ADJUST;
 
-	brakingForce = brakePedalPosition * tireFrictionFactor * mass * GRAVITY_ACCELERATION * sgn(speed);  // a multiplier here could be added for stronger and easier braking
-	rollingResistanceForce = rollingResistanceFactor * mass * GRAVITY_ACCELERATION * sgn(speed);  // rolling friction is independant on wheel count since the weight will be divided between them
-	slopePullForce = mass * GRAVITY_ACCELERATION * sin(slopeAngle),
-	airDragForce = 0.5 * airDragFactor * pow2(speed) * AIR_DRAG_ARBITRARY_ADJUST,
+	// update downforce
 	downforce = 0.5 * downforceFactor * pow2(speed) * DOWNFORCE_ARBITRATY_ADJUST;
 
+	// update drivetrain
+	if(simulationType == SIMULATION_TYPE_PACEJKA_BASED)
+		updateByPacejkaScheme(delta);
+	else
+		updateBySimplifiedScheme(delta);
+
+	// compute total net force
+	float totalForce = (
+		// drive force is ready to be get AFTER updating drivetrain
+		arbitraryForceFactor*getDriveForce()
+
+		// discounts for slope gravity pull and air drag friction
+		- (slopePullForce + airDragForce)
+
+		// pacejka scheme already accounts for braking force and rolling resistance force
+		- (simulationType != SIMULATION_TYPE_PACEJKA_BASED? (brakingForce + rollingResistanceForce) : 0)
+	);
+
 	// update acceleration
-	acceleration = ((arbitraryForceFactor*getDriveForce() - slopePullForce - brakingForce - rollingResistanceForce) - airDragForce)/mass;
+	acceleration = totalForce/mass;  // divide forces by mass
 
 	// update speed
 	speed += delta*acceleration;
@@ -208,13 +223,13 @@ void Mechanics::updateByPacejkaScheme(float delta)
 	const float tractionForce = getNormalizedTractionForce() * tireFrictionFactor * getDrivenWheelsWeightLoad();
 	const float tractionTorque = tractionForce * tireRadius;
 
-	//fixme how to do this formula right? remove from ingame state braking calculation
-//	const float brakingTorque = -brakePedalPosition*30;
-	const float brakingTorque = 0;
+	// todo braking torque calculation should have a brake pad slip ratio on its on
+	const float brakingTorque = brakePedalPosition * sgn(wheelAngularSpeed) * BRAKE_PAD_TORQUE_ARBITRARY_ADJUST;
+	const float rollingResistanceTorque = rollingResistanceForce * tireRadius * ROLLING_RESISTANCE_TORQUE_ARBITRARY_ADJUST;
 
-	const float totalTorque = engine.getDriveTorque() - tractionTorque + brakingTorque;
+	const float totalTorque = engine.getDriveTorque() - tractionTorque - brakingTorque - rollingResistanceTorque;
 
-	const float arbitraryAdjustmentFactor = 0.001;
+	const float arbitraryAdjustmentFactor = 0.002;
 	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
 
 	wheelAngularSpeed += delta * wheelAngularAcceleration;  // update wheel angular speed
@@ -226,7 +241,8 @@ float Mechanics::getDriveForceByPacejkaScheme()
 	return getNormalizedTractionForce() * getDrivenWheelsWeightLoad() * tireFrictionFactor;
 }
 
-static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  // increasing this constant degrades simulation quality
+// increasing this constant degrades simulation quality
+static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  //@suppress("Unused variable declaration in file scope")
 
 void Mechanics::updateSlipRatio(float delta)
 {

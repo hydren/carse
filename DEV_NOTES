@@ -46,3 +46,7 @@ verticalSpeed += gravity * dt
 PosY += verticalSpeed * dt
 
 from https://physics.stackexchange.com/questions/175381/speed-needed-to-make-a-car-jump-from-a-ramp
+
+# brainstorm
+
+Speedometer design with dynamic backlight: lights up circular disc behind the speedometer's pointer.

@@ -55,7 +55,7 @@ int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 //static
 Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID)); }
 
-Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
+Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)  //@suppress("Class members should be properly initialized")
 : State(*game),
   font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
@@ -487,7 +487,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2frad/s", vehicle.body.engine.getAngularSpeed());
+		sprintf(buffer, "%2.2frad/s", vehicle.body.wheelAngularSpeed);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;

@@ -13,7 +13,7 @@ class Logic
 
 	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 	std::vector<Course> courses;
-	std::vector<Vehicle> vehicles;
+	std::vector<Pseudo3DVehicle::Spec> vehicles;
 
 	Logic(Pseudo3DCarseGame& game);
 
@@ -42,15 +42,18 @@ class Logic
 	void setNextCourseRandom();
 	void setNextCourseDebug();
 
-	const std::vector<Vehicle>& getVehicleList();
+	const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
 	void setPickedVehicle(unsigned vehicleIndex, int skin=-1);
-	void setPickedVehicle(const Vehicle& v, int skin=-1);
+	void setPickedVehicle(const Pseudo3DVehicle::Spec& v, int skin=-1);
 
 	bool isImperialUnitEnabled();
 	void setImperialUnitEnabled(bool choice=true);
 
 	Mechanics::SimulationType getSimulationType();
 	void setSimulationType(Mechanics::SimulationType type);
+
+	// spec. loading functions
+	void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
 };
 
 // ----------------------------------------------------------------------------------------------------------

@@ -20,6 +20,9 @@ using std::endl;
 
 #include <vector>
 
+#include <cstdlib>
+#include <cmath>
+
 using futil::Properties;
 using futil::ends_with;
 using std::vector;
@@ -28,6 +31,12 @@ using std::map;
 
 // to reduce typing is good
 #define getRaceState() static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID))
+#define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
+
+// default float constants
+static const float
+	DEFAULT_VEHICLE_MASS = 1250,  // kg
+	DEFAULT_TIRE_DIAMETER = 678;  // mm
 
 Pseudo3DCarseGame::Logic::Logic(Pseudo3DCarseGame& game) : game(game) {}
 
@@ -231,6 +240,138 @@ Mechanics::SimulationType Pseudo3DCarseGame::Logic::getSimulationType()
 void Pseudo3DCarseGame::Logic::setSimulationType(Mechanics::SimulationType type)
 {
 	getRaceState()->simulationType = type;
+}
+
+// ----------------------------------------------------------------------------------------------------------
+
+void Pseudo3DCarseGame::Logic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& prop)
+{
+	// aux. var
+	string key;
+
+	// logic data
+
+	key = "vehicle_type";
+	if(prop.containsKey(key))
+	{
+		string t = futil::to_lower(prop.get(key));
+		if(t == "car" or t == "default") spec.type = Mechanics::TYPE_CAR;
+		else if(t == "bike") spec.type = Mechanics::TYPE_BIKE;
+		else spec.type = Mechanics::TYPE_OTHER;
+	}
+	else spec.type = Mechanics::TYPE_CAR;
+
+	spec.body = Mechanics(Engine(prop), spec.type);
+
+	// info data
+
+	key = "vehicle_name";
+	spec.name = prop.containsKey(key)? prop.get(key) : "unnamed";
+
+	key = "authors";
+	spec.authors = prop.containsKey(key)? prop.get(key) : "unknown";
+
+	key = "credits";
+	spec.credits = prop.containsKey(key)? prop.get(key) : "";
+
+	key = "comments";
+	spec.comments = prop.containsKey(key)? prop.get(key) : "";
+
+	// todo read more data from properties
+
+	// physics data
+
+	key = "vehicle_mass";
+	spec.mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
+
+	key = "tire_diameter";
+	spec.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
+
+	key = "engine_location";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = prop.get(key);
+		if(value == "mid" or value == "middle") spec.engineLocation = Mechanics::ENGINE_LOCATION_ON_MIDDLE;
+		else if(value == "rear") spec.engineLocation = Mechanics::ENGINE_LOCATION_ON_REAR;
+		else spec.engineLocation = Mechanics::ENGINE_LOCATION_ON_FRONT;
+	}
+	else
+		spec.engineLocation = Mechanics::ENGINE_LOCATION_ON_FRONT;
+
+	key = "driven_wheels";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = prop.get(key);
+		if(value == "all") spec.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ALL;
+		else if(value == "front") spec.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_FRONT;
+		else spec.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_REAR;
+	}
+	else
+		spec.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_REAR;
+
+	body.setSuggestedWeightDistribuition();
+
+	// sound data
+
+	if(EngineSoundProfile::requestsPresetProfile(prop))
+		spec.sound = getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
+	else
+		spec.sound = EngineSoundProfile::loadFromProperties(prop);
+
+	// sprite data
+
+	spec.sprite = Pseudo3DVehicleAnimationProfile(prop);
+
+	// ########################################################################################################################################################
+	// These properties need to be loaded after sprite data to make sure that some fields are ready ('depictedVehicleWidth', 'sprite_sheet_file', etc)
+
+	if(spec.sprite.sheetFilename == "DEFAULT")
+	{
+		// uncomment when there is a default sprite for bikes
+//		switch(type)
+//		{
+//			case TYPE_BIKE:  sprite.sheetFilename = "assets/bike-sheet-default.png"; break;
+//			default:
+//			case TYPE_OTHER:
+//			case TYPE_CAR:   sprite.sheetFilename = "assets/car-sheet-default.png"; break;
+//		}
+
+		spec.sprite.sheetFilename = "assets/car-sheet-default.png";
+	}
+
+	// attempt to estimate center's of gravity height
+	key = "vehicle_height";
+	if(isValueSpecified(prop, key))
+		spec.centerOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
+	else
+		spec.centerOfGravityHeight = 0.3506f * spec.sprite.depictedVehicleWidth * spec.sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+
+
+	// attempt to estimate wheelbase
+	{
+		key = "vehicle_wheelbase";
+		if(isValueSpecified(prop, key))
+			spec.wheelbase = atof(prop.get(key).c_str());
+		else
+			spec.wheelbase = -1;
+
+		key = "vehicle_length";
+		if(spec.wheelbase == -1 and isValueSpecified(prop, key))
+			spec.wheelbase = atof(prop.get(key).c_str());
+
+		key = "vehicle_width";
+		if(spec.wheelbase == -1 and isValueSpecified(prop, key))
+			spec.wheelbase = 2.5251f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+
+		key = "vehicle_height";
+		if(spec.wheelbase == -1 and isValueSpecified(prop, key))
+			spec.wheelbase = 3.6016f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+
+		if(spec.wheelbase == -1)
+		{
+			spec.wheelbase = 2.5251f * spec.sprite.depictedVehicleWidth * spec.sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+		}
+	}
 }
 
 // ----------------------------------------------------------------------------------------------------------

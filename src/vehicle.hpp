@@ -9,24 +9,25 @@
 #define PSEUDO3D_VEHICLE_HPP_
 #include <ciso646>
 
-#include "automotive/motor.hpp"
-#include "automotive/engine_sound.hpp"
 #include "pseudo3d/vehicle_gfx.hpp"
-
+#include "automotive/vehicle.hpp"
 #include "futil/properties.hpp"
 
-#include "carse_game.hpp"
-
-#include "automotive/mechanics.hpp"
-
-#include <map>
-#include <vector>
 #include <string>
+#include <vector>
+#include <map>
 
-struct Pseudo3DCarseGame;  // foward declaration
-
-struct Vehicle
+struct Pseudo3DVehicle
 {
+	struct Spec extends VehicleSpec
+	{
+		// graphics data
+		Pseudo3DVehicleAnimationProfile sprite;
+
+		// additional alternate graphics data (optional)
+		std::map<std::string, Pseudo3DVehicleAnimationProfile> alternateSprites;
+	};
+
 	Mechanics::VehicleType type;
 
 	// general information
@@ -40,13 +41,11 @@ struct Vehicle
 
 	// graphics data
 	Pseudo3DVehicleAnimationProfile sprite;
-	int activeSkin;  // the active skin (-1 means no skin; original sheet)
 
-	/** Creates a empty vehicle object. */
-	Vehicle();
+	Pseudo3DVehicle();  // zero constructor
 
-	/** Creates a vehicle with definitions taken from the given properties. */
-	Vehicle(const futil::Properties& properties, Pseudo3DCarseGame& game);
+	/** Creates a vehicle with the given specifications. The optional 'skin' argument specifies which skin to use (other than the default). */
+	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, const std::string& skin="default");
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

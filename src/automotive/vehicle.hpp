@@ -27,9 +27,6 @@ struct VehicleSpec
 	// the tire radius, in mm
 	float tireRadius;
 
-	// the number of wheels
-	unsigned wheelCount;
-
 	// the distance between the centers of the front and rear wheels.
 	float wheelbase;
 
@@ -58,16 +55,16 @@ struct VehicleSpec
 	float engineGearCount;
 
 	// the transmission's gear ratios
-	std::vector<float> gearRatio;
+	std::vector<float> engineGearRatio;
 
 	// the transmission's reverse gear ratio
-	float reverseGearRatio;
+	float engineReverseGearRatio;
 
 	// the transmission's differential ratio
-	float differentialRatio;
+	float engineDifferentialRatio;
 
 	// the torque curve data
-	Engine::TorqueCurveProfile torqueCurveProfile;
+	Engine::TorqueCurveProfile engineTorqueCurveProfile;
 
 	// the drivetrain type of the vehicle
 	Mechanics::DrivenWheelsType drivenWheelsType;
@@ -76,9 +73,9 @@ struct VehicleSpec
 	Mechanics::EngineLocation engineLocation;
 
 	// informative-only fields
-	std::string configuration, aspiration, valvetrain;
-	unsigned displacement, valveCount;
-	float maximumPower, maximumPowerRpm, maximumTorqueRpm;
+	std::string engineConfiguration, engineAspiration, engineValvetrain;
+	unsigned engineDisplacement, engineValveCount;
+	float engineMaximumPower, engineMaximumPowerRpm, engineMaximumTorqueRpm;
 
 	// sound data
 	EngineSoundProfile sound;

@@ -9,20 +9,10 @@
 #define CARSE_GAME_HPP_
 #include <ciso646>
 
-#include "futil/language.hpp"
-#include "futil/properties.hpp"
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 
-#include "course.hpp"
-#include "vehicle.hpp"
-#include "automotive/engine_sound.hpp"
-#include "automotive/mechanics.hpp"
-
-#include <map>
-#include <vector>
-
-struct Vehicle;  // foward declaration
+#include "carse_game_logic.hpp"
 
 class Pseudo3DCarseGame extends public fgeal::Game
 {
@@ -37,9 +27,8 @@ class Pseudo3DCarseGame extends public fgeal::Game
 	Pseudo3DCarseGame();
 	void initializeStatesList();
 
-	#include "carse_game_logic.hxx"
-	SharedResources* sharedResources;  // @suppress("Type cannot be resolved")
-	Logic logic;					   // @suppress("Type cannot be resolved")
+	CarseSharedResources* sharedResources;
+	CarseGameLogic logic;
 };
 
 typedef Pseudo3DCarseGame CarseGame;

@@ -15,7 +15,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 struct Pseudo3DVehicle
 {
@@ -25,13 +24,10 @@ struct Pseudo3DVehicle
 		Pseudo3DVehicleAnimationProfile sprite;
 
 		// additional alternate graphics data (optional)
-		std::map<std::string, Pseudo3DVehicleAnimationProfile> alternateSprites;
+		std::vector<Pseudo3DVehicleAnimationProfile> alternateSprites;
 	};
 
-	Mechanics::VehicleType type;
-
-	// general information
-	std::string name, authors, credits, comments;
+	const Spec& spec;
 
 	// physics simulation
 	Mechanics body;
@@ -44,8 +40,8 @@ struct Pseudo3DVehicle
 
 	Pseudo3DVehicle();  // zero constructor
 
-	/** Creates a vehicle with the given specifications. The optional 'skin' argument specifies which skin to use (other than the default). */
-	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, const std::string& skin="default");
+	/** Creates a vehicle with the given specifications. The optional 'alternateSpriteIndex' argument specifies an alternate skin to use (-1 means use default sprite). */
+	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex=-1);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

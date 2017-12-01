@@ -67,13 +67,12 @@ struct Engine
 		static void queryParameters(Engine::TorqueCurveProfile::PowerBandType type, float& initialTorqueFactor, float& redlineTorqueFactor);
 	};
 
+	Engine(float maxRpm=7000, float maxPower=300, TorqueCurveProfile::PowerBandType powerBand=TorqueCurveProfile::POWER_BAND_TYPICAL, unsigned gearCount=5);
+
 	TorqueCurveProfile torqueCurveProfile;
 
-	/** Empty constructor */
-	Engine();
-
-	/** Creates a engine profile from the given properties data. */
-	Engine(const futil::Properties& properties);
+	/** Reset the engine's state. */
+	void reset();
 
 	/** Returns this engine's torque in the given RPM. */
 	float getCurrentTorque();

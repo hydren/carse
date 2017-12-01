@@ -75,7 +75,7 @@ struct Mechanics
 	float arbitraryForceFactor;
 
 	// todo support more types of vehicles (jetskis, motorboats, hovercrafts, hovercars, trikes, etc)
-	Mechanics(const Engine& engine, VehicleType);
+	Mechanics(const Engine& engine, VehicleType, float dragArea=0, float liftArea=0);
 
 	/** Resets the powertrain state to idle. */
 	void reset();
@@ -88,9 +88,6 @@ struct Mechanics
 
 	/** Returns the current total weight load on the driven wheels. */
 	float getDrivenWheelsWeightLoad();
-
-	/** Sets a suggested value for the rear weight distribuition, accounting for the engine location within the vehicle. */
-	void setSuggestedWeightDistribuition();
 
 	private:
 

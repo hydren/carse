@@ -1,12 +1,31 @@
 /*
- * carse_game_logic.hxx
+ * carse_game_logic.hpp
  *
- *  Created on: 16 de out de 2017
+ *  Created on: 1 de dez de 2017
  *      Author: carlosfaruolo
  */
 
+#ifndef CARSE_GAME_LOGIC_HPP_
+#define CARSE_GAME_LOGIC_HPP_
+#include <ciso646>
+
+#include "carse_game.hpp"
+
+#include "course.hpp"
+#include "vehicle.hpp"
+#include "automotive/engine_sound.hpp"
+#include "automotive/mechanics.hpp"
+
+#include "futil/language.hpp"
+#include "futil/properties.hpp"
+
+#include <map>
+#include <vector>
+
+struct Vehicle;  // foward declaration
+
 /** Class to wrap together all between-states game logic. */
-class Logic
+class CarseGameLogic
 {
 	friend class Pseudo3DCarseGame;
 	Pseudo3DCarseGame& game;
@@ -15,7 +34,7 @@ class Logic
 	std::vector<Course> courses;
 	std::vector<Pseudo3DVehicle::Spec> vehicles;
 
-	Logic(Pseudo3DCarseGame& game);
+	CarseGameLogic(Pseudo3DCarseGame& game);
 
 	// intended to run on startup
 	void initialize();
@@ -56,13 +75,13 @@ class Logic
 	void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
 };
 
-// ----------------------------------------------------------------------------------------------------------
-
 /** Wrapper to resources shared between states. */
-struct SharedResources
+struct CarseSharedResources
 {
 	fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
 	fgeal::Font fontDev;
 
-	SharedResources();
+	CarseSharedResources();
 };
+
+#endif /* CARSE_GAME_LOGIC_HPP_ */

@@ -29,8 +29,8 @@ Pseudo3DCarseGame::Pseudo3DCarseGame()
 
 void Pseudo3DCarseGame::initializeStatesList()
 {
-	this->sharedResources = new SharedResources();
-	this->logic.initialize();  // @suppress("Method cannot be resolved")
+	this->sharedResources = new CarseSharedResources();
+	this->logic.initialize();
 
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
@@ -40,5 +40,5 @@ void Pseudo3DCarseGame::initializeStatesList()
 
 	this->setInitialState(MAIN_MENU_STATE_ID);
 
-	this->logic.onStatesListInitFinished();  // @suppress("Method cannot be resolved")
+	this->logic.onStatesListInitFinished();
 }

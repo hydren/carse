@@ -171,7 +171,7 @@ void CarseGameLogic::setNextCourseDebug()
 
 void CarseGameLogic::loadVehicles()
 {
-	cout << "reading vehicles..." << endl;
+	cout << "reading vehicles specs..." << endl;
 	vector<string> vehicleFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
 	for(unsigned i = 0; i < vehicleFiles.size(); i++)
 	{
@@ -188,7 +188,7 @@ void CarseGameLogic::loadVehicles()
 					prop.load(subfolderFile);
 					vehicles.push_back(Pseudo3DVehicle::Spec());
 					loadVehicleSpec(vehicles.back(), prop);
-					cout << "read vehicle: " << subfolderFile << endl;
+					cout << "read vehicle spec: " << subfolderFile << endl;
 					break;
 				}
 			}
@@ -199,7 +199,7 @@ void CarseGameLogic::loadVehicles()
 			prop.load(filename);
 			vehicles.push_back(Pseudo3DVehicle::Spec());
 			loadVehicleSpec(vehicles.back(), prop);
-			cout << "read vehicle: " << filename << endl;
+			cout << "read vehicle spec: " << filename << endl;
 		}
 	}
 }
@@ -332,6 +332,32 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 			alternateSpriteProp.load(alternateSpritePropFile);
 			spec.alternateSprites.push_back(Pseudo3DVehicleAnimationProfile());
 			loadAnimationSpec(spec.alternateSprites.back(), alternateSpriteProp);
+		}
+		else
+		{
+			key = "alternate_sprite_sheet" + futil::to_string(i) + "_file";
+			if(isValueSpecified(prop, key))
+			{
+				const string alternateSpriteSheetFile = prop.get(key);
+
+				int inheritedProfileIndex = -1;
+				key = "alternate_sprite_sheet" + futil::to_string(i) + "_inherit_from";
+				if(isValueSpecified(prop, key))
+				{
+					const unsigned inheritIndex = prop.getParsedCStrAllowDefault<int, atoi>(key, 0);
+					if(inheritIndex < spec.alternateSprites.size())
+						inheritedProfileIndex = inheritIndex;
+					else
+						cout << "warning: " << key << " specifies an out of bounds index (" << inheritIndex << "). inheriting default instead." << endl;
+				}
+
+				if(inheritedProfileIndex != -1)
+					spec.alternateSprites.push_back(spec.alternateSprites[inheritedProfileIndex]);
+				else
+					spec.alternateSprites.push_back(spec.sprite);
+
+				spec.alternateSprites.back().sheetFilename = alternateSpriteSheetFile;
+			}
 		}
 	}
 

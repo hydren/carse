@@ -22,7 +22,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& s, int alternateSpriteIndex)
 : spec(&s),
-  body(Engine(spec->engineMaximumRpm, spec->engineMaximumPower, spec->engineTorqueCurveProfile, spec->engineGearCount), spec->type, spec->dragArea, spec->liftArea),
+  body(Engine(spec->engineMaximumRpm, spec->engineMaximumPower, spec->enginePowerBand, spec->engineGearCount), spec->type, spec->dragArea, spec->liftArea),
   engineSoundProfile(spec->sound),
   sprite(alternateSpriteIndex == -1? spec->sprite : spec->alternateSprites[alternateSpriteIndex])
 {

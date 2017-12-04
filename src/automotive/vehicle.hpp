@@ -64,7 +64,7 @@ struct VehicleSpec
 	float engineDifferentialRatio;
 
 	// the torque curve data
-	Engine::TorqueCurveProfile engineTorqueCurveProfile;
+	Engine::TorqueCurveProfile::PowerBandType enginePowerBand;
 
 	// the drivetrain type of the vehicle
 	Mechanics::DrivenWheelsType drivenWheelsType;

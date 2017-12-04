@@ -9,7 +9,7 @@
 #define CARSE_GAME_LOGIC_HPP_
 #include <ciso646>
 
-#include "carse_game.hpp"
+#include "states/race_state.hpp"
 
 #include "course.hpp"
 #include "vehicle.hpp"
@@ -22,7 +22,9 @@
 #include <map>
 #include <vector>
 
-struct Vehicle;  // foward declaration
+// fwd decl
+class Pseudo3DCarseGame;
+class Vehicle;
 
 /** Class to wrap together all between-states game logic. */
 class CarseGameLogic

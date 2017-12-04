@@ -7,7 +7,7 @@
 
 #include "carse_game_logic.hpp"
 
-#include "states/race_state.hpp"
+#include "carse_game.hpp"
 
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"

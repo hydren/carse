@@ -7,13 +7,12 @@
 
 #include "vehicle_selection_state.hpp"
 
+#include "carse_game.hpp"
+
 #include "race_state.hpp"
+
 #include "futil/properties.hpp"
-
 #include "futil/string_actions.hpp"
-
-#include <iostream>
-using std::cout; using std::endl;
 
 #include <vector>
 #include <iomanip>

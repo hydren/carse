@@ -9,19 +9,25 @@
 #define PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_
 #include <ciso646>
 
-#include "carse_game.hpp"
+#include "vehicle.hpp"
+
+#include "fgeal/fgeal.hpp"
+#include "fgeal/extra/game.hpp"
+#include "fgeal/extra/menu.hpp"
 
 #include "futil/language.hpp"
-#include "fgeal/fgeal.hpp"
-#include "fgeal/extra/menu.hpp"
-#include "vehicle.hpp"
 
 #include <vector>
 
+// fwd decl.
+class Pseudo3DCarseGame;
+class CarseSharedResources;
+class CarseGameLogic;
+
 class VehicleSelectionState extends public fgeal::Game::State
 {
-	CarseGame::SharedResources& shared;
-	CarseGame::Logic& gameLogic;
+	CarseSharedResources& shared;
+	CarseGameLogic& gameLogic;
 
 	fgeal::Font* fontMain, *fontInfo;
 	fgeal::Menu* menu;

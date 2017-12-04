@@ -7,6 +7,8 @@
 
 #include "race_state.hpp"
 
+#include "carse_game.hpp"
+
 #include <algorithm>
 #include <cstdio>
 #include <cmath>

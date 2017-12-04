@@ -7,6 +7,8 @@
 
 #include "main_menu_state.hpp"
 
+#include "carse_game.hpp"
+
 #include "race_state.hpp"
 
 #include "futil/string_extra_operators.hpp"

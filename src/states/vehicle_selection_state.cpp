@@ -77,17 +77,17 @@ void VehicleSelectionState::initialize()
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
 
-	const vector<Vehicle>& vehicles = gameLogic.getVehicleList();
-	for(unsigned i = 0; i < vehicles.size(); i++)
+	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = gameLogic.getVehicleList();
+	const_foreach(const Pseudo3DVehicle::Spec&, vspec, vector<Pseudo3DVehicle::Spec>, vehiclesSpecs)
 	{
-		menu->addEntry(vehicles[i].name);
+		menu->addEntry(vspec.name);
 		previews.push_back(VehiclePreview());
-		previews.back().sprite = new Image(vehicles[i].sprite.sheetFilename);
+		previews.back().sprite = new Image(vspec.sprite.sheetFilename);
 		previews.back().altIndex = -1;
 
-		if(not vehicles[i].sprite.sheetFilenameExtra.empty())
-			for(unsigned j = 0; j < vehicles[i].sprite.sheetFilenameExtra.size(); j++)
-				previews.back().altSprites.push_back(new Image(vehicles[i].sprite.sheetFilenameExtra[j]));
+		if(not vspec.alternateSprites.empty())
+			const_foreach(const Pseudo3DVehicleAnimationProfile&, alternateSprite, vector<Pseudo3DVehicleAnimationProfile>, vspec.alternateSprites)
+				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
 	}
 }
 
@@ -203,19 +203,21 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 	if(index < 0)
 		index = menu->getSelectedIndex();
 
-
 	VehiclePreview& preview = previews[index];
-	Image& sprite = (preview.altIndex == -1 or preview.altSprites.empty()? *preview.sprite : *preview.altSprites[preview.altIndex]);
-	const Vehicle& vehicle = gameLogic.getVehicleList()[index];
+	const bool isNotAlternateSprite = (preview.altIndex == -1 or preview.altSprites.empty());
 
-	const float scalex = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.x,
-				scaley = display.getWidth() * 0.0048828125f * scale * vehicle.sprite.scale.y,
-				posX = x - 0.5*vehicle.sprite.frameWidth * scalex,
-				posY = y - 0.5*vehicle.sprite.frameHeight * scaley,
-				offsetY = angleType == 0? 0 : vehicle.sprite.frameHeight * (vehicle.sprite.stateCount/2);
+	const Pseudo3DVehicle::Spec& vspec = gameLogic.getVehicleList()[index];
+	const Pseudo3DVehicleAnimationProfile& spriteSpec = (isNotAlternateSprite? vspec.sprite : vspec.alternateSprites[preview.altIndex]);
+	Image& sprite = *(isNotAlternateSprite? preview.sprite : preview.altSprites[preview.altIndex]);
 
-	sprite.drawScaledRegion(posX, posY, scalex, scaley, (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE),
-									0, offsetY, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight);
+	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);
+	const float scalex = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.x,
+				scaley = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.y,
+				posX = x - 0.5*spriteSpec.frameWidth * scalex,
+				posY = y - 0.5*spriteSpec.frameHeight * scaley,
+				offsetY = (angleType == 0? 0 : spriteSpec.frameHeight * (spriteSpec.stateCount/2));
+
+	sprite.drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
 }
 
 void VehicleSelectionState::renderMenuPrototypeList()
@@ -225,27 +227,27 @@ void VehicleSelectionState::renderMenuPrototypeList()
 	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
 	drawVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
 
-	const Vehicle& vehicle = gameLogic.getVehicleList()[menu->getSelectedIndex()];
+	const Pseudo3DVehicle::Spec& vspec = gameLogic.getVehicleList()[menu->getSelectedIndex()];
 
 	// info sheet
 	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
-	const string engineDesc = (vehicle.body.engine.aspiration.empty()? "" : vehicle.body.engine.aspiration + " ")
-							+ (vehicle.body.engine.displacement == 0?  "" : vehicle.body.engine.displacement >= 950? toStrRounded(vehicle.body.engine.displacement/1000.0) + "L " : to_string(vehicle.body.engine.displacement)+"cc ")
-							+ (vehicle.body.engine.valvetrain.empty()? "" : vehicle.body.engine.valvetrain + " ")
-							+ (vehicle.body.engine.valveCount == 0?    "" : to_string(vehicle.body.engine.valveCount) + "-valve ")
-							+ (vehicle.body.engine.configuration.empty()? "" : vehicle.body.engine.configuration);
+	const string engineDesc = (vspec.engineAspiration.empty()? "" : vspec.engineAspiration + " ")
+							+ (vspec.engineDisplacement == 0?  "" : vspec.engineDisplacement >= 950? toStrRounded(vspec.engineDisplacement/1000.0) + "L " : to_string(vspec.engineDisplacement)+"cc ")
+							+ (vspec.engineValvetrain.empty()? "" : vspec.engineValvetrain + " ")
+							+ (vspec.engineValveCount == 0?    "" : to_string(vspec.engineValveCount) + "-valve ")
+							+ (vspec.engineConfiguration.empty()? "" : vspec.engineConfiguration);
 
 	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Power:  " +to_string(vehicle.body.engine.maximumPower) + "hp @" + to_string((int)vehicle.body.engine.maximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Torque: " +toStrRounded(vehicle.body.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.body.engine.maximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText(to_string(vehicle.body.engine.gearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Weight: "+to_string(vehicle.body.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Power:  " +to_string(vspec.engineMaximumPower) + "hp @" + to_string((int)vspec.engineMaximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Torque: " +toStrRounded(vspec.engineMaximumTorque) + "Nm @" + to_string((int)vspec.engineMaximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText(to_string(vspec.engineGearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
+	fontInfo->drawText("Weight: "+to_string(vspec.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
 }
 
 void VehicleSelectionState::renderMenuPrototypeSlideStand()
 {
 	Display& display = game.getDisplay();
-	const vector<Vehicle>& vehicles = gameLogic.getVehicleList();
+	const vector<Pseudo3DVehicle::Spec>& vehicles = gameLogic.getVehicleList();
 
 	// draw previous vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
@@ -273,7 +275,7 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
 
 	// info sheet
-	const Vehicle& vehicle = vehicles[menu->getSelectedIndex()];
+	const Pseudo3DVehicle::Spec& vehicle = vehicles[menu->getSelectedIndex()];
 	const int infoX = 0.25*display.getWidth(); int infoY = 0.66*display.getHeight();
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;
@@ -287,28 +289,28 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 	const string txtVehicleType = string("Type: ") + (vehicle.type == Mechanics::TYPE_CAR? "Car" : vehicle.type == Mechanics::TYPE_BIKE? "Bike" : "Other");
 	fontInfo->drawText(txtVehicleType, infoX, infoY, Color::WHITE);
 
-	const string txtEngineDesc = (vehicle.body.engine.aspiration.empty()? "" : vehicle.body.engine.aspiration + " ")
-							+ (vehicle.body.engine.displacement == 0?  "" : vehicle.body.engine.displacement >= 950? toStrRounded(vehicle.body.engine.displacement/1000.0) + "L " : to_string(vehicle.body.engine.displacement)+"cc ")
-							+ (vehicle.body.engine.valvetrain.empty()? "" : vehicle.body.engine.valvetrain + " ")
-							+ (vehicle.body.engine.valveCount == 0?    "" : to_string(vehicle.body.engine.valveCount) + "-valve ")
-							+ (vehicle.body.engine.configuration.empty()? "" : vehicle.body.engine.configuration);
+	const string txtEngineDesc = (vehicle.engineAspiration.empty()? "" : vehicle.engineAspiration + " ")
+	                           + (vehicle.engineDisplacement == 0?  "" : vehicle.engineDisplacement >= 950? toStrRounded(vehicle.engineDisplacement/1000.0) + "L " : to_string(vehicle.engineDisplacement)+"cc ")
+	                           + (vehicle.engineValvetrain.empty()? "" : vehicle.engineValvetrain + " ")
+	                           + (vehicle.engineValveCount == 0?    "" : to_string(vehicle.engineValveCount) + "-valve ")
+	                           + (vehicle.engineConfiguration.empty()? "" : vehicle.engineConfiguration);
 	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 
-	const string txtPowerInfo = "Power:  " +to_string(vehicle.body.engine.maximumPower) + "hp @" + to_string((int)vehicle.body.engine.maximumPowerRpm)+"rpm";
+	const string txtPowerInfo = "Power:  " +to_string(vehicle.engineMaximumPower) + "hp @" + to_string((int)vehicle.engineMaximumPowerRpm)+"rpm";
 	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 
-	const string txtTorqueInfo = "Torque: " +toStrRounded(vehicle.body.engine.maximumTorque) + "Nm @" + to_string((int)vehicle.body.engine.maximumTorqueRpm)+"rpm";
+	const string txtTorqueInfo = "Torque: " +toStrRounded(vehicle.engineMaximumTorque) + "Nm @" + to_string((int)vehicle.engineMaximumTorqueRpm)+"rpm";
 	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 
-	const string txtTransmissionInfo = to_string(vehicle.body.engine.gearCount)+"-speed transmission";
+	const string txtTransmissionInfo = to_string(vehicle.engineGearCount)+"-speed transmission";
 	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 
-	const string txtWeightInfo = "Weight: "+to_string(vehicle.body.mass) + "kg";
+	const string txtWeightInfo = "Weight: "+to_string(vehicle.mass) + "kg";
 	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 
-	const string txtDrivetrainInfo = "Drivetrain: "+(vehicle.body.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ALL? "AWD"
-															: (  vehicle.body.engineLocation == Mechanics::ENGINE_LOCATION_ON_FRONT? "F"
-															   : vehicle.body.engineLocation == Mechanics::ENGINE_LOCATION_ON_REAR? "R" : "M")
-															+ string(vehicle.body.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
+	const string txtDrivetrainInfo = "Drivetrain: "+(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ALL? "AWD"
+	                                            : (  vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_FRONT? "F"
+	                                            :    vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_REAR? "R" : "M")
+	                                        + string(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
 	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 }

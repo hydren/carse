@@ -186,7 +186,8 @@ void CarseGameLogic::loadVehicles()
 				{
 					Properties prop;
 					prop.load(subfolderFile);
-					vehicles.push_back(Vehicle(prop, game));
+					vehicles.push_back(Pseudo3DVehicle::Spec());
+					loadVehicleSpec(vehicles.back(), prop);
 					cout << "read vehicle: " << subfolderFile << endl;
 					break;
 				}
@@ -196,7 +197,8 @@ void CarseGameLogic::loadVehicles()
 		{
 			Properties prop;
 			prop.load(filename);
-			vehicles.push_back(Vehicle(prop, game));
+			vehicles.push_back(Pseudo3DVehicle::Spec());
+			loadVehicleSpec(vehicles.back(), prop);
 			cout << "read vehicle: " << filename << endl;
 		}
 	}
@@ -209,14 +211,17 @@ const vector<Pseudo3DVehicle::Spec>& CarseGameLogic::getVehicleList()
 
 void CarseGameLogic::setPickedVehicle(unsigned vehicleIndex, int skin)
 {
-	getRaceState()->vehicle = vehicles[vehicleIndex];
-	getRaceState()->vehicle.activeSkin = skin;
+	getRaceState().vehicle = Pseudo3DVehicle(vehicles[vehicleIndex], skin);
 }
 
-void CarseGameLogic::setPickedVehicle(const Vehicle& v, int skin)
+void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int skin)
 {
-	getRaceState()->vehicle = v;
-	getRaceState()->vehicle.activeSkin = skin;
+	getRaceState().vehicle = Pseudo3DVehicle(vspec, skin);
+}
+
+void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle& v)
+{
+	getRaceState().vehicle = v;
 }
 
 bool CarseGameLogic::isImperialUnitEnabled()

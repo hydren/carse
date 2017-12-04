@@ -69,6 +69,7 @@ class CarseGameLogic
 	const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
 	void setPickedVehicle(unsigned vehicleIndex, int skin=-1);
 	void setPickedVehicle(const Pseudo3DVehicle::Spec& v, int skin=-1);
+	void setPickedVehicle(const Pseudo3DVehicle& v);
 
 	bool isImperialUnitEnabled();
 	void setImperialUnitEnabled(bool choice=true);

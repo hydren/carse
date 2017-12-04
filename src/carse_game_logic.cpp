@@ -263,8 +263,6 @@ static const float
 	DEFAULT_MAXIMUM_POWER = 320,  // bhp
 	DEFAULT_GEAR_COUNT = 5,
 
-	TORQUE_POWER_CONVERSION_FACTOR = 5252.0 * 1.355818,  // TODO DELETE THIS OR MOVE TO motor.hpp
-
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
@@ -409,17 +407,16 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 
 	key = "engine_power_band";
 	string powerBandStr = isValueSpecified(prop, key)? prop.get(key) : "typical";
-	Engine::TorqueCurveProfile::PowerBandType powerBand;
-	if(powerBandStr == "peaky") powerBand = Engine::TorqueCurveProfile::POWER_BAND_PEAKY;
-	else if(powerBandStr == "torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_TORQUEY;
-	else if(powerBandStr == "semitorquey" or powerBandStr == "semi-torquey" or powerBandStr == "semi torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_SEMI_TORQUEY;
-	else if(powerBandStr == "wide") powerBand = Engine::TorqueCurveProfile::POWER_BAND_WIDE;
-	else powerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
-
-	float maxPowerNormalized;
-	spec.engineTorqueCurveProfile = Engine::TorqueCurveProfile::createAsSingleQuadratic(spec.engineMaximumRpm, powerBand, &spec.engineMaximumPowerRpm, &maxPowerNormalized);
-	spec.engineMaximumTorqueRpm = spec.engineTorqueCurveProfile.getRpmMaxTorque();
-	spec.engineMaximumTorque = ((spec.engineMaximumPower * TORQUE_POWER_CONVERSION_FACTOR)/spec.engineMaximumPowerRpm)/spec.engineTorqueCurveProfile.getTorqueFactor(spec.engineMaximumPowerRpm);
+	if(powerBandStr == "peaky")
+		spec.enginePowerBand = Engine::TorqueCurveProfile::POWER_BAND_PEAKY;
+	else if(powerBandStr == "torquey")
+		spec.enginePowerBand = Engine::TorqueCurveProfile::POWER_BAND_TORQUEY;
+	else if(powerBandStr == "semitorquey" or powerBandStr == "semi-torquey" or powerBandStr == "semi torquey")
+		spec.enginePowerBand = Engine::TorqueCurveProfile::POWER_BAND_SEMI_TORQUEY;
+	else if(powerBandStr == "wide")
+		spec.enginePowerBand = Engine::TorqueCurveProfile::POWER_BAND_WIDE;
+	else
+		spec.enginePowerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
 
 	spec.engineTransmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
 
@@ -517,8 +514,6 @@ static const float
 
 static void loadAnimationSpec(Pseudo3DVehicleAnimationProfile& spec, const Properties& prop)
 {
-	spec = Pseudo3DVehicleAnimationProfile(prop);
-
 	// aux. vars
 	string key, key2, key3;
 

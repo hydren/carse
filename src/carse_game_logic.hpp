@@ -53,6 +53,9 @@ class CarseGameLogic
 	// intended to run on startup, loads all vehicles in the data/vehicles folder
 	void loadVehicles();
 
+	// quick way to retrieve the race state object instance
+	Pseudo3DRaceState& getRaceState();
+
 	public:
 	// gets one of the built-in engine sound presets, by name
 	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);

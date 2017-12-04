@@ -28,7 +28,6 @@ using std::string;
 using std::map;
 
 // to reduce typing is good
-#define getRaceState() static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID))
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
 CarseGameLogic::CarseGameLogic(Pseudo3DCarseGame& game) : game(game) {}
@@ -46,6 +45,11 @@ void CarseGameLogic::onStatesListInitFinished()
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
 	this->setImperialUnitEnabled(false);
 	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
+}
+
+Pseudo3DRaceState& CarseGameLogic::getRaceState()
+{
+	return *static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID));  //todo create an reference or pointer on logic class to avoid this deference
 }
 
 void CarseGameLogic::loadPresetEngineSoundProfiles()
@@ -147,22 +151,22 @@ const vector<Course>& CarseGameLogic::getCourseList()
 
 void CarseGameLogic::setNextCourse(unsigned courseIndex)
 {
-	getRaceState()->course = courses[courseIndex];
+	getRaceState().course = courses[courseIndex];
 }
 
 void CarseGameLogic::setNextCourse(const Course& c)
 {
-	getRaceState()->course = c;
+	getRaceState().course = c;
 }
 
 void CarseGameLogic::setNextCourseRandom()
 {
-	getRaceState()->course = Course::createRandomCourse(200, 3000, 6400, 1.5);
+	getRaceState().course = Course::createRandomCourse(200, 3000, 6400, 1.5);
 }
 
 void CarseGameLogic::setNextCourseDebug()
 {
-	getRaceState()->course = Course::createDebugCourse(200, 3000);
+	getRaceState().course = Course::createDebugCourse(200, 3000);
 }
 
 void CarseGameLogic::loadVehicles()
@@ -217,22 +221,22 @@ void CarseGameLogic::setPickedVehicle(const Vehicle& v, int skin)
 
 bool CarseGameLogic::isImperialUnitEnabled()
 {
-	return getRaceState()->isImperialUnit;
+	return getRaceState().isImperialUnit;
 }
 
 void CarseGameLogic::setImperialUnitEnabled(bool choice)
 {
-	getRaceState()->isImperialUnit = choice;
+	getRaceState().isImperialUnit = choice;
 }
 
 Mechanics::SimulationType CarseGameLogic::getSimulationType()
 {
-	return getRaceState()->simulationType;
+	return getRaceState().simulationType;
 }
 
 void CarseGameLogic::setSimulationType(Mechanics::SimulationType type)
 {
-	getRaceState()->simulationType = type;
+	getRaceState().simulationType = type;
 }
 
 // ----------------------------------------------------------------------------------------------------------

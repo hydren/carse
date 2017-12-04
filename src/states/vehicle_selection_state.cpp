@@ -86,7 +86,7 @@ void VehicleSelectionState::initialize()
 		previews.back().altIndex = -1;
 
 		if(not vspec.alternateSprites.empty())
-			const_foreach(const Pseudo3DVehicleAnimationProfile&, alternateSprite, vector<Pseudo3DVehicleAnimationProfile>, vspec.alternateSprites)
+			const_foreach(const Pseudo3DVehicleAnimationSpec&, alternateSprite, vector<Pseudo3DVehicleAnimationSpec>, vspec.alternateSprites)
 				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
 	}
 }
@@ -207,7 +207,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 	const bool isNotAlternateSprite = (preview.altIndex == -1 or preview.altSprites.empty());
 
 	const Pseudo3DVehicle::Spec& vspec = gameLogic.getVehicleList()[index];
-	const Pseudo3DVehicleAnimationProfile& spriteSpec = (isNotAlternateSprite? vspec.sprite : vspec.alternateSprites[preview.altIndex]);
+	const Pseudo3DVehicleAnimationSpec& spriteSpec = (isNotAlternateSprite? vspec.sprite : vspec.alternateSprites[preview.altIndex]);
 	Image& sprite = *(isNotAlternateSprite? preview.sprite : preview.altSprites[preview.altIndex]);
 
 	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);

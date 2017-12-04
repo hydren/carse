@@ -21,10 +21,10 @@ struct Pseudo3DVehicle
 	struct Spec extends VehicleSpec
 	{
 		// graphics data
-		Pseudo3DVehicleAnimationProfile sprite;
+		Pseudo3DVehicleAnimationSpec sprite;
 
 		// additional alternate graphics data (optional)
-		std::vector<Pseudo3DVehicleAnimationProfile> alternateSprites;
+		std::vector<Pseudo3DVehicleAnimationSpec> alternateSprites;
 	};
 
 	const Spec* spec;
@@ -36,7 +36,7 @@ struct Pseudo3DVehicle
 	EngineSoundProfile engineSoundProfile;
 
 	// graphics data
-	Pseudo3DVehicleAnimationProfile sprite;
+	Pseudo3DVehicleAnimationSpec sprite;
 
 	Pseudo3DVehicle();  // zero constructor
 

@@ -274,7 +274,7 @@ static const float
 static void loadPowertrainSpec(Pseudo3DVehicle::Spec&, const Properties&);
 static void loadChassisSpec(Pseudo3DVehicle::Spec&, const Properties&);
 //static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
-static void loadAnimationSpec(Pseudo3DVehicleAnimationProfile&, const Properties&);
+static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec&, const Properties&);
 
 void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& prop)
 {
@@ -330,7 +330,7 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 			const string alternateSpritePropFile = prop.get(key);
 			Properties alternateSpriteProp;
 			alternateSpriteProp.load(alternateSpritePropFile);
-			spec.alternateSprites.push_back(Pseudo3DVehicleAnimationProfile());
+			spec.alternateSprites.push_back(Pseudo3DVehicleAnimationSpec());
 			loadAnimationSpec(spec.alternateSprites.back(), alternateSpriteProp);
 		}
 		else
@@ -543,7 +543,7 @@ static const float
 	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
 	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION = 0.857142857143;  // ~0,857
 
-static void loadAnimationSpec(Pseudo3DVehicleAnimationProfile& spec, const Properties& prop)
+static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properties& prop)
 {
 	// aux. vars
 	string key, key2, key3;

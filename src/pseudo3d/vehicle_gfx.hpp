@@ -15,7 +15,7 @@
 #include "fgeal/fgeal.hpp"
 
 /** A class containing data used to draw pseudo-3D vehicle animations. */
-struct Pseudo3DVehicleAnimationProfile
+struct Pseudo3DVehicleAnimationSpec
 {
 	/** The filename of the image containing the sprite sheet. */
 	std::string sheetFilename;

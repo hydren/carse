@@ -164,7 +164,7 @@ float Engine::TorqueCurveProfile::getRpmMaxTorque()
 
 Engine::Engine(float maxRpm, float maxPower, TorqueCurveProfile::PowerBandType curve, unsigned gearCount)
 : maximumTorque(), rpm(), maxRpm(maxRpm), minRpm(1000), throttlePosition(), transmissionEfficiency(0.7),
-  gear(), gearCount(gearCount), gearRatio(), differentialRatio(), reverseGearRatio(),
+  gear(), gearCount(gearCount), gearRatio(gearCount), differentialRatio(), reverseGearRatio(),
   configuration(), aspiration(), valvetrain(), displacement(3000), valveCount(),
   maximumPower(maxPower), maximumPowerRpm(), maximumTorqueRpm(), torqueCurveProfile()
 {
@@ -176,7 +176,7 @@ Engine::Engine(float maxRpm, float maxPower, TorqueCurveProfile::PowerBandType c
 	// default gear ratios
 	reverseGearRatio = 3.25;
 	differentialRatio = 4.0;
-	for(int g = 0; g < gearCount; g++)
+	for(unsigned g = 0; g < gearCount; g++)
 		gearRatio[g] = 3.0 + g*2.0/(1.0 - gearCount);  // generic gear ratio
 
 	rpm = 0;

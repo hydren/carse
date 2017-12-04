@@ -324,7 +324,7 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 	// attempt to read up to 32 alternative sprites
 	for(unsigned i = 0; i < 32; i++)
 	{
-		key = "alternate_sprite" + futil::to_string(i) + "_definition_file";
+		key = "alternate_sprite_sheet" + futil::to_string(i) + "_definition_file";
 		if(isValueSpecified(prop, key))
 		{
 			const string alternateSpritePropFile = prop.get(key);

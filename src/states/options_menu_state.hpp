@@ -17,8 +17,8 @@
 
 class OptionsMenuState extends public fgeal::Game::State
 {
-	CarseGame::Logic& logic;
-	CarseGame::SharedResources& shared;
+	CarseGameLogic& logic;
+	CarseSharedResources& shared;
 	fgeal::Menu* menu;
 	fgeal::Font* fontTitle, *font;
 

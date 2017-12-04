@@ -17,7 +17,7 @@
 
 class MainMenuState extends public fgeal::Game::State
 {
-	CarseGame::SharedResources& shared;
+	CarseSharedResources& shared;
 
 	// the menu
 	fgeal::Menu* menu;

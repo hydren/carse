@@ -57,7 +57,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	unsigned lapCurrent;
 
 	Course course;
-	Vehicle vehicle;
+	Pseudo3DVehicle vehicle;
 
 	Hud::DialGauge<float>* hudRpmGauge;
 	Hud::NumericalDisplay<float>* hudSpeedDisplay;
@@ -107,7 +107,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	static Pseudo3DRaceState* getInstance(fgeal::Game& game);
 
-	Pseudo3DRaceState(CarseGame* game);
+	Pseudo3DRaceState(Pseudo3DCarseGame* game);
 	~Pseudo3DRaceState();
 
 	void initialize();

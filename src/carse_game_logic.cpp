@@ -179,6 +179,7 @@ void CarseGameLogic::setNextCourseDebug()
 void CarseGameLogic::loadVehicles()
 {
 	cout << "reading vehicles specs..." << endl;
+	const string definitionTag = "definition", definitionVehicleValue = "vehicle";
 	vector<string> vehicleFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
 	for(unsigned i = 0; i < vehicleFiles.size(); i++)
 	{
@@ -193,10 +194,13 @@ void CarseGameLogic::loadVehicles()
 				{
 					Properties prop;
 					prop.load(subfolderFile);
-					vehicles.push_back(Pseudo3DVehicle::Spec());
-					loadVehicleSpec(vehicles.back(), prop);
-					cout << "read vehicle spec: " << subfolderFile << endl;
-					break;
+					if(prop.containsKey(definitionTag) and prop.get(definitionTag) == definitionVehicleValue)
+					{
+						vehicles.push_back(Pseudo3DVehicle::Spec());
+						loadVehicleSpec(vehicles.back(), prop);
+						cout << "read vehicle spec: " << subfolderFile << endl;
+						break;
+					}
 				}
 			}
 		}
@@ -204,9 +208,12 @@ void CarseGameLogic::loadVehicles()
 		{
 			Properties prop;
 			prop.load(filename);
-			vehicles.push_back(Pseudo3DVehicle::Spec());
-			loadVehicleSpec(vehicles.back(), prop);
-			cout << "read vehicle spec: " << filename << endl;
+			if(prop.containsKey(definitionTag) and prop.get(definitionTag) == definitionVehicleValue)
+			{
+				vehicles.push_back(Pseudo3DVehicle::Spec());
+				loadVehicleSpec(vehicles.back(), prop);
+				cout << "read vehicle spec: " << filename << endl;
+			}
 		}
 	}
 }

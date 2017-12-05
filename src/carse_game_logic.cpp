@@ -265,13 +265,13 @@ static const float
 	DEFAULT_VEHICLE_MASS = 1250,  // kg
 	DEFAULT_TIRE_DIAMETER = 678,  // mm
 
+	DEFAULT_CD_CAR  = 0.31,  // drag coefficient (Cd) of a Nissan 300ZX (Z32)
+	DEFAULT_CD_BIKE = 0.60,  // estimated drag coefficient (Cd) of a common sporty bike
+	DEFAULT_CL_CAR  = 0.20,  // estimated lift coefficient (Cl) of a Nissan 300ZX (Z32)
+	DEFAULT_CL_BIKE = 0.10,  // estimated lift coefficient (Cl) of a common sporty bike
+
 	DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
 	DEFAULT_FRONTAL_AREA_BIKE = 0.70,  // estimated frontal area (in square-meters) of a common sporty bike
-
-	DEFAULT_CDA_CAR  = 0.31 * DEFAULT_FRONTAL_AREA_CAR,   // drag coefficient (Cd) of a Nissan 300ZX (Z32)
-	DEFAULT_CDA_BIKE = 0.60 * DEFAULT_FRONTAL_AREA_BIKE,  // estimated drag coefficient (Cd) of a common sporty bike
-	DEFAULT_CLA_CAR  = 0.20 * DEFAULT_FRONTAL_AREA_CAR,    // estimated lift coefficient (Cl) of a Nissan 300ZX (Z32)
-	DEFAULT_CLA_BIKE = 0.10 * DEFAULT_FRONTAL_AREA_BIKE,   // estimated lift coefficient (Cl) of a common sporty bike
 
 	DEFAULT_FR_WEIGHT_DISTRIBUITION = 0.45,
 	DEFAULT_MR_WEIGHT_DISTRIBUITION = 0.55,
@@ -541,8 +541,24 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 	else
 		spec.drivenWheelsType = Mechanics::DRIVEN_WHEELS_ON_REAR;
 
-	spec.dragArea = spec.type == Mechanics::TYPE_CAR? DEFAULT_CDA_CAR : spec.type == Mechanics::TYPE_BIKE? DEFAULT_CDA_BIKE : 0.5;
-	spec.liftArea = spec.type == Mechanics::TYPE_CAR? DEFAULT_CLA_CAR : spec.type == Mechanics::TYPE_BIKE? DEFAULT_CLA_BIKE : 0.5;
+	key = "vehicle_frontal_area";
+	const float referenceArea = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_FRONTAL_AREA_BIKE : DEFAULT_FRONTAL_AREA_CAR));
+
+	key = "drag_coefficient";
+	const float dragCoefficient = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_CD_BIKE : DEFAULT_CD_CAR));
+
+	key = "drag_area";
+	spec.dragArea = referenceArea * dragCoefficient;
+	if(isValueSpecified(prop, key))
+		spec.dragArea = prop.getParsedCStrAllowDefault<double, atof>(key, spec.dragArea);
+
+	key = "lift_coefficient";
+	const float liftCoefficient = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_CL_BIKE : DEFAULT_CL_CAR));
+
+	key = "lift_area";
+	spec.liftArea = referenceArea * liftCoefficient;
+	if(isValueSpecified(prop, key))
+		spec.liftArea = prop.getParsedCStrAllowDefault<double, atof>(key, spec.liftArea);
 
 	if(spec.engineLocation == Mechanics::ENGINE_LOCATION_ON_FRONT)
 	{

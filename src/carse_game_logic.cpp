@@ -469,6 +469,12 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 	else
 		spec.enginePowerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
 
+	// here an engine object is created just to collect some data
+	Engine tmpEngine(spec.engineMaximumRpm, spec.engineMaximumPower, spec.enginePowerBand, DEFAULT_GEAR_COUNT);
+	spec.engineMaximumPowerRpm = tmpEngine.maximumPowerRpm;
+	spec.engineMaximumTorque = tmpEngine.maximumTorque;
+	spec.engineMaximumTorqueRpm = tmpEngine.maximumTorqueRpm;
+
 	spec.engineTransmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
 
 	key = "gear_count";

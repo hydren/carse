@@ -48,10 +48,11 @@ struct Engine
 			//POWER_BAND_TYPICAL_ELECTRIC
 		};
 
-		float getTorqueFactor(float rpm);
+		/** Returns the preficted fraction of the maximum torque output in the given RPM. */
+		float getTorqueFactor(float rpm) const;
 
 		/** Returns the RPM which theorectically give the maximum torque of this curve. */
-		float getRpmMaxTorque();
+		float getRpmMaxTorque() const;
 
 		/** Creates a torque curve as two linear functions (increasing then decreasing), given the redline RPM, power band type and (optional) RPM of maximum torque.
 		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.

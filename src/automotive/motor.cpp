@@ -132,7 +132,7 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsSingleQuadratic(f
 	return profile;
 }
 
-float Engine::TorqueCurveProfile::getTorqueFactor(float rpm)
+float Engine::TorqueCurveProfile::getTorqueFactor(float rpm) const
 {
 	if(rpm < 1)
 		return -1;
@@ -145,7 +145,7 @@ float Engine::TorqueCurveProfile::getTorqueFactor(float rpm)
 	return parameters[parameters.size()-1][PARAM_SLOPE]*rpm + parameters[parameters.size()-1][PARAM_INTERCEPT];
 }
 
-float Engine::TorqueCurveProfile::getRpmMaxTorque()
+float Engine::TorqueCurveProfile::getRpmMaxTorque() const
 {
 	float maxTorqueRpm = parameters[0][PARAM_RPM];  // initialize with first range RPM
 	float maxTorque = maxTorqueRpm * parameters[0][PARAM_SLOPE] + parameters[0][PARAM_INTERCEPT];

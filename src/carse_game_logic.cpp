@@ -475,7 +475,8 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 	spec.engineMaximumTorque = tmpEngine.maximumTorque;
 	spec.engineMaximumTorqueRpm = tmpEngine.maximumTorqueRpm;
 
-	spec.engineTransmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
+	key = "transmission_efficiency";
+	spec.engineTransmissionEfficiency = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TRANSMISSION_EFFICIENCY;
 
 	key = "gear_count";
 	spec.engineGearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;

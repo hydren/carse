@@ -9,28 +9,25 @@
 #define PSEUDO3D_VEHICLE_HPP_
 #include <ciso646>
 
-#include "automotive/motor.hpp"
-#include "automotive/engine_sound.hpp"
 #include "pseudo3d/vehicle_gfx.hpp"
-
+#include "automotive/vehicle.hpp"
 #include "futil/properties.hpp"
 
-#include "carse_game.hpp"
-
-#include "automotive/mechanics.hpp"
-
-#include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
-struct Pseudo3DCarseGame;  // foward declaration
-
-struct Vehicle
+struct Pseudo3DVehicle
 {
-	Mechanics::VehicleType type;
+	struct Spec extends VehicleSpec
+	{
+		// graphics data
+		Pseudo3DVehicleAnimationSpec sprite;
 
-	// general information
-	std::string name, authors, credits, comments;
+		// additional alternate graphics data (optional)
+		std::vector<Pseudo3DVehicleAnimationSpec> alternateSprites;
+	};
+
+	const Spec* spec;
 
 	// physics simulation
 	Mechanics body;
@@ -39,14 +36,12 @@ struct Vehicle
 	EngineSoundProfile engineSoundProfile;
 
 	// graphics data
-	Pseudo3DVehicleAnimationProfile sprite;
-	int activeSkin;  // the active skin (-1 means no skin; original sheet)
+	Pseudo3DVehicleAnimationSpec sprite;
 
-	/** Creates a empty vehicle object. */
-	Vehicle();
+	Pseudo3DVehicle();  // zero constructor
 
-	/** Creates a vehicle with definitions taken from the given properties. */
-	Vehicle(const futil::Properties& properties, Pseudo3DCarseGame& game);
+	/** Creates a vehicle with the given specifications. The optional 'alternateSpriteIndex' argument specifies an alternate skin to use (-1 means use default sprite). */
+	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex=-1);
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

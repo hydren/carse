@@ -7,9 +7,7 @@
 
 #include "course_selection_state.hpp"
 
-#include "race_state.hpp"
 #include "futil/properties.hpp"
-
 #include "futil/string_actions.hpp"
 #include "futil/string_extra_operators.hpp"
 

@@ -1,21 +1,42 @@
 /*
- * carse_game_logic.hxx
+ * carse_game_logic.hpp
  *
- *  Created on: 16 de out de 2017
+ *  Created on: 1 de dez de 2017
  *      Author: carlosfaruolo
  */
 
+#ifndef CARSE_GAME_LOGIC_HPP_
+#define CARSE_GAME_LOGIC_HPP_
+#include <ciso646>
+
+#include "states/race_state.hpp"
+
+#include "course.hpp"
+#include "vehicle.hpp"
+#include "automotive/engine_sound.hpp"
+#include "automotive/mechanics.hpp"
+
+#include "futil/language.hpp"
+#include "futil/properties.hpp"
+
+#include <map>
+#include <vector>
+
+// fwd decl
+class Pseudo3DCarseGame;
+class Vehicle;
+
 /** Class to wrap together all between-states game logic. */
-class Logic
+class CarseGameLogic
 {
 	friend class Pseudo3DCarseGame;
 	Pseudo3DCarseGame& game;
 
 	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 	std::vector<Course> courses;
-	std::vector<Vehicle> vehicles;
+	std::vector<Pseudo3DVehicle::Spec> vehicles;
 
-	Logic(Pseudo3DCarseGame& game);
+	CarseGameLogic(Pseudo3DCarseGame& game);
 
 	// intended to run on startup
 	void initialize();
@@ -32,6 +53,9 @@ class Logic
 	// intended to run on startup, loads all vehicles in the data/vehicles folder
 	void loadVehicles();
 
+	// quick way to retrieve the race state object instance
+	Pseudo3DRaceState& getRaceState();
+
 	public:
 	// gets one of the built-in engine sound presets, by name
 	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
@@ -42,24 +66,28 @@ class Logic
 	void setNextCourseRandom();
 	void setNextCourseDebug();
 
-	const std::vector<Vehicle>& getVehicleList();
+	const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
 	void setPickedVehicle(unsigned vehicleIndex, int skin=-1);
-	void setPickedVehicle(const Vehicle& v, int skin=-1);
+	void setPickedVehicle(const Pseudo3DVehicle::Spec& v, int skin=-1);
+	void setPickedVehicle(const Pseudo3DVehicle& v);
 
 	bool isImperialUnitEnabled();
 	void setImperialUnitEnabled(bool choice=true);
 
 	Mechanics::SimulationType getSimulationType();
 	void setSimulationType(Mechanics::SimulationType type);
+
+	// spec. loading functions
+	void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
 };
 
-// ----------------------------------------------------------------------------------------------------------
-
 /** Wrapper to resources shared between states. */
-struct SharedResources
+struct CarseSharedResources
 {
 	fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
 	fgeal::Font fontDev;
 
-	SharedResources();
+	CarseSharedResources();
 };
+
+#endif /* CARSE_GAME_LOGIC_HPP_ */

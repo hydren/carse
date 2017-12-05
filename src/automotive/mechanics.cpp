@@ -27,36 +27,31 @@
 
 const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 
-static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
-				   DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
-				   DEFAULT_FRONTAL_AREA_BIKE = 0.70;  // estimated frontal area (in square-meters) of a common sporty bike
+static const float AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 
-static const float DEFAULT_CDA_CAR  = 0.31 * DEFAULT_FRONTAL_AREA_CAR,   // drag coefficient (Cd) of a Nissan 300ZX (Z32)
-				   DEFAULT_CDA_BIKE = 0.60 * DEFAULT_FRONTAL_AREA_BIKE,  // estimated drag coefficient (Cd) of a common sporty bike
-				   DEFAULT_CLA_CAR  = 0.20 * DEFAULT_FRONTAL_AREA_CAR,    // estimated lift coefficient (Cl) of a Nissan 300ZX (Z32)
-				   DEFAULT_CLA_BIKE = 0.10 * DEFAULT_FRONTAL_AREA_BIKE;   // estimated lift coefficient (Cl) of a common sporty bike
-
-Mechanics::Mechanics(const Engine& eng, VehicleType type)
+Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
 : simulationType(SIMULATION_TYPE_FAKESLIP), engine(eng),
   automaticShiftingEnabled(),
   automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
   automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),
-  wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
+  mass(1250), tireRadius(650), wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
+  speed(), acceleration(),
+  centerOfGravityHeight(500), wheelbase(1000), weightDistribuition(0.5),
+  slopeAngle(), wheelAngularSpeed(), brakePedalPosition(),
   tireFrictionFactor(1.0),
   rollingResistanceFactor(0.2),
-  airDragFactor((type == TYPE_CAR? DEFAULT_CDA_CAR : type == TYPE_BIKE? DEFAULT_CDA_BIKE : 0.5) * AIR_DENSITY),
-  downforceFactor((type == TYPE_CAR? DEFAULT_CLA_CAR : type == TYPE_BIKE? DEFAULT_CLA_BIKE : 0.5) * AIR_DENSITY),
-  rollingResistanceForce(), airDragForce(), brakingForce(), slopePullForce()
-{
-	engine.minRpm = 1000;
-	setSuggestedWeightDistribuition();
-	reset();
-}
+  airDragFactor(dragArea*AIR_DENSITY),
+  downforceFactor(liftArea*AIR_DENSITY),
+  drivenWheelsType(DRIVEN_WHEELS_ON_REAR),
+  engineLocation(ENGINE_LOCATION_ON_FRONT),
+  rollingResistanceForce(), airDragForce(), brakingForce(), slopePullForce(), downforce(),
+  arbitraryForceFactor(1.0),
+  slipRatio(), differentialSlipRatio()
+{}
 
 void Mechanics::reset()
 {
-	engine.gear = 1;
-	engine.rpm = engine.minRpm;
+	engine.reset();
 	slopeAngle = 0;
 	arbitraryForceFactor = 1.0;
 	acceleration = 0;
@@ -70,6 +65,7 @@ void Mechanics::reset()
 	slopePullForce = 0;
 	airDragForce = 0;
 	downforce = 0;
+	slipRatio = differentialSlipRatio = 0;
 }
 
 void Mechanics::updatePowertrain(float delta)
@@ -146,27 +142,6 @@ float Mechanics::getDrivenWheelsWeightLoad()
 
 	// the execution should not get to this point
 	return weightLoad;
-}
-
-void Mechanics::setSuggestedWeightDistribuition()
-{
-	static const float FR_WEIGHT_DISTRIBUITION = 0.45,
-					   MR_WEIGHT_DISTRIBUITION = 0.55,
-					   RR_WEIGHT_DISTRIBUITION = 0.65,
-					   FF_WEIGHT_DISTRIBUITION = 0.40;
-
-	switch(engineLocation)
-	{
-		default:
-		case ENGINE_LOCATION_ON_MIDDLE:		weightDistribuition = MR_WEIGHT_DISTRIBUITION; break;
-		case ENGINE_LOCATION_ON_REAR:		weightDistribuition = RR_WEIGHT_DISTRIBUITION; break;
-		case ENGINE_LOCATION_ON_FRONT:
-			if(drivenWheelsType == DRIVEN_WHEELS_ON_FRONT)
-				weightDistribuition = FF_WEIGHT_DISTRIBUITION;
-			if(drivenWheelsType == DRIVEN_WHEELS_ON_REAR)
-				weightDistribuition = FR_WEIGHT_DISTRIBUITION;
-			break;
-	}
 }
 
 // ------------------------------------------------------------------------------------------------

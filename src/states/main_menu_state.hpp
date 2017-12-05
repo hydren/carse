@@ -9,15 +9,18 @@
 #define MAIN_MENU_STATE_HPP_
 #include <ciso646>
 
-#include "carse_game.hpp"
+#include "fgeal/fgeal.hpp"
+#include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
 
 #include "futil/language.hpp"
-#include "fgeal/fgeal.hpp"
+
+class CarseSharedResources;
+class Pseudo3DCarseGame;
 
 class MainMenuState extends public fgeal::Game::State
 {
-	CarseGame::SharedResources& shared;
+	CarseSharedResources& shared;
 
 	// the menu
 	fgeal::Menu* menu;
@@ -81,7 +84,7 @@ class MainMenuState extends public fgeal::Game::State
 	public:
 	int getId();
 
-	MainMenuState(CarseGame* game);
+	MainMenuState(Pseudo3DCarseGame* game);
 	~MainMenuState();
 
 	void initialize();

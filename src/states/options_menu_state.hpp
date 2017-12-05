@@ -10,15 +10,21 @@
 #include <ciso646>
 
 #include "carse_game.hpp"
+
+#include "fgeal/fgeal.hpp"
+#include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
 
 #include "futil/language.hpp"
-#include "fgeal/fgeal.hpp"
+
+class CarseGameLogic;
+class CarseSharedResources;
+class Pseudo3DCarseGame;
 
 class OptionsMenuState extends public fgeal::Game::State
 {
-	CarseGame::Logic& logic;
-	CarseGame::SharedResources& shared;
+	CarseGameLogic& logic;
+	CarseSharedResources& shared;
 	fgeal::Menu* menu;
 	fgeal::Font* fontTitle, *font;
 

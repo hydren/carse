@@ -7,101 +7,11 @@
 
 #include "engine_sound.hpp"
 
-#include "futil/string_extra_operators.hpp"
-
 #include <cmath>
-#include <cstdlib>
 
-#include <stdexcept>
-#include <algorithm>
-
-using futil::Properties;
 using std::string;
 using std::vector;
 using fgeal::Sound;
-
-const string
-	KEY_SOUND = "sound",
-	KEY_SOUND_RELINE_LAST = "sound_redline_last",
-	KEY_ENGINE_MAX_RPM = "engine_maximum_rpm",
-	KEY_SOUND_PREFIX = "sound";
-
-//static
-bool EngineSoundProfile::requestsPresetProfile(const Properties& prop)
-{
-	return prop.containsKey(KEY_SOUND) and prop.get(KEY_SOUND) != "custom" and prop.get(KEY_SOUND) != "no";
-}
-
-//static
-string EngineSoundProfile::getSoundDefinitionFromProperties(const Properties& prop)
-{
-	return prop.get(KEY_SOUND);
-}
-
-static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)
-{
-	return p1.isRedline? false : p2.isRedline? true : p1.rpm < p2.rpm;
-}
-
-//static
-EngineSoundProfile EngineSoundProfile::loadFromProperties(const Properties& prop)
-{
-	EngineSoundProfile profile;
-	short maxRpm = 0;
-
-	if(prop.containsKey(KEY_ENGINE_MAX_RPM))
-		maxRpm = atoi(prop.get(KEY_ENGINE_MAX_RPM).c_str());
-
-	if(maxRpm <= 0)
-		maxRpm = 7000;
-
-	if(prop.containsKey(KEY_SOUND))
-	{
-		if(prop.get(KEY_SOUND) == "none")
-		{
-			profile.ranges.clear();
-		}
-		else if(prop.get(KEY_SOUND) == "custom")
-		{
-			int i = 0;
-			string key = KEY_SOUND_PREFIX + i;
-			while(prop.containsKey(key))
-			{
-				string filename = prop.get(key);
-
-				// now try to read _rpm property
-				key += "_rpm";
-				short rpm = -1;
-				bool isRedline = false;
-				if(prop.containsKey(key))
-				{
-					if(prop.get(key) == "redline")
-						isRedline = true;
-					else
-						rpm = atoi(prop.get(key).c_str());
-				}
-
-				// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
-				if(rpm < 0 and not isRedline)
-				{
-					if(i == 0) rpm = 0;
-					else       rpm = (maxRpm - profile.ranges.rbegin()->rpm)/2;
-				}
-
-				// save filename and settings for given rpm
-				RangeProfile range = {rpm, filename, isRedline};
-				profile.ranges.push_back(range);
-				i += 1;
-				key = KEY_SOUND_PREFIX + i;
-			}
-
-			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), rangeProfileCompareFunction);
-		}
-		else throw std::logic_error("properties specify a preset profile instead of a custom one");
-	}
-
-	return profile;
-}
 
 EngineSoundSimulator::~EngineSoundSimulator()
 {

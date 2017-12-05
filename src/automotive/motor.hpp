@@ -48,10 +48,11 @@ struct Engine
 			//POWER_BAND_TYPICAL_ELECTRIC
 		};
 
-		float getTorqueFactor(float rpm);
+		/** Returns the preficted fraction of the maximum torque output in the given RPM. */
+		float getTorqueFactor(float rpm) const;
 
 		/** Returns the RPM which theorectically give the maximum torque of this curve. */
-		float getRpmMaxTorque();
+		float getRpmMaxTorque() const;
 
 		/** Creates a torque curve as two linear functions (increasing then decreasing), given the redline RPM, power band type and (optional) RPM of maximum torque.
 		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.
@@ -67,13 +68,12 @@ struct Engine
 		static void queryParameters(Engine::TorqueCurveProfile::PowerBandType type, float& initialTorqueFactor, float& redlineTorqueFactor);
 	};
 
+	Engine(float maxRpm=7000, float maxPower=300, TorqueCurveProfile::PowerBandType powerBand=TorqueCurveProfile::POWER_BAND_TYPICAL, unsigned gearCount=5);
+
 	TorqueCurveProfile torqueCurveProfile;
 
-	/** Empty constructor */
-	Engine();
-
-	/** Creates a engine profile from the given properties data. */
-	Engine(const futil::Properties& properties);
+	/** Reset the engine's state. */
+	void reset();
 
 	/** Returns this engine's torque in the given RPM. */
 	float getCurrentTorque();

@@ -27,15 +27,6 @@ static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
 		           TORQUE_POWER_CONVERSION_FACTOR = 5252.0 * 1.355818,
                    RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
-// default float constants
-static const float
-	DEFAULT_MAXIMUM_RPM = 7000,
-	DEFAULT_MAXIMUM_POWER = 320,  // bhp
-	DEFAULT_GEAR_COUNT = 5,
-
-	// for the time being, assume 70% efficiency
-	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
-
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
 /* todo revise TorqueCurveProfile to be able to specify specific RPMs for max. power or/and max. torque.
@@ -141,7 +132,7 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsSingleQuadratic(f
 	return profile;
 }
 
-float Engine::TorqueCurveProfile::getTorqueFactor(float rpm)
+float Engine::TorqueCurveProfile::getTorqueFactor(float rpm) const
 {
 	if(rpm < 1)
 		return -1;
@@ -154,7 +145,7 @@ float Engine::TorqueCurveProfile::getTorqueFactor(float rpm)
 	return parameters[parameters.size()-1][PARAM_SLOPE]*rpm + parameters[parameters.size()-1][PARAM_INTERCEPT];
 }
 
-float Engine::TorqueCurveProfile::getRpmMaxTorque()
+float Engine::TorqueCurveProfile::getRpmMaxTorque() const
 {
 	float maxTorqueRpm = parameters[0][PARAM_RPM];  // initialize with first range RPM
 	float maxTorque = maxTorqueRpm * parameters[0][PARAM_SLOPE] + parameters[0][PARAM_INTERCEPT];
@@ -171,101 +162,33 @@ float Engine::TorqueCurveProfile::getRpmMaxTorque()
 	return maxTorqueRpm;
 }
 
-Engine::Engine() {}   // @suppress("Class members should be properly initialized")
-
-Engine::Engine(const futil::Properties& prop)
+Engine::Engine(float maxRpm, float maxPower, TorqueCurveProfile::PowerBandType curve, unsigned gearCount)
+: maximumTorque(), rpm(), maxRpm(maxRpm), minRpm(1000), throttlePosition(), transmissionEfficiency(0.7),
+  gear(), gearCount(gearCount), gearRatio(gearCount), differentialRatio(), reverseGearRatio(),
+  configuration(), aspiration(), valvetrain(), displacement(3000), valveCount(),
+  maximumPower(maxPower), maximumPowerRpm(), maximumTorqueRpm(), torqueCurveProfile()
 {
-	// aux. var
-	string key;
-
-	// info data
-
-	key = "engine_configuration";
-	configuration = prop.containsKey(key)? prop.get(key) : "";
-
-	key = "engine_aspiration";
-	aspiration = prop.containsKey(key)? prop.get(key) : "";
-
-	key = "engine_valvetrain";
-	valvetrain = prop.containsKey(key)? prop.get(key) : "";
-
-	key = "engine_displacement";
-	displacement = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 0;
-
-	key = "engine_valve_count";
-	valveCount = prop.containsKey(key)? atoi(prop.get(key).c_str()) : 0;
-
-	// actually useful data
-
-	key = "engine_maximum_rpm";
-	maxRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_RPM;
-
-	key = "engine_maximum_power";
-	maximumPower = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_POWER;
-
-	// todo re-enable these when proper formulas have been determined from parametrization
-//	key = "engine_maximum_power_rpm";
-//	maximumPowerRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_POWER_RPM_RANGE;
-
-//	key = "engine_maximum_torque";
-//	maximumTorque = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1;
-
-//	key = "engine_maximum_torque_rpm";
-//	maximumTorqueRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1;
-
-	key = "engine_power_band";
-	string powerBandStr = isValueSpecified(prop, key)? prop.get(key) : "typical";
-	Engine::TorqueCurveProfile::PowerBandType powerBand;
-	if(powerBandStr == "peaky") powerBand = Engine::TorqueCurveProfile::POWER_BAND_PEAKY;
-	else if(powerBandStr == "torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_TORQUEY;
-	else if(powerBandStr == "semitorquey" or powerBandStr == "semi-torquey" or powerBandStr == "semi torquey") powerBand = Engine::TorqueCurveProfile::POWER_BAND_SEMI_TORQUEY;
-	else if(powerBandStr == "wide") powerBand = Engine::TorqueCurveProfile::POWER_BAND_WIDE;
-	else powerBand = Engine::TorqueCurveProfile::POWER_BAND_TYPICAL;
-
 	float maxPowerNormalized;
-	torqueCurveProfile = Engine::TorqueCurveProfile::createAsSingleQuadratic(maxRpm, powerBand, &maximumPowerRpm, &maxPowerNormalized);
+	torqueCurveProfile = Engine::TorqueCurveProfile::createAsSingleQuadratic(maxRpm, curve, &maximumPowerRpm, &maxPowerNormalized);
 	maximumTorqueRpm = torqueCurveProfile.getRpmMaxTorque();
 	maximumTorque = ((maximumPower * TORQUE_POWER_CONVERSION_FACTOR)/maximumPowerRpm)/torqueCurveProfile.getTorqueFactor(maximumPowerRpm);
 
-	transmissionEfficiency = DEFAULT_TRANSMISSION_EFFICIENCY;
-
-	key = "gear_count";
-	gearCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_GEAR_COUNT;
-	gearRatio.resize(gearCount);
-
-	// first, set default ratios, then override
+	// default gear ratios
 	reverseGearRatio = 3.25;
 	differentialRatio = 4.0;
-	for(int g = 0; g < gearCount; g++)
+	for(unsigned g = 0; g < gearCount; g++)
 		gearRatio[g] = 3.0 + g*2.0/(1.0 - gearCount);  // generic gear ratio
 
-	key = "gear_ratios";
-	if(prop.containsKey(key))
-	{
-		string ratiosTxt = prop.get(key);
-		if(ratiosTxt == "custom")
-		{
-			key = "gear_differential_ratio";
-			if(prop.containsKey(key))
-				differentialRatio = atof(prop.get(key).c_str());
-
-			key = "gear_reverse_ratio";
-			if(prop.containsKey(key))
-				reverseGearRatio = atof(prop.get(key).c_str());
-
-			for(int g = 0; g < gearCount; g++)
-			{
-				key = "gear_" + futil::to_string(g+1) + "_ratio";
-				if(prop.containsKey(key))
-					gearRatio[g] = atof(prop.get(key).c_str());
-			}
-		}
-	}
-
-	throttlePosition = 0;
 	rpm = 0;
-	minRpm = 1000;
 	gear = 1;
+	throttlePosition = 0;
+}
+
+void Engine::reset()
+{
+	rpm = minRpm;
+	gear = 1;
+	throttlePosition = 0;
 }
 
 float Engine::getCurrentTorque()

@@ -12,16 +12,19 @@
 #include <vector>
 
 #include "carse_game.hpp"
-#include "fgeal/extra/menu.hpp"
+
 #include "course.hpp"
 
-#include "futil/language.hpp"
 #include "fgeal/fgeal.hpp"
+#include "fgeal/extra/game.hpp"
+#include "fgeal/extra/menu.hpp"
+
+#include "futil/language.hpp"
 
 class CourseSelectionState extends public fgeal::Game::State
 {
-	CarseGame::SharedResources& shared;
-	CarseGame::Logic& gameLogic;
+	CarseSharedResources& shared;
+	CarseGameLogic& gameLogic;
 
 	fgeal::Image* imgRandom, *imgCircuit;
 	fgeal::Font* fontMain, *fontInfo, *fontTab;

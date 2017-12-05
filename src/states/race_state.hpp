@@ -9,23 +9,28 @@
 #define PSEUDO3D_RACE_STATE_HPP_
 #include <ciso646>
 
+#include "course.hpp"
+#include "vehicle.hpp"
+
+#include "automotive/engine_sound.hpp"
+
+#include "gui/race_hud.hpp"
+
+#include "futil/language.hpp"
+
+#include "fgeal/fgeal.hpp"
+#include "fgeal/extra/game.hpp"
+#include "fgeal/extra/sprite.hpp"
+
 #include <vector>
 #include <utility>
 
-#include "carse_game.hpp"
-
-#include "futil/language.hpp"
-#include "fgeal/fgeal.hpp"
-#include "fgeal/extra/sprite.hpp"
-
-#include "course.hpp"
-#include "vehicle.hpp"
-#include "automotive/engine_sound.hpp"
-#include "gui/race_hud.hpp"
+class Pseudo3DCarseGame;
+class CarseGameLogic;
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
-	friend class Pseudo3DCarseGame;
+	friend class CarseGameLogic;
 
 	fgeal::Font* font, *font2, *font3, *fontDebug;
 	fgeal::Image* bg;
@@ -57,7 +62,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	unsigned lapCurrent;
 
 	Course course;
-	Vehicle vehicle;
+	Pseudo3DVehicle vehicle;
 
 	Hud::DialGauge<float>* hudRpmGauge;
 	Hud::NumericalDisplay<float>* hudSpeedDisplay;
@@ -107,7 +112,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	static Pseudo3DRaceState* getInstance(fgeal::Game& game);
 
-	Pseudo3DRaceState(CarseGame* game);
+	Pseudo3DRaceState(Pseudo3DCarseGame* game);
 	~Pseudo3DRaceState();
 
 	void initialize();

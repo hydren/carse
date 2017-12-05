@@ -9,21 +9,16 @@
 #define PSEUDO3D_VEHICLE_GFX_HPP_
 #include <ciso646>
 
-#include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "fgeal/fgeal.hpp"
-#include "futil/properties.hpp"
 
 /** A class containing data used to draw pseudo-3D vehicle animations. */
-struct Pseudo3DVehicleAnimationProfile
+struct Pseudo3DVehicleAnimationSpec
 {
 	/** The filename of the image containing the sprite sheet. */
 	std::string sheetFilename;
-
-	/** The filenames of extra sprite sheets. */
-	std::vector<std::string> sheetFilenameExtra;
 
 	/** The amount of states of this animation. */
 	unsigned stateCount;
@@ -58,12 +53,6 @@ struct Pseudo3DVehicleAnimationProfile
 	/** The width of the vehicle as depicted in the sprite (in pixels). This is used to align animation
 	 *  effects, such as burning rubber's smoking animation, etc. */
 	unsigned depictedVehicleWidth;
-
-	/** Empty constructor */
-	Pseudo3DVehicleAnimationProfile();
-
-	/** Creates a vehicle graphics profile from the given properties data. */
-	Pseudo3DVehicleAnimationProfile(const futil::Properties& properties);
 };
 
 #endif /* PSEUDO3D_VEHICLE_GFX_HPP_ */

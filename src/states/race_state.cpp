@@ -7,6 +7,8 @@
 
 #include "race_state.hpp"
 
+#include "carse_game.hpp"
+
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
@@ -138,7 +140,7 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.clear();
 	}
 
-	Image* sheet = new Image(vehicle.activeSkin == -1? vehicle.sprite.sheetFilename : vehicle.sprite.sheetFilenameExtra[vehicle.activeSkin]);
+	Image* sheet = new Image(vehicle.sprite.sheetFilename);
 
 	if(sheet->getWidth() < (int) vehicle.sprite.frameWidth)
 		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
@@ -241,7 +243,7 @@ void Pseudo3DRaceState::onEnter()
 					spriteSmokeRight->scale.x =
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
-	corneringForceLeechFactor = (vehicle.type == Mechanics::TYPE_BIKE? 0.25 : 0.5);
+	corneringForceLeechFactor = (vehicle.spec->type == Mechanics::TYPE_BIKE? 0.25 : 0.5);
 	corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	bgParallax.x = bgParallax.y = 0;

@@ -94,6 +94,7 @@ int main(int argc, char** argv)
 		fgeal::initialize();
 		Display::Options options;
 		options.title = "carse";
+		options.iconFilename = "assets/carse-icon.png";
 		options.fullscreen = fullscreen;
 		options.width = screenWidth;
 		options.height = screenHeight;

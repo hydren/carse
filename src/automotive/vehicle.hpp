@@ -78,7 +78,7 @@ struct VehicleSpec
 	float engineMaximumPower, engineMaximumPowerRpm, engineMaximumTorqueRpm;
 
 	// sound data
-	EngineSoundProfile sound;
+	EngineSoundProfile soundProfile;
 };
 
 #endif /* AUTOMOTIVE_VEHICLE_HPP_ */

@@ -23,7 +23,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& s, int alternateSpriteIndex)
 : spec(&s),
   body(Engine(spec->engineMaximumRpm, spec->engineMaximumPower, spec->enginePowerBand, spec->engineGearCount), spec->type, spec->dragArea, spec->liftArea),
-  engineSoundProfile(spec->sound),
+  engineSoundProfile(spec->soundProfile),
   sprite(alternateSpriteIndex == -1? spec->sprite : spec->alternateSprites[alternateSpriteIndex])
 {
 	// update engine info data (optional)

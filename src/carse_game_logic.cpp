@@ -321,9 +321,9 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 
 	// sound data
 	if(isEngineSoundProfileRequestingPreset(prop))
-		spec.sound = getPresetEngineSoundProfile(prop.get("sound"));
+		spec.soundProfile = getPresetEngineSoundProfile(prop.get("sound"));
 	else
-		loadEngineSoundSpec(spec.sound, prop);
+		loadEngineSoundSpec(spec.soundProfile, prop);
 
 	// sprite data
 	loadAnimationSpec(spec.sprite, prop);

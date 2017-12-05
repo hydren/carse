@@ -14,6 +14,8 @@
 
 #include "carse_game_logic.hpp"
 
+extern const std::string CARSE_VERSION;
+
 class Pseudo3DCarseGame extends public fgeal::Game
 {
 	public:

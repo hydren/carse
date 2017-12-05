@@ -91,7 +91,7 @@ void MainMenuState::render()
 	display.clear();
 	bg->drawScaled(0, 0, display.getWidth()/(float)bg->getWidth(), display.getHeight()/(float)bg->getHeight());
 	layout->draw();
-	shared.fontDev.drawText(string("Using fgeal v")+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION, 4, display.getHeight() - shared.fontDev.getHeight(), Color::CREAM);
+	shared.fontDev.drawText(string("carse v")+CARSE_VERSION+" (using fgeal v"+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")", 4, display.getHeight() - shared.fontDev.getHeight(), Color::CREAM);
 }
 
 void MainMenuState::update(float delta)

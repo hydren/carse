@@ -23,7 +23,7 @@
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"
 
-#define CARSE_VERSION "0.4.7-dev"
+#define CARSE_VERSION_MACRO "0.4.7-dev"
 
 using std::cout;
 using std::endl;
@@ -35,6 +35,8 @@ using fgeal::Color;
 
 using futil::starts_with;
 using futil::split;
+
+const string CARSE_VERSION = CARSE_VERSION_MACRO;
 
 void runSplash()
 {
@@ -91,7 +93,7 @@ int main(int argc, char** argv)
 	{
 		fgeal::initialize();
 		Display::Options options;
-		options.title = string("carse ")+ CARSE_VERSION + " alpha";
+		options.title = "carse";
 		options.fullscreen = fullscreen;
 		options.width = screenWidth;
 		options.height = screenHeight;

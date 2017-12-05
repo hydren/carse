@@ -9,6 +9,7 @@
 
 #include "carse_game.hpp"
 
+#include "futil/string_extra_operators.hpp"
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"
 #include "futil/round.h"
@@ -16,6 +17,7 @@
 #include <vector>
 
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <cmath>
 
@@ -30,6 +32,11 @@ using std::map;
 // to reduce typing is good
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
+// returns true if the given properties requests a preset sound profile instead of specifying a custom one.
+static bool isEngineSoundProfileRequestingPreset(const Properties& prop) { return prop.containsKey("sound") and prop.get("sound") != "custom" and prop.get("sound") != "no"; }
+static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
+
+// logic constructor, booooooring!
 CarseGameLogic::CarseGameLogic(Pseudo3DCarseGame& game) : game(game) {}
 
 void CarseGameLogic::initialize()
@@ -69,16 +76,16 @@ void CarseGameLogic::loadPresetEngineSoundProfiles()
 				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
 				presetName = filenameWithoutExtension;
 
-			if(EngineSoundProfile::requestsPresetProfile(prop))
+			if(isEngineSoundProfileRequestingPreset(prop))
 			{
 				pendingPresetFiles.push_back(filename);
-				cout << "read profile: " << presetName << " (alias)" << endl;
+				cout << "read engine sound profile: " << presetName << " (alias)" << endl;
 			}
 
 			else
 			{
-				presetEngineSoundProfiles[presetName] = EngineSoundProfile::loadFromProperties(prop);
-				cout << "read profile: " << presetName << endl;
+				loadEngineSoundSpec(presetEngineSoundProfiles[presetName], prop);
+				cout << "read engine sound profile: " << presetName << endl;
 			}
 		}
 	}
@@ -93,7 +100,7 @@ void CarseGameLogic::loadPresetEngineSoundProfiles()
 			prop.load(filename);
 
 			const string
-				basePresetName = EngineSoundProfile::getSoundDefinitionFromProperties(prop),
+				basePresetName = prop.get("sound"),
 				filenameWithoutPath = filename.substr(filename.find_last_of("/\\")+1),
 				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
 				presetName = filenameWithoutExtension;
@@ -273,7 +280,7 @@ static const float
 
 static void loadPowertrainSpec(Pseudo3DVehicle::Spec&, const Properties&);
 static void loadChassisSpec(Pseudo3DVehicle::Spec&, const Properties&);
-//static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
+static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
 static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec&, const Properties&);
 
 void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& prop)
@@ -313,10 +320,10 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 	loadChassisSpec(spec, prop);
 
 	// sound data
-	if(EngineSoundProfile::requestsPresetProfile(prop))
-		spec.sound = getPresetEngineSoundProfile(EngineSoundProfile::getSoundDefinitionFromProperties(prop));
+	if(isEngineSoundProfileRequestingPreset(prop))
+		spec.sound = getPresetEngineSoundProfile(prop.get("sound"));
 	else
-		spec.sound = EngineSoundProfile::loadFromProperties(prop);
+		loadEngineSoundSpec(spec.sound, prop);
 
 	// sprite data
 	loadAnimationSpec(spec.sprite, prop);
@@ -531,6 +538,65 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 
 	else /* Mechanics::ENGINE_LOCATION_ON_MIDDLE */
 		spec.weightDistribuition = DEFAULT_MR_WEIGHT_DISTRIBUITION;
+}
+
+static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)
+{
+	return p1.isRedline? false : p2.isRedline? true : p1.rpm < p2.rpm;
+}
+
+// load a custom sound profile from properties. if a non-custom (preset) profile is specified, a std::logic_error is thrown.
+static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& prop)
+{
+	short maxRpm = 0;
+
+	maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", 7000);
+
+	string baseKey = "sound";
+	if(prop.containsKey(baseKey))
+	{
+		if(prop.get(baseKey) == "none")
+		{
+			profile.ranges.clear();
+		}
+		else if(prop.get(baseKey) == "custom")
+		{
+			int i = 0;
+			string key = baseKey + i;
+			while(prop.containsKey(key))
+			{
+				string filename = prop.get(key);
+
+				// now try to read _rpm property
+				key += "_rpm";
+				short rpm = -1;
+				bool isRedline = false;
+				if(prop.containsKey(key))
+				{
+					if(prop.get(key) == "redline")
+						isRedline = true;
+					else
+						rpm = atoi(prop.get(key).c_str());
+				}
+
+				// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
+				if(rpm < 0 and not isRedline)
+				{
+					if(i == 0) rpm = 0;
+					else       rpm = (maxRpm - profile.ranges.rbegin()->rpm)/2;
+				}
+
+				// save filename and settings for given rpm
+				EngineSoundProfile::RangeProfile range = {rpm, filename, isRedline};
+				profile.ranges.push_back(range);
+				i += 1;
+				key = baseKey + i;
+			}
+
+			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), rangeProfileCompareFunction);
+		}
+		else throw std::logic_error("properties specify a preset profile instead of a custom one");
+	}
 }
 
 // default sprite uint constants

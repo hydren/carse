@@ -337,6 +337,12 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 			const string alternateSpritePropFile = prop.get(key);
 			Properties alternateSpriteProp;
 			alternateSpriteProp.load(alternateSpritePropFile);
+
+			// load some additional properties from main properties file
+			alternateSpriteProp["vehicle_width"] = prop.get("vehicle_width");
+			alternateSpriteProp["vehicle_height"] = prop.get("vehicle_height");
+			alternateSpriteProp["vehicle_width_height_ratio"] = prop.get("vehicle_width_height_ratio");
+
 			spec.alternateSprites.push_back(Pseudo3DVehicleAnimationSpec());
 			loadAnimationSpec(spec.alternateSprites.back(), alternateSpriteProp);
 		}

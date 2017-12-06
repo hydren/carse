@@ -18,6 +18,8 @@
 
 #include <algorithm>
 
+#include "util.hpp"
+
 using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
@@ -34,7 +36,7 @@ int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
 : State(*game), shared(*game->sharedResources),
-  menu(null), bg(null), imgRace(null), imgExit(null), imgSettigns(null),
+  menu(null), imgBackground(null), imgRace(null), imgExit(null), imgSettings(null),
   layout(null)
 {}
 
@@ -57,7 +59,8 @@ enum MenuItem
 
 void MainMenuState::initialize()
 {
-	menu = new Menu(fgeal::Rectangle(), new Font("assets/font.ttf", 18), Color::WHITE);
+	Display& display = game.getDisplay();
+	menu = new Menu(fgeal::Rectangle(), new Font("assets/font.ttf", dip(18)), Color::WHITE);
 	menu->fontIsOwned = true;
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
@@ -67,10 +70,10 @@ void MainMenuState::initialize()
 	menu->addEntry("Settings");
 	menu->addEntry("Exit");
 
-	bg = new Image("assets/bg-main.jpg");
+	imgBackground = new Image("assets/bg-main.jpg");
 	imgRace = new Image("assets/race.png");
 	imgExit = new Image("assets/exit.png");
-	imgSettigns = new Image("assets/settings.png");
+	imgSettings = new Image("assets/settings.png");
 
 	layout = new PrototypeGridLayout(*this);
 }
@@ -89,7 +92,7 @@ void MainMenuState::render()
 {
 	Display& display = game.getDisplay();
 	display.clear();
-	bg->drawScaled(0, 0, display.getWidth()/(float)bg->getWidth(), display.getHeight()/(float)bg->getHeight());
+	imgBackground->drawScaled(0, 0, scaledToSize(imgBackground, display));
 	layout->draw();
 	shared.fontDev.drawText(string("carse v")+CARSE_VERSION+" (using fgeal v"+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")", 4, 4, Color::CREAM);
 }
@@ -145,6 +148,18 @@ void MainMenuState::handleInput()
 					layout->navigate(Layout::NAV_RIGHT);
 					break;
 				}
+				case Keyboard::KEY_1:
+				{
+					delete layout;
+					layout = new PrototypeSimpleLayout(*this);
+					break;
+				}
+				case Keyboard::KEY_2:
+				{
+					delete layout;
+					layout = new PrototypeGridLayout(*this);
+					break;
+				}
 				default:break;
 			}
 		}
@@ -189,7 +204,7 @@ void MainMenuState::Layout::onQuit()
 
 MainMenuState::PrototypeSimpleLayout::PrototypeSimpleLayout(MainMenuState& state)
 : Layout(state),
-  fontMain("assets/font.ttf", 32)
+  fontMain("assets/font.ttf", 32 * (state.game.getDisplay().getHeight()/480.0))
 {}
 
 void MainMenuState::PrototypeSimpleLayout::draw()
@@ -247,8 +262,8 @@ void MainMenuState::PrototypeSimpleLayout::onCursorAccept()
 
 MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
 : Layout(state),
-  fontMain("assets/font.ttf", (1.0/27) * state.game.getDisplay().getHeight()),
-  fontTitle("assets/font2.ttf", (4.0/27) * state.game.getDisplay().getHeight())
+  fontMain("assets/font.ttf",   18 * (state.game.getDisplay().getHeight()/480.0)),
+  fontTitle("assets/font2.ttf", 72 * (state.game.getDisplay().getHeight()/480.0))
 {}
 
 void MainMenuState::PrototypeGridLayout::draw()
@@ -328,11 +343,11 @@ void MainMenuState::PrototypeGridLayout::draw()
 			}
 			case MENU_ITEM_SETTINGS:
 			{
-				const float imgX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/state.imgSettigns->getWidth()),
-							imgY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/state.imgSettigns->getHeight()),
-							imgScaleX = 0.75f*slots[i].w/state.imgSettigns->getWidth(),
-							imgScaleY = 0.75f*slots[i].h/state.imgSettigns->getHeight();
-				state.imgSettigns->drawScaled(imgX, imgY, imgScaleX, imgScaleY);
+				const float imgX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/state.imgSettings->getWidth()),
+							imgY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/state.imgSettings->getHeight()),
+							imgScaleX = 0.75f*slots[i].w/state.imgSettings->getWidth(),
+							imgScaleY = 0.75f*slots[i].h/state.imgSettings->getHeight();
+				state.imgSettings->drawScaled(imgX, imgY, imgScaleX, imgScaleY);
 				break;
 			}
 			case MENU_ITEM_EXIT:

@@ -1,6 +1,5 @@
 # to do
 
-- Add possibility to specify weight distribuition and center of gravity height.
 - Optimize velocimeter drawing by caching geometric coordinates
 - Add mouse input on menus
 - Add gear shifting sounds

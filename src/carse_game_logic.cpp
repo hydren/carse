@@ -391,6 +391,9 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 	else
 		spec.centerOfGravityHeight = 0.3506f * spec.sprite.depictedVehicleWidth * spec.sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
 
+	key = "vehicle_center_of_gravity_height";
+	if(isValueSpecified(prop, key))
+		spec.centerOfGravityHeight = prop.getParsedCStrAllowDefault<double, atof>(key, spec.centerOfGravityHeight);
 
 	// attempt to estimate wheelbase
 	{
@@ -574,6 +577,10 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 
 	else /* Mechanics::ENGINE_LOCATION_ON_MIDDLE */
 		spec.weightDistribuition = DEFAULT_MR_WEIGHT_DISTRIBUITION;
+
+	key = "vehicle_weight_distribuition";
+	if(isValueSpecified(prop, key))
+		spec.weightDistribuition = prop.getParsedCStrAllowDefault<double, atof>(key, spec.weightDistribuition);
 }
 
 static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)

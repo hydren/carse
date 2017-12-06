@@ -70,7 +70,7 @@ void VehicleSelectionState::initialize()
 {
 	Display& display = game.getDisplay();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
-	fontMain = new Font("assets/font2.ttf", dip(48));
+	fontMain = new Font("assets/font2.ttf", dip(40));
 	fontInfo = new Font("assets/font.ttf", dip(12));
 
 	menu = new Menu(menuBounds, new Font("assets/font.ttf", dip(18)), Color::WHITE);
@@ -265,16 +265,6 @@ void VehicleSelectionState::changeSprite(bool forward)
 	}
 }
 
-void VehicleSelectionState::renderMenuPrototypeList()
-{
-
-}
-
-void VehicleSelectionState::renderMenuPrototypeSlideStand()
-{
-
-}
-
 // -------------------------------------------------
 // ListLayout
 
@@ -332,7 +322,7 @@ void VehicleSelectionState::ListLayout::onCursorAccept() {}
 // ShowroomLayout
 
 VehicleSelectionState::ShowroomLayout::ShowroomLayout(VehicleSelectionState& state)
-: Layout(state)
+: Layout(state), imgBackground("assets/showroom-bg.jpg")
 {}
 
 void VehicleSelectionState::ShowroomLayout::draw()
@@ -343,35 +333,37 @@ void VehicleSelectionState::ShowroomLayout::draw()
 	const vector<Pseudo3DVehicle::Spec>& vehicles = state.gameLogic.getVehicleList();
 	const Pseudo3DVehicle::Spec& vehicle = vehicles[menu->getSelectedIndex()];
 
+	imgBackground.drawScaled(0, 0, scaledToSize(&imgBackground, display));
+
 	// draw previous vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
 	{
 		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
-		state.drawVehiclePreview(0.25*display.getWidth(), 0.30*display.getHeight(), 0.75, index, -1);
+		state.drawVehiclePreview(0.2*display.getWidth(), 0.5*display.getHeight(), 1.02, index, -1);
 	}
 
 	// draw next vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 0))
 	{
 		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
-		state.drawVehiclePreview(0.75*display.getWidth(), 0.30*display.getHeight(), 0.75, index, +1);
+		state.drawVehiclePreview(0.8*display.getWidth(), 0.5*display.getHeight(), 1.02, index, +1);
 	}
 
 	// darkening other vehicles
 	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(),Color(0, 0, 0, 128));
 
 	// draw current vehicle
-	state.drawVehiclePreview(0.5*display.getWidth(), 0.35*display.getHeight());
+	state.drawVehiclePreview(0.5*display.getWidth(), 0.45*display.getHeight());
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
-	Image::drawFilledRectangle(0.9*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 0, display.getWidth(), 25+fontMain->getHeight(), Color::DARK_GREEN);
-	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
+	Image::drawFilledRectangle(0.9*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 0, display.getWidth(), 1.05*fontMain->getHeight(), Color::DARK_GREEN);
+	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 0.025*fontMain->getHeight(), Color::WHITE);
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;
 	const unsigned nameWidth = fontMain->getTextWidth(name);
 	const int nameOffset = nameWidth > display.getWidth()? 0.6*sin(fgeal::uptime())*(nameWidth - display.getWidth()) : 0;
-	const int infoX = 0.25*display.getWidth(); int infoY = 0.66*display.getHeight();
+	const int infoX = 0.25*display.getWidth(); int infoY = 0.75*display.getHeight();
 
 	Image::drawFilledRectangle(0, infoY - 1.1*fontMain->getHeight(), display.getWidth(), fontMain->getHeight(), Color::AZURE);
 	fontMain->drawText(name, 0.5*(display.getWidth()-fontMain->getTextWidth(name)) + nameOffset, infoY - 1.1*fontMain->getHeight(), Color::WHITE);

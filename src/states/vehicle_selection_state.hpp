@@ -60,6 +60,7 @@ class VehicleSelectionState extends public fgeal::Game::State
 
 	struct ShowroomLayout extends GenericMenuStateLayout<VehicleSelectionState>
 	{
+		fgeal::Image imgBackground;
 		ShowroomLayout(VehicleSelectionState& state);
 		void draw();
 		void update(float delta);
@@ -88,9 +89,6 @@ class VehicleSelectionState extends public fgeal::Game::State
 	private:
 	void handleInput();
 	void menuSelectionAction();
-
-	void renderMenuPrototypeList();
-	void renderMenuPrototypeSlideStand();
 };
 
 #endif /* PSEUDO3D_VEHICLE_SELECTION_STATE_HPP_ */

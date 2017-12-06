@@ -31,17 +31,26 @@ using std::endl;
 using futil::Properties;
 using futil::ends_with;
 
+#define scaledToSize(imgPtr, size) (size).getWidth()/(float)((imgPtr)->getWidth()), (size).getHeight()/(float)((imgPtr)->getHeight())
+#define scaledToRect(imgPtr, rect) (rect).w/(float)((imgPtr)->getWidth()), (rect).h/(float)((imgPtr)->getHeight())
+
+// device-independent pixel; can only be used if there is a 'display' instance in the scope
+#define dip(px) (px*(display.getHeight()/480.0))
+
 int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
 : State(*game), shared(*game->sharedResources), gameLogic(game->logic),
-  imgRandom(null), imgCircuit(null),
+  background(null), imgRandom(null), imgCircuit(null),
   fontMain(null), fontInfo(null), fontTab(null), menu(null),
   isLoadedCourseSelected(false), isDebugCourseSelected(false)
 {}
 
 CourseSelectionState::~CourseSelectionState()
 {
+	if(background != null) delete background;
+	if(imgRandom != null) delete imgRandom;
+	if(imgCircuit != null) delete imgCircuit;
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(fontTab  != null) delete fontTab;
@@ -50,16 +59,20 @@ CourseSelectionState::~CourseSelectionState()
 
 void CourseSelectionState::initialize()
 {
+	Display& display = game.getDisplay();
+
+	background = new Image("assets/course-menu-bg.jpg");
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
 
-	fontMain = new Font("assets/font2.ttf", 32);
-	fontInfo = new Font("assets/font.ttf", 12);
-	fontTab  = new Font("assets/font2.ttf", 16);
+	fontMain = new Font("assets/font2.ttf", dip(32));
+	fontInfo = new Font("assets/font.ttf",  dip(12));
+	fontTab  = new Font("assets/font2.ttf", dip(16));
 
-	menu = new Menu(Rectangle(), new Font("assets/font.ttf", 12), Color::RED);
+	menu = new Menu(Rectangle(), new Font("assets/font.ttf", dip(12)), Color::RED);
 	menu->fontIsOwned = true;
-	menu->bgColor = Color::GREEN;
+	menu->bgColor = Color(0, 0, 0, 128);
+	menu->borderColor = Color(0, 0, 0, 192);
 	menu->focusedEntryFontColor = Color::WHITE;
 
 	const vector<Course>& courses = gameLogic.getCourseList();
@@ -78,6 +91,8 @@ void CourseSelectionState::render()
 	Display& display = game.getDisplay();
 	display.clear();
 
+	background->drawScaled(0, 0, scaledToSize(background, display));
+
 	const float displayWidth = display.getWidth(),
 				displayHeight = display.getHeight(),
 				xspacing = 0.01f*displayWidth,
@@ -91,10 +106,14 @@ void CourseSelectionState::render()
 
 	const Rectangle tabSettingsBounds = {
 			menu->bounds.x,
-			menu->bounds.y - 0.1f*displayHeight,
+			menu->bounds.y - 1.5f*fontTab->getHeight(),
 			0.4f*menu->bounds.w,
-			0.1f*displayHeight
+			1.5f*fontTab->getHeight()
 	};
+
+	Image::drawFilledRectangle(tabSettingsBounds, not isLoadedCourseSelected? Color::AZURE : Color::NAVY);
+	fontTab->drawText("Custom",tabSettingsBounds.x + xspacing, tabSettingsBounds.y + yspacing, not isLoadedCourseSelected? Color::WHITE : Color::AZURE);
+
 	const Rectangle tabLoadedCoursesBounds = {
 			menu->bounds.x + xspacing + tabSettingsBounds.w,
 			tabSettingsBounds.y,
@@ -102,10 +121,8 @@ void CourseSelectionState::render()
 			tabSettingsBounds.h
 	};
 
-	Image::drawFilledRectangle(tabSettingsBounds, not isLoadedCourseSelected? Color::GREEN : Color::DARK_GREEN);
-	fontTab->drawText("Custom",tabSettingsBounds.x + xspacing, tabSettingsBounds.y + yspacing, not isLoadedCourseSelected? Color::BLACK : Color::GREEN);
-	Image::drawFilledRectangle(tabLoadedCoursesBounds, isLoadedCourseSelected? Color::GREEN : Color::DARK_GREEN);
-	fontTab->drawText("Courses",tabLoadedCoursesBounds.x + xspacing, tabLoadedCoursesBounds.y + yspacing, isLoadedCourseSelected? Color::BLACK : Color::GREEN);
+	Image::drawFilledRectangle(tabLoadedCoursesBounds, isLoadedCourseSelected? Color::AZURE : Color::NAVY);
+	fontTab->drawText("Courses",tabLoadedCoursesBounds.x + xspacing, tabLoadedCoursesBounds.y + yspacing, isLoadedCourseSelected? Color::WHITE : Color::AZURE);
 
 	const Rectangle portraitBounds = {
 			menu->bounds.x + menu->bounds.w + 32,
@@ -125,27 +142,28 @@ void CourseSelectionState::render()
 	if(isLoadedCourseSelected)
 	{
 		menu->draw();
-		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
+		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
 		const Course& course = gameLogic.getCourseList()[menu->getSelectedIndex()];
 		fontInfo->drawText(string("Length: ")+(course.lines.size()*course.roadSegmentLength*0.001) + "Km", menu->bounds.x + menu->bounds.w + 32, menu->bounds.y + menu->bounds.h, Color::WHITE);
 	}
 	else
 	{
-		Image::drawFilledRectangle(menu->bounds, isDebugCourseSelected? Color::GREY : menu->bgColor);
-		Image::drawRectangle(menu->bounds, Color::RED);
+		Image::drawFilledRectangle(menu->bounds, menu->bgColor);
+		Image::drawRectangle(menu->bounds, menu->borderColor);
+
+		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y * 1.1f, menu->bounds.w, fontTab->getHeight(), not isDebugCourseSelected? Color::RED : Color::_TRANSPARENT);
+		fontTab->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f,                        not isDebugCourseSelected? Color::WHITE : Color::RED);
+
+		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y * 1.1f + fontTab->getHeight(), menu->bounds.w, fontTab->getHeight(), isDebugCourseSelected? Color::RED : Color::_TRANSPARENT);
+		fontTab->drawText("Debug course",  menu->bounds.x * 1.1f, menu->bounds.y * 1.1f + fontTab->getHeight(), isDebugCourseSelected? Color::WHITE : Color::RED);
+
 		if(isDebugCourseSelected)
-		{
-			fontMain->drawText("Debug course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, isDebugCourseSelected? Color::LIGHT_GREY : Color::BLACK);
-			imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
-		}
+			imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
 		else
-		{
-			fontMain->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f, isDebugCourseSelected? Color::BLACK : Color::RED);
-			imgRandom->drawScaled(portraitImgBounds.x, portraitImgBounds.y, portraitImgBounds.h/imgCircuit->getWidth(), portraitImgBounds.h/imgCircuit->getHeight());
-		}
+			imgRandom->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgRandom, portraitImgBounds));
 	}
 
-	fontMain->drawText("Choose a course", menu->bounds.x, 0.025f*displayHeight, Color::WHITE);
+	fontMain->drawText("Choose a course", menu->bounds.x, 0.0625f*displayHeight, Color::WHITE);
 }
 
 void CourseSelectionState::update(float delta)

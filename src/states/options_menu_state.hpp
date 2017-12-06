@@ -27,6 +27,7 @@ class OptionsMenuState extends public fgeal::Game::State
 	CarseSharedResources& shared;
 	fgeal::Menu* menu;
 	fgeal::Font* fontTitle, *font;
+	fgeal::Image* background;
 
 	public:
 	int getId();

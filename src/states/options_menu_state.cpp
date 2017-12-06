@@ -8,6 +8,7 @@
 #include "options_menu_state.hpp"
 #include "futil/string_actions.hpp"
 
+using fgeal::Image;
 using fgeal::Font;
 using fgeal::Sound;
 using fgeal::Color;
@@ -23,8 +24,8 @@ using std::string;
 int OptionsMenuState::getId() { return Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(Pseudo3DCarseGame* game)
-: State(*game), logic(game->logic), shared(*game->sharedResources), menu(null),
-  fontTitle(null), font(null)
+: State(*game), logic(game->logic), shared(*game->sharedResources), menu(),
+  fontTitle(null), font(null), background(null)
 {}
 
 OptionsMenuState::~OptionsMenuState()
@@ -32,16 +33,21 @@ OptionsMenuState::~OptionsMenuState()
 	if(fontTitle != null) delete fontTitle;
 	if(font != null) delete font;
 	if(menu != null) delete menu;
+	if(background != null) delete background;
 }
 
 void OptionsMenuState::initialize()
 {
-	fontTitle = new Font("assets/font2.ttf", 32);
-	font = new Font("assets/font.ttf", 12);
+	Display& display = game.getDisplay();
+	background = new Image("assets/options-bg.jpg");
+	fontTitle = new Font("assets/font2.ttf", (48/480.0)*display.getHeight());
+	font = new Font("assets/font2.ttf", (16/480.0)*display.getHeight());
 
-	menu = new Menu(Rectangle(), font, Color::NAVY);
-	menu->bgColor = Color::BLUE;
+	menu = new Menu(Rectangle(), font, Color(16, 24, 192));
+	menu->bgColor = Color(0, 0, 0, 128);
+	menu->entryColor = Color::WHITE;
 	menu->focusedEntryFontColor = Color::WHITE;
+	menu->borderColor = Color::_TRANSPARENT;
 
 	menu->addEntry("Resolution: ");
 	menu->addEntry("Fullscreen: ");
@@ -67,10 +73,11 @@ void OptionsMenuState::render()
 	menu->bounds.w = display.getWidth() - 2*menu->bounds.x;
 	menu->bounds.h = 0.5f*display.getHeight();
 
+	background->drawScaled(0, 0, display.getWidth()/(float)background->getWidth(), display.getHeight()/(float)background->getHeight());
 	updateLabels();
 	menu->draw();
 
-	fontTitle->drawText("Options", 0.125*display.getWidth(), 0.125*display.getHeight(), Color::WHITE);
+	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getHeight(), Color::WHITE);
 }
 
 void OptionsMenuState::update(float delta)
@@ -152,7 +159,7 @@ void OptionsMenuState::updateLabels()
 	{
 		default:
 		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Arcade"; break;
-		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load capped power)"; break;
+		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load-limited power)"; break;
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
 	menu->at(3).label = "Simulation mode: " + strSimType;

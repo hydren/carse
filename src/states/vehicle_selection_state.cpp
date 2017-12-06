@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 typedef GenericMenuStateLayout<VehicleSelectionState> Layout;
@@ -114,6 +115,7 @@ void VehicleSelectionState::render()
 void VehicleSelectionState::update(float delta)
 {
 	this->handleInput();
+	layout->update(delta);
 }
 
 void VehicleSelectionState::handleInput()
@@ -314,7 +316,11 @@ void VehicleSelectionState::ListLayout::navigate(NavigationDirection navDir)
 	}
 }
 
-void VehicleSelectionState::ListLayout::onCursorChange() {}
+void VehicleSelectionState::ListLayout::onCursorChange()
+{
+	state.shared.sndCursorMove.stop();
+	state.shared.sndCursorMove.play();
+}
 
 void VehicleSelectionState::ListLayout::onCursorAccept() {}
 
@@ -322,7 +328,8 @@ void VehicleSelectionState::ListLayout::onCursorAccept() {}
 // ShowroomLayout
 
 VehicleSelectionState::ShowroomLayout::ShowroomLayout(VehicleSelectionState& state)
-: Layout(state), imgBackground("assets/showroom-bg.jpg")
+: Layout(state), imgBackground("assets/showroom-bg.jpg"),
+  isSelectionTransitioning(false), previousIndex(-1), selectionTransitionProgress(0)
 {}
 
 void VehicleSelectionState::ShowroomLayout::draw()
@@ -331,29 +338,37 @@ void VehicleSelectionState::ShowroomLayout::draw()
 	Font* fontMain = state.fontMain;
 	Menu* const menu = state.menu;
 	const vector<Pseudo3DVehicle::Spec>& vehicles = state.gameLogic.getVehicleList();
-	const Pseudo3DVehicle::Spec& vehicle = vehicles[menu->getSelectedIndex()];
+	const unsigned index = isSelectionTransitioning? previousIndex : menu->getSelectedIndex();
+	const Pseudo3DVehicle::Spec& vehicle = vehicles[index];
+
+	// transition effects
+	const float trans = isSelectionTransitioning? selectionTransitionProgress : 0,
+				doff = 0.35*sin(trans),  // dynamic offset
+	            doffp = -0.15*doff,
+				doffc = -0.15*fabs(doff),
+				doffn = 0.15*doff;
 
 	imgBackground.drawScaled(0, 0, scaledToSize(&imgBackground, display));
 
 	// draw previous vehicle
-	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
+	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 1))
 	{
-		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
-		state.drawVehiclePreview(0.2*display.getWidth(), 0.5*display.getHeight(), 1.02, index, -1);
+		const unsigned i = index == 0? menu->getNumberOfEntries()-1 : index-1;
+		state.drawVehiclePreview((0.2-doff)*display.getWidth(), (0.5-doffp)*display.getHeight(), 1.05-0.05*fabs(trans), i, trans < -0.5? 0 : -1);
 	}
 
 	// draw next vehicle
-	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 0))
+	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 0))
 	{
-		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
-		state.drawVehiclePreview(0.8*display.getWidth(), 0.5*display.getHeight(), 1.02, index, +1);
+		const unsigned i = index == menu->getNumberOfEntries()-1? 0 : index+1;
+		state.drawVehiclePreview((0.8-doff)*display.getWidth(), (0.5-doffn)*display.getHeight(), 1.05-0.05*fabs(trans), i, trans > 0.5? 0 : +1);
 	}
 
 	// darkening other vehicles
 	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(),Color(0, 0, 0, 128));
 
 	// draw current vehicle
-	state.drawVehiclePreview(0.5*display.getWidth(), 0.45*display.getHeight());
+	state.drawVehiclePreview((0.5-doff)*display.getWidth(), (0.45-doffc)*display.getHeight(), 1.0+0.05*fabs(trans), index, trans > 0.5? -1 : trans < -0.5? +1 : 0);
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
@@ -371,7 +386,19 @@ void VehicleSelectionState::ShowroomLayout::draw()
 	state.drawVehicleSpec(infoX,  infoY);
 }
 
-void VehicleSelectionState::ShowroomLayout::update(float delta) {}
+void VehicleSelectionState::ShowroomLayout::update(float delta)
+{
+	if(isSelectionTransitioning)
+	{
+		selectionTransitionProgress += 6*(((int) state.menu->getSelectedIndex()) - previousIndex) * delta;
+
+		if(fabs(selectionTransitionProgress) > 0.99)
+		{
+			isSelectionTransitioning = false;
+			previousIndex = -1;
+		}
+	}
+}
 
 void VehicleSelectionState::ShowroomLayout::navigate(NavigationDirection navDir)
 {
@@ -379,30 +406,50 @@ void VehicleSelectionState::ShowroomLayout::navigate(NavigationDirection navDir)
 	{
 		case NAV_UP:
 		{
-			state.changeSprite(false);
+			if(not isSelectionTransitioning)
+				state.changeSprite(false);
 			break;
 		}
 		case NAV_DOWN:
 		{
-			state.changeSprite();
+			if(not isSelectionTransitioning)
+				state.changeSprite();
 			break;
 		}
 		case NAV_LEFT:
 		{
-			state.menu->cursorUp();
-			this->onCursorChange();
+			if(not isSelectionTransitioning)
+			{
+				isSelectionTransitioning = true;
+				previousIndex = state.menu->getSelectedIndex();
+				selectionTransitionProgress = 0;
+
+				state.menu->cursorUp();
+				this->onCursorChange();
+			}
 			break;
 		}
 		case NAV_RIGHT:
 		{
-			state.menu->cursorDown();
-			this->onCursorChange();
+			if(not isSelectionTransitioning)
+			{
+				isSelectionTransitioning = true;
+				previousIndex = state.menu->getSelectedIndex();
+				selectionTransitionProgress = 0;
+
+				state.menu->cursorDown();
+				this->onCursorChange();
+			}
 			break;
 		}
 		default:break;
 	}
 }
 
-void VehicleSelectionState::ShowroomLayout::onCursorChange() {}
+void VehicleSelectionState::ShowroomLayout::onCursorChange()
+{
+	state.shared.sndCursorMove.stop();
+	state.shared.sndCursorMove.play();
+}
 
 void VehicleSelectionState::ShowroomLayout::onCursorAccept() {}

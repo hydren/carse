@@ -61,6 +61,10 @@ class VehicleSelectionState extends public fgeal::Game::State
 	struct ShowroomLayout extends GenericMenuStateLayout<VehicleSelectionState>
 	{
 		fgeal::Image imgBackground;
+		bool isSelectionTransitioning;
+		int previousIndex;
+		float selectionTransitionProgress;
+
 		ShowroomLayout(VehicleSelectionState& state);
 		void draw();
 		void update(float delta);

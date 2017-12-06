@@ -1,6 +1,5 @@
 # to do
 
-- Rename driven wheels property to include "vehicle_" prefix. (look for other similar cases)
 - Optimize velocimeter drawing by caching geometric coordinates
 - Add mouse input on menus
 - Add gear shifting sounds
@@ -25,6 +24,7 @@
 - Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
 - Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
+- Rename driven wheels property to include "vehicle_" prefix. (look for other similar cases)
 
 # bugs
 

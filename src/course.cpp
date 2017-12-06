@@ -223,7 +223,7 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	course.colorRoadPrimary =      Color( 64, 80, 80);
 	course.colorRoadSecondary =    Color( 40, 64, 64);
 	course.colorOffRoadPrimary =   Color(  0,112,  0);
-	course.colorOffRoadSecondary = Color(  0, 88, 80);
+	course.colorOffRoadSecondary = Color(  0, 88,  0);
 	course.colorHumblePrimary =    Color(200,200,200);
 	course.colorHumbleSecondary =  Color(152,  0,  0);
 

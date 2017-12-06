@@ -18,7 +18,6 @@
 
 #include <algorithm>
 
-#include "util.hpp"
 typedef GenericMenuStateLayout<MainMenuState> Layout;
 
 using fgeal::Display;

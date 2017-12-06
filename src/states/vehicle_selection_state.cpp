@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <sstream>
 
-#include "util.hpp"
+typedef GenericMenuStateLayout<VehicleSelectionState> Layout;
 
 using fgeal::Display;
 using fgeal::Event;
@@ -49,7 +49,7 @@ VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
 : State(*game), shared(*game->sharedResources), gameLogic(game->logic),
   fontMain(null), fontInfo(null), menu(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
-  layout(LAYOUT_PROTOTYPE_SLIDE_STAND)
+  layout(null)
 {}
 
 VehicleSelectionState::~VehicleSelectionState()
@@ -91,6 +91,8 @@ void VehicleSelectionState::initialize()
 			const_foreach(const Pseudo3DVehicleAnimationSpec&, alternateSprite, vector<Pseudo3DVehicleAnimationSpec>, vspec.alternateSprites)
 				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
 	}
+
+	layout = new ShowroomLayout(*this);
 }
 
 void VehicleSelectionState::onEnter()
@@ -106,12 +108,7 @@ void VehicleSelectionState::render()
 {
 	Display& display = game.getDisplay();
 	display.clear();
-	switch(layout)
-	{
-		default:
-		case LAYOUT_PROTOTYPE_LIST: renderMenuPrototypeList(); break;
-		case LAYOUT_PROTOTYPE_SLIDE_STAND: renderMenuPrototypeSlideStand(); break;
-	}
+	layout->draw();
 }
 
 void VehicleSelectionState::update(float delta)
@@ -144,48 +141,35 @@ void VehicleSelectionState::handleInput()
 				case Keyboard::KEY_ENTER:
 					shared.sndCursorIn.stop();
 					shared.sndCursorIn.play();
-					this->onMenuSelect();
+					this->menuSelectionAction();
 					break;
+
 				case Keyboard::KEY_ARROW_UP:
-				case Keyboard::KEY_ARROW_LEFT:
-					shared.sndCursorMove.stop();
-					shared.sndCursorMove.play();
-					menu->cursorUp();
+					layout->navigate(Layout::NAV_UP);
 					break;
+
 				case Keyboard::KEY_ARROW_DOWN:
+					layout->navigate(Layout::NAV_DOWN);
+					break;
+
+				case Keyboard::KEY_ARROW_LEFT:
+					layout->navigate(Layout::NAV_LEFT);
+					break;
+
 				case Keyboard::KEY_ARROW_RIGHT:
-					shared.sndCursorMove.stop();
-					shared.sndCursorMove.play();
-					menu->cursorDown();
+					layout->navigate(Layout::NAV_RIGHT);
 					break;
-				case Keyboard::KEY_PAGE_UP:
-				{
-					VehiclePreview& preview = previews[menu->getSelectedIndex()];
-					if(not preview.altSprites.empty())
-					{
-						shared.sndCursorMove.stop();
-						shared.sndCursorMove.play();
-						if(preview.altIndex == -1)
-							preview.altIndex = preview.altSprites.size() - 1;
-						else
-							preview.altIndex--;
-					}
+
+				case Keyboard::KEY_1:
+					delete layout;
+					layout = new ListLayout(*this);
 					break;
-				}
-				case Keyboard::KEY_PAGE_DOWN:
-				{
-					VehiclePreview& preview = previews[menu->getSelectedIndex()];
-					if(not preview.altSprites.empty())
-					{
-						shared.sndCursorMove.stop();
-						shared.sndCursorMove.play();
-						if(preview.altIndex == (int) preview.altSprites.size() - 1)
-							preview.altIndex = -1;
-						else
-							preview.altIndex++;
-					}
+
+				case Keyboard::KEY_2:
+					delete layout;
+					layout = new ShowroomLayout(*this);
 					break;
-				}
+
 				default:
 					break;
 			}
@@ -193,7 +177,7 @@ void VehicleSelectionState::handleInput()
 	}
 }
 
-void VehicleSelectionState::onMenuSelect()
+void VehicleSelectionState::menuSelectionAction()
 {
 	gameLogic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
 	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
@@ -222,72 +206,11 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 	sprite.drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
 }
 
-void VehicleSelectionState::renderMenuPrototypeList()
+void VehicleSelectionState::drawVehicleSpec(float infoX, float infoY, float index)
 {
-	Display& display = game.getDisplay();
-	menu->draw();
-	fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
-	drawVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
-
-	const Pseudo3DVehicle::Spec& vspec = gameLogic.getVehicleList()[menu->getSelectedIndex()];
-
 	// info sheet
-	int sheetX = 0.525*display.getWidth(), sheetY = 0.525*display.getHeight();
-	const string engineDesc = (vspec.engineAspiration.empty()? "" : vspec.engineAspiration + " ")
-							+ (vspec.engineDisplacement == 0?  "" : vspec.engineDisplacement >= 950? toStrRounded(vspec.engineDisplacement/1000.0) + "L " : to_string(vspec.engineDisplacement)+"cc ")
-							+ (vspec.engineValvetrain.empty()? "" : vspec.engineValvetrain + " ")
-							+ (vspec.engineValveCount == 0?    "" : to_string(vspec.engineValveCount) + "-valve ")
-							+ (vspec.engineConfiguration.empty()? "" : vspec.engineConfiguration);
+	const Pseudo3DVehicle::Spec& vehicle = gameLogic.getVehicleList()[index != -1? index : menu->getSelectedIndex()];
 
-	fontInfo->drawText("Engine: "+(engineDesc.empty()? "--" : engineDesc), sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Power:  " +to_string(vspec.engineMaximumPower) + "hp @" + to_string((int)vspec.engineMaximumPowerRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Torque: " +toStrRounded(vspec.engineMaximumTorque) + "Nm @" + to_string((int)vspec.engineMaximumTorqueRpm)+"rpm", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText(to_string(vspec.engineGearCount)+"-speed transmission", sheetX, sheetY+=12, Color::WHITE);
-	fontInfo->drawText("Weight: "+to_string(vspec.mass) + "kg", sheetX, sheetY+=12, Color::WHITE);
-}
-
-void VehicleSelectionState::renderMenuPrototypeSlideStand()
-{
-	Display& display = game.getDisplay();
-	const vector<Pseudo3DVehicle::Spec>& vehicles = gameLogic.getVehicleList();
-
-	// draw previous vehicle
-	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
-	{
-		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
-		drawVehiclePreview(0.25*display.getWidth(), 0.30*display.getHeight(), 0.75, index, -1);
-	}
-
-	// draw next vehicle
-	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 0))
-	{
-		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
-		drawVehiclePreview(0.75*display.getWidth(), 0.30*display.getHeight(), 0.75, index, +1);
-	}
-
-	// darkening other vehicles
-	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(),Color(0, 0, 0, 128));
-
-	// draw current vehicle
-	drawVehiclePreview(0.5*display.getWidth(), 0.35*display.getHeight());
-
-	// draw current vehicle info
-	const string lblChooseVehicle = "Choose your vehicle";
-	Image::drawFilledRectangle(0.9*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 0, display.getWidth(), 25+fontMain->getHeight(), Color::DARK_GREEN);
-	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
-
-	// info sheet
-	const Pseudo3DVehicle::Spec& vehicle = vehicles[menu->getSelectedIndex()];
-	const int infoX = 0.25*display.getWidth(); int infoY = 0.66*display.getHeight();
-
-	const string name = vehicle.name.empty()? "--" : vehicle.name;
-	const unsigned nameWidth = fontMain->getTextWidth(name);
-	const int nameOffset = nameWidth > display.getWidth()? 0.6*sin(fgeal::uptime())*(nameWidth - display.getWidth()) : 0;
-
-	Image::drawFilledRectangle(0, infoY - 1.1*fontMain->getHeight(), display.getWidth(), fontMain->getHeight(), Color::AZURE);
-	fontMain->drawText(name, 0.5*(display.getWidth()-fontMain->getTextWidth(name)) + nameOffset, infoY - 1.1*fontMain->getHeight(), Color::WHITE);
-
-	Image::drawFilledRectangle(0, infoY - 0.1*fontMain->getHeight(), display.getWidth(), 0.25*display.getHeight(), Color::NAVY);
 	const string txtVehicleType = string("Type: ") + (vehicle.type == Mechanics::TYPE_CAR? "Car" : vehicle.type == Mechanics::TYPE_BIKE? "Bike" : "Other");
 	fontInfo->drawText(txtVehicleType, infoX, infoY, Color::WHITE);
 
@@ -316,3 +239,178 @@ void VehicleSelectionState::renderMenuPrototypeSlideStand()
 	                                        + string(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
 	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 }
+
+void VehicleSelectionState::changeSprite(bool forward)
+{
+	VehiclePreview& preview = previews[menu->getSelectedIndex()];
+	if(not preview.altSprites.empty())
+	{
+		shared.sndCursorMove.stop();
+		shared.sndCursorMove.play();
+
+		if(forward)
+		{
+			if(preview.altIndex == (int) preview.altSprites.size() - 1)
+				preview.altIndex = -1;
+			else
+				preview.altIndex++;
+		}
+		else
+		{
+			if(preview.altIndex == -1)
+				preview.altIndex = preview.altSprites.size() - 1;
+			else
+				preview.altIndex--;
+		}
+	}
+}
+
+void VehicleSelectionState::renderMenuPrototypeList()
+{
+
+}
+
+void VehicleSelectionState::renderMenuPrototypeSlideStand()
+{
+
+}
+
+// -------------------------------------------------
+// ListLayout
+
+VehicleSelectionState::ListLayout::ListLayout(VehicleSelectionState& state)
+: Layout(state)
+{}
+
+void VehicleSelectionState::ListLayout::draw()
+{
+	Display& display = state.game.getDisplay();
+	state.menu->draw();
+	state.fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
+	state.drawVehiclePreview(0.7*display.getWidth(), 0.35*display.getHeight());
+	state.drawVehicleSpec(0.525*display.getWidth(),  0.525*display.getHeight());
+}
+
+void VehicleSelectionState::ListLayout::update(float delta)
+{}
+
+void VehicleSelectionState::ListLayout::navigate(NavigationDirection navDir)
+{
+	switch(navDir)
+	{
+		case NAV_UP:
+		{
+			state.menu->cursorUp();
+			this->onCursorChange();
+			break;
+		}
+		case NAV_DOWN:
+		{
+			state.menu->cursorDown();
+			this->onCursorChange();
+			break;
+		}
+		case NAV_LEFT:
+		{
+			state.changeSprite(false);
+			break;
+		}
+		case NAV_RIGHT:
+		{
+			state.changeSprite();
+			break;
+		}
+		default:break;
+	}
+}
+
+void VehicleSelectionState::ListLayout::onCursorChange() {}
+
+void VehicleSelectionState::ListLayout::onCursorAccept() {}
+
+// -------------------------------------------------
+// ShowroomLayout
+
+VehicleSelectionState::ShowroomLayout::ShowroomLayout(VehicleSelectionState& state)
+: Layout(state)
+{}
+
+void VehicleSelectionState::ShowroomLayout::draw()
+{
+	Display& display = state.game.getDisplay();
+	Font* fontMain = state.fontMain;
+	Menu* const menu = state.menu;
+	const vector<Pseudo3DVehicle::Spec>& vehicles = state.gameLogic.getVehicleList();
+	const Pseudo3DVehicle::Spec& vehicle = vehicles[menu->getSelectedIndex()];
+
+	// draw previous vehicle
+	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 1))
+	{
+		const unsigned index = menu->getSelectedIndex() == 0? menu->getNumberOfEntries()-1 : menu->getSelectedIndex()-1;
+		state.drawVehiclePreview(0.25*display.getWidth(), 0.30*display.getHeight(), 0.75, index, -1);
+	}
+
+	// draw next vehicle
+	if(vehicles.size() > 2 or (vehicles.size() == 2 and menu->getSelectedIndex() == 0))
+	{
+		const unsigned index = menu->getSelectedIndex() == menu->getNumberOfEntries()-1? 0 : menu->getSelectedIndex()+1;
+		state.drawVehiclePreview(0.75*display.getWidth(), 0.30*display.getHeight(), 0.75, index, +1);
+	}
+
+	// darkening other vehicles
+	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(),Color(0, 0, 0, 128));
+
+	// draw current vehicle
+	state.drawVehiclePreview(0.5*display.getWidth(), 0.35*display.getHeight());
+
+	// draw current vehicle info
+	const string lblChooseVehicle = "Choose your vehicle";
+	Image::drawFilledRectangle(0.9*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 0, display.getWidth(), 25+fontMain->getHeight(), Color::DARK_GREEN);
+	fontMain->drawText(lblChooseVehicle, 0.95*display.getWidth() - fontMain->getTextWidth(lblChooseVehicle), 25, Color::WHITE);
+
+	const string name = vehicle.name.empty()? "--" : vehicle.name;
+	const unsigned nameWidth = fontMain->getTextWidth(name);
+	const int nameOffset = nameWidth > display.getWidth()? 0.6*sin(fgeal::uptime())*(nameWidth - display.getWidth()) : 0;
+	const int infoX = 0.25*display.getWidth(); int infoY = 0.66*display.getHeight();
+
+	Image::drawFilledRectangle(0, infoY - 1.1*fontMain->getHeight(), display.getWidth(), fontMain->getHeight(), Color::AZURE);
+	fontMain->drawText(name, 0.5*(display.getWidth()-fontMain->getTextWidth(name)) + nameOffset, infoY - 1.1*fontMain->getHeight(), Color::WHITE);
+	Image::drawFilledRectangle(0, infoY - 0.1*fontMain->getHeight(), display.getWidth(), 0.25*display.getHeight(), Color::NAVY);
+	state.drawVehicleSpec(infoX,  infoY);
+}
+
+void VehicleSelectionState::ShowroomLayout::update(float delta) {}
+
+void VehicleSelectionState::ShowroomLayout::navigate(NavigationDirection navDir)
+{
+	switch(navDir)
+	{
+		case NAV_UP:
+		{
+			state.changeSprite(false);
+			break;
+		}
+		case NAV_DOWN:
+		{
+			state.changeSprite();
+			break;
+		}
+		case NAV_LEFT:
+		{
+			state.menu->cursorUp();
+			this->onCursorChange();
+			break;
+		}
+		case NAV_RIGHT:
+		{
+			state.menu->cursorDown();
+			this->onCursorChange();
+			break;
+		}
+		default:break;
+	}
+}
+
+void VehicleSelectionState::ShowroomLayout::onCursorChange() {}
+
+void VehicleSelectionState::ShowroomLayout::onCursorAccept() {}

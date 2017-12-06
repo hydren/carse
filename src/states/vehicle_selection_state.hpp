@@ -19,6 +19,8 @@
 
 #include <vector>
 
+#include "util.hpp"
+
 // fwd decl.
 class Pseudo3DCarseGame;
 class CarseSharedResources;
@@ -43,9 +45,28 @@ class VehicleSelectionState extends public fgeal::Game::State
 
 	std::vector<VehiclePreview> previews;
 
-	enum Layout {
-		LAYOUT_PROTOTYPE_LIST, LAYOUT_PROTOTYPE_SLIDE_STAND
-	} layout;
+	GenericMenuStateLayout<VehicleSelectionState>* layout;
+	friend class GenericMenuStateLayout<VehicleSelectionState>;
+
+	struct ListLayout extends GenericMenuStateLayout<VehicleSelectionState>
+	{
+		ListLayout(VehicleSelectionState& state);
+		void draw();
+		void update(float delta);
+		void navigate(NavigationDirection navDir);
+		void onCursorChange();
+		void onCursorAccept();
+	};
+
+	struct ShowroomLayout extends GenericMenuStateLayout<VehicleSelectionState>
+	{
+		ShowroomLayout(VehicleSelectionState& state);
+		void draw();
+		void update(float delta);
+		void navigate(NavigationDirection navDir);
+		void onCursorChange();
+		void onCursorAccept();
+	};
 
 	public:
 	int getId();
@@ -61,10 +82,12 @@ class VehicleSelectionState extends public fgeal::Game::State
 	void update(float delta);
 
 	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
+	void drawVehicleSpec(float x, float y, float index=-1);
+	void changeSprite(bool forward=true);
 
 	private:
 	void handleInput();
-	void onMenuSelect();
+	void menuSelectionAction();
 
 	void renderMenuPrototypeList();
 	void renderMenuPrototypeSlideStand();

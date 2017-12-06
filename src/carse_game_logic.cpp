@@ -548,18 +548,18 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 	key = "vehicle_frontal_area";
 	const float referenceArea = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_FRONTAL_AREA_BIKE : DEFAULT_FRONTAL_AREA_CAR));
 
-	key = "drag_coefficient";
+	key = "vehicle_drag_coefficient";
 	const float dragCoefficient = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_CD_BIKE : DEFAULT_CD_CAR));
 
-	key = "drag_area";
+	key = "vehicle_drag_area";
 	spec.dragArea = referenceArea * dragCoefficient;
 	if(isValueSpecified(prop, key))
 		spec.dragArea = prop.getParsedCStrAllowDefault<double, atof>(key, spec.dragArea);
 
-	key = "lift_coefficient";
+	key = "vehicle_lift_coefficient";
 	const float liftCoefficient = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_CL_BIKE : DEFAULT_CL_CAR));
 
-	key = "lift_area";
+	key = "vehicle_lift_area";
 	spec.liftArea = referenceArea * liftCoefficient;
 	if(isValueSpecified(prop, key))
 		spec.liftArea = prop.getParsedCStrAllowDefault<double, atof>(key, spec.liftArea);

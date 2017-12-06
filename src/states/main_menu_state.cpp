@@ -91,7 +91,7 @@ void MainMenuState::render()
 	display.clear();
 	bg->drawScaled(0, 0, display.getWidth()/(float)bg->getWidth(), display.getHeight()/(float)bg->getHeight());
 	layout->draw();
-	shared.fontDev.drawText(string("carse v")+CARSE_VERSION+" (using fgeal v"+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")", 4, display.getHeight() - shared.fontDev.getHeight(), Color::CREAM);
+	shared.fontDev.drawText(string("carse v")+CARSE_VERSION+" (using fgeal v"+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")", 4, 4, Color::CREAM);
 }
 
 void MainMenuState::update(float delta)
@@ -302,6 +302,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 		Image::drawFilledRectangle(slots[i].x + marginX, slots[i].y + marginY, slots[i].w - marginX*2, slots[i].h - marginY*2, isSelected? Color::LIGHT_GREY : Color::GREY);
 		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
 		fontMain.drawText(state.menu->at(i).label, slots[i].x + 0.5*(slots[i].w - textWidth), slots[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
+		if(isSelected) Image::drawRectangle(slots[i].x, slots[i].y, slots[i].w, slots[i].h, selectedSlotColor);
 
 		switch(i)
 		{

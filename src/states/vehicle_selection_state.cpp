@@ -18,6 +18,8 @@
 #include <iomanip>
 #include <sstream>
 
+#include "util.hpp"
+
 using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
@@ -68,10 +70,10 @@ void VehicleSelectionState::initialize()
 {
 	Display& display = game.getDisplay();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
-	fontMain = new Font("assets/font2.ttf", 48 * 0.0015625*display.getHeight());
-	fontInfo = new Font("assets/font.ttf", 12);
+	fontMain = new Font("assets/font2.ttf", dip(48));
+	fontInfo = new Font("assets/font.ttf", dip(12));
 
-	menu = new Menu(menuBounds, new Font("assets/font.ttf", 18), Color::WHITE);
+	menu = new Menu(menuBounds, new Font("assets/font.ttf", dip(18)), Color::WHITE);
 	menu->fontIsOwned = true;
 	menu->cursorWrapAroundEnabled = true;
 	menu->bgColor = Color::AZURE;

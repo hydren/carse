@@ -15,6 +15,8 @@
 
 #include "futil/language.hpp"
 
+#include "util.hpp"
+
 class CarseSharedResources;
 class Pseudo3DCarseGame;
 
@@ -31,34 +33,11 @@ class MainMenuState extends public fgeal::Game::State
 	// ilustrations
 	fgeal::Image* imgRace, *imgExit, *imgSettings;
 
-	struct Layout
-	{
-		MainMenuState& state;
-		Layout(MainMenuState& state);
-		virtual ~Layout();
-
-		// draws the layout
-		virtual void draw() abstract;
-
-		// performs any logic-related updates, if needed
-		virtual void update(float delta) abstract;
-
-		enum NavigationDirection { NAV_UP, NAV_DOWN, NAV_LEFT, NAV_RIGHT };
-
-		// action when user navigates
-		virtual void navigate(NavigationDirection navDir) abstract;
-
-		// action when user accept or selects and confirm a item of the menu
-		virtual void onCursorAccept();
-
-		// stuff to be done when exiting the menu
-		virtual void onQuit();
-	};
-
-	Layout* layout;
+	GenericMenuStateLayout<MainMenuState>* layout;
+	friend class GenericMenuStateLayout<MainMenuState>;
 
 	// todo once this PrototypeSimpleLayout becames time-tested, make it all virtual (and remove Prototype prefix)
-	struct PrototypeSimpleLayout extends Layout
+	struct PrototypeSimpleLayout extends GenericMenuStateLayout<MainMenuState>
 	{
 		fgeal::Font fontMain;
 		PrototypeSimpleLayout(MainMenuState& state);
@@ -70,7 +49,7 @@ class MainMenuState extends public fgeal::Game::State
 	};
 
 	// todo once this PrototypeGridLayout becames time-tested, make it all virtual (and remove Prototype prefix)
-	struct PrototypeGridLayout extends Layout
+	struct PrototypeGridLayout extends GenericMenuStateLayout<MainMenuState>
 	{
 		fgeal::Font fontMain, fontTitle;
 		fgeal::Color selectedSlotColor;

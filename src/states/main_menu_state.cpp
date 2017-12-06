@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include "util.hpp"
+typedef GenericMenuStateLayout<MainMenuState> Layout;
 
 using fgeal::Display;
 using fgeal::Event;
@@ -177,26 +178,6 @@ void MainMenuState::menuSelectionAction()
 		case MENU_ITEM_EXIT: game.running = false; break;
 		default: break;
 	}
-}
-
-// ============================================================================================
-// Layout
-
-MainMenuState::Layout::Layout(MainMenuState& state)
-: state(state)
-{}
-
-MainMenuState::Layout::~Layout()
-{}
-
-void MainMenuState::Layout::onCursorAccept()
-{
-	state.menuSelectionAction();
-}
-
-void MainMenuState::Layout::onQuit()
-{
-	state.game.running = false;
 }
 
 // -------------------------------------------------

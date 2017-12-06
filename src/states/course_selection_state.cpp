@@ -14,6 +14,8 @@
 #include <iostream>
 #include <vector>
 
+#include "util.hpp"
+
 using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
@@ -30,12 +32,6 @@ using std::cout;
 using std::endl;
 using futil::Properties;
 using futil::ends_with;
-
-#define scaledToSize(imgPtr, size) (size).getWidth()/(float)((imgPtr)->getWidth()), (size).getHeight()/(float)((imgPtr)->getHeight())
-#define scaledToRect(imgPtr, rect) (rect).w/(float)((imgPtr)->getWidth()), (rect).h/(float)((imgPtr)->getHeight())
-
-// device-independent pixel; can only be used if there is a 'display' instance in the scope
-#define dip(px) (px*(display.getHeight()/480.0))
 
 int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 

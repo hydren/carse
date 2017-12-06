@@ -8,6 +8,8 @@
 #include "options_menu_state.hpp"
 #include "futil/string_actions.hpp"
 
+#include "util.hpp"
+
 using fgeal::Image;
 using fgeal::Font;
 using fgeal::Sound;
@@ -40,8 +42,8 @@ void OptionsMenuState::initialize()
 {
 	Display& display = game.getDisplay();
 	background = new Image("assets/options-bg.jpg");
-	fontTitle = new Font("assets/font2.ttf", (48/480.0)*display.getHeight());
-	font = new Font("assets/font2.ttf", (16/480.0)*display.getHeight());
+	fontTitle = new Font("assets/font2.ttf", dip(48));
+	font = new Font("assets/font2.ttf", dip(16));
 
 	menu = new Menu(Rectangle(), font, Color(16, 24, 192));
 	menu->bgColor = Color(0, 0, 0, 128);
@@ -73,7 +75,7 @@ void OptionsMenuState::render()
 	menu->bounds.w = display.getWidth() - 2*menu->bounds.x;
 	menu->bounds.h = 0.5f*display.getHeight();
 
-	background->drawScaled(0, 0, display.getWidth()/(float)background->getWidth(), display.getHeight()/(float)background->getHeight());
+	background->drawScaled(0, 0, scaledToSize(background, display));
 	updateLabels();
 	menu->draw();
 

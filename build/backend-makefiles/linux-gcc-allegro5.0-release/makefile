@@ -13,7 +13,6 @@ RM := rm -rf
 -include src_libs/fgeal/adapters/allegro5.0/subdir.mk
 -include src_libs/fgeal/subdir.mk
 -include src/states/subdir.mk
--include src/pseudo3d/subdir.mk
 -include src/automotive/subdir.mk
 -include src/subdir.mk
 -include subdir.mk

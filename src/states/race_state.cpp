@@ -57,35 +57,68 @@ int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 //static
 Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID)); }
 
-Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)  //@suppress("Class members should be properly initialized")
+Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
-  font(null), font2(null), font3(null), fontDebug(null), bg(null), music(null),
+  font(null), font2(null), font3(null), fontDebug(null),
+  imgBackground(null),
+  music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
-  bgColor(), bgColorHorizon(), spriteSmokeLeft(null), spriteSmokeRight(null),
+
+  bgColor(), bgColorHorizon(),
+  spritesVehicle(), spriteSmokeLeft(null), spriteSmokeRight(null),
+  engineSound(),
+
   position(0), posX(0), posY(0),
   pseudoAngle(0), strafeSpeed(0), curvePull(0), corneringForceLeechFactor(0), corneringStiffness(0),
-  bgParallax(), isBurningRubber(false), /* verticalSpeed(0), onAir(false), onLongAir(false), */
+  parallax(), isBurningRubber(false),
+  /* verticalSpeed(0), onAir(false), onLongAir(false), */
+
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
-  laptime(0), laptimeBest(0), lapCurrent(0), course(0, 0),
+  laptime(0), laptimeBest(0), lapCurrent(0),
+
+  course(0, 0), vehicle(),
+
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
+
+  controlKeyAccelerate(fgeal::Keyboard::KEY_ARROW_UP),
+  controlKeyBrake(fgeal::Keyboard::KEY_ARROW_DOWN),
+  controlKeyTurnLeft(fgeal::Keyboard::KEY_ARROW_LEFT),
+  controlKeyTurnRight(fgeal::Keyboard::KEY_ARROW_RIGHT),
+  controlKeyShiftUp(fgeal::Keyboard::KEY_LEFT_SHIFT),
+  controlKeyShiftDown(fgeal::Keyboard::KEY_LEFT_CONTROL),
+  controlJoystickKeyAccelerate(2),
+  controlJoystickKeyBrake(3),
+  controlJoystickKeyShiftUp(5),
+  controlJoystickKeyShiftDown(4),
+  controlJoystickAxisTurn(0),
+
   debugMode(true)
 {
 	drawParameters.cameraDepth = 0.84;
 	drawParameters.drawDistance = 300;
-	bgParallax.x = bgParallax.y = 0;
+	parallax.x = parallax.y = 0;
 }
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	// todo delete sounds
-	delete font;
-	delete font2;
-	delete font3;
-	delete fontDebug;
-	delete bg;
-	delete music;
-	delete spriteSmokeLeft;
-	delete spriteSmokeRight;
+	if(font != null) delete font;
+	if(font2 != null) delete font2;
+	if(font3 != null) delete font3;
+	if(fontDebug != null) delete fontDebug;
+
+	if(imgBackground != null) delete imgBackground;
+	if(music != null) delete music;
+
+	if(sndTireBurnoutStandIntro != null) delete sndTireBurnoutStandIntro;
+	if(sndTireBurnoutStandLoop != null) delete sndTireBurnoutStandLoop;
+	if(sndTireBurnoutIntro != null) delete sndTireBurnoutIntro;
+	if(sndTireBurnoutLoop != null) delete sndTireBurnoutLoop;
+	if(sndOnDirtLoop != null) delete sndOnDirtLoop;
+	if(sndJumpImpact != null) delete sndJumpImpact;
+
+	if(spriteSmokeLeft != null) delete spriteSmokeLeft;
+	if(spriteSmokeRight != null) delete spriteSmokeRight;
 	for(unsigned i = 0; i < spritesVehicle.size(); i++)
 		delete spritesVehicle[i];
 }
@@ -109,19 +142,6 @@ void Pseudo3DRaceState::initialize()
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
 	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
 	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
-
-	controlKeyAccelerate = fgeal::Keyboard::KEY_ARROW_UP;
-	controlKeyBrake = fgeal::Keyboard::KEY_ARROW_DOWN;
-	controlKeyTurnLeft = fgeal::Keyboard::KEY_ARROW_LEFT;
-	controlKeyTurnRight = fgeal::Keyboard::KEY_ARROW_RIGHT;
-	controlKeyShiftUp = fgeal::Keyboard::KEY_LEFT_SHIFT;
-	controlKeyShiftDown = fgeal::Keyboard::KEY_LEFT_CONTROL;
-
-	controlJoystickAxisTurn = 0;
-	controlJoystickKeyAccelerate = 2;
-	controlJoystickKeyBrake = 3;
-	controlJoystickKeyShiftDown = 4;
-	controlJoystickKeyShiftUp = 5;
 }
 
 void Pseudo3DRaceState::onEnter()
@@ -167,10 +187,10 @@ void Pseudo3DRaceState::onEnter()
 		spritesVehicle.push_back(sprite);
 	}
 
-	if(bg != null)
-		delete bg;
+	if(imgBackground != null)
+		delete imgBackground;
 
-	bg = new Image(course.landscapeFilename);
+	imgBackground = new Image(course.landscapeFilename);
 
 	if(not drawParameters.sprites.empty())
 	{
@@ -212,6 +232,7 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay->backgroundColor = fgeal::Color::BLACK;
 	hudGearDisplay->specialCases[0] = "N";
 	hudGearDisplay->specialCases[-1] = "R";
+	hudGearDisplay->fontIsShared = true;
 
 	gaugeSize.x = hudRpmGauge->bounds.x - font2->getTextWidth("---");
 	gaugeSize.w *= 3;
@@ -221,23 +242,27 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedDisplay->disableBackground = true;
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
 	hudSpeedDisplay->borderThickness = 0;
+	hudSpeedDisplay->fontIsShared = true;
 
 	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font3);
 	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
 	hudCurrentLap->disableBackground = true;
 	hudCurrentLap->displayColor = Color::WHITE;
+	hudCurrentLap->fontIsShared = true;
 
 	hudTimerCurrentLap = new Hud::TimerDisplay<float>(laptime, gaugeSize, font3);
 	hudTimerCurrentLap->bounds.y = hudCurrentLap->bounds.y + font3->getHeight()*1.05;
 	hudTimerCurrentLap->valueScale = 1000;
 	hudTimerCurrentLap->disableBackground = true;
 	hudTimerCurrentLap->displayColor = Color::WHITE;
+	hudTimerCurrentLap->fontIsShared = true;
 
 	hudTimerBestLap = new Hud::TimerDisplay<float>(laptimeBest, gaugeSize, font3);
 	hudTimerBestLap->bounds.y = hudTimerCurrentLap->bounds.y + font3->getHeight()*1.05;
 	hudTimerBestLap->valueScale = 1000;
 	hudTimerBestLap->disableBackground = true;
 	hudTimerBestLap->displayColor = Color::WHITE;
+	hudTimerBestLap->fontIsShared = true;
 
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
@@ -247,7 +272,7 @@ void Pseudo3DRaceState::onEnter()
 	corneringForceLeechFactor = (vehicle.spec->type == Mechanics::TYPE_BIKE? 0.25 : 0.5);
 	corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
-	bgParallax.x = bgParallax.y = 0;
+	parallax.x = parallax.y = 0;
 	position = 0;
 	posX = posY = 0;
 //	verticalSpeed = 0;
@@ -273,11 +298,13 @@ void Pseudo3DRaceState::onLeave()
 	sndTireBurnoutStandIntro->stop();
 	sndTireBurnoutStandLoop->stop();
 	sndOnDirtLoop->stop();
-//	delete hudRpmGauge;
-//	delete hudSpeedDisplay;
-//	delete hudGearDisplay;
-//	delete hudCurrentLap;
-//	delete hudTimer;
+
+	delete hudRpmGauge;
+	delete hudSpeedDisplay;
+	delete hudGearDisplay;
+	delete hudCurrentLap;
+	delete hudTimerBestLap;
+	delete hudTimerCurrentLap;
 }
 
 void Pseudo3DRaceState::render()
@@ -287,12 +314,12 @@ void Pseudo3DRaceState::render()
 
 	game.getDisplay().clear();
 
-	const float parallaxAbsoluteY = bgParallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - bg->getHeight();
+	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight();
 
 	Image::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	Image::drawFilledRectangle(0, parallaxAbsoluteY + bg->getHeight(), displayWidth, displayHeight, bgColorHorizon);
-	bg->draw(bgParallax.x, parallaxAbsoluteY);
-	bg->draw(bgParallax.x + bg->getWidth(), parallaxAbsoluteY);
+	Image::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight(), displayWidth, displayHeight, bgColorHorizon);
+	imgBackground->draw(parallax.x, parallaxAbsoluteY);
+	imgBackground->draw(parallax.x + imgBackground->getWidth(), parallaxAbsoluteY);
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 
@@ -647,7 +674,7 @@ void Pseudo3DRaceState::handleInput()
 //					verticalSpeed = 0;
 					vehicle.body.reset();
 					pseudoAngle = 0;
-					bgParallax.x = bgParallax.y = 0;
+					parallax.x = parallax.y = 0;
 					laptime = 0;
 					lapCurrent = 1;
 //					isBurningRubber = onAir = onLongAir = false;

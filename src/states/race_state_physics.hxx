@@ -109,14 +109,14 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	*/
 
 	// update bg parallax
-	bgParallax.x -= segment.curve*vehicle.body.speed*0.025;
-	bgParallax.y -= 2*vehicle.body.slopeAngle;
+	parallax.x -= segment.curve*vehicle.body.speed*0.025;
+	parallax.y -= 2*vehicle.body.slopeAngle;
 
-	if(bgParallax.x < -(2.0f*bg->getWidth()-game.getDisplay().getWidth()))
-		bgParallax.x += bg->getWidth();
+	if(parallax.x < -(2.0f*imgBackground->getWidth()-game.getDisplay().getWidth()))
+		parallax.x += imgBackground->getWidth();
 
-	if(bgParallax.x > 0)
-		bgParallax.x -= bg->getWidth();
+	if(parallax.x > 0)
+		parallax.x -= imgBackground->getWidth();
 }
 
 static const float RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM

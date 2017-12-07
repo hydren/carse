@@ -33,7 +33,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	friend class CarseGameLogic;
 
 	fgeal::Font* font, *font2, *font3, *fontDebug;
-	fgeal::Image* bg;
+	fgeal::Image* imgBackground;
 	fgeal::Music* music;
 
 	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
@@ -47,7 +47,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	EngineSoundSimulator engineSound;
 	float position, posX, posY;
 	float pseudoAngle, strafeSpeed, curvePull, corneringForceLeechFactor, corneringStiffness;
-	fgeal::Point bgParallax;
+	fgeal::Point parallax;
+	fgeal::Vector2D backgroundScale;
 	bool isBurningRubber;
 //	float verticalSpeed;
 //	bool onAir, onLongAir;

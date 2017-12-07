@@ -27,7 +27,6 @@
 
 # bugs
 
-- Fix the ingame background to make it resolution-independent.
 - Fix incorrect tire animation speed.
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation

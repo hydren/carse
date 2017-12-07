@@ -48,7 +48,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float position, posX, posY;
 	float pseudoAngle, strafeSpeed, curvePull, corneringForceLeechFactor, corneringStiffness;
 	fgeal::Point parallax;
-	fgeal::Vector2D backgroundScale;
+	float backgroundScale;
 	bool isBurningRubber;
 //	float verticalSpeed;
 //	bool onAir, onLongAir;

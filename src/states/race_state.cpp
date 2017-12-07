@@ -70,7 +70,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   position(0), posX(0), posY(0),
   pseudoAngle(0), strafeSpeed(0), curvePull(0), corneringForceLeechFactor(0), corneringStiffness(0),
-  parallax(), isBurningRubber(false),
+  parallax(), backgroundScale(), isBurningRubber(false),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
 
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
@@ -191,6 +191,8 @@ void Pseudo3DRaceState::onEnter()
 		delete imgBackground;
 
 	imgBackground = new Image(course.landscapeFilename);
+
+	backgroundScale = 0.2 * display.getHeight() / (float) imgBackground->getHeight();
 
 	if(not drawParameters.sprites.empty())
 	{
@@ -314,12 +316,13 @@ void Pseudo3DRaceState::render()
 
 	game.getDisplay().clear();
 
-	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight();
+	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale;
 
 	Image::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	Image::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight(), displayWidth, displayHeight, bgColorHorizon);
-	imgBackground->draw(parallax.x, parallaxAbsoluteY);
-	imgBackground->draw(parallax.x + imgBackground->getWidth(), parallaxAbsoluteY);
+	Image::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
+
+	for(float bg = 0; bg < 2*displayWidth; bg += imgBackground->getWidth())
+		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
 	course.draw(position * coursePositionFactor, posX, drawParameters);
 

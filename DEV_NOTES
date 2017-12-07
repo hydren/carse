@@ -1,6 +1,5 @@
 # to do
 
-- Optimize velocimeter drawing by caching geometric coordinates
 - Add mouse input on menus
 - Add gear shifting sounds
 - Add optional gear shifting sounds derived from forced induction

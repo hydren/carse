@@ -12,11 +12,13 @@
 #include "fgeal/fgeal.hpp"
 
 #include "futil/string_extra_operators.hpp"
+#include "futil/string_actions.hpp"
 #include "futil/map_actions.hpp"
 
+#include <vector>
+#include <map>
 #include <cstdio>
 #include <cmath>
-#include <map>
 
 #ifndef M_PI
 	# define M_PI		3.14159265358979323846	/* pi */
@@ -95,6 +97,16 @@ namespace Hud
 		/** If true, indicates that the custom images used by this gauge are shared, and thus, should not be deleted when this gauge is deleted. */
 		bool imagesAreShared;
 
+		struct Line { float x1, y1, x2, y2; Line(float x1, float y1, float x2, float y2) : x1(x1), y1(y1), x2(x2), y2(y2) {}  };
+
+		/** A vector of cached coordinates to be drawn. It's necessary to call compile() to update this cache.  */
+		std::vector<Line> graduationPrimaryCache, graduationSecondaryCache, graduationTertiaryCache;
+
+		struct NumericGraduation { std::string str; float x, y; NumericGraduation(std::string str, float x, float y) : str(str), x(x), y(y) {} };
+
+		/** A vector of cached numbers and its coordinates to be drawn. It's necessary to call compile() to update this cache. */
+		std::vector<NumericGraduation> graduationPrimaryNumericCache;
+
 		DialGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
 		: value(var), min(min), max(max),
 		  graduationPrimarySize(0.1*(max-min)), graduationSecondarySize(0.01*(max-min)), graduationTertiarySize(0.001*(max-min)),
@@ -116,6 +128,47 @@ namespace Hud
 				if(pointerImage != null)    delete pointerImage;
 				if(backgroundImage != null) delete backgroundImage;
 				if(foregroundImage != null) delete foregroundImage;
+			}
+		}
+
+		void compile()
+		{
+			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
+
+			graduationPrimaryCache.clear();
+			graduationSecondaryCache.clear();
+			graduationTertiaryCache.clear();
+
+			if(graduationLevel >= 1)  // primary graduation
+			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
+			{
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
+				graduationPrimaryCache.push_back(Line(center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
+				                                      center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle)));
+
+				// numerical graduation
+				if(graduationFont != null)
+				{
+					const std::string str = futil::to_string(g * graduationValueScale);
+					graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
+							                                                       center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
+				}
+			}
+
+			if(graduationLevel >= 2)  // secondary graduation
+			for(NumberType g = min; g <= max; g += graduationSecondarySize)
+			{
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
+				graduationSecondaryCache.push_back(Line(center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
+								                        center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
+			}
+
+			if(graduationLevel >= 3)  // tertiary graduation
+			for(NumberType g = min; g <= max; g += graduationTertiarySize)
+			{
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
+				graduationTertiaryCache.push_back(Line(center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
+								                       center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
 			}
 		}
 
@@ -147,34 +200,30 @@ namespace Hud
 			}
 
 			if(graduationLevel >= 1)  // primary graduation
-			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
+			for(unsigned i = 0; i < graduationPrimaryCache.size(); i++)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				fgeal::Image::drawLine(center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
-									   center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle), graduationColor);
-
+				const Line& line = graduationPrimaryCache[i];
+				fgeal::Image::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
 				// numerical graduation
-				if(graduationFont != null)
+				if(graduationFont != null and i < graduationPrimaryNumericCache.size())
 				{
-					std::string str = std::string() + (g * graduationValueScale);
-					graduationFont->drawText(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str), center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight(), graduationColor);
+					const NumericGraduation& grad = graduationPrimaryNumericCache[i];
+					graduationFont->drawText(grad.str, grad.x, grad.y, graduationColor);
 				}
 			}
 
 			if(graduationLevel >= 2)  // secondary graduation
-			for(NumberType g = min; g <= max; g += graduationSecondarySize)
+			for(unsigned i = 0; i < graduationSecondaryCache.size(); i++)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				fgeal::Image::drawLine(center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
-									   center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle), graduationColor);
+				const Line& line = graduationSecondaryCache[i];
+				fgeal::Image::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
 			}
 
 			if(graduationLevel >= 3)  // tertiary graduation
-			for(NumberType g = min; g <= max; g += graduationTertiarySize)
+			for(unsigned i = 0; i < graduationTertiaryCache.size(); i++)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				fgeal::Image::drawLine(center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
-									   center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle), graduationColor);
+				const Line& line = graduationTertiaryCache[i];
+				fgeal::Image::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
 			}
 
 			if(foregroundImage != null)

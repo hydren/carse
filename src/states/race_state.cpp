@@ -200,6 +200,7 @@ void Pseudo3DRaceState::onEnter()
 	hudRpmGauge->graduationSecondarySize = 100;
 	hudRpmGauge->graduationValueScale = 0.001;
 	hudRpmGauge->graduationFont = font;
+	hudRpmGauge->compile();
 
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;

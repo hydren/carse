@@ -271,7 +271,7 @@ void Pseudo3DRaceState::onEnter()
 					spriteSmokeRight->scale.x =
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
-	corneringForceLeechFactor = (vehicle.spec->type == Mechanics::TYPE_BIKE? 0.25 : 0.5);
+	corneringForceLeechFactor = (vehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
 	corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	parallax.x = parallax.y = 0;

@@ -30,7 +30,7 @@ const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actua
 static const float AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
-: simulationType(SIMULATION_TYPE_FAKESLIP), engine(eng),
+: simulationType(SIMULATION_TYPE_FAKESLIP), vehicleType(type), engine(eng),
   automaticShiftingEnabled(),
   automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
   automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),

@@ -27,8 +27,6 @@ struct Pseudo3DVehicle
 		std::vector<Pseudo3DVehicleAnimationSpec> alternateSprites;
 	};
 
-	const Spec* spec;
-
 	// physics simulation
 	Mechanics body;
 

@@ -32,7 +32,7 @@ struct Mechanics
 	}
 	simulationType;
 
-	enum VehicleType { TYPE_CAR, TYPE_BIKE, TYPE_OTHER };
+	enum VehicleType { TYPE_CAR, TYPE_BIKE, TYPE_OTHER } vehicleType;
 
 	Engine engine;
 

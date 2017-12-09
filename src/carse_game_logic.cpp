@@ -223,19 +223,16 @@ const vector<Pseudo3DVehicle::Spec>& CarseGameLogic::getVehicleList()
 	return vehicles;
 }
 
-void CarseGameLogic::setPickedVehicle(unsigned vehicleIndex, int skin)
+void CarseGameLogic::setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex)
 {
-	getRaceState().vehicle = Pseudo3DVehicle(vehicles[vehicleIndex], skin);
+	getRaceState().playerVehicleSpec = vehicles[vehicleIndex];
+	getRaceState().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
 }
 
-void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int skin)
+void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int altSpriteIndex)
 {
-	getRaceState().vehicle = Pseudo3DVehicle(vspec, skin);
-}
-
-void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle& v)
-{
-	getRaceState().vehicle = v;
+	getRaceState().playerVehicleSpec = vspec;
+	getRaceState().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
 }
 
 bool CarseGameLogic::isImperialUnitEnabled()

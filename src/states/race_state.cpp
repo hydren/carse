@@ -76,7 +76,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
   laptime(0), laptimeBest(0), lapCurrent(0),
 
-  course(0, 0), vehicle(),
+  course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), vehicle(),
 
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
 
@@ -159,6 +159,8 @@ void Pseudo3DRaceState::onEnter()
 
 		spritesVehicle.clear();
 	}
+
+	vehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
 
 	Image* sheet = new Image(vehicle.sprite.sheetFilename);
 

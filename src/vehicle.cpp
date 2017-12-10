@@ -21,7 +21,8 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   pseudoAngle(), strafeSpeed(), curvePull(), corneringForceLeechFactor(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isBurningRubber(false),
-  engineSoundProfile(), spriteSpec(), sprites()
+  engineSoundProfile(), engineSound(),
+  spriteSpec(), sprites()
 {}
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
@@ -30,7 +31,7 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   pseudoAngle(), strafeSpeed(), curvePull(), corneringForceLeechFactor(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isBurningRubber(false),
-  engineSoundProfile(spec.soundProfile),
+  engineSoundProfile(spec.soundProfile), engineSound(),
   spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
   sprites()
 {
@@ -57,11 +58,22 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
 	body.weightDistribuition = spec.weightDistribuition;
 	body.centerOfGravityHeight = spec.centerOfGravityHeight;
 	body.wheelbase = spec.wheelbase;
-
-	reloadSprites();
 }
 
-void Pseudo3DVehicle::reloadSprites()
+Pseudo3DVehicle::~Pseudo3DVehicle()
+{
+	if(not engineSound.getSoundData().empty())
+	{
+		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)
+			delete engineSound.getSoundData()[i];
+
+		engineSound.getSoundData().clear();
+	}
+
+	clearDynamicData();
+}
+
+void Pseudo3DVehicle::clearDynamicData()
 {
 	if(not sprites.empty())
 	{
@@ -72,6 +84,11 @@ void Pseudo3DVehicle::reloadSprites()
 
 		sprites.clear();
 	}
+}
+
+void Pseudo3DVehicle::setupDynamicData()
+{
+	engineSound.setProfile(engineSoundProfile, body.engine.maxRpm);
 
 	fgeal::Image* sheet = new fgeal::Image(spriteSpec.sheetFilename);
 

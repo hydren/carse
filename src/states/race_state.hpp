@@ -43,7 +43,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Color bgColor, bgColorHorizon;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
 
-	EngineSoundSimulator engineSound;
 	fgeal::Point parallax;
 	float backgroundScale;
 

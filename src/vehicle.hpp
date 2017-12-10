@@ -40,6 +40,7 @@ struct Pseudo3DVehicle
 
 	// sound data
 	EngineSoundProfile engineSoundProfile;
+	EngineSoundSimulator engineSound;
 
 	// graphics data
 	Pseudo3DVehicleAnimationSpec spriteSpec;
@@ -50,8 +51,13 @@ struct Pseudo3DVehicle
 	/** Creates a vehicle with the given specifications. The optional 'alternateSpriteIndex' argument specifies an alternate skin to use (-1 means use default sprite). */
 	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex=-1);
 
-	/** Delete current sprite instances and reload them based on the specifications. */
-	void reloadSprites();
+	~Pseudo3DVehicle();
+
+	/** Disposes of dynamically loaded graphics and sounds. */
+	void clearDynamicData();
+
+	/** Loads dynamic graphics and sounds. */
+	void setupDynamicData();
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

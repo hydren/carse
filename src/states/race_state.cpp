@@ -65,7 +65,6 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   bgColor(), bgColorHorizon(),
   spriteSmokeLeft(null), spriteSmokeRight(null),
-  engineSound(),
 
   parallax(), backgroundScale(),
 
@@ -144,9 +143,9 @@ void Pseudo3DRaceState::onEnter()
 	drawParameters.drawAreaWidth = display.getWidth();
 	drawParameters.drawAreaHeight = display.getHeight();
 
+	vehicle.clearDynamicData();
 	vehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
-
-	vehicle.reloadSprites();
+	vehicle.setupDynamicData();
 
 	for(unsigned s = 0; s < vehicle.sprites.size(); s++)
 		vehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
@@ -175,7 +174,7 @@ void Pseudo3DRaceState::onEnter()
 	bgColor = course.colorLandscape;
 	bgColorHorizon = course.colorHorizon;
 
-	engineSound.setProfile(vehicle.engineSoundProfile, vehicle.body.engine.maxRpm);
+	vehicle.engineSound.setProfile(vehicle.engineSoundProfile, vehicle.body.engine.maxRpm);
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
@@ -252,12 +251,12 @@ void Pseudo3DRaceState::onEnter()
 	vehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
 
 	music->loop();
-	engineSound.playIdle();
+	vehicle.engineSound.playIdle();
 }
 
 void Pseudo3DRaceState::onLeave()
 {
-	engineSound.haltSound();
+	vehicle.engineSound.haltSound();
 	music->stop();
 	sndTireBurnoutIntro->stop();
 	sndTireBurnoutLoop->stop();
@@ -452,11 +451,11 @@ void Pseudo3DRaceState::render()
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
-		unsigned currentRangeIndex = engineSound.getRangeIndex(vehicle.body.engine.rpm);
-		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)
+		unsigned currentRangeIndex = vehicle.engineSound.getRangeIndex(vehicle.body.engine.rpm);
+		for(unsigned i = 0; i < vehicle.engineSound.getSoundData().size(); i++)
 		{
-			const std::string format = std::string(engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
-			sprintf(buffer, format.c_str(), i, engineSound.getSoundData()[i]->getVolume(), engineSound.getSoundData()[i]->getPlaybackSpeed());
+			const std::string format = std::string(vehicle.engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
+			sprintf(buffer, format.c_str(), i, vehicle.engineSound.getSoundData()[i]->getVolume(), vehicle.engineSound.getSoundData()[i]->getPlaybackSpeed());
 			font->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*font->getHeight(), fgeal::Color::WHITE);
 		}
 	}
@@ -541,7 +540,7 @@ void Pseudo3DRaceState::update(float delta)
 	while(vehicle.position < 0)
 		vehicle.position += N*course.roadSegmentLength / coursePositionFactor;
 
-	engineSound.updateSound(vehicle.body.engine.rpm);
+	vehicle.engineSound.updateSound(vehicle.body.engine.rpm);
 
 	// lets decide if there is burnout animation
 	const bool tireBurnoutAnimRequired = (

@@ -71,7 +71,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
   laptime(0), laptimeBest(0), lapCurrent(0),
 
-  course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), vehicle(),
+  course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
   hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
 
@@ -143,12 +143,12 @@ void Pseudo3DRaceState::onEnter()
 	drawParameters.drawAreaWidth = display.getWidth();
 	drawParameters.drawAreaHeight = display.getHeight();
 
-	vehicle.clearDynamicData();
-	vehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
-	vehicle.setupDynamicData();
+	playerVehicle.clearDynamicData();
+	playerVehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
+	playerVehicle.setupDynamicData();
 
-	for(unsigned s = 0; s < vehicle.sprites.size(); s++)
-		vehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
+		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
 	if(imgBackground != null)
 		delete imgBackground;
@@ -174,11 +174,11 @@ void Pseudo3DRaceState::onEnter()
 	bgColor = course.colorLandscape;
 	bgColorHorizon = course.colorHorizon;
 
-	vehicle.engineSound.setProfile(vehicle.engineSoundProfile, vehicle.body.engine.maxRpm);
+	playerVehicle.engineSound.setProfile(playerVehicle.engineSoundProfile, playerVehicle.body.engine.maxRpm);
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	hudRpmGauge = new Hud::DialGauge<float>(vehicle.body.engine.rpm, 1000, vehicle.body.engine.maxRpm, gaugeSize);
+	hudRpmGauge = new Hud::DialGauge<float>(playerVehicle.body.engine.rpm, 1000, playerVehicle.body.engine.maxRpm, gaugeSize);
 	hudRpmGauge->borderThickness = 6;
 	hudRpmGauge->graduationLevel = 2;
 	hudRpmGauge->graduationPrimarySize = 1000;
@@ -191,7 +191,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
 	gaugeSize.w = 24;
 	gaugeSize.h = 1.5 * font->getHeight();
-	hudGearDisplay = new Hud::NumericalDisplay<int>(vehicle.body.engine.gear, gaugeSize, font);
+	hudGearDisplay = new Hud::NumericalDisplay<int>(playerVehicle.body.engine.gear, gaugeSize, font);
 	hudGearDisplay->borderThickness = 6;
 	hudGearDisplay->borderColor = fgeal::Color::LIGHT_GREY;
 	hudGearDisplay->backgroundColor = fgeal::Color::BLACK;
@@ -202,7 +202,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.x = hudRpmGauge->bounds.x - font2->getTextWidth("---");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
-	hudSpeedDisplay = new Hud::NumericalDisplay<float>(vehicle.body.speed, gaugeSize, font2);
+	hudSpeedDisplay = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, font2);
 	hudSpeedDisplay->valueScale = isImperialUnit? 2.25 : 3.6;
 	hudSpeedDisplay->disableBackground = true;
 	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
@@ -234,29 +234,29 @@ void Pseudo3DRaceState::onEnter()
 					spriteSmokeRight->scale.x =
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
-	vehicle.corneringForceLeechFactor = (vehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
-	vehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
+	playerVehicle.corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
+	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	parallax.x = parallax.y = 0;
-	vehicle.position = 0;
-	vehicle.horizontalPosition = vehicle.verticalPosition = 0;
+	playerVehicle.position = 0;
+	playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //	verticalSpeed = 0;
-	vehicle.body.simulationType = simulationType;
-	vehicle.body.reset();
-	vehicle.body.automaticShiftingEnabled = true;
-	vehicle.pseudoAngle = 0;
+	playerVehicle.body.simulationType = simulationType;
+	playerVehicle.body.reset();
+	playerVehicle.body.automaticShiftingEnabled = true;
+	playerVehicle.pseudoAngle = 0;
 	laptime = laptimeBest = 0;
 	lapCurrent = 1;
 
-	vehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
+	playerVehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
 
 	music->loop();
-	vehicle.engineSound.playIdle();
+	playerVehicle.engineSound.playIdle();
 }
 
 void Pseudo3DRaceState::onLeave()
 {
-	vehicle.engineSound.haltSound();
+	playerVehicle.engineSound.haltSound();
 	music->stop();
 	sndTireBurnoutIntro->stop();
 	sndTireBurnoutLoop->stop();
@@ -287,14 +287,14 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 2*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw(vehicle.position * coursePositionFactor, vehicle.horizontalPosition, drawParameters);
+	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition, drawParameters);
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord
-			0.75f*displayHeight - vehicle.verticalPosition*0.01f  // y coord
+			0.75f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
 	};
 
-	drawVehicle(vehicle, vehicleSpritePosition);
+	drawVehicle(playerVehicle, vehicleSpritePosition);
 
 	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("______");
 	font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
@@ -327,22 +327,22 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Position:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", vehicle.position);
+		sprintf(buffer, "%2.2fm", playerVehicle.position);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", vehicle.body.speed*3.6);
+		sprintf(buffer, "%2.2fkm/h", playerVehicle.body.speed*3.6);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", vehicle.body.acceleration);
+		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.acceleration);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Height:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", vehicle.verticalPosition);
+		sprintf(buffer, "%2.2fm", playerVehicle.verticalPosition);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 //		offset += 18;
@@ -353,109 +353,109 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", vehicle.pseudoAngle);
+		sprintf(buffer, "%2.2f", playerVehicle.pseudoAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", vehicle.body.slopeAngle);
+		sprintf(buffer, "%2.2f", playerVehicle.body.slopeAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", vehicle.strafeSpeed/coursePositionFactor);
+		sprintf(buffer, "%2.2fm/s", playerVehicle.strafeSpeed/coursePositionFactor);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", vehicle.curvePull/coursePositionFactor);
+		sprintf(buffer, "%2.2fm/s", playerVehicle.curvePull/coursePositionFactor);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", vehicle.body.slopePullForce);
+		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.slopePullForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.brakingForce);
+		sprintf(buffer, "%2.2fN", playerVehicle.body.brakingForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.rollingResistanceForce);
+		sprintf(buffer, "%2.2fN", playerVehicle.body.rollingResistanceForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.airDragForce);
+		sprintf(buffer, "%2.2fN", playerVehicle.body.airDragForce);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (vehicle.curvePull/coursePositionFactor + vehicle.body.slopePullForce + vehicle.body.brakingForce + vehicle.body.rollingResistanceForce + vehicle.body.airDragForce));
+		sprintf(buffer, "%2.2fN", (playerVehicle.curvePull/coursePositionFactor + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.getDriveForce());
+		sprintf(buffer, "%2.2fN", playerVehicle.body.getDriveForce());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fNm", vehicle.body.engine.getCurrentTorque());
+		sprintf(buffer, "%2.2fNm", playerVehicle.body.engine.getCurrentTorque());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.f*vehicle.body.engine.getCurrentTorque()/vehicle.body.engine.maximumTorque);
+		sprintf(buffer, "%2.2f%%", 100.f*playerVehicle.body.engine.getCurrentTorque()/playerVehicle.body.engine.maximumTorque);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Power:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fhp", (vehicle.body.engine.getCurrentTorque()*vehicle.body.engine.rpm)/(5252.0 * 1.355818));
+		sprintf(buffer, "%2.2fhp", (playerVehicle.body.engine.getCurrentTorque()*playerVehicle.body.engine.rpm)/(5252.0 * 1.355818));
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", vehicle.body.getDrivenWheelsWeightLoad());
+		sprintf(buffer, "%2.2fN", playerVehicle.body.getDrivenWheelsWeightLoad());
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Downforce:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", -vehicle.body.downforce);
+		sprintf(buffer, "%2.2fN", -playerVehicle.body.downforce);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2frad/s", vehicle.body.wheelAngularSpeed);
+		sprintf(buffer, "%2.2frad/s", playerVehicle.body.wheelAngularSpeed);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.f", vehicle.body.engine.rpm);
+		sprintf(buffer, "%2.f", playerVehicle.body.engine.rpm);
 		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
-		const char* autoLabelTxt = (vehicle.body.automaticShiftingEnabled? " (auto)":"");
-		sprintf(buffer, "%d %s", vehicle.body.engine.gear, autoLabelTxt);
+		const char* autoLabelTxt = (playerVehicle.body.automaticShiftingEnabled? " (auto)":"");
+		sprintf(buffer, "%d %s", playerVehicle.body.engine.gear, autoLabelTxt);
 		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100*vehicle.body.slipRatio);
+		sprintf(buffer, "%2.2f%%", 100*playerVehicle.body.slipRatio);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
-		unsigned currentRangeIndex = vehicle.engineSound.getRangeIndex(vehicle.body.engine.rpm);
-		for(unsigned i = 0; i < vehicle.engineSound.getSoundData().size(); i++)
+		unsigned currentRangeIndex = playerVehicle.engineSound.getRangeIndex(playerVehicle.body.engine.rpm);
+		for(unsigned i = 0; i < playerVehicle.engineSound.getSoundData().size(); i++)
 		{
-			const std::string format = std::string(vehicle.engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
-			sprintf(buffer, format.c_str(), i, vehicle.engineSound.getSoundData()[i]->getVolume(), vehicle.engineSound.getSoundData()[i]->getPlaybackSpeed());
+			const std::string format = std::string(playerVehicle.engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
+			sprintf(buffer, format.c_str(), i, playerVehicle.engineSound.getSoundData()[i]->getVolume(), playerVehicle.engineSound.getSoundData()[i]->getPlaybackSpeed());
 			font->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*font->getHeight(), fgeal::Color::WHITE);
 		}
 	}
@@ -529,46 +529,46 @@ void Pseudo3DRaceState::update(float delta)
 
 	// course looping control
 	const unsigned N = course.lines.size();
-	while(vehicle.position * coursePositionFactor >= N*course.roadSegmentLength)
+	while(playerVehicle.position * coursePositionFactor >= N*course.roadSegmentLength)
 	{
-		vehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
+		playerVehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
 		lapCurrent++;
 		if(laptime < laptimeBest or laptimeBest == 0)
 			laptimeBest = laptime;
 		laptime = 0;
 	}
-	while(vehicle.position < 0)
-		vehicle.position += N*course.roadSegmentLength / coursePositionFactor;
+	while(playerVehicle.position < 0)
+		playerVehicle.position += N*course.roadSegmentLength / coursePositionFactor;
 
-	vehicle.engineSound.updateSound(vehicle.body.engine.rpm);
+	playerVehicle.engineSound.updateSound(playerVehicle.body.engine.rpm);
 
 	// lets decide if there is burnout animation
 	const bool tireBurnoutAnimRequired = (
-		(vehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS
+		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS
 			and
 			(
 				// fake burnout mode
-				vehicle.body.engine.gear == 1
-				and vehicle.body.engine.rpm < 0.5*vehicle.body.engine.maxRpm
+				playerVehicle.body.engine.gear == 1
+				and playerVehicle.body.engine.rpm < 0.5*playerVehicle.body.engine.maxRpm
 				and isPlayerAccelerating()
 			)
 		)
 		or
-		(vehicle.body.simulationType == Mechanics::SIMULATION_TYPE_FAKESLIP
+		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_FAKESLIP
 			and
 			(
 				// burnout based on capped drive force
-				(vehicle.body.getDriveForce() < 0.75 * vehicle.body.engine.getDriveTorque() / vehicle.body.tireRadius)
-				and vehicle.body.engine.gear == 1  // but limited to first gear.
+				(playerVehicle.body.getDriveForce() < 0.75 * playerVehicle.body.engine.getDriveTorque() / playerVehicle.body.tireRadius)
+				and playerVehicle.body.engine.gear == 1  // but limited to first gear.
 			)
 		)
 		or
-		(vehicle.body.simulationType == Mechanics::SIMULATION_TYPE_PACEJKA_BASED
+		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_PACEJKA_BASED
 			and
 			(
 				// burnout based on real slip ratio
-				fabs(vehicle.body.slipRatio) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
-				and fabs(vehicle.body.speed) > 1.0
+				fabs(playerVehicle.body.slipRatio) > LONGITUDINAL_SLIP_RATIO_BURN_RUBBER
+				and fabs(playerVehicle.body.speed) > 1.0
 			)
 		)
 	);
@@ -578,26 +578,26 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
 
-		if(not vehicle.isBurningRubber)
+		if(not playerVehicle.isBurningRubber)
 			sndTireBurnoutStandIntro->play();
 		else if(not sndTireBurnoutStandIntro->isPlaying() and not sndTireBurnoutStandLoop->isPlaying())
 			sndTireBurnoutStandLoop->loop();
 
-		vehicle.isBurningRubber = true;
+		playerVehicle.isBurningRubber = true;
 	}
-	else if(fabs(vehicle.body.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
-	   and (MAXIMUM_STRAFE_SPEED*vehicle.corneringStiffness - fabs(vehicle.strafeSpeed) < 1)
+	else if(fabs(playerVehicle.body.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
+	   and (MAXIMUM_STRAFE_SPEED*playerVehicle.corneringStiffness - fabs(playerVehicle.strafeSpeed) < 1)
 	 	 	 and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
 
-		if(not vehicle.isBurningRubber)
+		if(not playerVehicle.isBurningRubber)
 			sndTireBurnoutIntro->play();
 		else if(not sndTireBurnoutIntro->isPlaying() and not sndTireBurnoutLoop->isPlaying())
 			sndTireBurnoutLoop->loop();
 
-		vehicle.isBurningRubber = true;
+		playerVehicle.isBurningRubber = true;
 	}
 	else
 	{
@@ -605,10 +605,10 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
-		vehicle.isBurningRubber = false;
+		playerVehicle.isBurningRubber = false;
 	}
 
-	if(getCurrentSurfaceType() != SURFACE_TYPE_DRY_ASPHALT and fabs(vehicle.body.speed) > 1)
+	if(getCurrentSurfaceType() != SURFACE_TYPE_DRY_ASPHALT and fabs(playerVehicle.body.speed) > 1)
 	{
 		if(not sndOnDirtLoop->isPlaying())
 			sndOnDirtLoop->loop();
@@ -630,9 +630,9 @@ void Pseudo3DRaceState::handleInput()
 		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
 			if(event.getEventKeyCode() == controlKeyShiftUp)
-				shiftGear(vehicle.body.engine.gear+1);
+				shiftGear(playerVehicle.body.engine.gear+1);
 			else if(event.getEventKeyCode() == controlKeyShiftDown)
-				shiftGear(vehicle.body.engine.gear-1);
+				shiftGear(playerVehicle.body.engine.gear-1);
 
 			else switch(event.getEventKeyCode())
 			{
@@ -640,18 +640,18 @@ void Pseudo3DRaceState::handleInput()
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_R:
-					vehicle.position = 0;
-					vehicle.horizontalPosition = vehicle.verticalPosition = 0;
+					playerVehicle.position = 0;
+					playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //					verticalSpeed = 0;
-					vehicle.body.reset();
-					vehicle.pseudoAngle = 0;
+					playerVehicle.body.reset();
+					playerVehicle.pseudoAngle = 0;
 					parallax.x = parallax.y = 0;
 					laptime = 0;
 					lapCurrent = 1;
 //					isBurningRubber = onAir = onLongAir = false;
 					break;
 				case Keyboard::KEY_T:
-					vehicle.body.automaticShiftingEnabled = !vehicle.body.automaticShiftingEnabled;
+					playerVehicle.body.automaticShiftingEnabled = !playerVehicle.body.automaticShiftingEnabled;
 					break;
 				case Keyboard::KEY_M:
 					if(music->isPlaying())
@@ -670,9 +670,9 @@ void Pseudo3DRaceState::handleInput()
 		else if(event.getEventType() == Event::TYPE_JOYSTICK_BUTTON_PRESS)
 		{
 			if(event.getEventJoystickButtonIndex() == (int) controlJoystickKeyShiftUp)
-				shiftGear(vehicle.body.engine.gear+1);
+				shiftGear(playerVehicle.body.engine.gear+1);
 			else if(event.getEventJoystickButtonIndex() == (int) controlJoystickKeyShiftDown)
-				shiftGear(vehicle.body.engine.gear-1);
+				shiftGear(playerVehicle.body.engine.gear-1);
 		}
 	}
 }

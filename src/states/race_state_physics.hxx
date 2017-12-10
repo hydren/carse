@@ -36,55 +36,55 @@ static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
-	const Course::Segment& segment = course.lines[((int)(vehicle.position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
-	const float wheelAngleFactor = 1 - vehicle.corneringForceLeechFactor*fabs(vehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
+	const Course::Segment& segment = course.lines[((int)(playerVehicle.position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
+	const float wheelAngleFactor = 1 - playerVehicle.corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
 
-	vehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
-	vehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
-	vehicle.body.arbitraryForceFactor = wheelAngleFactor;
-	vehicle.body.slopeAngle = atan2(segment.y - vehicle.verticalPosition, course.roadSegmentLength);
+	playerVehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
+	playerVehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
+	playerVehicle.body.arbitraryForceFactor = wheelAngleFactor;
+	playerVehicle.body.slopeAngle = atan2(segment.y - playerVehicle.verticalPosition, course.roadSegmentLength);
 
-	vehicle.body.engine.throttlePosition = isPlayerAccelerating()? 1.0 : 0.0;
-	vehicle.body.brakePedalPosition = isPlayerBraking()? 1.0 : 0.0;
-	vehicle.body.updatePowertrain(delta);
+	playerVehicle.body.engine.throttlePosition = isPlayerAccelerating()? 1.0 : 0.0;
+	playerVehicle.body.brakePedalPosition = isPlayerBraking()? 1.0 : 0.0;
+	playerVehicle.body.updatePowertrain(delta);
 
 	// update position
-	vehicle.position += vehicle.body.speed*delta;
+	playerVehicle.position += playerVehicle.body.speed*delta;
 
 	// update steering
-	if(isPlayerSteeringRight() and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
+	if(isPlayerSteeringRight() and fabs(playerVehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
-		if(vehicle.pseudoAngle < 0) vehicle.pseudoAngle *= 1/(1+5*delta);
-		vehicle.pseudoAngle += delta * STEERING_SPEED;
+		if(playerVehicle.pseudoAngle < 0) playerVehicle.pseudoAngle *= 1/(1+5*delta);
+		playerVehicle.pseudoAngle += delta * STEERING_SPEED;
 	}
-	else if(isPlayerSteeringLeft() and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
+	else if(isPlayerSteeringLeft() and fabs(playerVehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
-		if(vehicle.pseudoAngle > 0) vehicle.pseudoAngle *= 1/(1+5*delta);
-		vehicle.pseudoAngle -= delta * STEERING_SPEED;
+		if(playerVehicle.pseudoAngle > 0) playerVehicle.pseudoAngle *= 1/(1+5*delta);
+		playerVehicle.pseudoAngle -= delta * STEERING_SPEED;
 	}
-	else vehicle.pseudoAngle *= 1/(1+5*delta);
+	else playerVehicle.pseudoAngle *= 1/(1+5*delta);
 
-	if(vehicle.pseudoAngle > PSEUDO_ANGLE_MAX) vehicle.pseudoAngle = PSEUDO_ANGLE_MAX;
-	if(vehicle.pseudoAngle <-PSEUDO_ANGLE_MAX) vehicle.pseudoAngle =-PSEUDO_ANGLE_MAX;
+	if(playerVehicle.pseudoAngle > PSEUDO_ANGLE_MAX) playerVehicle.pseudoAngle = PSEUDO_ANGLE_MAX;
+	if(playerVehicle.pseudoAngle <-PSEUDO_ANGLE_MAX) playerVehicle.pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	vehicle.strafeSpeed = vehicle.pseudoAngle * vehicle.body.speed * vehicle.corneringStiffness * coursePositionFactor;
+	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * playerVehicle.corneringStiffness * coursePositionFactor;
 //	vehicle.strafeSpeed = onAir? 0 : vehicle.pseudoAngle * vehicle.body.speed * coursePositionFactor;
 
 	// limit strafing speed by magic constant
-	if(vehicle.strafeSpeed >  MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness) vehicle.strafeSpeed = MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness;
-	if(vehicle.strafeSpeed < -MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness) vehicle.strafeSpeed =-MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness;
+	if(playerVehicle.strafeSpeed >  MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness) playerVehicle.strafeSpeed = MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness;
+	if(playerVehicle.strafeSpeed < -MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness) playerVehicle.strafeSpeed =-MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness;
 
 	// update curve pull
 	//curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;
-	vehicle.curvePull = sin(atan2(segment.curve*50, course.roadSegmentLength));
-	vehicle.curvePull *= vehicle.body.speed * coursePositionFactor;
+	playerVehicle.curvePull = sin(atan2(segment.curve*50, course.roadSegmentLength));
+	playerVehicle.curvePull *= playerVehicle.body.speed * coursePositionFactor;
 
 	// update strafe position
-	vehicle.horizontalPosition += (vehicle.strafeSpeed - vehicle.curvePull)*delta;
+	playerVehicle.horizontalPosition += (playerVehicle.strafeSpeed - playerVehicle.curvePull)*delta;
 
 	// update vertical position
-	vehicle.verticalPosition = segment.y;
+	playerVehicle.verticalPosition = segment.y;
 
 	/*
 	if(segment.y >= posY)
@@ -109,8 +109,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	*/
 
 	// update bg parallax
-	parallax.x -= segment.curve*vehicle.body.speed*0.025;
-	parallax.y -= 2*vehicle.body.slopeAngle;
+	parallax.x -= segment.curve*playerVehicle.body.speed*0.025;
+	parallax.y -= 2*playerVehicle.body.slopeAngle;
 
 	if(parallax.x < -(2.0f*imgBackground->getWidth()-game.getDisplay().getWidth()))
 		parallax.x += imgBackground->getWidth();
@@ -123,25 +123,25 @@ static const float RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
 void Pseudo3DRaceState::shiftGear(int gear)
 {
-	if(gear < 0 or gear > vehicle.body.engine.gearCount)
+	if(gear < 0 or gear > playerVehicle.body.engine.gearCount)
 		return;
 
-	if(gear != 0 and vehicle.body.engine.gear != 0)
+	if(gear != 0 and playerVehicle.body.engine.gear != 0)
 	{
-		const float driveshaftRpm = vehicle.body.wheelAngularSpeed
-									* vehicle.body.engine.gearRatio[gear-1]
-									* vehicle.body.engine.differentialRatio * RAD_TO_RPM;
+		const float driveshaftRpm = playerVehicle.body.wheelAngularSpeed
+									* playerVehicle.body.engine.gearRatio[gear-1]
+									* playerVehicle.body.engine.differentialRatio * RAD_TO_RPM;
 
 		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (simulate losses due to shift time)
-		vehicle.body.engine.rpm += 0.25*(driveshaftRpm - vehicle.body.engine.rpm);
+		playerVehicle.body.engine.rpm += 0.25*(driveshaftRpm - playerVehicle.body.engine.rpm);
 	}
 
-	vehicle.body.engine.gear = gear;
+	playerVehicle.body.engine.gear = gear;
 }
 
 Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()
 {
-	if(fabs(vehicle.horizontalPosition) > 1.2*course.roadWidth)
+	if(fabs(playerVehicle.horizontalPosition) > 1.2*course.roadWidth)
 		return SURFACE_TYPE_GRASS;
 	else
 		return SURFACE_TYPE_DRY_ASPHALT;

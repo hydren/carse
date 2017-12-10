@@ -58,7 +58,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Course course;
 	Pseudo3DVehicle::Spec playerVehicleSpec;
 	int playerVehicleSpecAlternateSpriteIndex;
-	Pseudo3DVehicle vehicle;
+	Pseudo3DVehicle playerVehicle;
 
 	Hud::DialGauge<float>* hudRpmGauge;
 	Hud::NumericalDisplay<float>* hudSpeedDisplay;

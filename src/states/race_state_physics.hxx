@@ -36,55 +36,55 @@ static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
-	const Course::Segment& segment = course.lines[((int)(position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
-	const float wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(pseudoAngle)/PSEUDO_ANGLE_MAX;
+	const Course::Segment& segment = course.lines[((int)(vehicle.position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
+	const float wheelAngleFactor = 1 - vehicle.corneringForceLeechFactor*fabs(vehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	vehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
 	vehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
 	vehicle.body.arbitraryForceFactor = wheelAngleFactor;
-	vehicle.body.slopeAngle = atan2(segment.y - posY, course.roadSegmentLength);
+	vehicle.body.slopeAngle = atan2(segment.y - vehicle.verticalPosition, course.roadSegmentLength);
 
 	vehicle.body.engine.throttlePosition = isPlayerAccelerating()? 1.0 : 0.0;
 	vehicle.body.brakePedalPosition = isPlayerBraking()? 1.0 : 0.0;
 	vehicle.body.updatePowertrain(delta);
 
 	// update position
-	position += vehicle.body.speed*delta;
+	vehicle.position += vehicle.body.speed*delta;
 
 	// update steering
 	if(isPlayerSteeringRight() and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
-		if(pseudoAngle < 0) pseudoAngle *= 1/(1+5*delta);
-		pseudoAngle += delta * STEERING_SPEED;
+		if(vehicle.pseudoAngle < 0) vehicle.pseudoAngle *= 1/(1+5*delta);
+		vehicle.pseudoAngle += delta * STEERING_SPEED;
 	}
 	else if(isPlayerSteeringLeft() and fabs(vehicle.body.speed) >= MINIMUM_SPEED_ALLOW_TURN)
 	{
-		if(pseudoAngle > 0) pseudoAngle *= 1/(1+5*delta);
-		pseudoAngle -= delta * STEERING_SPEED;
+		if(vehicle.pseudoAngle > 0) vehicle.pseudoAngle *= 1/(1+5*delta);
+		vehicle.pseudoAngle -= delta * STEERING_SPEED;
 	}
-	else pseudoAngle *= 1/(1+5*delta);
+	else vehicle.pseudoAngle *= 1/(1+5*delta);
 
-	if(pseudoAngle > PSEUDO_ANGLE_MAX) pseudoAngle = PSEUDO_ANGLE_MAX;
-	if(pseudoAngle <-PSEUDO_ANGLE_MAX) pseudoAngle =-PSEUDO_ANGLE_MAX;
+	if(vehicle.pseudoAngle > PSEUDO_ANGLE_MAX) vehicle.pseudoAngle = PSEUDO_ANGLE_MAX;
+	if(vehicle.pseudoAngle <-PSEUDO_ANGLE_MAX) vehicle.pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	strafeSpeed = pseudoAngle * vehicle.body.speed * corneringStiffness * coursePositionFactor;
-//	strafeSpeed = onAir? 0 : pseudoAngle * vehicle.body.speed * coursePositionFactor;
+	vehicle.strafeSpeed = vehicle.pseudoAngle * vehicle.body.speed * vehicle.corneringStiffness * coursePositionFactor;
+//	vehicle.strafeSpeed = onAir? 0 : vehicle.pseudoAngle * vehicle.body.speed * coursePositionFactor;
 
 	// limit strafing speed by magic constant
-	if(strafeSpeed >  MAXIMUM_STRAFE_SPEED * corneringStiffness) strafeSpeed = MAXIMUM_STRAFE_SPEED * corneringStiffness;
-	if(strafeSpeed < -MAXIMUM_STRAFE_SPEED * corneringStiffness) strafeSpeed =-MAXIMUM_STRAFE_SPEED * corneringStiffness;
+	if(vehicle.strafeSpeed >  MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness) vehicle.strafeSpeed = MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness;
+	if(vehicle.strafeSpeed < -MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness) vehicle.strafeSpeed =-MAXIMUM_STRAFE_SPEED * vehicle.corneringStiffness;
 
 	// update curve pull
 	//curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;
-	curvePull = sin(atan2(segment.curve*50, course.roadSegmentLength));
-	curvePull *= vehicle.body.speed * coursePositionFactor;
+	vehicle.curvePull = sin(atan2(segment.curve*50, course.roadSegmentLength));
+	vehicle.curvePull *= vehicle.body.speed * coursePositionFactor;
 
 	// update strafe position
-	posX += (strafeSpeed - curvePull)*delta;
+	vehicle.horizontalPosition += (vehicle.strafeSpeed - vehicle.curvePull)*delta;
 
 	// update vertical position
-	posY = segment.y;
+	vehicle.verticalPosition = segment.y;
 
 	/*
 	if(segment.y >= posY)
@@ -141,7 +141,7 @@ void Pseudo3DRaceState::shiftGear(int gear)
 
 Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()
 {
-	if(fabs(posX) > 1.2*course.roadWidth)
+	if(fabs(vehicle.horizontalPosition) > 1.2*course.roadWidth)
 		return SURFACE_TYPE_GRASS;
 	else
 		return SURFACE_TYPE_DRY_ASPHALT;

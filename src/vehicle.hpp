@@ -12,6 +12,7 @@
 #include "pseudo3d/vehicle_gfx.hpp"
 #include "automotive/vehicle.hpp"
 #include "futil/properties.hpp"
+#include "fgeal/extra/sprite.hpp"
 
 #include <string>
 #include <vector>
@@ -30,16 +31,27 @@ struct Pseudo3DVehicle
 	// physics simulation
 	Mechanics body;
 
+	// logic data
+	float position, horizontalPosition, verticalPosition;
+	float pseudoAngle, strafeSpeed, curvePull, corneringForceLeechFactor, corneringStiffness;
+//	float verticalSpeed;
+//	bool onAir, onLongAir;
+	bool isBurningRubber;
+
 	// sound data
 	EngineSoundProfile engineSoundProfile;
 
 	// graphics data
-	Pseudo3DVehicleAnimationSpec sprite;
+	Pseudo3DVehicleAnimationSpec spriteSpec;
+	std::vector<fgeal::Sprite*> sprites;
 
 	Pseudo3DVehicle();  // zero constructor
 
 	/** Creates a vehicle with the given specifications. The optional 'alternateSpriteIndex' argument specifies an alternate skin to use (-1 means use default sprite). */
 	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex=-1);
+
+	/** Delete current sprite instances and reload them based on the specifications. */
+	void reloadSprites();
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

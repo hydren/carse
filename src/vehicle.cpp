@@ -9,6 +9,7 @@
 
 #include "futil/string_actions.hpp"
 
+#include <stdexcept>
 #include <cstdlib>
 #include <cmath>
 
@@ -16,13 +17,22 @@ using std::string;
 
 Pseudo3DVehicle::Pseudo3DVehicle()
 : body(Engine(), Mechanics::TYPE_OTHER),
-  engineSoundProfile(), sprite()
+  position(), horizontalPosition(), verticalPosition(),
+  pseudoAngle(), strafeSpeed(), curvePull(), corneringForceLeechFactor(), corneringStiffness(),
+  /* verticalSpeed(0), onAir(false), onLongAir(false), */
+  isBurningRubber(false),
+  engineSoundProfile(), spriteSpec(), sprites()
 {}
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
 : body(Engine(spec.engineMaximumRpm, spec.engineMaximumPower, spec.enginePowerBand, spec.engineGearCount), spec.type, spec.dragArea, spec.liftArea),
+  position(), horizontalPosition(), verticalPosition(),
+  pseudoAngle(), strafeSpeed(), curvePull(), corneringForceLeechFactor(), corneringStiffness(),
+  /* verticalSpeed(0), onAir(false), onLongAir(false), */
+  isBurningRubber(false),
   engineSoundProfile(spec.soundProfile),
-  sprite(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex])
+  spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
+  sprites()
 {
 	// update engine info data (optional)
 	body.engine.configuration = spec.engineConfiguration;
@@ -47,4 +57,46 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
 	body.weightDistribuition = spec.weightDistribuition;
 	body.centerOfGravityHeight = spec.centerOfGravityHeight;
 	body.wheelbase = spec.wheelbase;
+
+	reloadSprites();
+}
+
+void Pseudo3DVehicle::reloadSprites()
+{
+	if(not sprites.empty())
+	{
+		delete sprites[0]->image;
+
+		for(unsigned i = 0; i < sprites.size(); i++)
+			delete sprites[i];
+
+		sprites.clear();
+	}
+
+	fgeal::Image* sheet = new fgeal::Image(spriteSpec.sheetFilename);
+
+	if(sheet->getWidth() < (int) spriteSpec.frameWidth)
+		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
+
+	for(unsigned i = 0; i < spriteSpec.stateCount; i++)
+	{
+		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
+									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
+									0, i*spriteSpec.frameHeight);
+
+		sprite->scale = spriteSpec.scale;
+		sprite->referencePixelY = - (int) spriteSpec.contactOffset;
+		sprites.push_back(sprite);
+	}
+
+	if(spriteSpec.asymmetrical) for(unsigned i = 1; i < spriteSpec.stateCount; i++)
+	{
+		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
+									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
+									0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
+
+		sprite->scale = spriteSpec.scale;
+		sprite->referencePixelY = - (int) spriteSpec.contactOffset;
+		sprites.push_back(sprite);
+	}
 }

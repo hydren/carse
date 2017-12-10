@@ -36,12 +36,11 @@ using fgeal::Joystick;
 
 #define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
 
-static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
-
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
 static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
+static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
 static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
@@ -65,13 +64,10 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
 
   bgColor(), bgColorHorizon(),
-  spritesVehicle(), spriteSmokeLeft(null), spriteSmokeRight(null),
+  spriteSmokeLeft(null), spriteSmokeRight(null),
   engineSound(),
 
-  position(0), posX(0), posY(0),
-  pseudoAngle(0), strafeSpeed(0), curvePull(0), corneringForceLeechFactor(0), corneringStiffness(0),
-  parallax(), backgroundScale(), isBurningRubber(false),
-  /* verticalSpeed(0), onAir(false), onLongAir(false), */
+  parallax(), backgroundScale(),
 
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
   laptime(0), laptimeBest(0), lapCurrent(0),
@@ -119,8 +115,6 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 
 	if(spriteSmokeLeft != null) delete spriteSmokeLeft;
 	if(spriteSmokeRight != null) delete spriteSmokeRight;
-	for(unsigned i = 0; i < spritesVehicle.size(); i++)
-		delete spritesVehicle[i];
 }
 
 void Pseudo3DRaceState::initialize()
@@ -150,44 +144,12 @@ void Pseudo3DRaceState::onEnter()
 	drawParameters.drawAreaWidth = display.getWidth();
 	drawParameters.drawAreaHeight = display.getHeight();
 
-	if(not spritesVehicle.empty())
-	{
-		delete spritesVehicle[0]->image;
-
-		for(unsigned i = 0; i < spritesVehicle.size(); i++)
-			delete spritesVehicle[i];
-
-		spritesVehicle.clear();
-	}
-
 	vehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
 
-	Image* sheet = new Image(vehicle.sprite.sheetFilename);
+	vehicle.reloadSprites();
 
-	if(sheet->getWidth() < (int) vehicle.sprite.frameWidth)
-		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
-
-	for(unsigned i = 0; i < vehicle.sprite.stateCount; i++)
-	{
-		Sprite* sprite = new Sprite(sheet, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight,
-									vehicle.sprite.frameDuration, vehicle.sprite.stateFrameCount[i],
-									0, i*vehicle.sprite.frameHeight);
-
-		sprite->scale = vehicle.sprite.scale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.sprite.contactOffset;
-		spritesVehicle.push_back(sprite);
-	}
-
-	if(vehicle.sprite.asymmetrical) for(unsigned i = 1; i < vehicle.sprite.stateCount; i++)
-	{
-		Sprite* sprite = new Sprite(sheet, vehicle.sprite.frameWidth, vehicle.sprite.frameHeight,
-									vehicle.sprite.frameDuration, vehicle.sprite.stateFrameCount[i],
-									0, (vehicle.sprite.stateCount-1 + i)*vehicle.sprite.frameHeight);
-
-		sprite->scale = vehicle.sprite.scale * display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR;
-		sprite->referencePixelY = - (int) vehicle.sprite.contactOffset;
-		spritesVehicle.push_back(sprite);
-	}
+	for(unsigned s = 0; s < vehicle.sprites.size(); s++)
+		vehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
 	if(imgBackground != null)
 		delete imgBackground;
@@ -273,21 +235,21 @@ void Pseudo3DRaceState::onEnter()
 					spriteSmokeRight->scale.x =
 							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
-	corneringForceLeechFactor = (vehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
-	corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
+	vehicle.corneringForceLeechFactor = (vehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
+	vehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (vehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	parallax.x = parallax.y = 0;
-	position = 0;
-	posX = posY = 0;
+	vehicle.position = 0;
+	vehicle.horizontalPosition = vehicle.verticalPosition = 0;
 //	verticalSpeed = 0;
 	vehicle.body.simulationType = simulationType;
 	vehicle.body.reset();
 	vehicle.body.automaticShiftingEnabled = true;
-	pseudoAngle = 0;
+	vehicle.pseudoAngle = 0;
 	laptime = laptimeBest = 0;
 	lapCurrent = 1;
 
-	isBurningRubber = /*onAir = onLongAir =*/ false;
+	vehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
 
 	music->loop();
 	engineSound.playIdle();
@@ -326,66 +288,14 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 2*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw(position * coursePositionFactor, posX, drawParameters);
+	course.draw(vehicle.position * coursePositionFactor, vehicle.horizontalPosition, drawParameters);
 
-	// the ammount of pseudo angle that will trigger the last sprite
-//	const float PSEUDO_ANGLE_LAST_STATE = PSEUDO_ANGLE_MAX;  // show last sprite when the pseudo angle is at its max
-	const float PSEUDO_ANGLE_LAST_STATE = vehicle.sprite.maxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
-
-	// linear sprite progression
-//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
-
-	// exponential sprite progression. may be slower.
-//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
-
-	// linear sprite progression with 1-index advance at threshold angle
-	unsigned animationIndex = 0;
-	if(vehicle.sprite.stateCount > 1 and fabs(pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
-		animationIndex = 1 + (vehicle.sprite.stateCount-2)*(fabs(pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
-
-	// cap index to max possible
-	if(animationIndex > vehicle.sprite.stateCount - 1)
-		animationIndex = vehicle.sprite.stateCount - 1;
-
-	const bool isLeanRight = (pseudoAngle > 0 and animationIndex != 0);
-
-	// if asymmetrical, right-leaning sprites are after all left-leaning ones
-	if(isLeanRight and vehicle.sprite.asymmetrical)
-		animationIndex += (vehicle.sprite.stateCount-1);
-
-	Sprite& sprite = *spritesVehicle[animationIndex];
-	sprite.flipmode = isLeanRight and not vehicle.sprite.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = vehicle.body.speed != 0? 0.1*400.0/(vehicle.body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = vehicle.sprite.frameDuration / sqrt(vehicle.body.speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = vehicle.body.speed != 0? 2.0*M_PI*vehicle.body.engine.tireRadius/(vehicle.body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
-	sprite.computeCurrentFrame();
-
-	const Point vehicleSpritePosition = {
-			// x coord
-			0.5f*(displayWidth - sprite.scale.x*vehicle.sprite.frameWidth),
-
-			// y coord
-			0.825f*(displayHeight- sprite.scale.y*vehicle.sprite.frameHeight)
-			- sprite.scale.y*vehicle.sprite.contactOffset
-			- posY*0.01f
+	const fgeal::Point vehicleSpritePosition = {
+			0.5f*displayWidth,  // x coord
+			0.75f*displayHeight - vehicle.verticalPosition*0.01f  // y coord
 	};
 
-	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
-
-	if(isBurningRubber)
-	{
-		const Point smokeSpritePosition = {
-				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.sprite.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
-				+ ((pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.sprite.maxDepictedTurnAngle),
-				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
-		};
-
-		spriteSmokeLeft->computeCurrentFrame();
-		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
-
-		spriteSmokeRight->computeCurrentFrame();
-		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.sprite.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
-	}
+	drawVehicle(vehicle, vehicleSpritePosition);
 
 	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("______");
 	font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
@@ -418,7 +328,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Position:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", position);
+		sprintf(buffer, "%2.2fm", vehicle.position);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -433,7 +343,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Height:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", posY);
+		sprintf(buffer, "%2.2fm", vehicle.verticalPosition);
 		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 //		offset += 18;
@@ -444,7 +354,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 25;
 		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", pseudoAngle);
+		sprintf(buffer, "%2.2f", vehicle.pseudoAngle);
 		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -454,13 +364,13 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", strafeSpeed/coursePositionFactor);
+		sprintf(buffer, "%2.2fm/s", vehicle.strafeSpeed/coursePositionFactor);
 		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", curvePull/coursePositionFactor);
+		sprintf(buffer, "%2.2fm/s", vehicle.curvePull/coursePositionFactor);
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -485,7 +395,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (curvePull/coursePositionFactor + vehicle.body.slopePullForce + vehicle.body.brakingForce + vehicle.body.rollingResistanceForce + vehicle.body.airDragForce));
+		sprintf(buffer, "%2.2fN", (vehicle.curvePull/coursePositionFactor + vehicle.body.slopePullForce + vehicle.body.brakingForce + vehicle.body.rollingResistanceForce + vehicle.body.airDragForce));
 		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
@@ -552,6 +462,63 @@ void Pseudo3DRaceState::render()
 	}
 }
 
+void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal::Point& p)
+{
+	// the ammount of pseudo angle that will trigger the last sprite
+//	const float PSEUDO_ANGLE_LAST_STATE = PSEUDO_ANGLE_MAX;  // show last sprite when the pseudo angle is at its max
+	const float PSEUDO_ANGLE_LAST_STATE = vehicle.spriteSpec.maxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
+
+	// linear sprite progression
+//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
+
+	// exponential sprite progression. may be slower.
+//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
+
+	// linear sprite progression with 1-index advance at threshold angle
+	unsigned animationIndex = 0;
+	if(vehicle.spriteSpec.stateCount > 1 and fabs(vehicle.pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
+		animationIndex = 1 + (vehicle.spriteSpec.stateCount-2)*(fabs(vehicle.pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
+
+	// cap index to max possible
+	if(animationIndex > vehicle.spriteSpec.stateCount - 1)
+		animationIndex = vehicle.spriteSpec.stateCount - 1;
+
+	const bool isLeanRight = (vehicle.pseudoAngle > 0 and animationIndex != 0);
+
+	// if asymmetrical, right-leaning sprites are after all left-leaning ones
+	if(isLeanRight and vehicle.spriteSpec.asymmetrical)
+		animationIndex += (vehicle.spriteSpec.stateCount-1);
+
+	Sprite& sprite = *vehicle.sprites[animationIndex];
+	sprite.flipmode = isLeanRight and not vehicle.spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+//	sprite.duration = vehicle.body.speed != 0? 0.1*400.0/(vehicle.body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
+	sprite.duration = vehicle.spriteSpec.frameDuration / sqrt(vehicle.body.speed);  // this formula doesn't present good tire animation results.
+//	sprite.duration = vehicle.body.speed != 0? 2.0*M_PI*vehicle.body.tireRadius/(vehicle.body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
+	sprite.computeCurrentFrame();
+
+	const Point vehicleSpritePosition =
+		{ p.x - 0.5f*sprite.scale.x*vehicle.spriteSpec.frameWidth,
+		  p.y - 0.5f*sprite.scale.y*vehicle.spriteSpec.frameHeight
+			  - sprite.scale.y*vehicle.spriteSpec.contactOffset };
+
+	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
+
+	if(vehicle.isBurningRubber)
+	{
+		const Point smokeSpritePosition = {
+				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteSpec.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
+				+ ((vehicle.pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteSpec.maxDepictedTurnAngle),
+				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
+		};
+
+		spriteSmokeLeft->computeCurrentFrame();
+		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
+
+		spriteSmokeRight->computeCurrentFrame();
+		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
+	}
+}
+
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 
 void Pseudo3DRaceState::update(float delta)
@@ -563,16 +530,16 @@ void Pseudo3DRaceState::update(float delta)
 
 	// course looping control
 	const unsigned N = course.lines.size();
-	while(position * coursePositionFactor >= N*course.roadSegmentLength)
+	while(vehicle.position * coursePositionFactor >= N*course.roadSegmentLength)
 	{
-		position -= N*course.roadSegmentLength / coursePositionFactor;
+		vehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
 		lapCurrent++;
 		if(laptime < laptimeBest or laptimeBest == 0)
 			laptimeBest = laptime;
 		laptime = 0;
 	}
-	while(position < 0)
-		position += N*course.roadSegmentLength / coursePositionFactor;
+	while(vehicle.position < 0)
+		vehicle.position += N*course.roadSegmentLength / coursePositionFactor;
 
 	engineSound.updateSound(vehicle.body.engine.rpm);
 
@@ -612,26 +579,26 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
 
-		if(not isBurningRubber)
+		if(not vehicle.isBurningRubber)
 			sndTireBurnoutStandIntro->play();
 		else if(not sndTireBurnoutStandIntro->isPlaying() and not sndTireBurnoutStandLoop->isPlaying())
 			sndTireBurnoutStandLoop->loop();
 
-		isBurningRubber = true;
+		vehicle.isBurningRubber = true;
 	}
 	else if(fabs(vehicle.body.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
-	   and (MAXIMUM_STRAFE_SPEED*corneringStiffness - fabs(strafeSpeed) < 1)
+	   and (MAXIMUM_STRAFE_SPEED*vehicle.corneringStiffness - fabs(vehicle.strafeSpeed) < 1)
 	 	 	 and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
 		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
 
-		if(not isBurningRubber)
+		if(not vehicle.isBurningRubber)
 			sndTireBurnoutIntro->play();
 		else if(not sndTireBurnoutIntro->isPlaying() and not sndTireBurnoutLoop->isPlaying())
 			sndTireBurnoutLoop->loop();
 
-		isBurningRubber = true;
+		vehicle.isBurningRubber = true;
 	}
 	else
 	{
@@ -639,7 +606,7 @@ void Pseudo3DRaceState::update(float delta)
 		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
 		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
 		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
-		isBurningRubber = false;
+		vehicle.isBurningRubber = false;
 	}
 
 	if(getCurrentSurfaceType() != SURFACE_TYPE_DRY_ASPHALT and fabs(vehicle.body.speed) > 1)
@@ -674,11 +641,11 @@ void Pseudo3DRaceState::handleInput()
 					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 					break;
 				case Keyboard::KEY_R:
-					position = 0;
-					posX = posY = 0;
+					vehicle.position = 0;
+					vehicle.horizontalPosition = vehicle.verticalPosition = 0;
 //					verticalSpeed = 0;
 					vehicle.body.reset();
-					pseudoAngle = 0;
+					vehicle.pseudoAngle = 0;
 					parallax.x = parallax.y = 0;
 					laptime = 0;
 					lapCurrent = 1;

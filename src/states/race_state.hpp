@@ -41,17 +41,11 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 				 *sndJumpImpact;
 
 	fgeal::Color bgColor, bgColorHorizon;
-	std::vector<fgeal::Sprite*> spritesVehicle;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
 
 	EngineSoundSimulator engineSound;
-	float position, posX, posY;
-	float pseudoAngle, strafeSpeed, curvePull, corneringForceLeechFactor, corneringStiffness;
 	fgeal::Point parallax;
 	float backgroundScale;
-	bool isBurningRubber;
-//	float verticalSpeed;
-//	bool onAir, onLongAir;
 
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
@@ -129,6 +123,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	private:
 	void handleInput();
 	void handlePhysics(float delta);
+
+	void drawVehicle(const Pseudo3DVehicle&, const fgeal::Point&);
 
 	void shiftGear(int gear);
 

@@ -662,6 +662,18 @@ void Pseudo3DRaceState::handleInput()
 				case Keyboard::KEY_D:
 					debugMode = !debugMode;
 					break;
+				case Keyboard::KEY_PAGE_UP:
+					drawParameters.drawDistance++;
+					break;
+				case Keyboard::KEY_PAGE_DOWN:
+					drawParameters.drawDistance--;
+					break;
+				case Keyboard::KEY_O:
+					drawParameters.cameraDepth += 0.1;
+					break;
+				case Keyboard::KEY_L:
+					drawParameters.cameraDepth -= 0.1;
+					break;
 				default:
 					break;
 			}

@@ -9,14 +9,10 @@
 
 #include "carse_game.hpp"
 
-#include "race_state.hpp"
-
 #include "futil/string_extra_operators.hpp"
 
-#include "vehicle_selection_state.hpp"
-#include "course_selection_state.hpp"
-
 #include <algorithm>
+#include <cmath>
 
 typedef GenericMenuStateLayout<MainMenuState> Layout;
 
@@ -35,7 +31,7 @@ using std::string;
 int MainMenuState::getId() { return Pseudo3DCarseGame::MAIN_MENU_STATE_ID; }
 
 MainMenuState::MainMenuState(CarseGame* game)
-: State(*game), shared(*game->sharedResources),
+: State(*game), logic(game->logic), shared(*game->sharedResources),
   menu(null), imgBackground(null), imgRace(null), imgExit(null), imgSettings(null),
   layout(null)
 {}
@@ -287,7 +283,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 		slotSize.w, slotSize.h
 	};
 	drawGridSlot(slotMenuItemVehicle, margin, MENU_ITEM_VEHICLE);
-	static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w, slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h, 0.75);
+	state.logic.drawPickedVehicle(slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w, slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h, 0.75);
 
 	// draw MENU_ITEM_COURSE
 	const Rectangle slotMenuItemCourse = {
@@ -296,7 +292,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 		slotSize.w, slotSize.h
 	};
 	drawGridSlot(slotMenuItemCourse, margin, MENU_ITEM_COURSE);
-	Image* portrait = static_cast<CourseSelectionState*>(state.game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
+	Image* portrait = state.logic.getNextCoursePreviewImage();
 	const float portraitX = slotMenuItemCourse.x + 0.125f*slotMenuItemCourse.w*(1 - 0.75f/portrait->getWidth()),
 				portraitY = slotMenuItemCourse.y + 0.1750f*slotMenuItemCourse.h*(1 - 0.75f/portrait->getHeight()),
 				portraitScaleX = 0.75f*slotMenuItemCourse.w/portrait->getWidth(),

@@ -17,11 +17,13 @@
 
 #include "util.hpp"
 
+class CarseGameLogic;
 class CarseSharedResources;
 class Pseudo3DCarseGame;
 
 class MainMenuState extends public fgeal::Game::State
 {
+	CarseGameLogic& logic;
 	CarseSharedResources& shared;
 
 	// the menu

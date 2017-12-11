@@ -9,8 +9,6 @@
 #define CARSE_GAME_LOGIC_HPP_
 #include <ciso646>
 
-#include "states/race_state.hpp"
-
 #include "course.hpp"
 #include "vehicle.hpp"
 #include "automotive/engine_sound.hpp"
@@ -53,9 +51,6 @@ class CarseGameLogic
 	// intended to run on startup, loads all vehicles in the data/vehicles folder
 	void loadVehicles();
 
-	// quick way to retrieve the race state object instance
-	Pseudo3DRaceState& getRaceState();
-
 	public:
 	// gets one of the built-in engine sound presets, by name
 	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
@@ -65,10 +60,14 @@ class CarseGameLogic
 	void setNextCourse(const Course& c);
 	void setNextCourseRandom();
 	void setNextCourseDebug();
+	const Course& getNextCourse();
+	fgeal::Image* getNextCoursePreviewImage();
 
 	const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
 	void setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex=-1);
 	void setPickedVehicle(const Pseudo3DVehicle::Spec& v, int altSpriteIndex=-1);
+	const Pseudo3DVehicle::Spec& getPickedVehicle();
+	void drawPickedVehicle(float x, float y, float scale=1.0f, int angleType=0);
 
 	bool isImperialUnitEnabled();
 	void setImperialUnitEnabled(bool choice=true);

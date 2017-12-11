@@ -9,6 +9,10 @@
 
 #include "carse_game.hpp"
 
+#include "states/race_state.hpp"
+#include "states/vehicle_selection_state.hpp"
+#include "states/course_selection_state.hpp"
+
 #include "futil/string_extra_operators.hpp"
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"
@@ -31,13 +35,16 @@ using std::map;
 
 // to reduce typing is good
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
+#define getRaceStateInstance() (*static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID)))
 
 // returns true if the given properties requests a preset sound profile instead of specifying a custom one.
 static bool isEngineSoundProfileRequestingPreset(const Properties& prop) { return prop.containsKey("sound") and prop.get("sound") != "custom" and prop.get("sound") != "no"; }
 static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
 
+
 // logic constructor, booooooring!
-CarseGameLogic::CarseGameLogic(Pseudo3DCarseGame& game) : game(game) {}
+CarseGameLogic::CarseGameLogic(Pseudo3DCarseGame& game)
+: game(game) {}
 
 void CarseGameLogic::initialize()
 {
@@ -52,11 +59,6 @@ void CarseGameLogic::onStatesListInitFinished()
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
 	this->setImperialUnitEnabled(false);
 	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
-}
-
-Pseudo3DRaceState& CarseGameLogic::getRaceState()
-{
-	return *static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID));  //todo create an reference or pointer on logic class to avoid this deference
 }
 
 void CarseGameLogic::loadPresetEngineSoundProfiles()
@@ -158,22 +160,32 @@ const vector<Course>& CarseGameLogic::getCourseList()
 
 void CarseGameLogic::setNextCourse(unsigned courseIndex)
 {
-	getRaceState().course = courses[courseIndex];
+	getRaceStateInstance().course = courses[courseIndex];
 }
 
 void CarseGameLogic::setNextCourse(const Course& c)
 {
-	getRaceState().course = c;
+	getRaceStateInstance().course = c;
 }
 
 void CarseGameLogic::setNextCourseRandom()
 {
-	getRaceState().course = Course::createRandomCourse(200, 3000, 6400, 1.5);
+	getRaceStateInstance().course = Course::createRandomCourse(200, 3000, 6400, 1.5);
 }
 
 void CarseGameLogic::setNextCourseDebug()
 {
-	getRaceState().course = Course::createDebugCourse(200, 3000);
+	getRaceStateInstance().course = Course::createDebugCourse(200, 3000);
+}
+
+const Course& CarseGameLogic::getNextCourse()
+{
+	return getRaceStateInstance().course;
+}
+
+fgeal::Image* CarseGameLogic::getNextCoursePreviewImage()
+{
+	return static_cast<CourseSelectionState*>(game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
 }
 
 void CarseGameLogic::loadVehicles()
@@ -223,36 +235,46 @@ const vector<Pseudo3DVehicle::Spec>& CarseGameLogic::getVehicleList()
 	return vehicles;
 }
 
+const Pseudo3DVehicle::Spec& CarseGameLogic::getPickedVehicle()
+{
+	return getRaceStateInstance().playerVehicleSpec;
+}
+
 void CarseGameLogic::setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex)
 {
-	getRaceState().playerVehicleSpec = vehicles[vehicleIndex];
-	getRaceState().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+	getRaceStateInstance().playerVehicleSpec = vehicles[vehicleIndex];
+	getRaceStateInstance().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
 }
 
 void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int altSpriteIndex)
 {
-	getRaceState().playerVehicleSpec = vspec;
-	getRaceState().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+	getRaceStateInstance().playerVehicleSpec = vspec;
+	getRaceStateInstance().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+}
+
+void CarseGameLogic::drawPickedVehicle(float x, float y, float scale, int angleType)
+{
+	static_cast<VehicleSelectionState*>(game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
 }
 
 bool CarseGameLogic::isImperialUnitEnabled()
 {
-	return getRaceState().isImperialUnit;
+	return getRaceStateInstance().isImperialUnit;
 }
 
 void CarseGameLogic::setImperialUnitEnabled(bool choice)
 {
-	getRaceState().isImperialUnit = choice;
+	getRaceStateInstance().isImperialUnit = choice;
 }
 
 Mechanics::SimulationType CarseGameLogic::getSimulationType()
 {
-	return getRaceState().simulationType;
+	return getRaceStateInstance().simulationType;
 }
 
 void CarseGameLogic::setSimulationType(Mechanics::SimulationType type)
 {
-	getRaceState().simulationType = type;
+	getRaceStateInstance().simulationType = type;
 }
 
 // ----------------------------------------------------------------------------------------------------------

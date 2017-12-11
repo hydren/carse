@@ -189,14 +189,17 @@ MainMenuState::PrototypeSimpleLayout::PrototypeSimpleLayout(MainMenuState& state
 
 void MainMenuState::PrototypeSimpleLayout::draw()
 {
-	const float w = state.game.getDisplay().getWidth(),
-				h = state.game.getDisplay().getHeight();
+	Display& display = state.game.getDisplay();
 
-	const Rectangle menuBounds = { 0.125f*w, 0.5f*h, 0.4f*w, 0.4f*h };
+	state.menu->bounds.x = 0.25*display.getWidth();
+	state.menu->bounds.y = 0.25*display.getHeight();
+	state.menu->bounds.w = 0.5*display.getWidth();
+	state.menu->bounds.h = 0.5*display.getHeight();
 
-	state.menu->bounds = menuBounds;
 	state.menu->draw();
-	fontMain.drawText("Carse Project", 84, 25, Color::WHITE);
+	const string title("Carse Project");
+	fontMain.drawText(title, 0.5*(display.getWidth() - fontMain.getTextWidth(title)),
+							  0.05*(display.getHeight() - fontMain.getHeight()), Color::WHITE);
 }
 
 void MainMenuState::PrototypeSimpleLayout::update(float delta)

@@ -9,15 +9,12 @@
 
 #include "carse_game.hpp"
 
-#include "race_state.hpp"
-
-#include "futil/properties.hpp"
 #include "futil/string_actions.hpp"
 
 #include <vector>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
+#include <cmath>
 
 typedef GenericMenuStateLayout<VehicleSelectionState> Layout;
 
@@ -37,7 +34,7 @@ using futil::to_string;
 using std::vector;
 using std::string;
 
-string toStrRounded(float value, unsigned placesCount=1)
+static string toStrRounded(float value, unsigned placesCount=1)
 {
 	std::stringstream ss;
 	ss << std::fixed << std::setprecision(placesCount) << value;

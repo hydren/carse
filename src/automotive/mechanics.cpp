@@ -12,10 +12,6 @@
 #include <cmath>
 #include <cfloat>
 
-// xxx debug
-#include <iostream>
-using std::cout; using std::endl;
-
 #ifdef sgn
 	#undef sgn
 #endif
@@ -85,11 +81,9 @@ void Mechanics::updatePowertrain(float delta)
 		if(nextGear-1 < engine.gearCount)
 		{
 			const float nextGearRpm = wheelAngularSpeed * engine.gearRatio[nextGear-1] * engine.differentialRatio * RAD_TO_RPM;
-			cout << ">>> next gear rpm: " << nextGearRpm << endl;
 			if(nextGearRpm > 0)
 			{
 				const float nextGearDriveTorque = engine.getTorqueAt(nextGearRpm) * engine.gearRatio[nextGear-1] * engine.differentialRatio * engine.transmissionEfficiency;
-				cout << ">>> >>> next gear torque: " << nextGearDriveTorque << endl;
 				if(engine.getDriveTorque() < nextGearDriveTorque)
 				{
 					if(stagedThrottle)
@@ -103,11 +97,9 @@ void Mechanics::updatePowertrain(float delta)
 		if(not shifted and prevGear > 0)
 		{
 			const float prevGearRpm = wheelAngularSpeed * engine.gearRatio[prevGear-1] * engine.differentialRatio * RAD_TO_RPM;
-			cout << "<<< prev gear rpm: " << prevGearRpm << endl;
 			if(prevGearRpm < engine.maxRpm)
 			{
 				const float prevGearDriveTorque = engine.getTorqueAt(prevGearRpm) * engine.gearRatio[prevGear-1] * engine.differentialRatio * engine.transmissionEfficiency;
-				cout << "<<< <<< prev gear torque: " << prevGearDriveTorque << endl;
 				if(engine.getDriveTorque() < 0.9*prevGearDriveTorque)
 				{
 					if(stagedThrottle)

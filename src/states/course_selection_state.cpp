@@ -7,12 +7,8 @@
 
 #include "course_selection_state.hpp"
 
-#include "futil/properties.hpp"
 #include "futil/string_actions.hpp"
 #include "futil/string_extra_operators.hpp"
-
-#include <iostream>
-#include <vector>
 
 #include "util.hpp"
 
@@ -28,8 +24,6 @@ using fgeal::Rectangle;
 using fgeal::Menu;
 using std::vector;
 using std::string;
-using std::cout;
-using std::endl;
 using futil::Properties;
 using futil::ends_with;
 

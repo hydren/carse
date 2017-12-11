@@ -53,9 +53,6 @@ static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
 int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
-//static
-Pseudo3DRaceState* Pseudo3DRaceState::getInstance(fgeal::Game& game) { return static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID)); }
-
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game),
   font(null), font2(null), font3(null), fontDebug(null),

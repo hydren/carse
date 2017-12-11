@@ -106,8 +106,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	public:
 	int getId();
 
-	static Pseudo3DRaceState* getInstance(fgeal::Game& game);
-
 	Pseudo3DRaceState(Pseudo3DCarseGame* game);
 	~Pseudo3DRaceState();
 

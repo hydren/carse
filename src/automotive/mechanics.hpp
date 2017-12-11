@@ -37,8 +37,7 @@ struct Mechanics
 	Engine engine;
 
 	bool automaticShiftingEnabled;
-	float automaticShiftingLowerThreshold;
-	float automaticShiftingUpperThreshold;
+	float automaticShiftingLastTime;
 
 	float mass;
 	float tireRadius;
@@ -82,7 +81,6 @@ struct Mechanics
 
 	/** Updates the powertrain, given the time step. */
 	void updatePowertrain(float timeStep);
-
 
 	void shiftGear(int gear);
 

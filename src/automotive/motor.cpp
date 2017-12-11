@@ -196,6 +196,11 @@ float Engine::getCurrentTorque()
 	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm : torqueCurveProfile.getTorqueFactor(rpm));
 }
 
+float Engine::getTorqueAt(float rpm)
+{
+	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm : torqueCurveProfile.getTorqueFactor(rpm));
+}
+
 float Engine::getDriveTorque()
 {
 	return gear==0? 0 : this->getCurrentTorque() * gearRatio[gear-1] * differentialRatio * transmissionEfficiency;

@@ -12,6 +12,10 @@
 #include <cmath>
 #include <cfloat>
 
+// xxx debug
+#include <iostream>
+using std::cout; using std::endl;
+
 #ifdef sgn
 	#undef sgn
 #endif
@@ -32,9 +36,7 @@ static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
 : simulationType(SIMULATION_TYPE_FAKESLIP), vehicleType(type), engine(eng),
-  automaticShiftingEnabled(),
-  automaticShiftingLowerThreshold(0.5*engine.maximumPowerRpm/engine.maxRpm),
-  automaticShiftingUpperThreshold(engine.maximumPowerRpm/engine.maxRpm),
+  automaticShiftingEnabled(), automaticShiftingLastTime(0),
   mass(1250), tireRadius(650), wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
   speed(), acceleration(),
   centerOfGravityHeight(500), wheelbase(1000), weightDistribuition(0.5),
@@ -71,14 +73,55 @@ void Mechanics::reset()
 
 void Mechanics::updatePowertrain(float delta)
 {
-	if(automaticShiftingEnabled and slipRatio < 0.1)
+	if(automaticShiftingEnabled and slipRatio < 0.1 and automaticShiftingLastTime > 1.0)
 	{
-		if(engine.gear < engine.gearCount and engine.rpm > automaticShiftingUpperThreshold*engine.maxRpm)
-			shiftGear(engine.gear+1);
-
-		if(engine.gear > 1 and engine.rpm < automaticShiftingLowerThreshold*engine.maxRpm)
-			shiftGear(engine.gear-1);
+		const int nextGear = engine.gear+1, prevGear = engine.gear-1;
+		bool shifted = false, stagedThrottle = false;
+		if(engine.throttlePosition == 0)
+		{
+			engine.throttlePosition = 1.0;
+			stagedThrottle = true;
+		}
+		if(nextGear-1 < engine.gearCount)
+		{
+			const float nextGearRpm = wheelAngularSpeed * engine.gearRatio[nextGear-1] * engine.differentialRatio * RAD_TO_RPM;
+			cout << ">>> next gear rpm: " << nextGearRpm << endl;
+			if(nextGearRpm > 0)
+			{
+				const float nextGearDriveTorque = engine.getTorqueAt(nextGearRpm) * engine.gearRatio[nextGear-1] * engine.differentialRatio * engine.transmissionEfficiency;
+				cout << ">>> >>> next gear torque: " << nextGearDriveTorque << endl;
+				if(engine.getDriveTorque() < nextGearDriveTorque)
+				{
+					if(stagedThrottle)
+						engine.throttlePosition = 0;
+					shiftGear(nextGear);
+					automaticShiftingLastTime = 0;
+					shifted = true;
+				}
+			}
+		}
+		if(not shifted and prevGear > 0)
+		{
+			const float prevGearRpm = wheelAngularSpeed * engine.gearRatio[prevGear-1] * engine.differentialRatio * RAD_TO_RPM;
+			cout << "<<< prev gear rpm: " << prevGearRpm << endl;
+			if(prevGearRpm < engine.maxRpm)
+			{
+				const float prevGearDriveTorque = engine.getTorqueAt(prevGearRpm) * engine.gearRatio[prevGear-1] * engine.differentialRatio * engine.transmissionEfficiency;
+				cout << "<<< <<< prev gear torque: " << prevGearDriveTorque << endl;
+				if(engine.getDriveTorque() < 0.9*prevGearDriveTorque)
+				{
+					if(stagedThrottle)
+						engine.throttlePosition = 0;
+					shiftGear(prevGear);
+					automaticShiftingLastTime = 0;
+					shifted = true;
+				}
+			}
+		}
+		if(not shifted and stagedThrottle)
+			engine.throttlePosition = 0;
 	}
+	automaticShiftingLastTime += delta;
 
 	const float weight = mass * GRAVITY_ACCELERATION;
 	brakingForce = brakePedalPosition * tireFrictionFactor * weight * sgn(speed);  // a multiplier here could be added for stronger and easier braking

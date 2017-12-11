@@ -75,8 +75,11 @@ struct Engine
 	/** Reset the engine's state. */
 	void reset();
 
-	/** Returns this engine's torque in the given RPM. */
+	/** Returns this engine's torque in the current RPM. */
 	float getCurrentTorque();
+
+	/** Returns this engine's torque in the given RPM. */
+	float getTorqueAt(float rpm);
 
 	/** Returns the current driving force. */
 	float getDriveTorque();

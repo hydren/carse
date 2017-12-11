@@ -153,15 +153,15 @@ void OptionsMenuState::updateLabels()
 {
 	Display& display = game.getDisplay();
 	menu->at(0).label = string("Resolution: ") + futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight());
-	menu->at(1).label = string("Fullscreen: ") + (display.isFullscreen()? " yes" : " no");
-	menu->at(2).label = string("Unit: ") + (logic.isImperialUnitEnabled()? " imperial" : " metric");
+	menu->at(1).label = string("Fullscreen: ") + (display.isFullscreen()? "yes" : "no");
+	menu->at(2).label = string("Unit: ") + (logic.isImperialUnitEnabled()? "imperial" : "metric");
 
 	string strSimType;
 	switch(logic.getSimulationType())
 	{
 		default:
-		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Arcade"; break;
-		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load-limited power)"; break;
+		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Arcade (slipless)"; break;
+		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load-capped power)"; break;
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
 	menu->at(3).label = "Simulation mode: " + strSimType;

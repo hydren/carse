@@ -54,6 +54,7 @@ class MainMenuState extends public fgeal::Game::State
 		fgeal::Font fontMain, fontTitle;
 		fgeal::Color selectedSlotColor;
 		PrototypeGridLayout(MainMenuState& state);
+		void drawGridSlot(const fgeal::Rectangle&, const fgeal::Vector2D&, int);
 		void draw();
 		void update(float delta);
 		void navigate(NavigationDirection navDir);

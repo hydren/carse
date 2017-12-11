@@ -249,6 +249,16 @@ MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
   fontTitle("assets/font2.ttf", 72 * (state.game.getDisplay().getHeight()/480.0))
 {}
 
+void MainMenuState::PrototypeGridLayout::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
+{
+	const bool isSelected = (index == (int) state.menu->getSelectedIndex());
+	Image::drawFilledRectangle(slot.x, slot.y, slot.w, slot.h, Color::DARK_GREY);
+	Image::drawFilledRectangle(slot.x + margin.x, slot.y + margin.y, slot.w - margin.x*2, slot.h - margin.y*2, isSelected? Color::LIGHT_GREY : Color::GREY);
+	const float textWidth = fontMain.getTextWidth(state.menu->at(index).label);
+	fontMain.drawText(state.menu->at(index).label, slot.x + 0.5*(slot.w - textWidth), slot.y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
+	if(isSelected) Image::drawRectangle(slot.x, slot.y, slot.w, slot.h, selectedSlotColor);
+}
+
 void MainMenuState::PrototypeGridLayout::draw()
 {
 	const float w = state.game.getDisplay().getWidth(),
@@ -256,95 +266,68 @@ void MainMenuState::PrototypeGridLayout::draw()
 				titleHeaderHeight = 0.2 * w,
 				marginX = w * 0.01, marginY = h * 0.01;
 
-	Rectangle slots[5];
-	{
-		Rectangle& slot = slots[MENU_ITEM_RACE];
-		slot.w = (w - 4*marginX)/3;
-		slot.h = (h - titleHeaderHeight - 3*marginY)/2;
-		slot.x = 0.5*(w - slot.w);
-		slot.y = titleHeaderHeight + 0.5*(h - titleHeaderHeight - slot.h);
-	}
-	{
-		Rectangle& slot = slots[MENU_ITEM_VEHICLE];
-		slot.x = marginX;
-		slot.y = titleHeaderHeight + marginY;
-		slot.w = slots->w;
-		slot.h = slots->h;
-	}
-	{
-		Rectangle& slot = slots[MENU_ITEM_COURSE];
-		slot.x = marginX;
-		slot.y = slots[MENU_ITEM_VEHICLE].y + slots[MENU_ITEM_VEHICLE].h + marginY;
-		slot.w = slots->w;
-		slot.h = slots->h;
-	}
-	{
-		Rectangle& slot = slots[MENU_ITEM_SETTINGS];
-		slot.x = slots[MENU_ITEM_RACE].x + slots[MENU_ITEM_RACE].w + marginX;
-		slot.y = titleHeaderHeight + marginY;
-		slot.w = slots->w;
-		slot.h = slots->h;
-	}
-	{
-		Rectangle& slot = slots[MENU_ITEM_EXIT];
-		slot.x = slots[MENU_ITEM_RACE].x + slots[MENU_ITEM_RACE].w + marginX;
-		slot.y = slots[MENU_ITEM_SETTINGS].y + slots[MENU_ITEM_SETTINGS].h + marginY;
-		slot.w = slots->w;
-		slot.h = slots->h;
-	}
+	const fgeal::Vector2D margin = {marginX, marginY};
 
-	for(unsigned i = 0; i < state.menu->getNumberOfEntries(); i++)
-	{
-		const bool isSelected = (i == state.menu->getSelectedIndex());
-		Image::drawFilledRectangle(slots[i].x, slots[i].y, slots[i].w, slots[i].h, Color::DARK_GREY);
-		Image::drawFilledRectangle(slots[i].x + marginX, slots[i].y + marginY, slots[i].w - marginX*2, slots[i].h - marginY*2, isSelected? Color::LIGHT_GREY : Color::GREY);
-		const float textWidth = fontMain.getTextWidth(state.menu->at(i).label);
-		fontMain.drawText(state.menu->at(i).label, slots[i].x + 0.5*(slots[i].w - textWidth), slots[i].y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
-		if(isSelected) Image::drawRectangle(slots[i].x, slots[i].y, slots[i].w, slots[i].h, selectedSlotColor);
+	const Rectangle slotSize = {0, 0, (w - 4*marginX)/3.0f, (h - titleHeaderHeight - 3*marginY)/2.0f};
 
-		switch(i)
-		{
-			case MENU_ITEM_RACE:
-			{
-				state.imgRace->drawScaled(slots[i].x*1.01, slots[i].y*1.01, slots[i].w * 0.98f / state.imgRace->getWidth(), slots[i].h * 0.98f / state.imgRace->getHeight());
-				break;
-			}
-			case MENU_ITEM_VEHICLE:
-			{
-				static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(slots[i].x + 0.5*slots[i].w, slots[i].y + 0.625*slots[i].h, 0.75);
-				break;
-			}
-			case MENU_ITEM_COURSE:
-			{
-				Image* portrait = static_cast<CourseSelectionState*>(state.game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
-				const float portraitX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/portrait->getWidth()),
-							portraitY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/portrait->getHeight()),
-							portraitScaleX = 0.75f*slots[i].w/portrait->getWidth(),
-							portraitScaleY = 0.75f*slots[i].h/portrait->getHeight();
-				portrait->drawScaled(portraitX, portraitY, portraitScaleX, portraitScaleY);
-				break;
-			}
-			case MENU_ITEM_SETTINGS:
-			{
-				const float imgX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/state.imgSettings->getWidth()),
-							imgY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/state.imgSettings->getHeight()),
-							imgScaleX = 0.75f*slots[i].w/state.imgSettings->getWidth(),
-							imgScaleY = 0.75f*slots[i].h/state.imgSettings->getHeight();
-				state.imgSettings->drawScaled(imgX, imgY, imgScaleX, imgScaleY);
-				break;
-			}
-			case MENU_ITEM_EXIT:
-			{
-				const float imgX = slots[i].x + 0.125f*slots[i].w*(1 - 0.75f/state.imgExit->getWidth()),
-							imgY = slots[i].y + 0.1750f*slots[i].h*(1 - 0.75f/state.imgExit->getHeight()),
-							imgScaleX = 0.75f*slots[i].w/state.imgExit->getWidth(),
-							imgScaleY = 0.75f*slots[i].h/state.imgExit->getHeight();
-				state.imgExit->drawScaled(imgX, imgY, imgScaleX, imgScaleY);
-				break;
-			}
-			default:break;
-		}
-	}
+	// draw MENU_ITEM_RACE
+	const Rectangle slotMenuItemRace = {
+		0.5f*(w - slotSize.w),
+		titleHeaderHeight + 0.5f*(h - titleHeaderHeight - slotSize.h),
+		slotSize.w, slotSize.h
+	};
+	drawGridSlot(slotMenuItemRace, margin, MENU_ITEM_RACE);
+	state.imgRace->drawScaled(slotMenuItemRace.x*1.01, slotMenuItemRace.y*1.01,
+		slotMenuItemRace.w * 0.98f / state.imgRace->getWidth(), slotMenuItemRace.h * 0.98f / state.imgRace->getHeight());
+
+	// draw MENU_ITEM_VEHICLE
+	const Rectangle slotMenuItemVehicle = {
+		marginX,
+		titleHeaderHeight + marginY,
+		slotSize.w, slotSize.h
+	};
+	drawGridSlot(slotMenuItemVehicle, margin, MENU_ITEM_VEHICLE);
+	static_cast<VehicleSelectionState*>(state.game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w, slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h, 0.75);
+
+	// draw MENU_ITEM_COURSE
+	const Rectangle slotMenuItemCourse = {
+		marginX,
+		slotMenuItemVehicle.y + slotMenuItemVehicle.h + marginY,
+		slotSize.w, slotSize.h
+	};
+	drawGridSlot(slotMenuItemCourse, margin, MENU_ITEM_COURSE);
+	Image* portrait = static_cast<CourseSelectionState*>(state.game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
+	const float portraitX = slotMenuItemCourse.x + 0.125f*slotMenuItemCourse.w*(1 - 0.75f/portrait->getWidth()),
+				portraitY = slotMenuItemCourse.y + 0.1750f*slotMenuItemCourse.h*(1 - 0.75f/portrait->getHeight()),
+				portraitScaleX = 0.75f*slotMenuItemCourse.w/portrait->getWidth(),
+				portraitScaleY = 0.75f*slotMenuItemCourse.h/portrait->getHeight();
+	portrait->drawScaled(portraitX, portraitY, portraitScaleX, portraitScaleY);
+
+	// draw MENU_ITEM_SETTINGS
+	const Rectangle slotMenuItemSettings = {
+		slotMenuItemRace.x + slotMenuItemRace.w + marginX,
+		titleHeaderHeight + marginY,
+		slotSize.w, slotSize.h
+	};
+	drawGridSlot(slotMenuItemSettings, margin, MENU_ITEM_SETTINGS);
+	const float imgSettingsX = slotMenuItemSettings.x + 0.125f*slotMenuItemSettings.w*(1 - 0.75f/state.imgSettings->getWidth()),
+				imgSettingsY = slotMenuItemSettings.y + 0.1750f*slotMenuItemSettings.h*(1 - 0.75f/state.imgSettings->getHeight()),
+				imgSettingsScaleX = 0.75f*slotMenuItemSettings.w/state.imgSettings->getWidth(),
+				imgSettingsScaleY = 0.75f*slotMenuItemSettings.h/state.imgSettings->getHeight();
+	state.imgSettings->drawScaled(imgSettingsX, imgSettingsY, imgSettingsScaleX, imgSettingsScaleY);
+
+	// draw MENU_ITEM_EXIT
+	const Rectangle slotMenuItemExit = {
+		slotMenuItemRace.x + slotMenuItemRace.w + marginX,
+		slotMenuItemSettings.y + slotMenuItemSettings.h + marginY,
+		slotSize.w, slotSize.h
+	};
+	drawGridSlot(slotMenuItemExit, margin, MENU_ITEM_EXIT);
+	const float imgExitX = slotMenuItemExit.x + 0.125f*slotMenuItemExit.w*(1 - 0.75f/state.imgExit->getWidth()),
+				imgExitY = slotMenuItemExit.y + 0.1750f*slotMenuItemExit.h*(1 - 0.75f/state.imgExit->getHeight()),
+				imgExitScaleX = 0.75f*slotMenuItemExit.w/state.imgExit->getWidth(),
+				imgExitScaleY = 0.75f*slotMenuItemExit.h/state.imgExit->getHeight();
+	state.imgExit->drawScaled(imgExitX, imgExitY, imgExitScaleX, imgExitScaleY);
 
 	const string title("Carse Project");
 	fontTitle.drawText(title, 0.5*(state.game.getDisplay().getWidth() - fontTitle.getTextWidth(title)),

@@ -27,7 +27,8 @@
 
 const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
 
-static const float AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
+                   RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
 : simulationType(SIMULATION_TYPE_FAKESLIP), vehicleType(type), engine(eng),
@@ -73,10 +74,10 @@ void Mechanics::updatePowertrain(float delta)
 	if(automaticShiftingEnabled and slipRatio < 0.1)
 	{
 		if(engine.gear < engine.gearCount and engine.rpm > automaticShiftingUpperThreshold*engine.maxRpm)
-			engine.gear++;
+			shiftGear(engine.gear+1);
 
 		if(engine.gear > 1 and engine.rpm < automaticShiftingLowerThreshold*engine.maxRpm)
-			engine.gear--;
+			shiftGear(engine.gear-1);
 	}
 
 	const float weight = mass * GRAVITY_ACCELERATION;
@@ -111,6 +112,24 @@ void Mechanics::updatePowertrain(float delta)
 
 	// update speed
 	speed += delta*acceleration;
+}
+
+void Mechanics::shiftGear(int gear)
+{
+	if(gear < 0 or gear > engine.gearCount)
+		return;
+
+	if(gear != 0 and engine.gear != 0)
+	{
+		const float driveshaftRpm = wheelAngularSpeed
+									* engine.gearRatio[gear-1]
+									* engine.differentialRatio * RAD_TO_RPM;
+
+		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (simulate losses due to shift time)
+		engine.rpm += 0.25*(driveshaftRpm - engine.rpm);
+	}
+
+	engine.gear = gear;
 }
 
 float Mechanics::getDriveForce()

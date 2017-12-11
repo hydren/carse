@@ -119,24 +119,10 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		parallax.x -= imgBackground->getWidth();
 }
 
-static const float RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
-
 void Pseudo3DRaceState::shiftGear(int gear)
 {
-	if(gear < 0 or gear > playerVehicle.body.engine.gearCount)
-		return;
-
-	if(gear != 0 and playerVehicle.body.engine.gear != 0)
-	{
-		const float driveshaftRpm = playerVehicle.body.wheelAngularSpeed
-									* playerVehicle.body.engine.gearRatio[gear-1]
-									* playerVehicle.body.engine.differentialRatio * RAD_TO_RPM;
-
-		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (simulate losses due to shift time)
-		playerVehicle.body.engine.rpm += 0.25*(driveshaftRpm - playerVehicle.body.engine.rpm);
-	}
-
-	playerVehicle.body.engine.gear = gear;
+	// todo play gear shift sound
+	playerVehicle.body.shiftGear(gear);
 }
 
 Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()

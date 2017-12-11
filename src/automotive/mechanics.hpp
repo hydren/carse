@@ -83,6 +83,9 @@ struct Mechanics
 	/** Updates the powertrain, given the time step. */
 	void updatePowertrain(float timeStep);
 
+
+	void shiftGear(int gear);
+
 	/** Returns the current resulting force coming from the powertrain that accelerates the car. */
 	float getDriveForce();
 

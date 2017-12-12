@@ -51,8 +51,32 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	bool isImperialUnit;
 	Mechanics::SimulationType simulationType;
 
-	float laptime, laptimeBest;
+	bool onIntro, onEnding;
+	float introTime;
+	enum RaceType
+	{
+		RACE_TYPE_LOOP_PRACTICE,
+//		RACE_TYPE_LOOP_TIME_TRIAL,
+//		RACE_TYPE_LOOP_TIME_ATTACK,
+//		RACE_TYPE_LOOP_AGAINST_OPPOSITION,
+//		RACE_TYPE_KNOCK_OUT,
+//		RACE_TYPE_POINT_TO_POINT_PRACTICE,
+//		RACE_TYPE_POINT_TO_POINT_TIME_TRIAL,
+//		RACE_TYPE_POINT_TO_POINT_AGAINST_OPPOSITION,
+//		RACE_TYPE_DRAG_PRACTICE,
+//		RACE_TYPE_DRAG_AGAINST_OPPOSITION,
+//		RACE_TYPE_SIDE_DRAG_PRACTICE,
+//		RACE_TYPE_SIDE_DRAG_AGAINST_OPPOSITION,
+//		RACE_TYPE_DRIFT_PRACTICE,
+//		RACE_TYPE_DRIFT_AGAINST_OPPOSITION,
+//		RACE_TYPE_OVERALL_SPEED_COMPETITION,
+//		RACE_TYPE_AVERAGE_SPEED_COMPETITION,
+//		RACE_TYPE_OVERTAKING_DUEL,
+//		RACE_TYPE_PURSUIT
+	}
+	raceType;
 
+	float laptime, laptimeBest;
 	unsigned lapCurrent;
 
 	Course course;
@@ -60,8 +84,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	int playerVehicleSpecAlternateSpriteIndex;
 	Pseudo3DVehicle playerVehicle;
 
-	Hud::DialGauge<float>* hudRpmGauge;
-	Hud::NumericalDisplay<float>* hudSpeedDisplay;
+	Hud::DialGauge<float>* hudTachometer;
+	Hud::NumericalDisplay<float>* hudSpeedometer;
 	Hud::NumericalDisplay<int>* hudGearDisplay;
 	Hud::TimerDisplay<float>* hudTimerCurrentLap, *hudTimerBestLap;
 	Hud::NumericalDisplay<unsigned>* hudCurrentLap;
@@ -102,6 +126,11 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	};
 
 	bool debugMode;
+
+	bool isPlayerAccelerating();
+	bool isPlayerBraking();
+	bool isPlayerSteeringLeft();
+	bool isPlayerSteeringRight();
 
 	public:
 	int getId();

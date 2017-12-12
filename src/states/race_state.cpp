@@ -44,11 +44,6 @@ static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
 static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
-#define isPlayerAccelerating() (Keyboard::isKeyPressed(controlKeyAccelerate) or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyAccelerate)))
-#define isPlayerBraking() (Keyboard::isKeyPressed(controlKeyBrake) or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyBrake)))
-#define isPlayerSteeringLeft() (Keyboard::isKeyPressed(controlKeyTurnLeft) or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) < 0))
-#define isPlayerSteeringRight() (Keyboard::isKeyPressed(controlKeyTurnRight) or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0))
-
 // -------------------------------------------------------------------------------
 
 int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
@@ -66,11 +61,12 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   parallax(), backgroundScale(),
 
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
+  onIntro(), onEnding(), introTime(), raceType(),
   laptime(0), laptimeBest(0), lapCurrent(0),
 
   course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
-  hudRpmGauge(null), hudSpeedDisplay(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
+  hudTachometer(null), hudSpeedometer(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
 
   controlKeyAccelerate(fgeal::Keyboard::KEY_ARROW_UP),
   controlKeyBrake(fgeal::Keyboard::KEY_ARROW_DOWN),
@@ -173,16 +169,21 @@ void Pseudo3DRaceState::onEnter()
 
 	playerVehicle.engineSound.setProfile(playerVehicle.engineSoundProfile, playerVehicle.body.engine.maxRpm);
 
+	onIntro = true;
+	onEnding = false;
+	introTime = 4.5;
+	raceType = RACE_TYPE_LOOP_PRACTICE;
+
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	hudRpmGauge = new Hud::DialGauge<float>(playerVehicle.body.engine.rpm, 1000, playerVehicle.body.engine.maxRpm, gaugeSize);
-	hudRpmGauge->borderThickness = 6;
-	hudRpmGauge->graduationLevel = 2;
-	hudRpmGauge->graduationPrimarySize = 1000;
-	hudRpmGauge->graduationSecondarySize = 100;
-	hudRpmGauge->graduationValueScale = 0.001;
-	hudRpmGauge->graduationFont = font;
-	hudRpmGauge->compile();
+	hudTachometer = new Hud::DialGauge<float>(playerVehicle.body.engine.rpm, 1000, playerVehicle.body.engine.maxRpm, gaugeSize);
+	hudTachometer->borderThickness = 6;
+	hudTachometer->graduationLevel = 2;
+	hudTachometer->graduationPrimarySize = 1000;
+	hudTachometer->graduationSecondarySize = 100;
+	hudTachometer->graduationValueScale = 0.001;
+	hudTachometer->graduationFont = font;
+	hudTachometer->compile();
 
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
@@ -196,15 +197,15 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay->specialCases[-1] = "R";
 	hudGearDisplay->fontIsShared = true;
 
-	gaugeSize.x = hudRpmGauge->bounds.x - font2->getTextWidth("---");
+	gaugeSize.x = hudTachometer->bounds.x - font2->getTextWidth("---");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
-	hudSpeedDisplay = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, font2);
-	hudSpeedDisplay->valueScale = isImperialUnit? 2.25 : 3.6;
-	hudSpeedDisplay->disableBackground = true;
-	hudSpeedDisplay->displayColor = fgeal::Color::WHITE;
-	hudSpeedDisplay->borderThickness = 0;
-	hudSpeedDisplay->fontIsShared = true;
+	hudSpeedometer = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, font2);
+	hudSpeedometer->valueScale = isImperialUnit? 2.25 : 3.6;
+	hudSpeedometer->disableBackground = true;
+	hudSpeedometer->displayColor = fgeal::Color::WHITE;
+	hudSpeedometer->borderThickness = 0;
+	hudSpeedometer->fontIsShared = true;
 
 	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font3);
 	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
@@ -261,8 +262,8 @@ void Pseudo3DRaceState::onLeave()
 	sndTireBurnoutStandLoop->stop();
 	sndOnDirtLoop->stop();
 
-	delete hudRpmGauge;
-	delete hudSpeedDisplay;
+	delete hudTachometer;
+	delete hudSpeedometer;
 	delete hudGearDisplay;
 	delete hudCurrentLap;
 	delete hudTimerBestLap;
@@ -306,11 +307,27 @@ void Pseudo3DRaceState::render()
 	else
 		hudTimerBestLap->draw();
 
-	hudSpeedDisplay->draw();
-	font->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedDisplay->bounds.x + hudRpmGauge->bounds.x)/2, hudSpeedDisplay->bounds.y+hudSpeedDisplay->bounds.h, fgeal::Color::WHITE);
+	hudSpeedometer->draw();
+	font->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedometer->bounds.x + hudTachometer->bounds.x)/2, hudSpeedometer->bounds.y+hudSpeedometer->bounds.h, fgeal::Color::WHITE);
 
-	hudRpmGauge->draw();
+	hudTachometer->draw();
 	hudGearDisplay->draw();
+
+	if(onIntro)
+	{
+		if(introTime >= 4); //todo something here, like ready? or nothing at all
+		else if(introTime > 1)
+		{
+			font2->drawText(futil::to_string((int) introTime),
+							0.5f*(displayWidth - font2->getTextWidth("0")),
+							0.4f*(displayHeight - font2->getHeight()), Color::WHITE);
+		}
+	}
+	else if(introTime > 0)
+	{
+		font2->drawText("GO!", 0.5f*(displayWidth - font2->getTextWidth("GO!")),
+							   0.4f*(displayHeight - font2->getHeight()), Color::WHITE);
+	}
 
 	// DEBUG
 	if(debugMode)
@@ -522,7 +539,21 @@ void Pseudo3DRaceState::update(float delta)
 	handleInput();
 	handlePhysics(delta);
 
-	laptime += delta;
+	if(onIntro)
+	{
+		introTime -= delta;
+		if(introTime < 1)
+		{
+			onIntro = false;
+			playerVehicle.body.engine.gear = 1;
+		}
+	}
+	else
+	{
+		laptime += delta;
+		if(introTime > 0)
+			introTime -= delta;
+	}
 
 	// course looping control
 	const unsigned N = course.lines.size();
@@ -645,6 +676,8 @@ void Pseudo3DRaceState::handleInput()
 					parallax.x = parallax.y = 0;
 					laptime = 0;
 					lapCurrent = 1;
+					onIntro = true;
+					introTime = 4.5;
 //					isBurningRubber = onAir = onLongAir = false;
 					break;
 				case Keyboard::KEY_T:
@@ -684,6 +717,30 @@ void Pseudo3DRaceState::handleInput()
 				shiftGear(playerVehicle.body.engine.gear-1);
 		}
 	}
+}
+
+bool Pseudo3DRaceState::isPlayerAccelerating()
+{
+	return Keyboard::isKeyPressed(controlKeyAccelerate)
+			or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyAccelerate));
+}
+
+bool Pseudo3DRaceState::isPlayerBraking()
+{
+	return Keyboard::isKeyPressed(controlKeyBrake)
+			or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyBrake));
+}
+
+bool Pseudo3DRaceState::isPlayerSteeringLeft()
+{
+	return Keyboard::isKeyPressed(controlKeyTurnLeft)
+			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) < 0);
+}
+
+bool Pseudo3DRaceState::isPlayerSteeringRight()
+{
+	return Keyboard::isKeyPressed(controlKeyTurnRight)
+			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0);
 }
 
 #include "race_state_physics.hxx"

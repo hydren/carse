@@ -216,7 +216,7 @@ void Engine::update(float delta, float wheelAngularSpeed)
 	if(gear == 0)
 	{
 		const float rpmRatio = rpm/maxRpm;
-		rpm += (getCurrentTorque()*RAD_TO_RPM - (1-throttlePosition)*rpmRatio*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT)*delta;
+		rpm += (getCurrentTorque()*RAD_TO_RPM - (1-throttlePosition)*rpmRatio*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT)*(displacement != 0? 10000.0/displacement : 1)*delta;
 	}
 	else
 	{

@@ -169,10 +169,18 @@ void Pseudo3DRaceState::onEnter()
 
 	playerVehicle.engineSound.setProfile(playerVehicle.engineSoundProfile, playerVehicle.body.engine.maxRpm);
 
-	onIntro = true;
-	onEnding = false;
-	introTime = 4.5;
-	raceType = RACE_TYPE_LOOP_PRACTICE;
+	if(raceType != RACE_TYPE_DEBUG)
+	{
+		onIntro = true;
+		onEnding = false;
+		introTime = 4.5;
+		debugMode = false;
+	}
+	else
+	{
+		onIntro = false;
+		debugMode = true;
+	}
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
@@ -294,18 +302,21 @@ void Pseudo3DRaceState::render()
 
 	drawVehicle(playerVehicle, vehicleSpritePosition);
 
-	const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("______");
-	font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
-	hudCurrentLap->draw();
+	if(raceType == RACE_TYPE_LOOP_PRACTICE)
+	{
+		const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("______");
+		font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
+		hudCurrentLap->draw();
 
-	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap->bounds.y, Color::WHITE);
-	hudTimerCurrentLap->draw();
+		font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap->bounds.y, Color::WHITE);
+		hudTimerCurrentLap->draw();
 
-	font3->drawText("Best:", rightHudMargin, hudTimerBestLap->bounds.y, Color::WHITE);
-	if(laptimeBest == 0)
-		font3->drawText("--", hudTimerBestLap->bounds.x, hudTimerBestLap->bounds.y, Color::WHITE);
-	else
-		hudTimerBestLap->draw();
+		font3->drawText("Best:", rightHudMargin, hudTimerBestLap->bounds.y, Color::WHITE);
+		if(laptimeBest == 0)
+			font3->drawText("--", hudTimerBestLap->bounds.x, hudTimerBestLap->bounds.y, Color::WHITE);
+		else
+			hudTimerBestLap->draw();
+	}
 
 	hudSpeedometer->draw();
 	font->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedometer->bounds.x + hudTachometer->bounds.x)/2, hudSpeedometer->bounds.y+hudSpeedometer->bounds.h, fgeal::Color::WHITE);
@@ -560,10 +571,14 @@ void Pseudo3DRaceState::update(float delta)
 	while(playerVehicle.position * coursePositionFactor >= N*course.roadSegmentLength)
 	{
 		playerVehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
-		lapCurrent++;
-		if(laptime < laptimeBest or laptimeBest == 0)
-			laptimeBest = laptime;
-		laptime = 0;
+
+		if(raceType == RACE_TYPE_LOOP_PRACTICE)
+		{
+			lapCurrent++;
+			if(laptime < laptimeBest or laptimeBest == 0)
+				laptimeBest = laptime;
+			laptime = 0;
+		}
 	}
 	while(playerVehicle.position < 0)
 		playerVehicle.position += N*course.roadSegmentLength / coursePositionFactor;

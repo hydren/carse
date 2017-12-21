@@ -55,6 +55,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float introTime;
 	enum RaceType
 	{
+		RACE_TYPE_DEBUG,
 		RACE_TYPE_LOOP_PRACTICE,
 //		RACE_TYPE_LOOP_TIME_TRIAL,
 //		RACE_TYPE_LOOP_TIME_ATTACK,

@@ -171,11 +171,13 @@ void CarseGameLogic::setNextCourse(const Course& c)
 void CarseGameLogic::setNextCourseRandom()
 {
 	getRaceStateInstance().course = Course::createRandomCourse(200, 3000, 6400, 1.5);
+	getRaceStateInstance().raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE;
 }
 
 void CarseGameLogic::setNextCourseDebug()
 {
 	getRaceStateInstance().course = Course::createDebugCourse(200, 3000);
+	getRaceStateInstance().raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 
 const Course& CarseGameLogic::getNextCourse()

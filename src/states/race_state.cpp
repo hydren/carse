@@ -326,7 +326,7 @@ void Pseudo3DRaceState::render()
 
 	if(onIntro)
 	{
-		if(introTime >= 4); //todo something here, like ready? or nothing at all
+		if(introTime >= 4);  //@suppress("Suspicious semicolon")
 		else if(introTime > 1)
 		{
 			font2->drawText(futil::to_string((int) introTime),

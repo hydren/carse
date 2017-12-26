@@ -318,7 +318,7 @@ Course Course::createCourseFromFile(const Properties& prop)
 
 			if(line.spriteID != -1 and
 			  (line.spriteID + 1 > (int) course.spritesFilenames.size() or course.spritesFilenames[line.spriteID].empty()))
-				throw std::runtime_error("Error: course indicates usage of an unspecified sprite ID. \n " + segmentFilename);
+				throw std::logic_error("Error: course indicates usage of an unspecified sprite ID. \n " + segmentFilename);
 		}
 		else if(tokens.size() == 4)
 			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;

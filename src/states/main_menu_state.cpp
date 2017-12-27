@@ -63,7 +63,7 @@ void MainMenuState::initialize()
 	menu->addEntry("Race!");
 	menu->addEntry("Vehicle");
 	menu->addEntry("Course");
-	menu->addEntry("Settings");
+	menu->addEntry("Options");
 	menu->addEntry("Exit");
 
 	imgBackground = new Image("assets/bg-main.jpg");

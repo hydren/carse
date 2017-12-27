@@ -49,7 +49,7 @@ static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
-: State(*game),
+: State(*game), shared(*game->sharedResources),
   font(null), font2(null), font3(null), fontDebug(null),
   imgBackground(null),
   music(null),
@@ -111,10 +111,10 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 
 void Pseudo3DRaceState::initialize()
 {
-	font = new Font("assets/font.ttf");
-	font2 = new Font("assets/font2.ttf", 40);
-	font3 = new Font("assets/font2.ttf", 24);
-	fontDebug = new Font("assets/font.ttf");
+	font = new Font(shared.font1Path);
+	font2 = new Font(shared.font2Path, 36);
+	font3 = new Font(shared.font1Path, 24);
+	fontDebug = new Font(shared.fontDev);
 	music = new Music("assets/music_sample.ogg");
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
@@ -205,7 +205,7 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay->specialCases[-1] = "R";
 	hudGearDisplay->fontIsShared = true;
 
-	gaugeSize.x = hudTachometer->bounds.x - font2->getTextWidth("---");
+	gaugeSize.x = hudTachometer->bounds.x - font2->getTextWidth("000");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
 	hudSpeedometer = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, font2);

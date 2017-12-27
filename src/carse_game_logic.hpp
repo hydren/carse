@@ -84,6 +84,7 @@ struct CarseSharedResources
 {
 	fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
 	fgeal::Font fontDev;
+	std::string font1Path, font2Path;
 
 	CarseSharedResources();
 };

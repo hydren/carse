@@ -46,7 +46,7 @@ int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION
 
 VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
 : State(*game), shared(*game->sharedResources), gameLogic(game->logic),
-  fontMain(null), fontInfo(null), menu(null),
+  fontMain(null), fontInfo(null), fontSub(null), menu(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   layout(null)
 {}
@@ -55,6 +55,7 @@ VehicleSelectionState::~VehicleSelectionState()
 {
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
+	if(fontSub != null) delete fontSub;
 	if(menu != null) delete menu;
 
 	for(unsigned i = 0; i < previews.size(); i++)
@@ -69,10 +70,11 @@ void VehicleSelectionState::initialize()
 {
 	Display& display = game.getDisplay();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
-	fontMain = new Font("assets/font2.ttf", dip(40));
-	fontInfo = new Font("assets/font.ttf", dip(12));
+	fontMain = new Font(shared.font2Path, dip(28));
+	fontInfo = new Font(shared.font1Path, dip(12));
+	fontSub = new Font(shared.font1Path, dip(36));
 
-	menu = new Menu(menuBounds, new Font("assets/font.ttf", dip(18)), Color::WHITE);
+	menu = new Menu(menuBounds, new Font(shared.font1Path, dip(18)), Color::WHITE);
 	menu->fontIsOwned = true;
 	menu->cursorWrapAroundEnabled = true;
 	menu->bgColor = Color::AZURE;
@@ -277,7 +279,7 @@ void VehicleSelectionState::ListLayout::draw()
 	Display& display = state.game.getDisplay();
 	const float dw = display.getWidth(), dh = display.getHeight();
 	state.menu->draw();
-	state.fontMain->drawText("Choose your vehicle", 84, 25, Color::WHITE);
+	state.fontSub->drawText("Choose your vehicle", 32, 25, Color::WHITE);
 	state.drawVehiclePreview(0.7*dw, 0.35*dh);
 	state.drawVehicleSpec(0.525*dw,  0.525*dh);
 
@@ -354,7 +356,7 @@ void VehicleSelectionState::ShowroomLayout::draw()
 {
 	Display& display = state.game.getDisplay();
 	const float dw = display.getWidth(), dh = display.getHeight();
-	Font* fontMain = state.fontMain;
+	Font& fontMain = *state.fontMain, &fontSub = *state.fontSub;
 	Menu* const menu = state.menu;
 	const vector<Pseudo3DVehicle::Spec>& vehicles = state.gameLogic.getVehicleList();
 	const unsigned index = isSelectionTransitioning? previousIndex : menu->getSelectedIndex();
@@ -391,17 +393,17 @@ void VehicleSelectionState::ShowroomLayout::draw()
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
-	Image::drawFilledRectangle(0.9*dw - fontMain->getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain->getHeight(), Color::DARK_GREEN);
-	fontMain->drawText(lblChooseVehicle, 0.95*dw - fontMain->getTextWidth(lblChooseVehicle), 0.025*fontMain->getHeight(), Color::WHITE);
+	Image::drawFilledRectangle(0.9*dw - fontMain.getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain.getHeight(), Color::DARK_GREEN);
+	fontMain.drawText(lblChooseVehicle, 0.95*dw - fontMain.getTextWidth(lblChooseVehicle), 0.03*fontMain.getHeight(), Color::WHITE);
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;
-	const unsigned nameWidth = fontMain->getTextWidth(name);
+	const unsigned nameWidth = fontSub.getTextWidth(name);
 	const int nameOffset = nameWidth > dw? 0.6*sin(fgeal::uptime())*(nameWidth - dw) : 0;
 	const int infoX = 0.25*dw; int infoY = 0.75*dh;
 
-	Image::drawFilledRectangle(0, infoY - 1.1*fontMain->getHeight(), dw, fontMain->getHeight(), Color::AZURE);
-	fontMain->drawText(name, 0.5*(dw-fontMain->getTextWidth(name)) + nameOffset, infoY - 1.1*fontMain->getHeight(), Color::WHITE);
-	Image::drawFilledRectangle(0, infoY - 0.1*fontMain->getHeight(), dw, 0.25*dh, Color::NAVY);
+	Image::drawFilledRectangle(0, infoY - 1.1*fontSub.getHeight(), dw, fontSub.getHeight(), Color::AZURE);
+	fontSub.drawText(name, 0.5*(dw-fontSub.getTextWidth(name)) + nameOffset, infoY - 1.1*fontSub.getHeight(), Color::WHITE);
+	Image::drawFilledRectangle(0, infoY - 0.1*fontSub.getHeight(), dw, 0.25*dh, Color::NAVY);
 	state.drawVehicleSpec(infoX,  infoY);
 
 	VehiclePreview& preview = state.previews[state.menu->getSelectedIndex()];

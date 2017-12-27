@@ -42,8 +42,8 @@ void OptionsMenuState::initialize()
 {
 	Display& display = game.getDisplay();
 	background = new Image("assets/options-bg.jpg");
-	fontTitle = new Font("assets/font2.ttf", dip(48));
-	font = new Font("assets/font2.ttf", dip(16));
+	fontTitle = new Font(shared.font2Path, dip(48));
+	font = new Font(shared.font1Path, dip(16));
 
 	menu = new Menu(Rectangle(), font, Color(16, 24, 192));
 	menu->bgColor = Color(0, 0, 0, 128);

@@ -31,7 +31,7 @@ class VehicleSelectionState extends public fgeal::Game::State
 	CarseSharedResources& shared;
 	CarseGameLogic& gameLogic;
 
-	fgeal::Font* fontMain, *fontInfo;
+	fgeal::Font* fontMain, *fontInfo, *fontSub;
 	fgeal::Menu* menu;
 
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;

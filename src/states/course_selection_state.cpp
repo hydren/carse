@@ -55,11 +55,11 @@ void CourseSelectionState::initialize()
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
 
-	fontMain = new Font("assets/font2.ttf", dip(32));
-	fontInfo = new Font("assets/font.ttf",  dip(12));
-	fontTab  = new Font("assets/font2.ttf", dip(16));
+	fontMain = new Font(shared.font2Path, dip(32));
+	fontInfo = new Font(shared.font1Path, dip(12));
+	fontTab  = new Font(shared.font2Path, dip(11));
 
-	menu = new Menu(Rectangle(), new Font("assets/font.ttf", dip(12)), Color::RED);
+	menu = new Menu(Rectangle(), new Font(shared.font1Path, dip(12)), Color::RED);
 	menu->fontIsOwned = true;
 	menu->bgColor = Color(0, 0, 0, 128);
 	menu->borderColor = Color(0, 0, 0, 192);
@@ -141,11 +141,11 @@ void CourseSelectionState::render()
 		Image::drawFilledRectangle(menu->bounds, menu->bgColor);
 		Image::drawRectangle(menu->bounds, menu->borderColor);
 
-		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y * 1.1f, menu->bounds.w, fontTab->getHeight(), not isDebugCourseSelected? Color::RED : Color::_TRANSPARENT);
-		fontTab->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f,                        not isDebugCourseSelected? Color::WHITE : Color::RED);
+		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y * 1.1f, menu->bounds.w, fontInfo->getHeight(), not isDebugCourseSelected? Color::RED : Color::_TRANSPARENT);
+		fontInfo->drawText("Random course", menu->bounds.x * 1.1f, menu->bounds.y * 1.1f,                        not isDebugCourseSelected? Color::WHITE : Color::RED);
 
-		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y * 1.1f + fontTab->getHeight(), menu->bounds.w, fontTab->getHeight(), isDebugCourseSelected? Color::RED : Color::_TRANSPARENT);
-		fontTab->drawText("Debug course",  menu->bounds.x * 1.1f, menu->bounds.y * 1.1f + fontTab->getHeight(), isDebugCourseSelected? Color::WHITE : Color::RED);
+		Image::drawFilledRectangle(menu->bounds.x, menu->bounds.y * 1.1f + fontInfo->getHeight(), menu->bounds.w, fontInfo->getHeight(), isDebugCourseSelected? Color::RED : Color::_TRANSPARENT);
+		fontInfo->drawText("Debug course",  menu->bounds.x * 1.1f, menu->bounds.y * 1.1f + fontInfo->getHeight(), isDebugCourseSelected? Color::WHITE : Color::RED);
 
 		if(isDebugCourseSelected)
 			imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));

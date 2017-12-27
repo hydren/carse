@@ -56,7 +56,7 @@ enum MenuItem
 void MainMenuState::initialize()
 {
 	Display& display = game.getDisplay();
-	menu = new Menu(fgeal::Rectangle(), new Font("assets/font.ttf", dip(18)), Color::WHITE);
+	menu = new Menu(fgeal::Rectangle(), new Font(shared.font1Path, dip(18)), Color::WHITE);
 	menu->fontIsOwned = true;
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
@@ -180,7 +180,7 @@ void MainMenuState::menuSelectionAction()
 
 MainMenuState::PrototypeSimpleLayout::PrototypeSimpleLayout(MainMenuState& state)
 : Layout(state),
-  fontMain("assets/font.ttf", 32 * (state.game.getDisplay().getHeight()/480.0))
+  fontMain(state.shared.font1Path, 32 * (state.game.getDisplay().getHeight()/480.0))
 {}
 
 void MainMenuState::PrototypeSimpleLayout::draw()
@@ -241,8 +241,8 @@ void MainMenuState::PrototypeSimpleLayout::onCursorAccept()
 
 MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
 : Layout(state),
-  fontMain("assets/font.ttf",   18 * (state.game.getDisplay().getHeight()/480.0)),
-  fontTitle("assets/font2.ttf", 72 * (state.game.getDisplay().getHeight()/480.0))
+  fontMain(state.shared.font1Path,   18 * (state.game.getDisplay().getHeight()/480.0)),
+  fontTitle(state.shared.font2Path, 40 * (state.game.getDisplay().getHeight()/480.0))
 {}
 
 void MainMenuState::PrototypeGridLayout::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
@@ -327,7 +327,7 @@ void MainMenuState::PrototypeGridLayout::draw()
 
 	const string title("Carse Project");
 	fontTitle.drawText(title, 0.5*(state.game.getDisplay().getWidth() - fontTitle.getTextWidth(title)),
-							  0.05*(state.game.getDisplay().getHeight() - fontTitle.getHeight()), Color::WHITE);
+							  0.1*(state.game.getDisplay().getHeight() - fontTitle.getHeight()), Color::WHITE);
 }
 
 void MainMenuState::PrototypeGridLayout::update(float delta)

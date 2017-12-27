@@ -26,11 +26,14 @@
 #include <utility>
 
 class Pseudo3DCarseGame;
+class CarseSharedResources;
 class CarseGameLogic;
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	friend class CarseGameLogic;
+
+	CarseSharedResources& shared;
 
 	fgeal::Font* font, *font2, *font3, *fontDebug;
 	fgeal::Image* imgBackground;
@@ -57,8 +60,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	{
 		RACE_TYPE_DEBUG,
 		RACE_TYPE_LOOP_PRACTICE,
-//		RACE_TYPE_LOOP_TIME_TRIAL,
-//		RACE_TYPE_LOOP_TIME_ATTACK,
+		RACE_TYPE_LOOP_TIME_TRIAL,
+		RACE_TYPE_LOOP_TIME_ATTACK,
 //		RACE_TYPE_LOOP_AGAINST_OPPOSITION,
 //		RACE_TYPE_KNOCK_OUT,
 //		RACE_TYPE_POINT_TO_POINT_PRACTICE,

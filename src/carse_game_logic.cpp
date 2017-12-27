@@ -795,9 +795,18 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 // ########################################################################################################################################################
 
+static string getFontFilename(const string& key)
+{
+	Properties properties;
+	properties.load("assets/fonts/fonts.properties");
+	return "assets/fonts/"+properties.get(key, "default.ttf");
+}
+
 CarseSharedResources::CarseSharedResources()
 : sndCursorMove("assets/sound/cursor_move.ogg"),
   sndCursorIn("assets/sound/cursor_accept.ogg"),
   sndCursorOut("assets/sound/cursor_out.ogg"),
-  fontDev("assets/font.ttf", 12)
+  fontDev("assets/fonts/default.ttf", 12),
+  font1Path(getFontFilename("font1")),
+  font2Path(getFontFilename("font2"))
 {}

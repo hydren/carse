@@ -54,8 +54,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	bool isImperialUnit;
 	Mechanics::SimulationType simulationType;
 
-	bool onIntro, onEnding;
-	float introTime;
+	bool onSceneIntro, onSceneFinish;
+	float timerSceneIntro, timerSceneFinish;
 	enum RaceType
 	{
 		RACE_TYPE_DEBUG,
@@ -80,8 +80,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	}
 	raceType;
 
-	float laptime, laptimeBest;
-	unsigned lapCurrent;
+	float lapTimeCurrent, lapTimeBest;
+	unsigned lapCurrent, lapCountGoal;
 
 	Course course;
 	Pseudo3DVehicle::Spec playerVehicleSpec;

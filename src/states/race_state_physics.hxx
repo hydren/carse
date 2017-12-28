@@ -44,7 +44,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	playerVehicle.body.arbitraryForceFactor = wheelAngleFactor;
 	playerVehicle.body.slopeAngle = atan2(segment.y - playerVehicle.verticalPosition, course.roadSegmentLength);
 
-	if(onIntro or onEnding)
+	if(onSceneIntro)
 		playerVehicle.body.engine.gear = 0;
 
 	playerVehicle.body.engine.throttlePosition = isPlayerAccelerating()? 1.0 : 0.0;

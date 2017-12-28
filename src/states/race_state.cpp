@@ -64,16 +64,16 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   parallax(), backgroundScale(),
 
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
-  onIntro(), onEnding(), introTime(), raceType(),
-  laptime(0), laptimeBest(0), lapCurrent(0),
+  onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), raceType(),
+  lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), lapCountGoal(0),
 
   course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
   hudTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
   hudGearDisplay(playerVehicle.body.engine.gear, Rectangle(), null),
-  hudTimerCurrentLap(laptime, Rectangle(), null),
-  hudTimerBestLap(laptimeBest, Rectangle(), null),
+  hudTimerCurrentLap(lapTimeCurrent, Rectangle(), null),
+  hudTimerBestLap(lapTimeBest, Rectangle(), null),
   hudCurrentLap(lapCurrent, Rectangle(), null),
 
   controlKeyAccelerate(fgeal::Keyboard::KEY_ARROW_UP),
@@ -217,14 +217,14 @@ void Pseudo3DRaceState::onEnter()
 
 	if(raceType != RACE_TYPE_DEBUG)
 	{
-		onIntro = true;
-		onEnding = false;
-		introTime = 4.5;
+		onSceneIntro = true;
+		onSceneFinish = false;
+		timerSceneIntro = 4.5;
 		debugMode = false;
 	}
 	else
 	{
-		onIntro = false;
+		onSceneIntro = false;
 		debugMode = true;
 	}
 
@@ -274,7 +274,7 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.body.reset();
 	playerVehicle.body.automaticShiftingEnabled = true;
 	playerVehicle.pseudoAngle = 0;
-	laptime = laptimeBest = 0;
+	lapTimeCurrent = lapTimeBest = 0;
 	lapCurrent = 1;
 
 	playerVehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
@@ -318,7 +318,9 @@ void Pseudo3DRaceState::render()
 
 	drawVehicle(playerVehicle, vehicleSpritePosition);
 
-	if(raceType == RACE_TYPE_LOOP_PRACTICE)
+	if(raceType == RACE_TYPE_LOOP_PRACTICE
+	or raceType == RACE_TYPE_LOOP_TIME_TRIAL
+	or raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 	{
 		const float rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("______");
 		font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
@@ -328,7 +330,7 @@ void Pseudo3DRaceState::render()
 		hudTimerCurrentLap.draw();
 
 		font3->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
-		if(laptimeBest == 0)
+		if(lapTimeBest == 0)
 			font3->drawText("--", hudTimerBestLap.bounds.x, hudTimerBestLap.bounds.y, Color::WHITE);
 		else
 			hudTimerBestLap.draw();
@@ -340,21 +342,24 @@ void Pseudo3DRaceState::render()
 	hudTachometer.draw();
 	hudGearDisplay.draw();
 
-	if(onIntro)
+	if(onSceneIntro)
 	{
-		if(introTime >= 4);  //@suppress("Suspicious semicolon")
-		else if(introTime > 1)
+		if(timerSceneIntro >= 4);  //@suppress("Suspicious semicolon")
+		else if(timerSceneIntro > 1)
 		{
-			fontCountdown->drawText(futil::to_string((int) introTime),
+			fontCountdown->drawText(futil::to_string((int) timerSceneIntro),
 							0.5f*(displayWidth - fontCountdown->getTextWidth("0")),
 							0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
 		}
 	}
-	else if(introTime > 0)
+	else if(timerSceneIntro > 0)
 	{
 		fontCountdown->drawText("GO", 0.5f*(displayWidth - fontCountdown->getTextWidth("GO")),
 							   0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
 	}
+	else if(onSceneFinish)
+		fontCountdown->drawText("FINISHED", 0.5f*(displayWidth - fontCountdown->getTextWidth("FINISHED")),
+									   0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
 
 	// DEBUG
 	if(debugMode)
@@ -566,20 +571,30 @@ void Pseudo3DRaceState::update(float delta)
 	handleInput();
 	handlePhysics(delta);
 
-	if(onIntro)
+	if(onSceneIntro)
 	{
-		introTime -= delta;
-		if(introTime < 1)
+		timerSceneIntro -= delta;
+		if(timerSceneIntro < 1)
 		{
-			onIntro = false;
+			onSceneIntro = false;
 			playerVehicle.body.engine.gear = 1;
 		}
 	}
 	else
 	{
-		laptime += delta;
-		if(introTime > 0)
-			introTime -= delta;
+		lapTimeCurrent += delta;
+		if(timerSceneIntro > 0)
+			timerSceneIntro -= delta;
+	}
+
+	if(onSceneFinish)
+	{
+		timerSceneFinish -= delta;
+		if(timerSceneFinish < 1)
+		{
+			onSceneFinish = false;
+			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+		}
 	}
 
 	// course looping control
@@ -588,12 +603,23 @@ void Pseudo3DRaceState::update(float delta)
 	{
 		playerVehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
 
-		if(raceType == RACE_TYPE_LOOP_PRACTICE)
+		if(raceType == RACE_TYPE_LOOP_PRACTICE
+		or raceType == RACE_TYPE_LOOP_TIME_TRIAL
+		or raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 		{
 			lapCurrent++;
-			if(laptime < laptimeBest or laptimeBest == 0)
-				laptimeBest = laptime;
-			laptime = 0;
+			if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
+				lapTimeBest = lapTimeCurrent;
+			lapTimeCurrent = 0;
+
+			if(raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+			{
+				if(lapCurrent > lapCountGoal)
+				{
+					onSceneFinish = true;
+					timerSceneFinish = 8.0;
+				}
+			}
 		}
 	}
 	while(playerVehicle.position < 0)
@@ -705,10 +731,10 @@ void Pseudo3DRaceState::handleInput()
 					playerVehicle.body.reset();
 					playerVehicle.pseudoAngle = 0;
 					parallax.x = parallax.y = 0;
-					laptime = 0;
+					lapTimeCurrent = 0;
 					lapCurrent = 1;
-					onIntro = true;
-					introTime = 4.5;
+					onSceneIntro = true;
+					timerSceneIntro = 4.5;
 //					isBurningRubber = onAir = onLongAir = false;
 					break;
 				case Keyboard::KEY_T:
@@ -752,12 +778,14 @@ void Pseudo3DRaceState::handleInput()
 
 bool Pseudo3DRaceState::isPlayerAccelerating()
 {
+	if(onSceneFinish) return false;
 	return Keyboard::isKeyPressed(controlKeyAccelerate)
 			or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyAccelerate));
 }
 
 bool Pseudo3DRaceState::isPlayerBraking()
 {
+	if(onSceneFinish) return true;
 	return Keyboard::isKeyPressed(controlKeyBrake)
 			or (Joystick::getCount() > 0 and Joystick::isButtonPressed(0, controlJoystickKeyBrake));
 }

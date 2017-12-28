@@ -113,9 +113,10 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 
 void Pseudo3DRaceState::initialize()
 {
+	Display& display = game.getDisplay();
 	font = new Font(shared.font1Path);
-	fontCountdown = new Font(shared.font2Path, 36);
-	font3 = new Font(shared.font1Path, 24);
+	fontCountdown = new Font(shared.font2Path, dip(36));
+	font3 = new Font(shared.font1Path, dip(24));
 	fontDebug = new Font(shared.fontDev);
 	music = new Music("assets/music_sample.ogg");
 
@@ -207,7 +208,7 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay->specialCases[-1] = "R";
 	hudGearDisplay->fontIsShared = true;
 
-	Font* fontSpeedometer = new Font(shared.font2Path, 24);
+	Font* fontSpeedometer = new Font(shared.font2Path, dip(24));
 	gaugeSize.x = hudTachometer->bounds.x - fontSpeedometer->getTextWidth("000");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;

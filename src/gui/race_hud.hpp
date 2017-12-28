@@ -109,7 +109,7 @@ namespace Hud
 
 		DialGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
 		: value(var), min(min), max(max),
-		  graduationPrimarySize(0.1*(max-min)), graduationSecondarySize(0.01*(max-min)), graduationTertiarySize(0.001*(max-min)),
+		  graduationPrimarySize(), graduationSecondarySize(), graduationTertiarySize(),
 		  bounds(bounds), angleMin(0.25*M_PI), angleMax(1.75*M_PI),
 		  backgroundColor(fgeal::Color::WHITE),
 		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
@@ -119,7 +119,9 @@ namespace Hud
 		  graduationValueScale(1.0), graduationLevel(1),
 		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0),
 		  backgroundImage(null), foregroundImage(null), pointerImage(null), imagesAreShared(false)
-		{}
+		{
+			setRecommendedGraduationSizes();
+		}
 
 		~DialGauge()
 		{
@@ -129,6 +131,13 @@ namespace Hud
 				if(backgroundImage != null) delete backgroundImage;
 				if(foregroundImage != null) delete foregroundImage;
 			}
+		}
+
+		void setRecommendedGraduationSizes()
+		{
+			graduationPrimarySize = 0.1*(max-min);
+			graduationSecondarySize = 0.01*(max-min);
+			graduationTertiarySize = 0.001*(max-min);
 		}
 
 		void compile()

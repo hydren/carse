@@ -72,7 +72,7 @@ void VehicleSelectionState::initialize()
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font(shared.font2Path, dip(28));
 	fontInfo = new Font(shared.font1Path, dip(12));
-	fontSub = new Font(shared.font1Path, dip(36));
+	fontSub = new Font(shared.font3Path, dip(36));
 
 	menu = new Menu(menuBounds, new Font(shared.font1Path, dip(18)), Color::WHITE);
 	menu->fontIsOwned = true;

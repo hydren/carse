@@ -808,5 +808,6 @@ CarseSharedResources::CarseSharedResources()
   sndCursorOut("assets/sound/cursor_out.ogg"),
   fontDev("assets/fonts/default.ttf", 12),
   font1Path(getFontFilename("font1")),
-  font2Path(getFontFilename("font2"))
+  font2Path(getFontFilename("font2")),
+  font3Path(getFontFilename("font3"))
 {}

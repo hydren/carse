@@ -9,6 +9,8 @@
 
 #include "carse_game.hpp"
 
+#include "util.hpp"
+
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
@@ -50,7 +52,7 @@ int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), shared(*game->sharedResources),
-  font(null), font2(null), font3(null), fontDebug(null),
+  font(null), fontCountdown(null), font3(null), fontDebug(null),
   imgBackground(null),
   music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
@@ -91,7 +93,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	// todo delete sounds
 	if(font != null) delete font;
-	if(font2 != null) delete font2;
+	if(fontCountdown != null) delete fontCountdown;
 	if(font3 != null) delete font3;
 	if(fontDebug != null) delete fontDebug;
 
@@ -112,7 +114,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 void Pseudo3DRaceState::initialize()
 {
 	font = new Font(shared.font1Path);
-	font2 = new Font(shared.font2Path, 36);
+	fontCountdown = new Font(shared.font2Path, 36);
 	font3 = new Font(shared.font1Path, 24);
 	fontDebug = new Font(shared.fontDev);
 	music = new Music("assets/music_sample.ogg");
@@ -205,15 +207,15 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay->specialCases[-1] = "R";
 	hudGearDisplay->fontIsShared = true;
 
-	gaugeSize.x = hudTachometer->bounds.x - font2->getTextWidth("000");
+	Font* fontSpeedometer = new Font(shared.font2Path, 24);
+	gaugeSize.x = hudTachometer->bounds.x - fontSpeedometer->getTextWidth("000");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
-	hudSpeedometer = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, font2);
+	hudSpeedometer = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, fontSpeedometer);
 	hudSpeedometer->valueScale = isImperialUnit? 2.25 : 3.6;
 	hudSpeedometer->disableBackground = true;
 	hudSpeedometer->displayColor = fgeal::Color::WHITE;
 	hudSpeedometer->borderThickness = 0;
-	hudSpeedometer->fontIsShared = true;
 
 	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font3);
 	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
@@ -329,15 +331,15 @@ void Pseudo3DRaceState::render()
 		if(introTime >= 4);  //@suppress("Suspicious semicolon")
 		else if(introTime > 1)
 		{
-			font2->drawText(futil::to_string((int) introTime),
-							0.5f*(displayWidth - font2->getTextWidth("0")),
-							0.4f*(displayHeight - font2->getHeight()), Color::WHITE);
+			fontCountdown->drawText(futil::to_string((int) introTime),
+							0.5f*(displayWidth - fontCountdown->getTextWidth("0")),
+							0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
 		}
 	}
 	else if(introTime > 0)
 	{
-		font2->drawText("GO!", 0.5f*(displayWidth - font2->getTextWidth("GO!")),
-							   0.4f*(displayHeight - font2->getHeight()), Color::WHITE);
+		fontCountdown->drawText("GO", 0.5f*(displayWidth - fontCountdown->getTextWidth("GO")),
+							   0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
 	}
 
 	// DEBUG

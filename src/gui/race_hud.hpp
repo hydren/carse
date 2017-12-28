@@ -145,6 +145,7 @@ namespace Hud
 			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
 
 			graduationPrimaryCache.clear();
+			graduationPrimaryNumericCache.clear();
 			graduationSecondaryCache.clear();
 			graduationTertiaryCache.clear();
 

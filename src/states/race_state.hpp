@@ -35,7 +35,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	CarseSharedResources& shared;
 
-	fgeal::Font* font, *fontCountdown, *font3, *fontDebug;
+	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDebug;
 	fgeal::Image* imgBackground;
 	fgeal::Music* music;
 
@@ -88,11 +88,11 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	int playerVehicleSpecAlternateSpriteIndex;
 	Pseudo3DVehicle playerVehicle;
 
-	Hud::DialGauge<float>* hudTachometer;
-	Hud::NumericalDisplay<float>* hudSpeedometer;
-	Hud::NumericalDisplay<int>* hudGearDisplay;
-	Hud::TimerDisplay<float>* hudTimerCurrentLap, *hudTimerBestLap;
-	Hud::NumericalDisplay<unsigned>* hudCurrentLap;
+	Hud::DialGauge<float> hudTachometer;
+	Hud::NumericalDisplay<float> hudSpeedometer;
+	Hud::NumericalDisplay<int> hudGearDisplay;
+	Hud::TimerDisplay<float> hudTimerCurrentLap, hudTimerBestLap;
+	Hud::NumericalDisplay<unsigned> hudCurrentLap;
 
 	// keybindings
 	fgeal::Keyboard::Key controlKeyAccelerate,

@@ -35,6 +35,7 @@ using fgeal::Music;
 using fgeal::Sprite;
 using fgeal::Point;
 using fgeal::Joystick;
+using fgeal::Rectangle;
 
 #define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
 
@@ -52,7 +53,7 @@ int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), shared(*game->sharedResources),
-  font(null), fontCountdown(null), font3(null), fontDebug(null),
+  fontSmall(null), fontCountdown(null), font3(null), fontDebug(null),
   imgBackground(null),
   music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
@@ -68,7 +69,12 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
-  hudTachometer(null), hudSpeedometer(null), hudGearDisplay(null), hudTimerCurrentLap(null), hudTimerBestLap(null), hudCurrentLap(null),
+  hudTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
+  hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
+  hudGearDisplay(playerVehicle.body.engine.gear, Rectangle(), null),
+  hudTimerCurrentLap(laptime, Rectangle(), null),
+  hudTimerBestLap(laptimeBest, Rectangle(), null),
+  hudCurrentLap(lapCurrent, Rectangle(), null),
 
   controlKeyAccelerate(fgeal::Keyboard::KEY_ARROW_UP),
   controlKeyBrake(fgeal::Keyboard::KEY_ARROW_DOWN),
@@ -92,7 +98,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	// todo delete sounds
-	if(font != null) delete font;
+	if(fontSmall != null) delete fontSmall;
 	if(fontCountdown != null) delete fontCountdown;
 	if(font3 != null) delete font3;
 	if(fontDebug != null) delete fontDebug;
@@ -114,7 +120,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 void Pseudo3DRaceState::initialize()
 {
 	Display& display = game.getDisplay();
-	font = new Font(shared.font1Path);
+	fontSmall = new Font(shared.font1Path);
 	fontCountdown = new Font(shared.font2Path, dip(36));
 	font3 = new Font(shared.font1Path, dip(24));
 	fontDebug = new Font(shared.fontDev);
@@ -131,6 +137,43 @@ void Pseudo3DRaceState::initialize()
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
 	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
 	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
+
+	hudTachometer.borderThickness = 6;
+	hudTachometer.graduationLevel = 2;
+	hudTachometer.graduationPrimarySize = 1000;
+	hudTachometer.graduationSecondarySize = 100;
+	hudTachometer.graduationValueScale = 0.001;
+	hudTachometer.graduationFont = fontSmall;
+
+	hudGearDisplay.font = fontSmall;
+	hudGearDisplay.fontIsShared = true;
+	hudGearDisplay.borderThickness = 6;
+	hudGearDisplay.borderColor = fgeal::Color::LIGHT_GREY;
+	hudGearDisplay.backgroundColor = fgeal::Color::BLACK;
+	hudGearDisplay.specialCases[0] = "N";
+	hudGearDisplay.specialCases[-1] = "R";
+
+	hudSpeedometer.font = new Font(shared.font2Path, dip(24));
+	hudSpeedometer.fontIsShared = false;
+	hudSpeedometer.disableBackground = true;
+	hudSpeedometer.displayColor = fgeal::Color::WHITE;
+	hudSpeedometer.borderThickness = 0;
+
+	hudCurrentLap.font = font3;
+	hudCurrentLap.fontIsShared = true;
+	hudCurrentLap.disableBackground = true;
+	hudCurrentLap.displayColor = Color::WHITE;
+
+	hudTimerCurrentLap.font = font3;
+	hudTimerCurrentLap.fontIsShared = true;
+	hudTimerCurrentLap.disableBackground = true;
+	hudTimerCurrentLap.displayColor = Color::WHITE;
+
+	hudTimerBestLap.font = font3;
+	hudTimerBestLap.fontIsShared = true;
+	hudTimerBestLap.disableBackground = true;
+	hudTimerBestLap.displayColor = Color::WHITE;
+	hudTimerBestLap.valueScale = 1000;
 }
 
 void Pseudo3DRaceState::onEnter()
@@ -186,57 +229,34 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
-	fgeal::Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
-	hudTachometer = new Hud::DialGauge<float>(playerVehicle.body.engine.rpm, 1000, playerVehicle.body.engine.maxRpm, gaugeSize);
-	hudTachometer->borderThickness = 6;
-	hudTachometer->graduationLevel = 2;
-	hudTachometer->graduationPrimarySize = 1000;
-	hudTachometer->graduationSecondarySize = 100;
-	hudTachometer->graduationValueScale = 0.001;
-	hudTachometer->graduationFont = font;
-	hudTachometer->compile();
+	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
+
+	hudTachometer.min = playerVehicle.body.engine.minRpm;
+	hudTachometer.max = playerVehicle.body.engine.maxRpm;
+	hudTachometer.bounds = gaugeSize;
+	hudTachometer.compile();
 
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
 	gaugeSize.w = 24;
-	gaugeSize.h = 1.5 * font->getHeight();
-	hudGearDisplay = new Hud::NumericalDisplay<int>(playerVehicle.body.engine.gear, gaugeSize, font);
-	hudGearDisplay->borderThickness = 6;
-	hudGearDisplay->borderColor = fgeal::Color::LIGHT_GREY;
-	hudGearDisplay->backgroundColor = fgeal::Color::BLACK;
-	hudGearDisplay->specialCases[0] = "N";
-	hudGearDisplay->specialCases[-1] = "R";
-	hudGearDisplay->fontIsShared = true;
+	gaugeSize.h = 1.5 * fontSmall->getHeight();
+	hudGearDisplay.bounds = gaugeSize;
 
-	Font* fontSpeedometer = new Font(shared.font2Path, dip(24));
-	gaugeSize.x = hudTachometer->bounds.x - fontSpeedometer->getTextWidth("000");
+	gaugeSize.x = hudTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
-	hudSpeedometer = new Hud::NumericalDisplay<float>(playerVehicle.body.speed, gaugeSize, fontSpeedometer);
-	hudSpeedometer->valueScale = isImperialUnit? 2.25 : 3.6;
-	hudSpeedometer->disableBackground = true;
-	hudSpeedometer->displayColor = fgeal::Color::WHITE;
-	hudSpeedometer->borderThickness = 0;
+	hudSpeedometer.bounds = gaugeSize;
+	hudSpeedometer.valueScale = isImperialUnit? 2.25 : 3.6;
 
-	hudCurrentLap = new Hud::NumericalDisplay<unsigned>(lapCurrent, gaugeSize, font3);
-	hudCurrentLap->bounds.y = display.getHeight() * 0.04;
-	hudCurrentLap->disableBackground = true;
-	hudCurrentLap->displayColor = Color::WHITE;
-	hudCurrentLap->fontIsShared = true;
+	hudCurrentLap.bounds = gaugeSize;
+	hudCurrentLap.bounds.y = display.getHeight() * 0.04;
 
-	hudTimerCurrentLap = new Hud::TimerDisplay<float>(laptime, gaugeSize, font3);
-	hudTimerCurrentLap->bounds.y = hudCurrentLap->bounds.y + font3->getHeight()*1.05;
-	hudTimerCurrentLap->valueScale = 1000;
-	hudTimerCurrentLap->disableBackground = true;
-	hudTimerCurrentLap->displayColor = Color::WHITE;
-	hudTimerCurrentLap->fontIsShared = true;
+	hudTimerCurrentLap.bounds = gaugeSize;
+	hudTimerCurrentLap.bounds.y = hudCurrentLap.bounds.y + font3->getHeight()*1.05;
+	hudTimerCurrentLap.valueScale = 1000;
 
-	hudTimerBestLap = new Hud::TimerDisplay<float>(laptimeBest, gaugeSize, font3);
-	hudTimerBestLap->bounds.y = hudTimerCurrentLap->bounds.y + font3->getHeight()*1.05;
-	hudTimerBestLap->valueScale = 1000;
-	hudTimerBestLap->disableBackground = true;
-	hudTimerBestLap->displayColor = Color::WHITE;
-	hudTimerBestLap->fontIsShared = true;
+	hudTimerBestLap.bounds = gaugeSize;
+	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + font3->getHeight()*1.05;
 
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
@@ -272,13 +292,6 @@ void Pseudo3DRaceState::onLeave()
 	sndTireBurnoutStandIntro->stop();
 	sndTireBurnoutStandLoop->stop();
 	sndOnDirtLoop->stop();
-
-	delete hudTachometer;
-	delete hudSpeedometer;
-	delete hudGearDisplay;
-	delete hudCurrentLap;
-	delete hudTimerBestLap;
-	delete hudTimerCurrentLap;
 }
 
 void Pseudo3DRaceState::render()
@@ -307,25 +320,25 @@ void Pseudo3DRaceState::render()
 
 	if(raceType == RACE_TYPE_LOOP_PRACTICE)
 	{
-		const float rightHudMargin = hudCurrentLap->bounds.x - font3->getTextWidth("______");
-		font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap->bounds.y, Color::WHITE);
-		hudCurrentLap->draw();
+		const float rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("______");
+		font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
+		hudCurrentLap.draw();
 
-		font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap->bounds.y, Color::WHITE);
-		hudTimerCurrentLap->draw();
+		font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
+		hudTimerCurrentLap.draw();
 
-		font3->drawText("Best:", rightHudMargin, hudTimerBestLap->bounds.y, Color::WHITE);
+		font3->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 		if(laptimeBest == 0)
-			font3->drawText("--", hudTimerBestLap->bounds.x, hudTimerBestLap->bounds.y, Color::WHITE);
+			font3->drawText("--", hudTimerBestLap.bounds.x, hudTimerBestLap.bounds.y, Color::WHITE);
 		else
-			hudTimerBestLap->draw();
+			hudTimerBestLap.draw();
 	}
 
-	hudSpeedometer->draw();
-	font->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedometer->bounds.x + hudTachometer->bounds.x)/2, hudSpeedometer->bounds.y+hudSpeedometer->bounds.h, fgeal::Color::WHITE);
+	hudSpeedometer.draw();
+	fontSmall->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.bounds.h, fgeal::Color::WHITE);
 
-	hudTachometer->draw();
-	hudGearDisplay->draw();
+	hudTachometer.draw();
+	hudGearDisplay.draw();
 
 	if(onIntro)
 	{
@@ -350,28 +363,28 @@ void Pseudo3DRaceState::render()
 		float offset = 25;
 		fontDebug->drawText("FPS:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", game.getFpsCount());
-		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Position:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", playerVehicle.position);
-		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", playerVehicle.body.speed*3.6);
-		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.acceleration);
-		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Height:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", playerVehicle.verticalPosition);
-		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 //		offset += 18;
 //		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
@@ -382,101 +395,101 @@ void Pseudo3DRaceState::render()
 		offset += 25;
 		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f", playerVehicle.pseudoAngle);
-		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f", playerVehicle.body.slopeAngle);
-		font->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", playerVehicle.strafeSpeed/coursePositionFactor);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", playerVehicle.curvePull/coursePositionFactor);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.slopePullForce);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.brakingForce);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.rollingResistanceForce);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.airDragForce);
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", (playerVehicle.curvePull/coursePositionFactor + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
-		font->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.getDriveForce());
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fNm", playerVehicle.body.engine.getCurrentTorque());
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f%%", 100.f*playerVehicle.body.engine.getCurrentTorque()/playerVehicle.body.engine.maximumTorque);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Power:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fhp", (playerVehicle.body.engine.getCurrentTorque()*playerVehicle.body.engine.rpm)/(5252.0 * 1.355818));
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDebug->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.getDrivenWheelsWeightLoad());
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Downforce:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", -playerVehicle.body.downforce);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2frad/s", playerVehicle.body.wheelAngularSpeed);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.f", playerVehicle.body.engine.rpm);
-		font->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
 		const char* autoLabelTxt = (playerVehicle.body.automaticShiftingEnabled? " (auto)":"");
 		sprintf(buffer, "%d %s", playerVehicle.body.engine.gear, autoLabelTxt);
-		font->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDebug->drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f%%", 100*playerVehicle.body.slipRatio);
-		font->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		unsigned currentRangeIndex = playerVehicle.engineSound.getRangeIndex(playerVehicle.body.engine.rpm);
@@ -484,7 +497,7 @@ void Pseudo3DRaceState::render()
 		{
 			const std::string format = std::string(playerVehicle.engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
 			sprintf(buffer, format.c_str(), i, playerVehicle.engineSound.getSoundData()[i]->getVolume(), playerVehicle.engineSound.getSoundData()[i]->getPlaybackSpeed());
-			font->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*font->getHeight(), fgeal::Color::WHITE);
+			fontSmall->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*fontSmall->getHeight(), fgeal::Color::WHITE);
 		}
 	}
 }

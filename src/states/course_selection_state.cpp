@@ -304,7 +304,7 @@ void CourseSelectionState::handleInputOnSettings(Event& event)
 				{
 					if(isCursorLeft)
 					{
-						if(logic.getNextRaceSettings().lapCountGoal > 1)
+						if(logic.getNextRaceSettings().lapCountGoal > 2)
 							logic.getNextRaceSettings().lapCountGoal--;
 					}
 					else

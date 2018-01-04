@@ -24,11 +24,11 @@
 class CourseSelectionState extends public fgeal::Game::State
 {
 	CarseSharedResources& shared;
-	CarseGameLogic& gameLogic;
+	CarseGameLogic& logic;
 
 	fgeal::Image* background, *imgRandom, *imgCircuit;
 	fgeal::Font* fontMain, *fontInfo;
-	fgeal::Menu* menu, *menuSettings;
+	fgeal::Menu* menuCourse, *menuSettings;
 
 	bool isLoadedCourseSelected, isDebugCourseSelected;
 

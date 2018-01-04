@@ -27,12 +27,18 @@ class CourseSelectionState extends public fgeal::Game::State
 	CarseGameLogic& gameLogic;
 
 	fgeal::Image* background, *imgRandom, *imgCircuit;
-	fgeal::Font* fontMain, *fontInfo, *fontTab;
-	fgeal::Menu* menu;
+	fgeal::Font* fontMain, *fontInfo;
+	fgeal::Menu* menu, *menuSettings;
 
-	bool isLoadedCourseSelected;
+	bool isLoadedCourseSelected, isDebugCourseSelected;
 
-	bool isDebugCourseSelected;
+	enum MenuStatus
+	{
+		STATUS_ON_COURSE_LIST_SELECTION,
+		STATUS_HOVERING_COURSE_LIST,
+		STATUS_HOVERING_SETTINGS_LIST
+	}
+	status;
 
 	public:
 	int getId();
@@ -51,7 +57,8 @@ class CourseSelectionState extends public fgeal::Game::State
 
 	private:
 	void handleInput();
-	void onMenuSelect();
+	void handleInputOnCourseList(fgeal::Event&);
+	void handleInputOnSettings(fgeal::Event&);
 };
 
 #endif /* COURSE_SELECTION_STATE_HPP_ */

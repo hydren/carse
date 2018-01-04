@@ -56,6 +56,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	bool onSceneIntro, onSceneFinish;
 	float timerSceneIntro, timerSceneFinish;
+
+	public:
 	enum RaceType
 	{
 		RACE_TYPE_DEBUG,
@@ -77,11 +79,20 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 //		RACE_TYPE_AVERAGE_SPEED_COMPETITION,
 //		RACE_TYPE_OVERTAKING_DUEL,
 //		RACE_TYPE_PURSUIT
-	}
-	raceType;
+		RACE_TYPE_COUNT
+	};
+
+	struct RaceSettings
+	{
+		RaceType raceType;
+		unsigned lapCountGoal;
+	};
+
+	private:
+	RaceSettings settings;
 
 	float lapTimeCurrent, lapTimeBest;
-	unsigned lapCurrent, lapCountGoal;
+	unsigned lapCurrent;
 
 	Course course;
 	Pseudo3DVehicle::Spec playerVehicleSpec;
@@ -92,7 +103,10 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Hud::NumericalDisplay<float> hudSpeedometer;
 	Hud::NumericalDisplay<int> hudGearDisplay;
 	Hud::TimerDisplay<float> hudTimerCurrentLap, hudTimerBestLap;
-	Hud::NumericalDisplay<unsigned> hudCurrentLap;
+	Hud::NumericalDisplay<unsigned> hudCurrentLap, hudLapCountGoal;
+
+	float rightHudMargin, offsetHudLapGoal;
+	fgeal::Point posHudCountdown, posHudFinishedCaption;
 
 	// keybindings
 	fgeal::Keyboard::Key controlKeyAccelerate,
@@ -162,5 +176,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float getTireKineticFrictionCoefficient();
 	float getTireRollingResistanceCoefficient();
 };
+
+std::string to_string(Pseudo3DRaceState::RaceType);
 
 #endif /* PSEUDO3D_RACE_STATE_HPP_ */

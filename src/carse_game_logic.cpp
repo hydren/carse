@@ -56,6 +56,8 @@ void CarseGameLogic::initialize()
 void CarseGameLogic::onStatesListInitFinished()
 {
 	this->setNextCourseRandom();  // set default course
+	getRaceStateInstance().settings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
+	getRaceStateInstance().settings.lapCountGoal = 2;    // set default lap count
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
 	this->setImperialUnitEnabled(false);
 	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
@@ -171,13 +173,12 @@ void CarseGameLogic::setNextCourse(const Course& c)
 void CarseGameLogic::setNextCourseRandom()
 {
 	getRaceStateInstance().course = Course::createRandomCourse(200, 3000, 6400, 1.5);
-	getRaceStateInstance().raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE;
 }
 
 void CarseGameLogic::setNextCourseDebug()
 {
 	getRaceStateInstance().course = Course::createDebugCourse(200, 3000);
-	getRaceStateInstance().raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
+	getRaceStateInstance().settings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 
 const Course& CarseGameLogic::getNextCourse()
@@ -188,6 +189,11 @@ const Course& CarseGameLogic::getNextCourse()
 fgeal::Image* CarseGameLogic::getNextCoursePreviewImage()
 {
 	return static_cast<CourseSelectionState*>(game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
+}
+
+Pseudo3DRaceState::RaceSettings& CarseGameLogic::getNextRaceSettings()
+{
+	return getRaceStateInstance().settings;
 }
 
 void CarseGameLogic::loadVehicles()

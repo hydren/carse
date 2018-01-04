@@ -64,8 +64,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   parallax(), backgroundScale(),
 
   drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
-  onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), raceType(),
-  lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), lapCountGoal(0),
+  onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), settings(),
+  lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0),
 
   course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
@@ -75,6 +75,9 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   hudTimerCurrentLap(lapTimeCurrent, Rectangle(), null),
   hudTimerBestLap(lapTimeBest, Rectangle(), null),
   hudCurrentLap(lapCurrent, Rectangle(), null),
+  hudLapCountGoal(settings.lapCountGoal, Rectangle(), null),
+
+  rightHudMargin(), offsetHudLapGoal(), posHudCountdown(), posHudFinishedCaption(),
 
   controlKeyAccelerate(fgeal::Keyboard::KEY_ARROW_UP),
   controlKeyBrake(fgeal::Keyboard::KEY_ARROW_DOWN),
@@ -164,6 +167,11 @@ void Pseudo3DRaceState::initialize()
 	hudCurrentLap.disableBackground = true;
 	hudCurrentLap.displayColor = Color::WHITE;
 
+	hudLapCountGoal.font = font3;
+	hudLapCountGoal.fontIsShared = true;
+	hudLapCountGoal.disableBackground = true;
+	hudLapCountGoal.displayColor = Color::WHITE;
+
 	hudTimerCurrentLap.font = font3;
 	hudTimerCurrentLap.fontIsShared = true;
 	hudTimerCurrentLap.disableBackground = true;
@@ -215,7 +223,7 @@ void Pseudo3DRaceState::onEnter()
 
 	playerVehicle.engineSound.setProfile(playerVehicle.engineSoundProfile, playerVehicle.body.engine.maxRpm);
 
-	if(raceType != RACE_TYPE_DEBUG)
+	if(settings.raceType != RACE_TYPE_DEBUG)
 	{
 		onSceneIntro = true;
 		onSceneFinish = false;
@@ -251,12 +259,23 @@ void Pseudo3DRaceState::onEnter()
 	hudCurrentLap.bounds = gaugeSize;
 	hudCurrentLap.bounds.y = display.getHeight() * 0.04;
 
+	hudLapCountGoal.bounds = gaugeSize;
+	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");
+	hudLapCountGoal.bounds.y = hudCurrentLap.bounds.y;
+
 	hudTimerCurrentLap.bounds = gaugeSize;
 	hudTimerCurrentLap.bounds.y = hudCurrentLap.bounds.y + font3->getHeight()*1.05;
 	hudTimerCurrentLap.valueScale = 1000;
 
 	hudTimerBestLap.bounds = gaugeSize;
 	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + font3->getHeight()*1.05;
+
+	rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("999/999");
+	offsetHudLapGoal = font3->getTextWidth("Laps: 999");
+	posHudCountdown.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("0"));
+	posHudCountdown.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
+	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
+	posHudFinishedCaption.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
 
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
@@ -318,13 +337,18 @@ void Pseudo3DRaceState::render()
 
 	drawVehicle(playerVehicle, vehicleSpritePosition);
 
-	if(raceType == RACE_TYPE_LOOP_PRACTICE
-	or raceType == RACE_TYPE_LOOP_TIME_TRIAL
-	or raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+	if(settings.raceType == RACE_TYPE_LOOP_PRACTICE
+	or settings.raceType == RACE_TYPE_LOOP_TIME_TRIAL
+	or settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 	{
-		const float rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("______");
 		font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
 		hudCurrentLap.draw();
+
+		if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+		{
+			font3->drawText("/", 1.05*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
+			hudLapCountGoal.draw();
+		}
 
 		font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
 		hudTimerCurrentLap.draw();
@@ -346,20 +370,13 @@ void Pseudo3DRaceState::render()
 	{
 		if(timerSceneIntro >= 4);  //@suppress("Suspicious semicolon")
 		else if(timerSceneIntro > 1)
-		{
-			fontCountdown->drawText(futil::to_string((int) timerSceneIntro),
-							0.5f*(displayWidth - fontCountdown->getTextWidth("0")),
-							0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
-		}
+			fontCountdown->drawText(futil::to_string((int) timerSceneIntro), posHudCountdown.x, posHudCountdown.y, Color::WHITE);
 	}
 	else if(timerSceneIntro > 0)
-	{
-		fontCountdown->drawText("GO", 0.5f*(displayWidth - fontCountdown->getTextWidth("GO")),
-							   0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
-	}
+		fontCountdown->drawText("GO", posHudCountdown.x, posHudCountdown.y, Color::WHITE);
+
 	else if(onSceneFinish)
-		fontCountdown->drawText("FINISHED", 0.5f*(displayWidth - fontCountdown->getTextWidth("FINISHED")),
-									   0.4f*(displayHeight - fontCountdown->getHeight()), Color::WHITE);
+		fontCountdown->drawText("FINISHED", posHudFinishedCaption.x, posHudFinishedCaption.y, Color::WHITE);
 
 	// DEBUG
 	if(debugMode)
@@ -603,18 +620,18 @@ void Pseudo3DRaceState::update(float delta)
 	{
 		playerVehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
 
-		if(raceType == RACE_TYPE_LOOP_PRACTICE
-		or raceType == RACE_TYPE_LOOP_TIME_TRIAL
-		or raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+		if(settings.raceType == RACE_TYPE_LOOP_PRACTICE
+		or settings.raceType == RACE_TYPE_LOOP_TIME_TRIAL
+		or settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 		{
 			lapCurrent++;
 			if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
 				lapTimeBest = lapTimeCurrent;
 			lapTimeCurrent = 0;
 
-			if(raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+			if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 			{
-				if(lapCurrent > lapCountGoal)
+				if(lapCurrent > settings.lapCountGoal)
 				{
 					onSceneFinish = true;
 					timerSceneFinish = 8.0;
@@ -800,6 +817,18 @@ bool Pseudo3DRaceState::isPlayerSteeringRight()
 {
 	return Keyboard::isKeyPressed(controlKeyTurnRight)
 			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0);
+}
+
+string to_string(Pseudo3DRaceState::RaceType type)
+{
+	switch(type)
+	{
+		case Pseudo3DRaceState::RACE_TYPE_DEBUG: 				return "Debug";
+		case Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE: 		return "Circuit - Practice";
+		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_TRIAL: 		return "Circuit - Time Trial";
+		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK:		return "Circuit - Time Attack";
+		default: return "???";
+	}
 }
 
 #include "race_state_physics.hxx"

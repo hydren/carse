@@ -14,6 +14,8 @@
 #include "automotive/engine_sound.hpp"
 #include "automotive/mechanics.hpp"
 
+#include "states/race_state.hpp"
+
 #include "futil/language.hpp"
 #include "futil/properties.hpp"
 
@@ -62,6 +64,7 @@ class CarseGameLogic
 	void setNextCourseDebug();
 	const Course& getNextCourse();
 	fgeal::Image* getNextCoursePreviewImage();
+	Pseudo3DRaceState::RaceSettings& getNextRaceSettings();
 
 	const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
 	void setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex=-1);

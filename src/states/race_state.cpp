@@ -359,6 +359,12 @@ void Pseudo3DRaceState::render()
 		else
 			hudTimerBestLap.draw();
 	}
+	else if(isRaceTypePointToPoint(settings.raceType))
+	{
+		const float courseLength = (course.lines.size()*course.roadSegmentLength)/coursePositionFactor,
+					progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));
+		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
+	}
 
 	hudSpeedometer.draw();
 	fontSmall->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.bounds.h, fgeal::Color::WHITE);

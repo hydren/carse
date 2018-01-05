@@ -56,6 +56,7 @@ void OptionsMenuState::initialize()
 	menu->addEntry("Fullscreen: ");
 	menu->addEntry("Unit: ");
 	menu->addEntry("Simulation mode: ");
+	menu->addEntry("Tachometer type: ");
 	menu->addEntry("Back to main menu");
 
 	menuResolution = new Menu(Rectangle(), font, Color::GREY);
@@ -173,6 +174,9 @@ void OptionsMenuState::onMenuSelect()
 		logic.setSimulationType(newType);
 	}
 
+	if(menu->getSelectedIndex() == 4)
+		logic.getNextRaceSettings().useBarTachometer = !logic.getNextRaceSettings().useBarTachometer;
+
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
 		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
 }
@@ -193,11 +197,11 @@ void OptionsMenuState::updateLabels()
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
 	menu->at(3).label = "Simulation mode: " + strSimType;
+	menu->at(4).label = "Tachometer type: " + string(logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
 }
 
 void OptionsMenuState::updateOnResolutionMenu(Event& event)
 {
-
 	if(event.getEventType() == Event::TYPE_KEY_PRESS)
 	{
 		switch(event.getEventKeyCode())

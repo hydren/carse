@@ -280,7 +280,7 @@ namespace Hud
 			const float fillRatio = (value-min)/(max-min);
 			fgeal::Image::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
 			fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-											  bounds.w - borderThickness, bounds.h - borderThickness), backgroundColor;
+											  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
 			fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
 											  fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness, fillColor);
 		}

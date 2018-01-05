@@ -70,6 +70,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
   hudTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
+  hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
   hudGearDisplay(playerVehicle.body.engine.gear, Rectangle(), null),
   hudTimerCurrentLap(lapTimeCurrent, Rectangle(), null),
@@ -148,18 +149,21 @@ void Pseudo3DRaceState::initialize()
 	hudTachometer.graduationValueScale = 0.001;
 	hudTachometer.graduationFont = fontSmall;
 
+	hudBarTachometer.borderThickness = 6;
+	hudBarTachometer.fillColor = Color::RED;
+
 	hudGearDisplay.font = fontSmall;
 	hudGearDisplay.fontIsShared = true;
 	hudGearDisplay.borderThickness = 6;
-	hudGearDisplay.borderColor = fgeal::Color::LIGHT_GREY;
-	hudGearDisplay.backgroundColor = fgeal::Color::BLACK;
+	hudGearDisplay.borderColor = Color::LIGHT_GREY;
+	hudGearDisplay.backgroundColor = Color::BLACK;
 	hudGearDisplay.specialCases[0] = "N";
 	hudGearDisplay.specialCases[-1] = "R";
 
 	hudSpeedometer.font = new Font(shared.font2Path, dip(24));
 	hudSpeedometer.fontIsShared = false;
 	hudSpeedometer.disableBackground = true;
-	hudSpeedometer.displayColor = fgeal::Color::WHITE;
+	hudSpeedometer.displayColor = Color::WHITE;
 	hudSpeedometer.borderThickness = 0;
 
 	hudCurrentLap.font = font3;
@@ -243,6 +247,14 @@ void Pseudo3DRaceState::onEnter()
 	hudTachometer.max = playerVehicle.body.engine.maxRpm;
 	hudTachometer.bounds = gaugeSize;
 	hudTachometer.compile();
+
+	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
+	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
+	hudBarTachometer.bounds = gaugeSize;
+	hudBarTachometer.bounds.x *= 0.8;
+	hudBarTachometer.bounds.y *= 1.15;
+	hudBarTachometer.bounds.w *= 2;
+	hudBarTachometer.bounds.h *= 0.125;
 
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
@@ -369,7 +381,11 @@ void Pseudo3DRaceState::render()
 	hudSpeedometer.draw();
 	fontSmall->drawText(settings.isImperialUnit? "mph" : "Km/h", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.bounds.h, fgeal::Color::WHITE);
 
-	hudTachometer.draw();
+	if(settings.useBarTachometer)
+		hudBarTachometer.draw();
+	else
+		hudTachometer.draw();
+
 	hudGearDisplay.draw();
 
 	if(onSceneIntro)

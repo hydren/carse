@@ -86,6 +86,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		RaceType raceType;
 		unsigned lapCountGoal;
 		bool isImperialUnit;
+		bool useBarTachometer;
 	};
 
 	private:
@@ -100,6 +101,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Pseudo3DVehicle playerVehicle;
 
 	Hud::DialGauge<float> hudTachometer;
+	Hud::BarGauge<float> hudBarTachometer;
 	Hud::NumericalDisplay<float> hudSpeedometer;
 	Hud::NumericalDisplay<int> hudGearDisplay;
 	Hud::TimerDisplay<float> hudTimerCurrentLap, hudTimerBestLap;

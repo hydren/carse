@@ -63,7 +63,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  drawParameters(), coursePositionFactor(500), isImperialUnit(), simulationType(),
+  drawParameters(), coursePositionFactor(500), simulationType(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0),
 
@@ -254,7 +254,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
 	hudSpeedometer.bounds = gaugeSize;
-	hudSpeedometer.valueScale = isImperialUnit? 2.25 : 3.6;
+	hudSpeedometer.valueScale = settings.isImperialUnit? 2.25 : 3.6;
 
 	gaugeSize.x = display.getWidth() - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
 	hudTimerCurrentLap.bounds = gaugeSize;
@@ -367,7 +367,7 @@ void Pseudo3DRaceState::render()
 	}
 
 	hudSpeedometer.draw();
-	fontSmall->drawText(isImperialUnit? "mph" : "Km/h", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.bounds.h, fgeal::Color::WHITE);
+	fontSmall->drawText(settings.isImperialUnit? "mph" : "Km/h", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.bounds.h, fgeal::Color::WHITE);
 
 	hudTachometer.draw();
 	hudGearDisplay.draw();

@@ -58,8 +58,8 @@ void CarseGameLogic::onStatesListInitFinished()
 	this->setNextCourseRandom();  // set default course
 	getRaceStateInstance().settings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
 	getRaceStateInstance().settings.lapCountGoal = 2;    // set default lap count
+	getRaceStateInstance().settings.isImperialUnit = false;
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
-	this->setImperialUnitEnabled(false);
 	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
 }
 
@@ -263,16 +263,6 @@ void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int al
 void CarseGameLogic::drawPickedVehicle(float x, float y, float scale, int angleType)
 {
 	static_cast<VehicleSelectionState*>(game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
-}
-
-bool CarseGameLogic::isImperialUnitEnabled()
-{
-	return getRaceStateInstance().isImperialUnit;
-}
-
-void CarseGameLogic::setImperialUnitEnabled(bool choice)
-{
-	getRaceStateInstance().isImperialUnit = choice;
 }
 
 Mechanics::SimulationType CarseGameLogic::getSimulationType()

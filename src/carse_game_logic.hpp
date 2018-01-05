@@ -72,9 +72,6 @@ class CarseGameLogic
 	const Pseudo3DVehicle::Spec& getPickedVehicle();
 	void drawPickedVehicle(float x, float y, float scale=1.0f, int angleType=0);
 
-	bool isImperialUnitEnabled();
-	void setImperialUnitEnabled(bool choice=true);
-
 	Mechanics::SimulationType getSimulationType();
 	void setSimulationType(Mechanics::SimulationType type);
 

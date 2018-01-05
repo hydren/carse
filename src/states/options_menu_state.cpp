@@ -158,7 +158,7 @@ void OptionsMenuState::onMenuSelect()
 		game.getDisplay().setFullscreen(!game.getDisplay().isFullscreen());
 
 	if(menu->getSelectedIndex() == 2)
-		logic.setImperialUnitEnabled(!logic.isImperialUnitEnabled());
+		logic.getNextRaceSettings().isImperialUnit = !logic.getNextRaceSettings().isImperialUnit;
 
 	if(menu->getSelectedIndex() == 3)
 	{
@@ -182,7 +182,7 @@ void OptionsMenuState::updateLabels()
 	Display& display = game.getDisplay();
 	menu->at(0).label = string("Resolution: ") + futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight());
 	menu->at(1).label = string("Fullscreen: ") + (display.isFullscreen()? "yes" : "no");
-	menu->at(2).label = string("Unit: ") + (logic.isImperialUnitEnabled()? "imperial" : "metric");
+	menu->at(2).label = string("Unit: ") + (logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
 
 	string strSimType;
 	switch(logic.getSimulationType())

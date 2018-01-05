@@ -51,7 +51,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
-	bool isImperialUnit;
 	Mechanics::SimulationType simulationType;
 
 	bool onSceneIntro, onSceneFinish;
@@ -86,6 +85,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	{
 		RaceType raceType;
 		unsigned lapCountGoal;
+		bool isImperialUnit;
 	};
 
 	private:

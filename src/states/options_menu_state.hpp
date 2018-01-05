@@ -25,9 +25,11 @@ class OptionsMenuState extends public fgeal::Game::State
 {
 	CarseGameLogic& logic;
 	CarseSharedResources& shared;
-	fgeal::Menu* menu;
+	fgeal::Menu* menu, *menuResolution;
 	fgeal::Font* fontTitle, *font;
 	fgeal::Image* background;
+
+	bool isResolutionMenuActive;
 
 	public:
 	int getId();
@@ -44,7 +46,10 @@ class OptionsMenuState extends public fgeal::Game::State
 
 	private:
 	void onMenuSelect();
+	void updateOnResolutionMenu(fgeal::Event&);
 	void updateLabels();
+
+	void updateFonts();
 };
 
 #endif /* OPTIONS_MENU_STATE_HPP_ */

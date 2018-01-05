@@ -26,8 +26,8 @@ using std::string;
 int OptionsMenuState::getId() { return Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(Pseudo3DCarseGame* game)
-: State(*game), logic(game->logic), shared(*game->sharedResources), menu(),
-  fontTitle(null), font(null), background(null)
+: State(*game), logic(game->logic), shared(*game->sharedResources), menu(null), menuResolution(null),
+  fontTitle(null), font(null), background(null), isResolutionMenuActive(false)
 {}
 
 OptionsMenuState::~OptionsMenuState()
@@ -35,6 +35,7 @@ OptionsMenuState::~OptionsMenuState()
 	if(fontTitle != null) delete fontTitle;
 	if(font != null) delete font;
 	if(menu != null) delete menu;
+	if(menuResolution != null) delete menuResolution;
 	if(background != null) delete background;
 }
 
@@ -56,10 +57,23 @@ void OptionsMenuState::initialize()
 	menu->addEntry("Unit: ");
 	menu->addEntry("Simulation mode: ");
 	menu->addEntry("Back to main menu");
+
+	menuResolution = new Menu(Rectangle(), font, Color::GREY);
+	menuResolution->bgColor = Color(0, 0, 0, 96);
+	menuResolution->borderColor = Color::_TRANSPARENT;
+	for(unsigned i = 0; i < Display::Resolution::getList().size(); i++)
+	{
+		Display::Resolution resolution = Display::Resolution::getList()[i];
+		menuResolution->addEntry(futil::to_string(resolution.width)+"x"+futil::to_string(resolution.height)
+			+ " ("+futil::to_string(resolution.aspect.first)+":"+futil::to_string(resolution.aspect.second)+")"
+			+ (resolution.description.empty()? "" : " ("+resolution.description+")"));
+	}
 }
 
 void OptionsMenuState::onEnter()
-{}
+{
+	isResolutionMenuActive = false;
+}
 
 void OptionsMenuState::onLeave()
 {}
@@ -75,9 +89,18 @@ void OptionsMenuState::render()
 	menu->bounds.w = display.getWidth() - 2*menu->bounds.x;
 	menu->bounds.h = 0.5f*display.getHeight();
 
+	menuResolution->bounds.x = 0.25f*display.getWidth();
+	menuResolution->bounds.y = 0.25f*display.getHeight();
+	menuResolution->bounds.w = display.getWidth() - 2*menuResolution->bounds.x;
+	menuResolution->bounds.h = 0.5f*display.getHeight();
+
 	background->drawScaled(0, 0, scaledToSize(background, display));
 	updateLabels();
-	menu->draw();
+
+	if(isResolutionMenuActive)
+		menuResolution->draw();
+	else
+		menu->draw();
 
 	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getHeight(), Color::WHITE);
 }
@@ -93,6 +116,8 @@ void OptionsMenuState::update(float delta)
 		{
 			game.running = false;
 		}
+		else if(isResolutionMenuActive)
+			updateOnResolutionMenu(event);
 		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
 		{
 			switch(event.getEventKeyCode())
@@ -126,6 +151,9 @@ void OptionsMenuState::update(float delta)
 
 void OptionsMenuState::onMenuSelect()
 {
+	if(menu->getSelectedIndex() == 0)
+		isResolutionMenuActive = true;
+
 	if(menu->getSelectedIndex() == 1)
 		game.getDisplay().setFullscreen(!game.getDisplay().isFullscreen());
 
@@ -165,4 +193,42 @@ void OptionsMenuState::updateLabels()
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
 	menu->at(3).label = "Simulation mode: " + strSimType;
+}
+
+void OptionsMenuState::updateOnResolutionMenu(Event& event)
+{
+
+	if(event.getEventType() == Event::TYPE_KEY_PRESS)
+	{
+		switch(event.getEventKeyCode())
+		{
+			case Keyboard::KEY_ESCAPE:
+				isResolutionMenuActive = false;
+				break;
+			case Keyboard::KEY_ENTER:
+			{
+				Display::Resolution resolution = Display::Resolution::getList()[menuResolution->getSelectedIndex()];
+				game.getDisplay().setSize(resolution.width, resolution.height);
+				updateFonts();
+				isResolutionMenuActive = false;
+				break;
+			}
+			case Keyboard::KEY_ARROW_UP:
+				menuResolution->cursorUp();
+				break;
+			case Keyboard::KEY_ARROW_DOWN:
+				menuResolution->cursorDown();
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+void OptionsMenuState::updateFonts()
+{
+	Display& display = game.getDisplay();
+
+	if(fontTitle != null) delete fontTitle;
+	fontTitle = new Font(shared.font2Path, dip(48));
 }

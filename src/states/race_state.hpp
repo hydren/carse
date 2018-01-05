@@ -66,8 +66,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		RACE_TYPE_LOOP_TIME_ATTACK,
 //		RACE_TYPE_LOOP_AGAINST_OPPOSITION,
 //		RACE_TYPE_KNOCK_OUT,
-//		RACE_TYPE_POINT_TO_POINT_PRACTICE,
-//		RACE_TYPE_POINT_TO_POINT_TIME_TRIAL,
+		RACE_TYPE_POINT_TO_POINT_PRACTICE,
+		RACE_TYPE_POINT_TO_POINT_TIME_TRIAL,
 //		RACE_TYPE_POINT_TO_POINT_AGAINST_OPPOSITION,
 //		RACE_TYPE_DRAG_PRACTICE,
 //		RACE_TYPE_DRAG_AGAINST_OPPOSITION,
@@ -163,6 +163,12 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	void update(float delta);
 	void render();
+
+	// returns true if the given race type is a loop-type
+	static bool isRaceTypeLoop(RaceType type);
+
+	// returns true if the given race type is a point-to-point-type
+	static bool isRaceTypePointToPoint(RaceType type);
 
 	private:
 	void handleInput();

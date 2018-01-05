@@ -59,6 +59,8 @@ class CourseSelectionState extends public fgeal::Game::State
 	void handleInput();
 	void handleInputOnCourseList(fgeal::Event&);
 	void handleInputOnSettings(fgeal::Event&);
+
+	void updateLapCount();
 };
 
 #endif /* COURSE_SELECTION_STATE_HPP_ */

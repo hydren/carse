@@ -30,6 +30,12 @@ using std::vector;
 using std::string;
 using futil::to_string;
 
+enum SettingsMenuIndex
+{
+	SETTINGS_RACE_TYPE = 0,
+	SETTINGS_LAPS = 1
+};
+
 int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
@@ -192,6 +198,14 @@ void CourseSelectionState::update(float delta)
 	this->handleInput();
 }
 
+void CourseSelectionState::updateLapCount()
+{
+	if(menuSettings->at(1).enabled)
+		menuSettings->at(1).label = "Laps: " + to_string(logic.getNextRaceSettings().lapCountGoal);
+	else
+		menuSettings->at(1).label = "Laps: --";
+}
+
 void CourseSelectionState::handleInput()
 {
 	Event event;
@@ -282,7 +296,7 @@ void CourseSelectionState::handleInputOnSettings(Event& event)
 			shared.sndCursorMove.play();
 			switch(menuSettings->getSelectedIndex())
 			{
-				case 0:  // race type
+				case SETTINGS_RACE_TYPE:  // race type
 				{
 					unsigned nextType;
 					if(isCursorLeft)
@@ -297,11 +311,17 @@ void CourseSelectionState::handleInputOnSettings(Event& event)
 							nextType = logic.getNextRaceSettings().raceType+1;
 
 					logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
-					menuSettings->getSelectedEntry().label = "Race type: " + to_string(logic.getNextRaceSettings().raceType);
+					menuSettings->at(SETTINGS_RACE_TYPE).label = "Race type: " + to_string(logic.getNextRaceSettings().raceType);
+					menuSettings->at(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(logic.getNextRaceSettings().raceType);
+					updateLapCount();
 					break;
 				}
-				case 1:  // laps
+				case SETTINGS_LAPS:  // laps
 				{
+					// if not a loop type race, do nothing
+					if(not menuSettings->at(SETTINGS_LAPS).enabled)
+						break;
+
 					if(isCursorLeft)
 					{
 						if(logic.getNextRaceSettings().lapCountGoal > 2)
@@ -310,7 +330,7 @@ void CourseSelectionState::handleInputOnSettings(Event& event)
 					else
 						logic.getNextRaceSettings().lapCountGoal++;
 
-					menuSettings->getSelectedEntry().label = "Laps: " + to_string(logic.getNextRaceSettings().lapCountGoal);
+					updateLapCount();
 					break;
 				}
 				default: break;

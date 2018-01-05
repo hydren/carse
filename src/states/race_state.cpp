@@ -256,22 +256,24 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedometer.bounds = gaugeSize;
 	hudSpeedometer.valueScale = isImperialUnit? 2.25 : 3.6;
 
-	hudCurrentLap.bounds = gaugeSize;
-	hudCurrentLap.bounds.y = display.getHeight() * 0.04;
-
-	hudLapCountGoal.bounds = gaugeSize;
-	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");
-	hudLapCountGoal.bounds.y = hudCurrentLap.bounds.y;
-
+	gaugeSize.x = display.getWidth() - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
 	hudTimerCurrentLap.bounds = gaugeSize;
-	hudTimerCurrentLap.bounds.y = hudCurrentLap.bounds.y + font3->getHeight()*1.05;
+	hudTimerCurrentLap.bounds.y = display.getHeight() * 0.01;
 	hudTimerCurrentLap.valueScale = 1000;
 
 	hudTimerBestLap.bounds = gaugeSize;
 	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + font3->getHeight()*1.05;
 
+	hudCurrentLap.bounds = gaugeSize;
+	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + font3->getHeight()*1.05;
+
+	hudLapCountGoal.bounds = gaugeSize;
+	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");
+	hudLapCountGoal.bounds.y = hudCurrentLap.bounds.y;
+
 	rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("999/999");
 	offsetHudLapGoal = font3->getTextWidth("Laps: 999");
+
 	posHudCountdown.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("0"));
 	posHudCountdown.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
 	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
@@ -337,21 +339,19 @@ void Pseudo3DRaceState::render()
 
 	drawVehicle(playerVehicle, vehicleSpritePosition);
 
-	if(settings.raceType == RACE_TYPE_LOOP_PRACTICE
-	or settings.raceType == RACE_TYPE_LOOP_TIME_TRIAL
-	or settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
+	hudTimerCurrentLap.draw();
+
+	if(isRaceTypeLoop(settings.raceType))
 	{
-		font3->drawText("Lap ", 1.05*rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
+		font3->drawText("Lap", rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
 		hudCurrentLap.draw();
 
 		if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 		{
-			font3->drawText("/", 1.05*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
+			font3->drawText("/", 1.025*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
 			hudLapCountGoal.draw();
 		}
-
-		font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
-		hudTimerCurrentLap.draw();
 
 		font3->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 		if(lapTimeBest == 0)
@@ -620,24 +620,32 @@ void Pseudo3DRaceState::update(float delta)
 	{
 		playerVehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
 
-		if(settings.raceType == RACE_TYPE_LOOP_PRACTICE
-		or settings.raceType == RACE_TYPE_LOOP_TIME_TRIAL
-		or settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+		if(not onSceneFinish)
 		{
-			lapCurrent++;
-			if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
-				lapTimeBest = lapTimeCurrent;
-			lapTimeCurrent = 0;
-
-			if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+			if(isRaceTypeLoop(settings.raceType))
 			{
-				if(lapCurrent > settings.lapCountGoal)
+				lapCurrent++;
+				if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
+					lapTimeBest = lapTimeCurrent;
+				lapTimeCurrent = 0;
+
+				if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 				{
-					onSceneFinish = true;
-					timerSceneFinish = 8.0;
+					if(lapCurrent > settings.lapCountGoal)
+					{
+						onSceneFinish = true;
+						timerSceneFinish = 8.0;
+						lapCurrent--;
+					}
 				}
 			}
+			else if(isRaceTypePointToPoint(settings.raceType))
+			{
+				onSceneFinish = true;
+				timerSceneFinish = 8.0;
+			}
 		}
+
 	}
 	while(playerVehicle.position < 0)
 		playerVehicle.position += N*course.roadSegmentLength / coursePositionFactor;
@@ -819,14 +827,29 @@ bool Pseudo3DRaceState::isPlayerSteeringRight()
 			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0);
 }
 
+bool Pseudo3DRaceState::isRaceTypeLoop(RaceType t)
+{
+	return t == RACE_TYPE_LOOP_PRACTICE
+		or t == RACE_TYPE_LOOP_TIME_TRIAL
+		or t == RACE_TYPE_LOOP_TIME_ATTACK;
+}
+
+bool Pseudo3DRaceState::isRaceTypePointToPoint(RaceType t)
+{
+	return t == RACE_TYPE_POINT_TO_POINT_PRACTICE
+		or t == RACE_TYPE_POINT_TO_POINT_TIME_TRIAL;
+}
+
 string to_string(Pseudo3DRaceState::RaceType type)
 {
 	switch(type)
 	{
-		case Pseudo3DRaceState::RACE_TYPE_DEBUG: 				return "Debug";
-		case Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE: 		return "Circuit - Practice";
-		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_TRIAL: 		return "Circuit - Time Trial";
-		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK:		return "Circuit - Time Attack";
+		case Pseudo3DRaceState::RACE_TYPE_DEBUG: 						return "Debug";
+		case Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE: 				return "Circuit - Practice";
+		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_TRIAL: 				return "Circuit - Time Trial";
+		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK:				return "Circuit - Time Attack";
+		case Pseudo3DRaceState::RACE_TYPE_POINT_TO_POINT_PRACTICE:		return "Sprint - Practice";
+		case Pseudo3DRaceState::RACE_TYPE_POINT_TO_POINT_TIME_TRIAL:	return "Sprint - Time Trial";
 		default: return "???";
 	}
 }

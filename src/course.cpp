@@ -212,12 +212,18 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 			line.spriteID = 1;
 			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
+		else if(rand() % 1000 == 0)
+		{
+			line.spriteID = 2;
+			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
+		}
 
 		course.lines.push_back(line);
 	}
 
 	course.spritesFilenames.push_back("assets/bush.png");
 	course.spritesFilenames.push_back("assets/tree.png");
+	course.spritesFilenames.push_back("assets/redbarn.png");
 	course.landscapeFilename = "assets/bg.png";
 
 	course.colorRoadPrimary =      Color( 64, 80, 80);

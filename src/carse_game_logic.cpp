@@ -199,38 +199,34 @@ Pseudo3DRaceState::RaceSettings& CarseGameLogic::getNextRaceSettings()
 void CarseGameLogic::loadVehicles()
 {
 	cout << "reading vehicles specs..." << endl;
-	const string definitionTag = "definition", definitionVehicleValue = "vehicle";
-	vector<string> vehicleFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
-	for(unsigned i = 0; i < vehicleFiles.size(); i++)
+
+	// create a list of files inside the vehicles folder and inside its subfolders (but not recursively)
+	vector<string> possibleVehiclePropertiesFilenames;
+	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
+	for(unsigned i = 0; i < vehiclesFolderFilenames.size(); i++)
 	{
-		const string& filename = vehicleFiles[i];
+		const string& filename = vehiclesFolderFilenames[i];
 		if(fgeal::filesystem::isFilenameDirectory(filename))
 		{
-			vector<string> subfolderFiles = fgeal::filesystem::getFilenamesWithinDirectory(filename);
-			for(unsigned j = 0; j < subfolderFiles.size(); j++)
-			{
-				const string& subfolderFile = subfolderFiles[j];
-				if(ends_with(subfolderFile, ".properties"))
-				{
-					Properties prop;
-					prop.load(subfolderFile);
-					if(prop.containsKey(definitionTag) and prop.get(definitionTag) == definitionVehicleValue)
-					{
-						vehicles.push_back(Pseudo3DVehicle::Spec());
-						loadVehicleSpec(vehicles.back(), prop);
-						cout << "read vehicle spec: " << subfolderFile << endl;
-						break;
-					}
-				}
-			}
+			const vector<string> subfolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(filename);
+			for(unsigned j = 0; j < subfolderFilenames.size(); j++)
+				possibleVehiclePropertiesFilenames.push_back(subfolderFilenames[j]);
 		}
-		else if(ends_with(filename, ".properties"))
+		else possibleVehiclePropertiesFilenames.push_back(filename);
+	}
+
+	// check the list of possible "vehicle properties" filenames
+	for(unsigned i = 0; i < possibleVehiclePropertiesFilenames.size(); i++)
+	{
+		const string& filename = possibleVehiclePropertiesFilenames[i];
+		if(fgeal::filesystem::isFilenameArchive(filename) and ends_with(filename, ".properties"))
 		{
 			Properties prop;
 			prop.load(filename);
-			if(prop.containsKey(definitionTag) and prop.get(definitionTag) == definitionVehicleValue)
+			if(prop.containsKey("definition") and prop.get("definition") == "vehicle")
 			{
 				vehicles.push_back(Pseudo3DVehicle::Spec());
+				prop.put("filename", filename);  // done so we can later get properties filename
 				loadVehicleSpec(vehicles.back(), prop);
 				cout << "read vehicle spec: " << filename << endl;
 			}

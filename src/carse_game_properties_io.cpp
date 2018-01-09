@@ -26,13 +26,58 @@ using futil::Properties;
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
 // returns true if the given properties requests a preset sound profile instead of specifying a custom one.
-static bool isEngineSoundProfileRequestingPreset(const Properties& prop) { return prop.containsKey("sound") and prop.get("sound") != "custom" and prop.get("sound") != "no"; }
+static bool isEngineSoundProfileRequestingPreset(const Properties& prop)
+{
+	return prop.containsKey("sound") and prop.get("sound") != "custom" and prop.get("sound") != "no";
+}
+
+// fwd. decl.
 static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
+
+/** Attempt to get a contextualized filename.
+ *  First it attempts to check if "baseDir1 + specifiedFilename" is a valid file and returns it if true.
+ *  If not, then it tries the same with "baseDir2 + specifiedFilename".
+ *  If not, then it tries the same with "baseDir3 + specifiedFilename".
+ *  If not, then it tries the same with "current working dir. + specifiedFilename".
+ *  If not, then it tries the same with "specifiedFilename" alone by itself.
+ *  If not, then we could not come up with a valid filename and an empty string is returned. */
+static string getContextualizedFilename(const string& specifiedFilename, const string& baseDir1, const string& baseDir2, const string& baseDir3)
+{
+	if(fgeal::filesystem::isFilenameArchive(baseDir1 + specifiedFilename))
+		return baseDir1 + specifiedFilename;
+
+	if(fgeal::filesystem::isFilenameArchive(baseDir2 + specifiedFilename))
+		return baseDir2 + specifiedFilename;
+
+	if(fgeal::filesystem::isFilenameArchive(baseDir3 + specifiedFilename))
+		return baseDir3 + specifiedFilename;
+
+	if(fgeal::filesystem::isFilenameArchive(fgeal::filesystem::getCurrentWorkingDirectory() + specifiedFilename))
+		return fgeal::filesystem::getCurrentWorkingDirectory() + specifiedFilename;
+
+	if(fgeal::filesystem::isFilenameArchive(specifiedFilename))
+		return specifiedFilename;
+
+	return string();
+}
+
+/// Same as the 4-argument version, but with only two "baseDir" option.
+static string getContextualizedFilename(const string& specifiedFilename, const string& baseDir1, const string& baseDir2)
+{
+	return getContextualizedFilename(specifiedFilename, baseDir1, baseDir2, baseDir2);
+}
+
+// ========================================================================================================================
+
+const static string
+	CARSE_VEHICLES_FOLDER = "data/vehicles",
+	CARSE_COURSES_FOLDER = "data/courses",
+	CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine";
 
 void CarseGameLogic::loadPresetEngineSoundProfiles()
 {
 	cout << "reading preset engine sound profiles..." << endl;
-	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory("assets/sound/engine");
+	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER);
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
 		string& filename = presetFiles[i];
@@ -99,7 +144,7 @@ void CarseGameLogic::loadCourses()
 {
 	cout << "reading courses..." << endl;
 
-	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory("data/courses");
+	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_COURSES_FOLDER);
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 	{
 		if(ends_with(courseFiles[i], ".properties"))
@@ -119,7 +164,7 @@ void CarseGameLogic::loadVehicles()
 
 	// create a list of files inside the vehicles folder and inside its subfolders (but not recursively)
 	vector<string> possibleVehiclePropertiesFilenames;
-	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory("data/vehicles");
+	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_VEHICLES_FOLDER);
 	for(unsigned i = 0; i < vehiclesFolderFilenames.size(); i++)
 	{
 		const string& filename = vehiclesFolderFilenames[i];
@@ -144,12 +189,15 @@ void CarseGameLogic::loadVehicles()
 			{
 				vehicles.push_back(Pseudo3DVehicle::Spec());
 				prop.put("filename", filename);  // done so we can later get properties filename
+				prop.put("base_dir", filename.substr(0, filename.find_last_of("/\\")+1));  // done so we can later get properties base dir
 				loadVehicleSpec(vehicles.back(), prop);
 				cout << "read vehicle spec: " << filename << endl;
 			}
 		}
 	}
 }
+
+// ========================================================================================================================
 
 // vehicle spec default constants
 static const float
@@ -232,7 +280,14 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 		key = "alternate_sprite_sheet" + futil::to_string(i) + "_definition_file";
 		if(isValueSpecified(prop, key))
 		{
-			const string alternateSpritePropFile = prop.get(key);
+			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+			if(alternateSpritePropFile.empty())
+			{
+				cout << "warning: alternate sprite sheet " << i << " definition file could not be found!"
+				<< " (specified by \"" << prop.get("filename") << "\")" << endl;
+				continue;
+			}
+
 			Properties alternateSpriteProp;
 			alternateSpriteProp.load(alternateSpritePropFile);
 
@@ -240,6 +295,8 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 			alternateSpriteProp["vehicle_width"] = prop.get("vehicle_width");
 			alternateSpriteProp["vehicle_height"] = prop.get("vehicle_height");
 			alternateSpriteProp["vehicle_width_height_ratio"] = prop.get("vehicle_width_height_ratio");
+			alternateSpriteProp.put("filename", alternateSpritePropFile);
+			alternateSpriteProp.put("base_dir", prop.get("base_dir"));
 
 			spec.alternateSprites.push_back(Pseudo3DVehicleAnimationSpec());
 			loadAnimationSpec(spec.alternateSprites.back(), alternateSpriteProp);
@@ -249,7 +306,13 @@ void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::P
 			key = "alternate_sprite_sheet" + futil::to_string(i) + "_file";
 			if(isValueSpecified(prop, key))
 			{
-				const string alternateSpriteSheetFile = prop.get(key);
+				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+				if(alternateSpriteSheetFile.empty())
+				{
+					cout << "warning: alternate sprite sheet " << i << " file could not be found!"
+					<< " (specified by \"" << prop.get("filename") << "\")" << endl;
+					continue;
+				}
 
 				int inheritedProfileIndex = -1;
 				key = "alternate_sprite_sheet" + futil::to_string(i) + "_inherit_from";
@@ -474,6 +537,8 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 		spec.weightDistribuition = prop.getParsedCStrAllowDefault<double, atof>(key, spec.weightDistribuition);
 }
 
+// ========================================================================================================================
+
 static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)
 {
 	return p1.isRedline? false : p2.isRedline? true : p1.rpm < p2.rpm;
@@ -499,7 +564,10 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 			string key = baseKey + futil::to_string(i);
 			while(prop.containsKey(key))
 			{
-				string filename = prop.get(key);
+				const string filename = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/", CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
+				if(filename.empty())
+					cout << "warning: sound file \"" << prop.get(key) << "\" could not be found!"  // todo use default sound?
+					<< " (specified by \"" << prop.get("filename") << "\")" << endl;
 
 				// now try to read _rpm property
 				key += "_rpm";
@@ -533,6 +601,8 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 	}
 }
 
+// ========================================================================================================================
+
 // default sprite uint constants
 static const unsigned
 	DEFAULT_SPRITE_WIDTH = 56,
@@ -551,8 +621,15 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	key = "sprite_sheet_file";
 	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "DEFAULT";
 
-	if(spec.sheetFilename == "DEFAULT")
+	if(not spec.sheetFilename.empty() and spec.sheetFilename != "DEFAULT")
+		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+
+	if(spec.sheetFilename == "DEFAULT" or spec.sheetFilename.empty())
 	{
+		if(spec.sheetFilename.empty())
+			cout << "warning: sheet file \"" << prop.get(key) << "\" could not be found!"
+		<< " (specified by \"" << prop.get("filename") << "\"). using default sheet instead..." << endl;
+
 		// uncomment when there is a default sprite for bikes
 //		switch(type)
 //		{

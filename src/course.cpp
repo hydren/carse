@@ -12,6 +12,8 @@
 #include "futil/string_split.hpp"
 #include "futil/collection_actions.hpp"
 
+#include "util.hpp"
+
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
@@ -28,6 +30,8 @@ using fgeal::Sprite;
 using futil::Properties;
 using std::string;
 using std::vector;
+using std::cout;
+using std::endl;
 using futil::random_between_decimal;
 using futil::split;
 using futil::trim;
@@ -260,10 +264,20 @@ Course Course::createCourseFromFile(const Properties& prop)
 	course.author = prop.get("author");
 	course.credits = prop.get("credits");
 	course.comments = prop.get("comments");
+	course.filename = prop.get("filename");  // property provided by course loader
 
-	course.landscapeFilename = prop.get("landscape_image");
-	if(course.landscapeFilename.empty() or futil::trim(course.landscapeFilename) == "default")
+	course.landscapeFilename = futil::trim(prop.get("landscape_image"));
+
+	if(not course.landscapeFilename.empty() and course.landscapeFilename != "default")
+		course.landscapeFilename = getContextualizedFilename(course.landscapeFilename, prop.get("base_dir"), "assets/");
+
+	if(course.landscapeFilename.empty() or course.landscapeFilename == "default")
+	{
+		if(course.landscapeFilename.empty())
+			cout << "warning: image file specified in \"landscape_image\" entry could not be found"
+			<< ", specified by \"" << course.filename << "\". using default instead..." << endl;
 		course.landscapeFilename = "assets/bg.png";
+	}
 
 	course.colorRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_primary", Color( 64, 80, 80));
 	course.colorRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_secondary", Color( 40, 64, 64));
@@ -276,12 +290,24 @@ Course Course::createCourseFromFile(const Properties& prop)
 
 	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", 32);
 	for(unsigned id = 0; id < spriteIdCount; id++)
-		course.spritesFilenames.push_back(prop.get("sprite" + futil::to_string(id)));
+	{
+		const string specifiedSpriteFilename = prop.get("sprite" + futil::to_string(id));
+		if(not specifiedSpriteFilename.empty())
+		{
+			const string spriteFilename = getContextualizedFilename(specifiedSpriteFilename, prop.get("base_dir"), "assets/");
+			if(spriteFilename.empty())
+				cout << "warning: could not load sprite for ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". ID will be treated as unspecified!" << endl;
+			course.spritesFilenames.push_back(spriteFilename);
+		}
+		else course.spritesFilenames.push_back(string());
+	}
 
-	string segmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
+	const string specifiedSegmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
+	const string segmentFilename = getContextualizedFilename(specifiedSegmentFilename, prop.get("base_dir"));
+
 	std::ifstream stream(segmentFilename.c_str());
 	if(not stream.is_open())
-		throw std::runtime_error("File could not be opened: " + segmentFilename);
+		throw std::runtime_error("Course description file could not be opened: \"" + specifiedSegmentFilename + "\", specified by \"" + course.filename + "\"");
 
 	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
 	for(unsigned i = 0; i < length; i++)
@@ -324,7 +350,7 @@ Course Course::createCourseFromFile(const Properties& prop)
 
 			if(line.spriteID != -1 and
 			  (line.spriteID + 1 > (int) course.spritesFilenames.size() or course.spritesFilenames[line.spriteID].empty()))
-				throw std::logic_error("Error: course indicates usage of an unspecified sprite ID. \n " + segmentFilename);
+				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + futil::to_string(line.spriteID) + "), specified by \"" + course.filename);
 		}
 		else if(tokens.size() == 4)
 			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;

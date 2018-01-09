@@ -11,6 +11,8 @@
 #include "futil/properties.hpp"
 #include "futil/round.h"
 
+#include "util.hpp"
+
 #include <iostream>
 #include <algorithm>
 #include <cstdlib>
@@ -33,39 +35,6 @@ static bool isEngineSoundProfileRequestingPreset(const Properties& prop)
 
 // fwd. decl.
 static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
-
-/** Attempt to get a contextualized filename.
- *  First it attempts to check if "baseDir1 + specifiedFilename" is a valid file and returns it if true.
- *  If not, then it tries the same with "baseDir2 + specifiedFilename".
- *  If not, then it tries the same with "baseDir3 + specifiedFilename".
- *  If not, then it tries the same with "current working dir. + specifiedFilename".
- *  If not, then it tries the same with "specifiedFilename" alone by itself.
- *  If not, then we could not come up with a valid filename and an empty string is returned. */
-static string getContextualizedFilename(const string& specifiedFilename, const string& baseDir1, const string& baseDir2, const string& baseDir3)
-{
-	if(fgeal::filesystem::isFilenameArchive(baseDir1 + specifiedFilename))
-		return baseDir1 + specifiedFilename;
-
-	if(fgeal::filesystem::isFilenameArchive(baseDir2 + specifiedFilename))
-		return baseDir2 + specifiedFilename;
-
-	if(fgeal::filesystem::isFilenameArchive(baseDir3 + specifiedFilename))
-		return baseDir3 + specifiedFilename;
-
-	if(fgeal::filesystem::isFilenameArchive(fgeal::filesystem::getCurrentWorkingDirectory() + specifiedFilename))
-		return fgeal::filesystem::getCurrentWorkingDirectory() + specifiedFilename;
-
-	if(fgeal::filesystem::isFilenameArchive(specifiedFilename))
-		return specifiedFilename;
-
-	return string();
-}
-
-/// Same as the 4-argument version, but with only two "baseDir" option.
-static string getContextualizedFilename(const string& specifiedFilename, const string& baseDir1, const string& baseDir2)
-{
-	return getContextualizedFilename(specifiedFilename, baseDir1, baseDir2, baseDir2);
-}
 
 // ========================================================================================================================
 
@@ -151,8 +120,10 @@ void CarseGameLogic::loadCourses()
 		{
 			Properties prop;
 			prop.load(courseFiles[i]);
-			courses.push_back(Course::createCourseFromFile(prop));
-			courses.back().filename = courseFiles[i];
+			prop.put("filename", courseFiles[i]);  // done so we can later get properties filename
+			prop.put("base_dir", courseFiles[i].substr(0, courseFiles[i].find_last_of("/\\")+1));  // done so we can later get properties base dir
+			try { courses.push_back(Course::createCourseFromFile(prop)); }
+			catch(const std::exception& e) { cout << "error while reading course: " << e.what() << endl; continue; }
 			cout << "read course: " << courseFiles[i] << endl;
 		}
 	}

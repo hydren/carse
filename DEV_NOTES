@@ -3,7 +3,6 @@
 - Add mouse input on menus
 - Add gear shifting sounds
 - Add optional gear shifting sounds derived from forced induction
-- Improve UI to choose vehicle skins.
 - Re-attempt to create jumping physics. Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite.
 - Add option to specify custom vehicle portrait.
 - Add option to specify custom vehicle rotating sprite.

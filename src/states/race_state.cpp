@@ -201,6 +201,8 @@ void Pseudo3DRaceState::onEnter()
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
 		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
+	playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+
 	if(imgBackground != null)
 		delete imgBackground;
 
@@ -601,6 +603,21 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 		spriteSmokeRight->computeCurrentFrame();
 		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
+
+	if(vehicle.body.brakePedalPosition > 0)
+	{
+		vehicle.brakelightSprite->draw(
+			vehicleSpritePosition.x + (vehicle.spriteSpec.brakelightsPosition.x * sprite.scale.x) - 0.5*(vehicle.brakelightSprite->width  * vehicle.brakelightSprite->scale.x),
+			vehicleSpritePosition.y + (vehicle.spriteSpec.brakelightsPosition.y * sprite.scale.y) - 0.5*(vehicle.brakelightSprite->height * vehicle.brakelightSprite->scale.y)
+		);
+
+		if(vehicle.spriteSpec.isMirrowedBrakelightsEnabled)
+			vehicle.brakelightSprite->draw(
+				vehicleSpritePosition.x + (vehicle.spriteSpec.frameWidth - vehicle.spriteSpec.brakelightsPosition.x)*sprite.scale.x - 0.5*(vehicle.brakelightSprite->width  * vehicle.brakelightSprite->scale.x),
+				vehicleSpritePosition.y + (vehicle.spriteSpec.brakelightsPosition.y * sprite.scale.y) - 0.5*(vehicle.brakelightSprite->height * vehicle.brakelightSprite->scale.y)
+			);
+	}
+
 }
 
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%

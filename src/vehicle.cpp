@@ -22,7 +22,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isBurningRubber(false),
   engineSoundProfile(), engineSound(),
-  spriteSpec(), sprites()
+  spriteSpec(), sprites(), brakelightSprite(null)
 {}
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
@@ -33,7 +33,7 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   isBurningRubber(false),
   engineSoundProfile(spec.soundProfile), engineSound(),
   spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
-  sprites()
+  sprites(), brakelightSprite(null)
 {
 	// update engine info data (optional)
 	body.engine.configuration = spec.engineConfiguration;
@@ -84,6 +84,9 @@ void Pseudo3DVehicle::clearDynamicData()
 
 		sprites.clear();
 	}
+
+	if(brakelightSprite != null)
+		delete brakelightSprite;
 }
 
 void Pseudo3DVehicle::setupDynamicData()
@@ -116,4 +119,8 @@ void Pseudo3DVehicle::setupDynamicData()
 		sprite->referencePixelY = - (int) spriteSpec.contactOffset;
 		sprites.push_back(sprite);
 	}
+
+	fgeal::Image* brakelightSpriteImage = new fgeal::Image(spriteSpec.brakelightsSheetFilename);
+	brakelightSprite = new fgeal::Sprite(brakelightSpriteImage, brakelightSpriteImage->getWidth(), brakelightSpriteImage->getHeight()
+			-1, -1, 0, 0, true);
 }

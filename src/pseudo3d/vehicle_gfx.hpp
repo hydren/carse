@@ -53,6 +53,19 @@ struct Pseudo3DVehicleAnimationSpec
 	/** The width of the vehicle as depicted in the sprite (in pixels). This is used to align animation
 	 *  effects, such as burning rubber's smoking animation, etc. */
 	unsigned depictedVehicleWidth;
+
+	/** The filename of the image containing the sprite for the optional brakelights overlay.
+	 *  Note that the actual brakelight image portraited in the sheet should be in the same scale as
+	 *  the vehicle sprite sheet.*/
+	std::string brakelightsSheetFilename;
+
+	/** The position of the brakelights within the animation's coordinates. */
+	fgeal::Point brakelightsPosition;
+
+	/** If true (default), a mirrowed version of the brakeligthts animation is mirrowed as well.
+	 *  The position of the mirrowed brakelights is a mirrowed version of the 'brakelightsPosition',
+	 *  minus the animation width. */
+	bool isMirrowedBrakelightsEnabled;
 };
 
 #endif /* PSEUDO3D_VEHICLE_GFX_HPP_ */

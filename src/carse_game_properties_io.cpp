@@ -590,12 +590,12 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	string key, key2, key3;
 
 	key = "sprite_sheet_file";
-	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "DEFAULT";
+	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
 
-	if(not spec.sheetFilename.empty() and spec.sheetFilename != "DEFAULT")
+	if(not spec.sheetFilename.empty() and spec.sheetFilename != "default")
 		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
 
-	if(spec.sheetFilename == "DEFAULT" or spec.sheetFilename.empty())
+	if(spec.sheetFilename == "default" or spec.sheetFilename.empty())
 	{
 		if(spec.sheetFilename.empty())
 			cout << "warning: sheet file \"" << prop.get(key) << "\" could not be found!"
@@ -708,5 +708,35 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
 		const unsigned frameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 		spec.stateFrameCount.push_back(frameCount);
+	}
+
+	key = "brakelights_sprite_filename";
+	spec.brakelightsSheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
+
+	if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "default")
+		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+
+	if(spec.brakelightsSheetFilename == "default" or spec.brakelightsSheetFilename.empty())
+	{
+		if(spec.brakelightsSheetFilename.empty())
+			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
+		<< " (specified by \"" << prop.get("filename") << "\"). using default instead..." << endl;
+
+		spec.brakelightsSheetFilename = "assets/default-brakelight-effect.png";
+	}
+
+	key = "brakelights_position_x";
+	spec.brakelightsPosition.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth);
+
+	key = "brakelights_position_y";
+	spec.brakelightsPosition.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.5*spec.frameHeight;
+
+	spec.isMirrowedBrakelightsEnabled = true;
+	key = "enable_mirrowed_brakelights";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = futil::to_lower(futil::trim(prop.get(key)));
+		if(value == "false" or value == "no")
+			spec.isMirrowedBrakelightsEnabled = false;
 	}
 }

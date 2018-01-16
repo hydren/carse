@@ -8,6 +8,7 @@
 #include "carse_game_logic.hpp"
 
 #include "futil/string_actions.hpp"
+#include "futil/string_split.hpp"
 #include "futil/properties.hpp"
 #include "futil/round.h"
 
@@ -725,18 +726,69 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 		spec.brakelightsSheetFilename = "assets/default-brakelight-effect.png";
 	}
 
-	key = "brakelights_position_x";
-	spec.brakelightsPosition.x = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth);
+	spec.brakelightsMultipleSprites = false;
+	key = "brakelights_multiple_sprites";
+	if(isValueSpecified(prop, key))
+	{
+		const string value = futil::to_lower(futil::trim(prop.get(key)));
+		if(value == "true" or value == "yes")
+			spec.brakelightsMultipleSprites = true;
+	}
 
-	key = "brakelights_position_y";
-	spec.brakelightsPosition.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.5*spec.frameHeight;
+	for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
+	{
+		fgeal::Point brakelightsPosition;
+		bool defaultedX = false, defaultedY = false;
+		key = "brakelights_position" + futil::to_string(stateNumber);
+		if(isValueSpecified(prop, key))
+		{
+			vector<string> tokens = futil::split(prop.get(key), ',');
+			if(tokens.size() > 1)
+			{
+				brakelightsPosition.x = atof(tokens[0].c_str());
+				brakelightsPosition.y = atof(tokens[1].c_str());
+			}
+		}
+		else defaultedX = defaultedY = true;
 
-	spec.isMirrowedBrakelightsEnabled = true;
-	key = "enable_mirrowed_brakelights";
+		string key2 = key + "_x";
+		if(isValueSpecified(prop, key2))
+		{
+			brakelightsPosition.x = atof(prop.get(key2).c_str());
+			defaultedX = false;
+		}
+
+		key2 = key + "_y";
+		if(isValueSpecified(prop, key2))
+		{
+			brakelightsPosition.y = atof(prop.get(key2).c_str());
+			defaultedY = false;
+		}
+
+		if(defaultedX)
+		{
+			if(spec.brakelightsMultipleSprites)
+				brakelightsPosition.x = 0;
+			else
+				brakelightsPosition.x = 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth) + stateNumber*0.0357*spec.frameWidth;
+		}
+		if(defaultedY)
+		{
+			if(spec.brakelightsMultipleSprites)
+				brakelightsPosition.y = 0;
+			else
+				brakelightsPosition.y = 0.5*spec.frameHeight;
+		}
+
+		spec.brakelightsPositions.push_back(brakelightsPosition);
+	}
+
+	spec.brakelightsMirrowed = true;
+	key = "brakelights_mirrowed";
 	if(isValueSpecified(prop, key))
 	{
 		const string value = futil::to_lower(futil::trim(prop.get(key)));
 		if(value == "false" or value == "no")
-			spec.isMirrowedBrakelightsEnabled = false;
+			spec.brakelightsMirrowed = false;
 	}
 }

@@ -606,18 +606,31 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 
 	if(vehicle.body.brakePedalPosition > 0)
 	{
+		if(vehicle.spriteSpec.brakelightsMultipleSprites)
+			vehicle.brakelightSprite->currentFrameSequenceIndex = animationIndex;
+
+		const float scaledBrakelightPositionX = vehicle.spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
+					scaledBrakelightPositionY = vehicle.spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,
+					scaledBrakelightWidth =  vehicle.brakelightSprite->width  * vehicle.brakelightSprite->scale.x,
+					scaledBrakelightHeight = vehicle.brakelightSprite->height * vehicle.brakelightSprite->scale.y,
+					scaledTurnOffset = (vehicle.spriteSpec.brakelightsPositions[animationIndex].x - vehicle.spriteSpec.brakelightsPositions[0].x)*sprite.scale.x,
+					scaledFlipOffset = sprite.flipmode != Image::FLIP_HORIZONTAL? 0 : 2*scaledTurnOffset;
+
 		vehicle.brakelightSprite->draw(
-			vehicleSpritePosition.x + (vehicle.spriteSpec.brakelightsPosition.x * sprite.scale.x) - 0.5*(vehicle.brakelightSprite->width  * vehicle.brakelightSprite->scale.x),
-			vehicleSpritePosition.y + (vehicle.spriteSpec.brakelightsPosition.y * sprite.scale.y) - 0.5*(vehicle.brakelightSprite->height * vehicle.brakelightSprite->scale.y)
+			vehicleSpritePosition.x + scaledBrakelightPositionX - 0.5*scaledBrakelightWidth - scaledFlipOffset,
+			vehicleSpritePosition.y + scaledBrakelightPositionY - 0.5*scaledBrakelightHeight
 		);
 
-		if(vehicle.spriteSpec.isMirrowedBrakelightsEnabled)
-			vehicle.brakelightSprite->draw(
-				vehicleSpritePosition.x + (vehicle.spriteSpec.frameWidth - vehicle.spriteSpec.brakelightsPosition.x)*sprite.scale.x - 0.5*(vehicle.brakelightSprite->width  * vehicle.brakelightSprite->scale.x),
-				vehicleSpritePosition.y + (vehicle.spriteSpec.brakelightsPosition.y * sprite.scale.y) - 0.5*(vehicle.brakelightSprite->height * vehicle.brakelightSprite->scale.y)
-			);
-	}
+		if(vehicle.spriteSpec.brakelightsMirrowed)
+		{
+			const float scaledFrameWidth = vehicle.spriteSpec.frameWidth*sprite.scale.x;
 
+			vehicle.brakelightSprite->draw(
+				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - 0.5*scaledBrakelightWidth - scaledFlipOffset + 2*scaledTurnOffset,
+				vehicleSpritePosition.y + scaledBrakelightPositionY - 0.5*scaledBrakelightHeight
+			);
+		}
+	}
 }
 
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%

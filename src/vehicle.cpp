@@ -121,6 +121,21 @@ void Pseudo3DVehicle::setupDynamicData()
 	}
 
 	fgeal::Image* brakelightSpriteImage = new fgeal::Image(spriteSpec.brakelightsSheetFilename);
-	brakelightSprite = new fgeal::Sprite(brakelightSpriteImage, brakelightSpriteImage->getWidth(), brakelightSpriteImage->getHeight()
-			-1, -1, 0, 0, true);
+	if(spriteSpec.brakelightsMultipleSprites)
+		brakelightSprite = new fgeal::Sprite(
+			brakelightSpriteImage,
+			brakelightSpriteImage->getWidth(),
+			brakelightSpriteImage->getHeight()/spriteSpec.stateCount,
+			-1, spriteSpec.stateCount, 0, 0, true
+		);
+	else
+		brakelightSprite = new fgeal::Sprite(
+			brakelightSpriteImage,
+			brakelightSpriteImage->getWidth(),
+			brakelightSpriteImage->getHeight()
+			-1, -1, 0, 0, true
+		);
+
+	if(spriteSpec.brakelightsMultipleSprites)
+		brakelightSprite->scale = spriteSpec.scale;
 }

@@ -704,10 +704,13 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	key = "sprite_frame_duration";
 	spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
 
+	key = "sprite_frame_count";
+	const float globalFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+
 	for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
 	{
 		key = "sprite_state" + futil::to_string(stateNumber) + "_frame_count";
-		const unsigned frameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
+		const unsigned frameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : globalFrameCount;
 		spec.stateFrameCount.push_back(frameCount);
 	}
 

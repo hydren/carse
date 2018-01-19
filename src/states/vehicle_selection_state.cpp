@@ -74,8 +74,9 @@ void VehicleSelectionState::initialize()
 	fontInfo = new Font(shared.font1Path, dip(12));
 	fontSub = new Font(shared.font3Path, dip(36));
 
-	menu = new Menu(menuBounds, new Font(shared.font1Path, dip(18)), Color::WHITE);
-	menu->fontIsOwned = true;
+	menu = new Menu(menuBounds);
+	menu->setFont(new Font(shared.font1Path, dip(18)), false);
+	menu->setColor(Color::WHITE);
 	menu->cursorWrapAroundEnabled = true;
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
@@ -312,13 +313,13 @@ void VehicleSelectionState::ListLayout::navigate(NavigationDirection navDir)
 	{
 		case NAV_UP:
 		{
-			state.menu->cursorUp();
+			state.menu->moveCursorUp();
 			this->onCursorChange();
 			break;
 		}
 		case NAV_DOWN:
 		{
-			state.menu->cursorDown();
+			state.menu->moveCursorDown();
 			this->onCursorChange();
 			break;
 		}
@@ -466,7 +467,7 @@ void VehicleSelectionState::ShowroomLayout::navigate(NavigationDirection navDir)
 				previousIndex = state.menu->getSelectedIndex();
 				selectionTransitionProgress = 0;
 
-				state.menu->cursorUp();
+				state.menu->moveCursorUp();
 				this->onCursorChange();
 			}
 			break;
@@ -479,7 +480,7 @@ void VehicleSelectionState::ShowroomLayout::navigate(NavigationDirection navDir)
 				previousIndex = state.menu->getSelectedIndex();
 				selectionTransitionProgress = 0;
 
-				state.menu->cursorDown();
+				state.menu->moveCursorDown();
 				this->onCursorChange();
 			}
 			break;

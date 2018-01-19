@@ -56,8 +56,9 @@ enum MenuItem
 void MainMenuState::initialize()
 {
 	Display& display = game.getDisplay();
-	menu = new Menu(fgeal::Rectangle(), new Font(shared.font1Path, dip(18)), Color::WHITE);
-	menu->fontIsOwned = true;
+	menu = new Menu();
+	menu->setFont(new Font(shared.font1Path, dip(18)), false);
+	menu->setColor(Color::WHITE);
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
 	menu->addEntry("Race!");
@@ -207,13 +208,13 @@ void MainMenuState::PrototypeSimpleLayout::navigate(NavigationDirection navDir)
 	{
 		case NAV_UP:
 		{
-			state.menu->cursorUp();
+			state.menu->moveCursorUp();
 			this->onCursorChange();
 			break;
 		}
 		case NAV_DOWN:
 		{
-			state.menu->cursorDown();
+			state.menu->moveCursorDown();
 			this->onCursorChange();
 			break;
 		}

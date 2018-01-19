@@ -136,12 +136,12 @@ void OptionsMenuState::update(float delta)
 				case Keyboard::KEY_ARROW_UP:
 					shared.sndCursorMove.stop();
 					shared.sndCursorMove.play();
-					menu->cursorUp();
+					menu->moveCursorUp();
 					break;
 				case Keyboard::KEY_ARROW_DOWN:
 					shared.sndCursorMove.stop();
 					shared.sndCursorMove.play();
-					menu->cursorDown();
+					menu->moveCursorDown();
 					break;
 				default:
 					break;
@@ -218,10 +218,10 @@ void OptionsMenuState::updateOnResolutionMenu(Event& event)
 				break;
 			}
 			case Keyboard::KEY_ARROW_UP:
-				menuResolution->cursorUp();
+				menuResolution->moveCursorUp();
 				break;
 			case Keyboard::KEY_ARROW_DOWN:
-				menuResolution->cursorDown();
+				menuResolution->moveCursorDown();
 				break;
 			default:
 				break;

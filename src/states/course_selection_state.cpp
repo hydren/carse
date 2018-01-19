@@ -68,8 +68,9 @@ void CourseSelectionState::initialize()
 	fontMain = new Font(shared.font2Path, dip(32));
 	fontInfo = new Font(shared.font1Path, dip(14));
 
-	menuCourse = new Menu(Rectangle(), new Font(shared.font1Path, dip(12)), Color::RED);
-	menuCourse->fontIsOwned = true;
+	menuCourse = new Menu();
+	menuCourse->setFont(new Font(shared.font1Path, dip(12)), false);
+	menuCourse->setColor(Color::RED);
 	menuCourse->bgColor = Color(0, 0, 0, 128);
 	menuCourse->borderColor = Color(0, 0, 0, 192);
 	menuCourse->focusedEntryFontColor = Color::WHITE;
@@ -80,8 +81,9 @@ void CourseSelectionState::initialize()
 	for(unsigned i = 0; i < courses.size(); i++)
 		menuCourse->addEntry((string) courses[i]);
 
-	menuSettings = new Menu(Rectangle(), new Font(shared.font1Path, dip(12)), Color::RED);
-	menuSettings->fontIsOwned = true;
+	menuSettings = new Menu();
+	menuSettings->setFont(new Font(shared.font1Path, dip(12)), false);
+	menuSettings->setColor(Color::RED);
 	menuSettings->bgColor = menuCourse->bgColor;
 	menuSettings->borderColor = menuCourse->borderColor;
 	menuSettings->focusedEntryFontColor = menuCourse->focusedEntryFontColor;
@@ -263,12 +265,12 @@ void CourseSelectionState::handleInputOnCourseList(Event& event)
 		case Keyboard::KEY_ARROW_UP:
 			shared.sndCursorMove.stop();
 			shared.sndCursorMove.play();
-			menuCourse->cursorUp();
+			menuCourse->moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
 			shared.sndCursorMove.stop();
 			shared.sndCursorMove.play();
-			menuCourse->cursorDown();
+			menuCourse->moveCursorDown();
 			break;
 		case Keyboard::KEY_ENTER:
 		case Keyboard::KEY_ESCAPE:
@@ -343,12 +345,12 @@ void CourseSelectionState::handleInputOnSettings(Event& event)
 			if(menuSettings->getSelectedIndex() == 0)
 				status = STATUS_HOVERING_COURSE_LIST;
 			else
-				menuSettings->cursorUp();
+				menuSettings->moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
 			shared.sndCursorMove.stop();
 			shared.sndCursorMove.play();
-			menuSettings->cursorDown();
+			menuSettings->moveCursorDown();
 			break;
 		default:
 			break;

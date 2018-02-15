@@ -611,14 +611,17 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 
 		const float scaledBrakelightPositionX = vehicle.spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
 					scaledBrakelightPositionY = vehicle.spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,
-					scaledBrakelightWidth =  vehicle.brakelightSprite->width  * vehicle.brakelightSprite->scale.x,
-					scaledBrakelightHeight = vehicle.brakelightSprite->height * vehicle.brakelightSprite->scale.y,
+					scaledBrakelightOffsetX = vehicle.spriteSpec.brakelightsOffset.x * vehicle.brakelightSprite->scale.x,
+					scaledBrakelightOffsetY = vehicle.spriteSpec.brakelightsOffset.y * vehicle.brakelightSprite->scale.y,
 					scaledTurnOffset = (vehicle.spriteSpec.brakelightsPositions[animationIndex].x - vehicle.spriteSpec.brakelightsPositions[0].x)*sprite.scale.x,
 					scaledFlipOffset = sprite.flipmode != Image::FLIP_HORIZONTAL? 0 : 2*scaledTurnOffset;
 
+		if(not vehicle.spriteSpec.brakelightsMirrowed)
+			vehicle.brakelightSprite->flipmode = sprite.flipmode;
+
 		vehicle.brakelightSprite->draw(
-			vehicleSpritePosition.x + scaledBrakelightPositionX - 0.5*scaledBrakelightWidth - scaledFlipOffset,
-			vehicleSpritePosition.y + scaledBrakelightPositionY - 0.5*scaledBrakelightHeight
+			vehicleSpritePosition.x + scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX,
+			vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
 		);
 
 		if(vehicle.spriteSpec.brakelightsMirrowed)
@@ -626,8 +629,8 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 			const float scaledFrameWidth = vehicle.spriteSpec.frameWidth*sprite.scale.x;
 
 			vehicle.brakelightSprite->draw(
-				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - 0.5*scaledBrakelightWidth - scaledFlipOffset + 2*scaledTurnOffset,
-				vehicleSpritePosition.y + scaledBrakelightPositionY - 0.5*scaledBrakelightHeight
+				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX + 2*scaledTurnOffset,
+				vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
 			);
 		}
 	}

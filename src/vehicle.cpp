@@ -136,6 +136,5 @@ void Pseudo3DVehicle::setupDynamicData()
 			-1, -1, 0, 0, true
 		);
 
-	if(spriteSpec.brakelightsMultipleSprites)
-		brakelightSprite->scale = spriteSpec.scale;
+	brakelightSprite->scale = spriteSpec.brakelightsSpriteScale;
 }

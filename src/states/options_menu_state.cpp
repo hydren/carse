@@ -90,7 +90,7 @@ void OptionsMenuState::render()
 	menu->bounds.w = display.getWidth() - 2*menu->bounds.x;
 	menu->bounds.h = 0.5f*display.getHeight();
 
-	menuResolution->bounds.x = 0.25f*display.getWidth();
+	menuResolution->bounds.x = 0.0625f*display.getWidth();
 	menuResolution->bounds.y = 0.25f*display.getHeight();
 	menuResolution->bounds.w = display.getWidth() - 2*menuResolution->bounds.x;
 	menuResolution->bounds.h = 0.5f*display.getHeight();
@@ -233,6 +233,15 @@ void OptionsMenuState::updateFonts()
 {
 	Display& display = game.getDisplay();
 
+	if(font != null) delete font;
+	font = new Font(shared.font1Path, dip(16));
+
 	if(fontTitle != null) delete fontTitle;
 	fontTitle = new Font(shared.font2Path, dip(48));
+
+	if(menuResolution != null)
+	{
+		menu->setFont(font);
+		menuResolution->setFont(font);
+	}
 }

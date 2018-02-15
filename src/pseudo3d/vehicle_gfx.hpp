@@ -59,10 +59,17 @@ struct Pseudo3DVehicleAnimationSpec
 	 *  the vehicle sprite sheet.*/
 	std::string brakelightsSheetFilename;
 
+	/** The scaling factor of the brakelights overlay. Applies to all frames. */
+	fgeal::Vector2D brakelightsSpriteScale;
+
 	/** The positions of the brakelights within the animation's coordinates.
 	 *  Note that this is vector because it's needed to specify the brakelight position on each of
 	 *  this animation's states. */
 	std::vector<fgeal::Point> brakelightsPositions;
+
+	/** An optional offset applied to the brakelights sprites' positions, meant to center them when
+	 *  necessary, i.e. mirrowed sprites with surrounding alpha regions.  */
+	fgeal::Vector2D brakelightsOffset;
 
 	/** If true (default), a mirrowed version of the brakeligthts animation is drawn as well.
 	 *  The position of the mirrowed brakelights is a mirrowed version of the 'brakelightsPositions',

@@ -578,7 +578,9 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 // default sprite uint constants
 static const unsigned
 	DEFAULT_SPRITE_WIDTH = 56,
-	DEFAULT_SPRITE_HEIGHT = 36;
+	DEFAULT_SPRITE_HEIGHT = 36,
+	DEFAULT_BRAKELIGHTS_SPRITE_WIDTH = 32,
+	DEFAULT_BRAKELIGHTS_SPRITE_HEIGHT = 32;
 
 // default sprite float constants
 static const float
@@ -715,10 +717,14 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 
 	key = "brakelights_sprite_filename";
+	bool usingDefaultBrakelights = false;
 	spec.brakelightsSheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
 
 	if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "default")
+	{
 		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+		spec.brakelightsSpriteScale = spec.scale;  // if specified sheet, assume same scale as main sprite
+	}
 
 	if(spec.brakelightsSheetFilename == "default" or spec.brakelightsSheetFilename.empty())
 	{
@@ -726,7 +732,15 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
 		<< " (specified by \"" << prop.get("filename") << "\"). using default instead..." << endl;
 
+		usingDefaultBrakelights = true;
 		spec.brakelightsSheetFilename = "assets/default-brakelight-effect.png";
+		spec.brakelightsSpriteScale.x = spec.brakelightsSpriteScale.y = 1.0f;  // if no specified sheet, assume no scaling
+	}
+
+	key = "brakelights_sprite_scale";
+	if(isValueSpecified(prop, key))  // if brakelights scale factor is available, override previous definitions
+	{
+		spec.brakelightsSpriteScale.x = spec.brakelightsSpriteScale.y = atof(prop.get(key).c_str());
 	}
 
 	spec.brakelightsMultipleSprites = false;
@@ -785,6 +799,22 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 		spec.brakelightsPositions.push_back(brakelightsPosition);
 	}
+
+	key = "brakelights_sprite_offset_x";
+	if(isValueSpecified(prop, key))
+		spec.brakelightsOffset.x = atof(prop.get(key).c_str());
+	else if(usingDefaultBrakelights)
+		spec.brakelightsOffset.x = -0.5*DEFAULT_BRAKELIGHTS_SPRITE_WIDTH;
+	else
+		spec.brakelightsOffset.x = 0;
+
+	key = "brakelights_sprite_offset_y";
+	if(isValueSpecified(prop, key))
+		spec.brakelightsOffset.y = atof(prop.get(key).c_str());
+	else if(usingDefaultBrakelights)
+		spec.brakelightsOffset.y = -0.5*DEFAULT_BRAKELIGHTS_SPRITE_HEIGHT;
+	else
+		spec.brakelightsOffset.y = 0;
 
 	spec.brakelightsMirrowed = true;
 	key = "brakelights_mirrowed";

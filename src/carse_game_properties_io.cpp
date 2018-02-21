@@ -717,111 +717,117 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 
 	key = "brakelights_sprite_filename";
+	spec.brakelightsSheetFilename = prop.get(key);
+
 	bool usingDefaultBrakelights = false;
-	spec.brakelightsSheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
-
-	if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "default")
+	if(spec.brakelightsSheetFilename == "builtin" or spec.brakelightsSheetFilename == "default")
 	{
-		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
-		spec.brakelightsSpriteScale = spec.scale;  // if specified sheet, assume same scale as main sprite
-	}
-
-	if(spec.brakelightsSheetFilename == "default" or spec.brakelightsSheetFilename.empty())
-	{
-		if(spec.brakelightsSheetFilename.empty())
-			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
-		<< " (specified by \"" << prop.get("filename") << "\"). using default instead..." << endl;
-
 		usingDefaultBrakelights = true;
 		spec.brakelightsSheetFilename = "assets/default-brakelight-effect.png";
 		spec.brakelightsSpriteScale.x = spec.brakelightsSpriteScale.y = 1.0f;  // if no specified sheet, assume no scaling
 	}
-
-	key = "brakelights_sprite_scale";
-	if(isValueSpecified(prop, key))  // if brakelights scale factor is available, override previous definitions
+	else if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "none")
 	{
-		spec.brakelightsSpriteScale.x = spec.brakelightsSpriteScale.y = atof(prop.get(key).c_str());
+		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+
+		if(spec.brakelightsSheetFilename.empty())
+			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
+			<< " (specified by \"" << prop.get("filename") << "\"). ignoring brakelights definitions..." << endl;
+		else
+			spec.brakelightsSpriteScale = spec.scale;  // if specified sheet, assume same scale as main sprite
 	}
+	else if(spec.brakelightsSheetFilename != "none")
+		spec.brakelightsSheetFilename.clear();
 
-	spec.brakelightsMultipleSprites = false;
-	key = "brakelights_multiple_sprites";
-	if(isValueSpecified(prop, key))
+	// at this point either a valid brakelights sheet filename is set or it is empty (meaning that there won't be any brakelights effect)
+	if(not spec.brakelightsSheetFilename.empty())
 	{
-		const string value = futil::to_lower(futil::trim(prop.get(key)));
-		if(value == "true" or value == "yes")
-			spec.brakelightsMultipleSprites = true;
-	}
+		key = "brakelights_sprite_scale";
+		if(isValueSpecified(prop, key))  // if brakelights scale factor is available, override previous definitions
+		{
+			spec.brakelightsSpriteScale.x = spec.brakelightsSpriteScale.y = atof(prop.get(key).c_str());
+		}
 
-	for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
-	{
-		fgeal::Point brakelightsPosition;
-		bool defaultedX = false, defaultedY = false;
-		key = "brakelights_position" + futil::to_string(stateNumber);
+		spec.brakelightsMultipleSprites = false;
+		key = "brakelights_multiple_sprites";
 		if(isValueSpecified(prop, key))
 		{
-			vector<string> tokens = futil::split(prop.get(key), ',');
-			if(tokens.size() > 1)
+			const string value = futil::to_lower(futil::trim(prop.get(key)));
+			if(value == "true" or value == "yes")
+				spec.brakelightsMultipleSprites = true;
+		}
+
+		for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
+		{
+			fgeal::Point brakelightsPosition;
+			bool defaultedX = false, defaultedY = false;
+			key = "brakelights_position" + futil::to_string(stateNumber);
+			if(isValueSpecified(prop, key))
 			{
-				brakelightsPosition.x = atof(tokens[0].c_str());
-				brakelightsPosition.y = atof(tokens[1].c_str());
+				vector<string> tokens = futil::split(prop.get(key), ',');
+				if(tokens.size() > 1)
+				{
+					brakelightsPosition.x = atof(tokens[0].c_str());
+					brakelightsPosition.y = atof(tokens[1].c_str());
+				}
 			}
-		}
-		else defaultedX = defaultedY = true;
+			else defaultedX = defaultedY = true;
 
-		string key2 = key + "_x";
-		if(isValueSpecified(prop, key2))
+			string key2 = key + "_x";
+			if(isValueSpecified(prop, key2))
+			{
+				brakelightsPosition.x = atof(prop.get(key2).c_str());
+				defaultedX = false;
+			}
+
+			key2 = key + "_y";
+			if(isValueSpecified(prop, key2))
+			{
+				brakelightsPosition.y = atof(prop.get(key2).c_str());
+				defaultedY = false;
+			}
+
+			if(defaultedX)
+			{
+				if(spec.brakelightsMultipleSprites)
+					brakelightsPosition.x = 0;
+				else
+					brakelightsPosition.x = 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth) + stateNumber*0.0357*spec.frameWidth;
+			}
+			if(defaultedY)
+			{
+				if(spec.brakelightsMultipleSprites)
+					brakelightsPosition.y = 0;
+				else
+					brakelightsPosition.y = 0.5*spec.frameHeight;
+			}
+
+			spec.brakelightsPositions.push_back(brakelightsPosition);
+		}
+
+		key = "brakelights_sprite_offset_x";
+		if(isValueSpecified(prop, key))
+			spec.brakelightsOffset.x = atof(prop.get(key).c_str());
+		else if(usingDefaultBrakelights)
+			spec.brakelightsOffset.x = -0.5*DEFAULT_BRAKELIGHTS_SPRITE_WIDTH;
+		else
+			spec.brakelightsOffset.x = 0;
+
+		key = "brakelights_sprite_offset_y";
+		if(isValueSpecified(prop, key))
+			spec.brakelightsOffset.y = atof(prop.get(key).c_str());
+		else if(usingDefaultBrakelights)
+			spec.brakelightsOffset.y = -0.5*DEFAULT_BRAKELIGHTS_SPRITE_HEIGHT;
+		else
+			spec.brakelightsOffset.y = 0;
+
+		spec.brakelightsMirrowed = true;
+		key = "brakelights_mirrowed";
+		if(isValueSpecified(prop, key))
 		{
-			brakelightsPosition.x = atof(prop.get(key2).c_str());
-			defaultedX = false;
+			const string value = futil::to_lower(futil::trim(prop.get(key)));
+			if(value == "false" or value == "no")
+				spec.brakelightsMirrowed = false;
 		}
-
-		key2 = key + "_y";
-		if(isValueSpecified(prop, key2))
-		{
-			brakelightsPosition.y = atof(prop.get(key2).c_str());
-			defaultedY = false;
-		}
-
-		if(defaultedX)
-		{
-			if(spec.brakelightsMultipleSprites)
-				brakelightsPosition.x = 0;
-			else
-				brakelightsPosition.x = 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth) + stateNumber*0.0357*spec.frameWidth;
-		}
-		if(defaultedY)
-		{
-			if(spec.brakelightsMultipleSprites)
-				brakelightsPosition.y = 0;
-			else
-				brakelightsPosition.y = 0.5*spec.frameHeight;
-		}
-
-		spec.brakelightsPositions.push_back(brakelightsPosition);
-	}
-
-	key = "brakelights_sprite_offset_x";
-	if(isValueSpecified(prop, key))
-		spec.brakelightsOffset.x = atof(prop.get(key).c_str());
-	else if(usingDefaultBrakelights)
-		spec.brakelightsOffset.x = -0.5*DEFAULT_BRAKELIGHTS_SPRITE_WIDTH;
-	else
-		spec.brakelightsOffset.x = 0;
-
-	key = "brakelights_sprite_offset_y";
-	if(isValueSpecified(prop, key))
-		spec.brakelightsOffset.y = atof(prop.get(key).c_str());
-	else if(usingDefaultBrakelights)
-		spec.brakelightsOffset.y = -0.5*DEFAULT_BRAKELIGHTS_SPRITE_HEIGHT;
-	else
-		spec.brakelightsOffset.y = 0;
-
-	spec.brakelightsMirrowed = true;
-	key = "brakelights_mirrowed";
-	if(isValueSpecified(prop, key))
-	{
-		const string value = futil::to_lower(futil::trim(prop.get(key)));
-		if(value == "false" or value == "no")
-			spec.brakelightsMirrowed = false;
 	}
 }

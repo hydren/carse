@@ -201,7 +201,8 @@ void Pseudo3DRaceState::onEnter()
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
 		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
-	playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+	if(playerVehicle.brakelightSprite != null)
+		playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
 	if(imgBackground != null)
 		delete imgBackground;
@@ -604,7 +605,7 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 	}
 
-	if(vehicle.body.brakePedalPosition > 0)
+	if(vehicle.body.brakePedalPosition > 0 and vehicle.brakelightSprite != null)
 	{
 		if(vehicle.spriteSpec.brakelightsMultipleSprites)
 			vehicle.brakelightSprite->currentFrameSequenceIndex = animationIndex;

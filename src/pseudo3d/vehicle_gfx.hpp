@@ -88,6 +88,9 @@ struct Pseudo3DVehicleAnimationSpec
 
 	// Shadow layer/sprites
 
+	/** If true, the shadow is not displayed. By default, this is false. */
+	bool shadowDisabled;
+
 	/** The filename of the image containing the sprite for the optional shadow overlay.
 	 *  If this field is specified, the shadow sprite will be drawn before the vehicle sprite.
 	 *  Note that this sprites should depict the vehicle's shadow as it was being cast from

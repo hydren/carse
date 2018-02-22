@@ -595,6 +595,26 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 		  p.y - 0.5f*sprite.scale.y*vehicle.spriteSpec.frameHeight
 			  - sprite.scale.y*vehicle.spriteSpec.contactOffset };
 
+	if(not vehicle.spriteSpec.shadowDisabled)
+	{
+		if(vehicle.shadowSprite == null)
+		{
+			// todo draw primitive-based shadow
+
+			Image::drawFilledEllipse(
+				vehicleSpritePosition.x + (vehicle.spriteSpec.shadowPositions[animationIndex].x + 0.5*vehicle.spriteSpec.frameWidth) * sprite.scale.x,
+				vehicleSpritePosition.y + (vehicle.spriteSpec.shadowPositions[animationIndex].y + 0.9*vehicle.spriteSpec.frameHeight)* sprite.scale.y,
+				0.5 * vehicle.spriteSpec.depictedVehicleWidth * sprite.scale.x,
+				0.125 * vehicle.spriteSpec.frameHeight * sprite.scale.y,
+				Color::GREY
+			);
+		}
+		else
+		{
+			// todo draw sprite-based shadow
+		}
+	}
+
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
 	if(vehicle.isBurningRubber)
@@ -642,18 +662,11 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 			);
 		}
 	}
+}
 
-	if(not vehicle.spriteSpec.shadowDisabled)
-	{
-		if(vehicle.shadowSprite == null)
-		{
-			// todo draw primite-based shadow
-		}
-		else
-		{
-			// todo draw sprite-based shadow
-		}
-	}
+void Pseudo3DRaceState::drawVehicleShadow()
+{
+
 }
 
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%

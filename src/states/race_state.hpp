@@ -95,6 +95,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float lapTimeCurrent, lapTimeBest;
 	unsigned lapCurrent;
 
+	//debug
+	float acc0to60clock, acc0to60time;
+
 	Course course;
 	Pseudo3DVehicle::Spec playerVehicleSpec;
 	int playerVehicleSpecAlternateSpriteIndex;

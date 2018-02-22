@@ -65,7 +65,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   drawParameters(), coursePositionFactor(500), simulationType(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), settings(),
-  lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0),
+  lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
   course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
@@ -312,6 +312,7 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.pseudoAngle = 0;
 	lapTimeCurrent = lapTimeBest = 0;
 	lapCurrent = 1;
+	acc0to60time = acc0to60clock = 0;
 
 	playerVehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
 
@@ -423,6 +424,10 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fkm/h", playerVehicle.body.speed*3.6);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
+		fontDebug->drawText("0-60mph: ", 175, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fs", acc0to60time);
+		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
+
 		offset += 18;
 		fontDebug->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.acceleration);
@@ -437,7 +442,6 @@ void Pseudo3DRaceState::render()
 //		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 //		sprintf(buffer, "%2.2fm/s", verticalSpeed);
 //		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
-
 
 		offset += 25;
 		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
@@ -670,6 +674,16 @@ void Pseudo3DRaceState::update(float delta)
 		}
 	}
 
+	if(acc0to60time == 0)
+	{
+		if(playerVehicle.body.engine.throttlePosition > 0 and playerVehicle.body.speed > 0 and acc0to60clock == 0)
+			acc0to60clock = fgeal::uptime();
+		else if(playerVehicle.body.engine.throttlePosition < 0 and acc0to60clock != 0)
+			acc0to60clock = 0;
+		else if(playerVehicle.body.engine.throttlePosition > 0 and playerVehicle.body.speed * 3.6 > 96)
+			acc0to60time = fgeal::uptime() - acc0to60clock;
+	}
+
 	// course looping control
 	const unsigned N = course.lines.size();
 	while(playerVehicle.position * coursePositionFactor >= N*course.roadSegmentLength)
@@ -817,6 +831,7 @@ void Pseudo3DRaceState::handleInput()
 					onSceneIntro = true;
 					timerSceneIntro = 4.5;
 //					isBurningRubber = onAir = onLongAir = false;
+					acc0to60time = acc0to60clock = 0;
 					break;
 				case Keyboard::KEY_T:
 					playerVehicle.body.automaticShiftingEnabled = !playerVehicle.body.automaticShiftingEnabled;

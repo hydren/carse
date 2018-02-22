@@ -204,6 +204,9 @@ void Pseudo3DRaceState::onEnter()
 	if(playerVehicle.brakelightSprite != null)
 		playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
+	if(playerVehicle.shadowSprite != null)
+		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+
 	if(imgBackground != null)
 		delete imgBackground;
 
@@ -637,6 +640,18 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX + 2*scaledTurnOffset,
 				vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
 			);
+		}
+	}
+
+	if(not vehicle.spriteSpec.shadowDisabled)
+	{
+		if(vehicle.shadowSprite == null)
+		{
+			// todo draw primite-based shadow
+		}
+		else
+		{
+			// todo draw sprite-based shadow
 		}
 	}
 }

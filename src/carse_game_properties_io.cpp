@@ -830,4 +830,46 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 				spec.brakelightsMirrowed = false;
 		}
 	}
+
+	key = "shadow_sprite_filename";
+	spec.shadowSheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
+
+	if(spec.shadowSheetFilename == "none" or spec.shadowSheetFilename == "disabled")
+		spec.shadowDisabled = true;
+
+	else if(spec.shadowSheetFilename == "builtin" or spec.shadowSheetFilename == "default")
+		spec.shadowSheetFilename.clear();
+
+	else if(not spec.shadowSheetFilename.empty())
+	{
+		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+
+		if(spec.shadowSheetFilename.empty())
+			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
+			<< " (specified by \"" << prop.get("filename") << "\"). ignoring brakelights definitions..." << endl;
+	}
+
+	if(not spec.shadowDisabled) for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
+	{
+		fgeal::Point shadowPosition;
+		key = "shadow_position" + futil::to_string(stateNumber);
+		if(isValueSpecified(prop, key))
+		{
+			vector<string> tokens = futil::split(prop.get(key), ',');
+			if(tokens.size() > 1)
+			{
+				shadowPosition.x = atof(tokens[0].c_str());
+				shadowPosition.y = atof(tokens[1].c_str());
+			}
+		}
+		else shadowPosition.x = shadowPosition.y = 0;
+
+		string key2 = key + "_x";
+		shadowPosition.x = isValueSpecified(prop, key2)? atof(prop.get(key2).c_str()) : 0;
+
+		key2 = key + "_y";
+		shadowPosition.y = isValueSpecified(prop, key2)? atof(prop.get(key2).c_str()) : 0;
+
+		spec.shadowPositions.push_back(shadowPosition);
+	}
 }

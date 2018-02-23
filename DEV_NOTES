@@ -1,6 +1,5 @@
 # to do
 
-- Add options to specify custom shadow sprite/layer.
 - Add mouse input on menus
 - Add gear shifting sounds
 - Add optional gear shifting sounds derived from forced induction
@@ -32,6 +31,7 @@
 - Fix incorrect tire animation speed.
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
+- Test specifying custom shadow sprite/layer positions.
 
 # misc.
 

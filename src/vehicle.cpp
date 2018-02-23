@@ -22,7 +22,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isBurningRubber(false),
   engineSoundProfile(), engineSound(),
-  spriteSpec(), sprites(), brakelightSprite(null)
+  spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null)
 {}
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
@@ -33,7 +33,7 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   isBurningRubber(false),
   engineSoundProfile(spec.soundProfile), engineSound(),
   spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
-  sprites(), brakelightSprite(null)
+  sprites(), brakelightSprite(null), shadowSprite(null)
 {
 	// update engine info data (optional)
 	body.engine.configuration = spec.engineConfiguration;
@@ -87,6 +87,9 @@ void Pseudo3DVehicle::clearDynamicData()
 
 	if(brakelightSprite != null)
 		delete brakelightSprite;
+
+	if(shadowSprite != null)
+		delete shadowSprite;
 }
 
 void Pseudo3DVehicle::setupDynamicData()
@@ -139,5 +142,18 @@ void Pseudo3DVehicle::setupDynamicData()
 			);
 
 		brakelightSprite->scale = spriteSpec.brakelightsSpriteScale;
+	}
+
+	if(not spriteSpec.shadowSheetFilename.empty())
+	{
+		fgeal::Image* shadowSpriteImage = new fgeal::Image(spriteSpec.shadowSheetFilename);
+		shadowSprite = new fgeal::Sprite(
+			shadowSpriteImage,
+			shadowSpriteImage->getWidth(),
+			shadowSpriteImage->getHeight()/spriteSpec.stateCount,
+			-1, spriteSpec.stateCount, 0, 0, true
+		);
+
+		shadowSprite->scale = spriteSpec.scale;
 	}
 }

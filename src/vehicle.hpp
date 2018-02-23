@@ -45,7 +45,7 @@ struct Pseudo3DVehicle
 	// graphics data
 	Pseudo3DVehicleAnimationSpec spriteSpec;
 	std::vector<fgeal::Sprite*> sprites;
-	fgeal::Sprite* brakelightSprite;
+	fgeal::Sprite* brakelightSprite, *shadowSprite;
 
 	Pseudo3DVehicle();  // zero constructor
 

@@ -204,6 +204,9 @@ void Pseudo3DRaceState::onEnter()
 	if(playerVehicle.brakelightSprite != null)
 		playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
+	if(playerVehicle.shadowSprite != null)
+		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+
 	if(imgBackground != null)
 		delete imgBackground;
 
@@ -592,6 +595,18 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 		  p.y - 0.5f*sprite.scale.y*vehicle.spriteSpec.frameHeight
 			  - sprite.scale.y*vehicle.spriteSpec.contactOffset };
 
+	if(vehicle.shadowSprite != null)
+	{
+		const Point& shadowPosition = vehicle.spriteSpec.shadowPositions[animationIndex];
+		vehicle.shadowSprite->currentFrameSequenceIndex = animationIndex;
+		vehicle.shadowSprite->flipmode = sprite.flipmode;
+
+		vehicle.shadowSprite->draw(
+			vehicleSpritePosition.x + shadowPosition.x * sprite.scale.x,
+			vehicleSpritePosition.y + shadowPosition.y * sprite.scale.y
+		);
+	}
+
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
 	if(vehicle.isBurningRubber)
@@ -639,6 +654,11 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 			);
 		}
 	}
+}
+
+void Pseudo3DRaceState::drawVehicleShadow()
+{
+
 }
 
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%

@@ -834,10 +834,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	key = "shadow_sprite_filename";
 	spec.shadowSheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
 
-	if(spec.shadowSheetFilename == "none" or spec.shadowSheetFilename == "disabled")
-		spec.shadowDisabled = true;
-
-	else if(spec.shadowSheetFilename == "builtin" or spec.shadowSheetFilename == "default")
+	if(spec.shadowSheetFilename == "none" or spec.shadowSheetFilename == "default")
 		spec.shadowSheetFilename.clear();
 
 	else if(not spec.shadowSheetFilename.empty())
@@ -849,7 +846,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 			<< " (specified by \"" << prop.get("filename") << "\"). ignoring brakelights definitions..." << endl;
 	}
 
-	if(not spec.shadowDisabled) for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
+	if(not spec.shadowSheetFilename.empty()) for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
 	{
 		fgeal::Point shadowPosition;
 		key = "shadow_position" + futil::to_string(stateNumber);

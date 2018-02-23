@@ -144,16 +144,16 @@ void Pseudo3DVehicle::setupDynamicData()
 		brakelightSprite->scale = spriteSpec.brakelightsSpriteScale;
 	}
 
-	if(not spriteSpec.shadowDisabled and not spriteSpec.shadowSheetFilename.empty())
+	if(not spriteSpec.shadowSheetFilename.empty())
 	{
 		fgeal::Image* shadowSpriteImage = new fgeal::Image(spriteSpec.shadowSheetFilename);
-		brakelightSprite = new fgeal::Sprite(
+		shadowSprite = new fgeal::Sprite(
 			shadowSpriteImage,
 			shadowSpriteImage->getWidth(),
 			shadowSpriteImage->getHeight()/spriteSpec.stateCount,
 			-1, spriteSpec.stateCount, 0, 0, true
 		);
 
-		brakelightSprite->scale = spriteSpec.scale;
+		shadowSprite->scale = spriteSpec.scale;
 	}
 }

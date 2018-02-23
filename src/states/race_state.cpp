@@ -595,24 +595,16 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 		  p.y - 0.5f*sprite.scale.y*vehicle.spriteSpec.frameHeight
 			  - sprite.scale.y*vehicle.spriteSpec.contactOffset };
 
-	if(not vehicle.spriteSpec.shadowDisabled)
+	if(vehicle.shadowSprite != null)
 	{
-		if(vehicle.shadowSprite == null)
-		{
-			// todo draw primitive-based shadow
+		const Point& shadowPosition = vehicle.spriteSpec.shadowPositions[animationIndex];
+		vehicle.shadowSprite->currentFrameSequenceIndex = animationIndex;
+		vehicle.shadowSprite->flipmode = sprite.flipmode;
 
-			Image::drawFilledEllipse(
-				vehicleSpritePosition.x + (vehicle.spriteSpec.shadowPositions[animationIndex].x + 0.5*vehicle.spriteSpec.frameWidth) * sprite.scale.x,
-				vehicleSpritePosition.y + (vehicle.spriteSpec.shadowPositions[animationIndex].y + 0.9*vehicle.spriteSpec.frameHeight)* sprite.scale.y,
-				0.5 * vehicle.spriteSpec.depictedVehicleWidth * sprite.scale.x,
-				0.125 * vehicle.spriteSpec.frameHeight * sprite.scale.y,
-				Color::GREY
-			);
-		}
-		else
-		{
-			// todo draw sprite-based shadow
-		}
+		vehicle.shadowSprite->draw(
+			vehicleSpritePosition.x + shadowPosition.x * sprite.scale.x,
+			vehicleSpritePosition.y + shadowPosition.y * sprite.scale.y
+		);
 	}
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);

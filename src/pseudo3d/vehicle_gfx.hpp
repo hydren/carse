@@ -88,9 +88,6 @@ struct Pseudo3DVehicleAnimationSpec
 
 	// Shadow layer/sprites
 
-	/** If true, the shadow is not displayed. By default, this is false. */
-	bool shadowDisabled;
-
 	/** The filename of the image containing the sprite for the optional shadow overlay.
 	 *  If this field is specified, the shadow sprite will be drawn before the vehicle sprite.
 	 *  Note that this sprites should depict the vehicle's shadow as it was being cast from
@@ -102,8 +99,7 @@ struct Pseudo3DVehicleAnimationSpec
 
 	/** The positions of the shadows within the animation's coordinates.
 	 *  Note that this is a vector because each of the vehicle animation's states may have the
-	 *  shadow located at different coordinates.
-	 *  This value is ignored if a default shadow is used.*/
+	 *  shadow located at different coordinates. By default, (0, 0) coordinates are assumed. */
 	std::vector<fgeal::Point> shadowPositions;
 };
 

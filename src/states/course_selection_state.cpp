@@ -77,7 +77,7 @@ void CourseSelectionState::initialize()
 
 	menuCourse->addEntry("<Random course>");
 	menuCourse->addEntry("<Debug course>");
-	const vector<Course>& courses = logic.getCourseList();
+	const vector<Pseudo3DCourse::Spec>& courses = logic.getCourseList();
 	for(unsigned i = 0; i < courses.size(); i++)
 		menuCourse->addEntry((string) courses[i]);
 
@@ -157,7 +157,7 @@ void CourseSelectionState::render()
 	fontInfo->drawText(menuCourse->getSelectedEntry().label, portraitBounds.x, 1.1*(portraitBounds.y + portraitBounds.h), Color::WHITE);
 	if(menuCourse->getSelectedIndex() > 1)
 	{
-		const Course& course = logic.getCourseList()[menuCourse->getSelectedIndex() - 2];
+		const Pseudo3DCourse::Spec& course = logic.getCourseList()[menuCourse->getSelectedIndex() - 2];
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
 		fontInfo->drawText(txtLength, portraitBounds.x, 1.1*(portraitBounds.y + portraitBounds.h) + fontInfo->getHeight(), Color::WHITE);

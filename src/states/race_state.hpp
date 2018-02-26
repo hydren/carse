@@ -49,7 +49,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Point parallax;
 	float backgroundScale;
 
-	Course::DrawParameters drawParameters;
 	float coursePositionFactor;
 	Mechanics::SimulationType simulationType;
 
@@ -98,7 +97,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	//debug
 	float acc0to60clock, acc0to60time;
 
-	Course course;
+	Pseudo3DCourse::Spec nextCourseSpec;
+	Pseudo3DCourse course;
+
 	Pseudo3DVehicle::Spec playerVehicleSpec;
 	int playerVehicleSpecAlternateSpriteIndex;
 	Pseudo3DVehicle playerVehicle;

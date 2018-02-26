@@ -33,7 +33,7 @@ class CarseGameLogic
 	Pseudo3DCarseGame& game;
 
 	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
-	std::vector<Course> courses;
+	std::vector<Pseudo3DCourse::Spec> courses;
 	std::vector<Pseudo3DVehicle::Spec> vehicles;
 
 	CarseGameLogic(Pseudo3DCarseGame& game);
@@ -57,12 +57,12 @@ class CarseGameLogic
 	// gets one of the built-in engine sound presets, by name
 	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
 
-	const std::vector<Course>& getCourseList();
+	const std::vector<Pseudo3DCourse::Spec>& getCourseList();
 	void setNextCourse(unsigned courseIndex);
-	void setNextCourse(const Course& c);
+	void setNextCourse(const Pseudo3DCourse::Spec& c);
 	void setNextCourseRandom();
 	void setNextCourseDebug();
-	const Course& getNextCourse();
+	const Pseudo3DCourse::Spec& getNextCourse();
 	fgeal::Image* getNextCoursePreviewImage();
 	Pseudo3DRaceState::RaceSettings& getNextRaceSettings();
 

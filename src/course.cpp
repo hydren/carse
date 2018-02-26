@@ -8,80 +8,67 @@
 #include "course.hpp"
 
 #include "futil/random.h"
-#include "futil/string_actions.hpp"
-#include "futil/string_split.hpp"
-#include "futil/collection_actions.hpp"
-
-#include "util.hpp"
-
-#include <stdexcept>
-#include <iostream>
-#include <fstream>
-#include <string>
 
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
 
-using fgeal::Color;
-using fgeal::Display;
-using fgeal::Image;
-using fgeal::Sprite;
-using futil::Properties;
 using std::string;
 using std::vector;
-using std::cout;
-using std::endl;
+using fgeal::Image;
+using fgeal::Color;
 using futil::random_between_decimal;
-using futil::split;
-using futil::trim;
-using futil::starts_with;
+
+Pseudo3DCourse::Pseudo3DCourse()
+: spec(100, 1000), sprites(),
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+{}
+
+Pseudo3DCourse::Pseudo3DCourse(Spec spec)
+: spec(spec), sprites(),
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+{}
 
 //custom call to draw quad
-void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
+inline static void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
 {
 	Image::drawFilledQuadrangle(x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1, c);
 }
 
-// needed to ensure consistency
-Course::Segment::Segment() : x(0), y(0), z(0), curve(0), slope(0),
-		clip(0), spriteID(-1), spriteX(0)  {}
-
-Course::Course(float segmentLength, float roadWidth)
-: lines(), roadSegmentLength(segmentLength), roadWidth(roadWidth), spritesFilenames()
-{}
-
-struct ScreenCoordCache
+namespace // static
 {
-	float X, Y, W, scale;
-};
+	struct ScreenCoordCache
+	{
+		float X, Y, W, scale;
+	};
+}
 
-void Course::draw(int pos, int posX, const DrawParameters& param)
+void Pseudo3DCourse::draw(int pos, int posX)
 {
-	const unsigned N = lines.size(), fromPos = pos/roadSegmentLength;
-	const float camHeight = 1500 + lines[fromPos].y;
+	const unsigned N = spec.lines.size(), fromPos = pos/spec.roadSegmentLength;
+	const float camHeight = 1500 + spec.lines[fromPos].y;
 	float x = 0, dx = 0;
 
-	float maxY = param.drawAreaHeight;
+	float maxY = drawAreaHeight;
 
 	// screen coordinates cache
 	vector<ScreenCoordCache> lts(N, ScreenCoordCache());
 
-	for(unsigned n = fromPos+1; n < fromPos + param.drawDistance; n++)
+	for(unsigned n = fromPos+1; n < fromPos + drawDistance; n++)
 	{
-		Segment& l = lines[n%N];
+		CourseSpec::Segment& l = spec.lines[n%N];
 		ScreenCoordCache& lt = lts[n%N];
 
 		// project from "world" to "screen" coordinates
 		const int camX = posX - x,
 				  camY = camHeight,
-				  camZ = pos - (n >= N? N*roadSegmentLength : 0);
-		const float scale = param.cameraDepth / (l.z - camZ);
+				  camZ = pos - (n >= N? N*spec.roadSegmentLength : 0);
+		const float scale = cameraDepth / (l.z - camZ);
 
 		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
-		lt.X = (1 + scale*(l.x - camX)) * param.drawAreaWidth/2;
-		lt.Y = (1 - scale*(l.y - camY)) * param.drawAreaHeight/2;
-		lt.W = scale * roadWidth * param.drawAreaWidth/2;
+		lt.X = (1 + scale*(l.x - camX)) * drawAreaWidth/2;
+		lt.Y = (1 - scale*(l.y - camY)) * drawAreaHeight/2;
+		lt.W = scale * spec.roadWidth * drawAreaWidth/2;
 		lt.scale = scale;
 
 		// update curve
@@ -92,30 +79,30 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 		if(lt.Y > maxY) continue;
 		maxY = lt.Y;
 
-		Color grass  = (n/3)%2? colorOffRoadPrimary : colorOffRoadSecondary;
-		Color rumble = (n/3)%2? colorHumblePrimary : colorHumbleSecondary;
-		Color road   = (n/3)%2? colorRoadPrimary : colorRoadSecondary;
+		Color grass  = (n/3)%2? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary;
+		Color rumble = (n/3)%2? spec.colorHumblePrimary : spec.colorHumbleSecondary;
+		Color road   = (n/3)%2? spec.colorRoadPrimary : spec.colorRoadSecondary;
 
 		ScreenCoordCache& p = lts[(n-1)%N];
 
-		drawRoadQuad(grass,  0,  p.Y, param.drawAreaWidth, 0, lt.Y, param.drawAreaWidth);
+		drawRoadQuad(grass,  0,  p.Y, drawAreaWidth, 0, lt.Y, drawAreaWidth);
 		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, lt.X, lt.Y, lt.W*1.2);
 		drawRoadQuad(road,   p.X, p.Y, p.W, lt.X, lt.Y, lt.W);
 	}
 
-	for(unsigned n = fromPos + param.drawDistance; n >= fromPos+1; n--)
+	for(unsigned n = fromPos + drawDistance; n >= fromPos+1; n--)
 	{
-		Segment& l = lines[n%N];
+		CourseSpec::Segment& l = spec.lines[n%N];
 		if(l.spriteID == -1)
 			continue;
 
-	    Image& s = *param.sprites[l.spriteID];
+	    Image& s = *sprites[l.spriteID];
 	    int w = s.getWidth();
 	    int h = s.getHeight();
 
 	    ScreenCoordCache& lt = lts[n%N];
 
-	    float destX = lt.X + lt.scale * l.spriteX * param.drawAreaWidth/2;
+	    float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
 	    float destY = lt.Y + 4;
 	    float destW  = w * lt.W / 150;
 	    float destH  = h * lt.W / 150;
@@ -131,48 +118,72 @@ void Course::draw(int pos, int posX, const DrawParameters& param)
 	}
 }
 
-Course::operator std::string() const
+void Pseudo3DCourse::clearDynamicData()
 {
-	return not name.empty()? name : not filename.empty()? filename : "<unnamed>";
+	if(not sprites.empty())
+	{
+		for(unsigned i = 0; i < sprites.size(); i++)
+			delete sprites[i];
+
+		sprites.clear();
+	}
+
+
 }
 
-//static
-Course Course::createDebugCourse(float segmentLength, float roadWidth)
+void Pseudo3DCourse::setupDynamicData()
 {
-	Course course(segmentLength, roadWidth);
-	for(unsigned i = 0; i < 1600; i++) // generating hardcoded course
+	for(unsigned i = 0; i < spec.spritesFilenames.size(); i++)
+		if(not spec.spritesFilenames[i].empty())
+			sprites.push_back(new Image(spec.spritesFilenames[i]));
+		else
+			sprites.push_back(null);
+
+
+}
+
+// ========================================================================================================================
+// ====================== built-in generators =============================================================================
+
+//static
+Pseudo3DCourse::Spec Pseudo3DCourse::generateDebugCourseSpec(float segmentLength, float roadWidth)
+{
+	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
+	for(unsigned i = 0; i < 1600; i++)  // generating hardcoded course
 	{
-		Segment line;
-		line.z = i*course.roadSegmentLength;
+		CourseSpec::Segment line;
+		line.z = i*spec.roadSegmentLength;
 		if(i > 300 && i < 500) line.curve = 0.3;
 		if(i > 500 && i < 700) line.curve = -0.3;
 		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
 		if(i % 17==0) { line.spriteX=2.0; line.spriteID=0; }
 		if(i % 17==1) { line.spriteX=-3.0; line.spriteID=0; }
-		course.lines.push_back(line);
+		spec.lines.push_back(line);
 	}
-	course.spritesFilenames.push_back("assets/bush.png");  // type 0
-	course.landscapeFilename = "assets/bg.png";
-	course.colorRoadPrimary =      Color( 64, 80, 80);
-	course.colorRoadSecondary =    Color( 40, 64, 64);
-	course.colorOffRoadPrimary =   Color(  0,112,  0);
-	course.colorOffRoadSecondary = Color(  0, 88, 80);
-	course.colorHumblePrimary =    Color(200,200,200);
-	course.colorHumbleSecondary =  Color(152,  0,  0);
+	spec.spritesFilenames.push_back("assets/bush.png");  // type 0
+	spec.landscapeFilename = "assets/bg.png";
+	spec.colorRoadPrimary =      Color( 64, 80, 80);
+	spec.colorRoadSecondary =    Color( 40, 64, 64);
+	spec.colorOffRoadPrimary =   Color(  0,112,  0);
+	spec.colorOffRoadSecondary = Color(  0, 88, 80);
+	spec.colorHumblePrimary =    Color(200,200,200);
+	spec.colorHumbleSecondary =  Color(152,  0,  0);
 
-	course.colorLandscape = Color(136,204,238);
-	course.colorHorizon = course.colorOffRoadPrimary;
+	spec.colorLandscape = Color(136,204,238);
+	spec.colorHorizon = spec.colorOffRoadPrimary;
 
-	return course;
+	spec.musicFilename = "assets/music_sample.ogg";
+
+	return spec;
 }
 
 //static
-Course Course::createRandomCourse(float segmentLength, float roadWidth, float length, float curveness)
+Pseudo3DCourse::Spec Pseudo3DCourse::generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness)
 {
+	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
 	srand(time(null));
 
-	Course course(segmentLength, roadWidth);
 	float currentCurve = 0;
 
 	const bool range1 = true,//rand()%2,
@@ -185,8 +196,8 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 	// generating random course
 	for(unsigned i = 0; i < length; i++)
 	{
-		Segment line;
-		line.z = i*course.roadSegmentLength;
+		CourseSpec::Segment line;
+		line.z = i*spec.roadSegmentLength;
 
 		if(currentCurve == 0)
 		{
@@ -222,143 +233,25 @@ Course Course::createRandomCourse(float segmentLength, float roadWidth, float le
 			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
 
-		course.lines.push_back(line);
+		spec.lines.push_back(line);
 	}
 
-	course.spritesFilenames.push_back("assets/bush.png");
-	course.spritesFilenames.push_back("assets/tree.png");
-	course.spritesFilenames.push_back("assets/redbarn.png");
-	course.landscapeFilename = "assets/bg.png";
+	spec.spritesFilenames.push_back("assets/bush.png");
+	spec.spritesFilenames.push_back("assets/tree.png");
+	spec.spritesFilenames.push_back("assets/redbarn.png");
+	spec.landscapeFilename = "assets/bg.png";
 
-	course.colorRoadPrimary =      Color( 64, 80, 80);
-	course.colorRoadSecondary =    Color( 40, 64, 64);
-	course.colorOffRoadPrimary =   Color(  0,112,  0);
-	course.colorOffRoadSecondary = Color(  0, 88,  0);
-	course.colorHumblePrimary =    Color(200,200,200);
-	course.colorHumbleSecondary =  Color(152,  0,  0);
+	spec.colorRoadPrimary =      Color( 64, 80, 80);
+	spec.colorRoadSecondary =    Color( 40, 64, 64);
+	spec.colorOffRoadPrimary =   Color(  0,112,  0);
+	spec.colorOffRoadSecondary = Color(  0, 88,  0);
+	spec.colorHumblePrimary =    Color(200,200,200);
+	spec.colorHumbleSecondary =  Color(152,  0,  0);
 
-	course.colorLandscape = Color(136,204,238);
-	course.colorHorizon = course.colorOffRoadPrimary;
+	spec.colorLandscape = Color(136,204,238);
+	spec.colorHorizon = spec.colorOffRoadPrimary;
 
-	return course;
+	spec.musicFilename = "assets/music_sample.ogg";
+
+	return spec;
 }
-
-
-namespace carse_details
-{
-	Color parseColor(const char* cstr)
-	{
-		return Color::parseCStr(cstr);
-	}
-}
-
-//static
-Course Course::createCourseFromFile(const Properties& prop)
-{
-	using carse_details::parseColor;
-	float segmentLength = prop.getParsedCStrAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
-	float roadWidth = prop.getParsedCStrAllowDefault<double, atof>("road_width", 3000);
-
-	Course course(segmentLength, roadWidth);
-	course.name = prop.get("name");
-	course.author = prop.get("author");
-	course.credits = prop.get("credits");
-	course.comments = prop.get("comments");
-	course.filename = prop.get("filename");  // property provided by course loader
-
-	course.landscapeFilename = futil::trim(prop.get("landscape_image"));
-
-	if(not course.landscapeFilename.empty() and course.landscapeFilename != "default")
-		course.landscapeFilename = getContextualizedFilename(course.landscapeFilename, prop.get("base_dir"), "assets/");
-
-	if(course.landscapeFilename.empty() or course.landscapeFilename == "default")
-	{
-		if(course.landscapeFilename.empty())
-			cout << "warning: image file specified in \"landscape_image\" entry could not be found"
-			<< ", specified by \"" << course.filename << "\". using default instead..." << endl;
-		course.landscapeFilename = "assets/bg.png";
-	}
-
-	course.colorRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_primary", Color( 64, 80, 80));
-	course.colorRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_secondary", Color( 40, 64, 64));
-	course.colorOffRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_primary", Color(  0,112,  0));
-	course.colorOffRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_secondary", Color(  0, 88, 80));
-	course.colorHumblePrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_primary", Color(200,200,200));
-	course.colorHumbleSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_secondary", Color(152,  0,  0));
-	course.colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
-	course.colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", course.colorOffRoadPrimary);
-
-	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", 32);
-	for(unsigned id = 0; id < spriteIdCount; id++)
-	{
-		const string specifiedSpriteFilename = prop.get("sprite" + futil::to_string(id));
-		if(not specifiedSpriteFilename.empty())
-		{
-			const string spriteFilename = getContextualizedFilename(specifiedSpriteFilename, prop.get("base_dir"), "assets/");
-			if(spriteFilename.empty())
-				cout << "warning: could not load sprite for ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". ID will be treated as unspecified!" << endl;
-			course.spritesFilenames.push_back(spriteFilename);
-		}
-		else course.spritesFilenames.push_back(string());
-	}
-
-	const string specifiedSegmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
-	const string segmentFilename = getContextualizedFilename(specifiedSegmentFilename, prop.get("base_dir"));
-
-	std::ifstream stream(segmentFilename.c_str());
-	if(not stream.is_open())
-		throw std::runtime_error("Course description file could not be opened: \"" + specifiedSegmentFilename + "\", specified by \"" + course.filename + "\"");
-
-	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
-	for(unsigned i = 0; i < length; i++)
-	{
-		Segment line;
-		line.z = i*course.roadSegmentLength;
-
-		string str;
-		do{
-			if(stream.good())
-			{
-				str = trim(str);
-				getline(stream, str);
-			}
-			else
-			{
-				str.clear();  // if no more input, signal no data by clearing str
-				break;
-			}
-		}
-		while(str.empty() or starts_with(str, "#") or starts_with(str, "!")); // ignore empty lines or commented out ones
-
-		vector<string> tokens = split(str, ',');
-
-		line.x = atof(tokens[0].c_str());
-
-		if(tokens.size() > 1)
-			line.y = atof(tokens[1].c_str());
-
-		if(tokens.size() > 2)
-			line.curve = atof(tokens[2].c_str());
-
-		if(tokens.size() >= 3)
-			line.slope = atof(tokens[3].c_str());
-
-		if(tokens.size() >= 5)
-		{
-			line.spriteID = atoi(tokens[4].c_str());
-			line.spriteX = atof(tokens[5].c_str());
-
-			if(line.spriteID != -1 and
-			  (line.spriteID + 1 > (int) course.spritesFilenames.size() or course.spritesFilenames[line.spriteID].empty()))
-				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + futil::to_string(line.spriteID) + "), specified by \"" + course.filename);
-		}
-		else if(tokens.size() == 4)
-			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;
-
-		course.lines.push_back(line);
-	}
-
-	stream.close();
-	return course;
-}
-

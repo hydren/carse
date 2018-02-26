@@ -63,11 +63,12 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  drawParameters(), coursePositionFactor(500), simulationType(),
+  coursePositionFactor(500), simulationType(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
-  course(0, 0), playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
+  nextCourseSpec(0, 0), course(),
+  playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
 
   hudTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
@@ -93,11 +94,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   controlJoystickAxisTurn(0),
 
   debugMode(true)
-{
-	drawParameters.cameraDepth = 0.84;
-	drawParameters.drawDistance = 300;
-	parallax.x = parallax.y = 0;
-}
+{}
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
@@ -128,7 +125,6 @@ void Pseudo3DRaceState::initialize()
 	fontCountdown = new Font(shared.font2Path, dip(36));
 	font3 = new Font(shared.font1Path, dip(24));
 	fontDebug = new Font(shared.fontDev);
-	music = new Music("assets/music_sample.ogg");
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
 	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
@@ -191,8 +187,33 @@ void Pseudo3DRaceState::initialize()
 void Pseudo3DRaceState::onEnter()
 {
 	Display& display = game.getDisplay();
-	drawParameters.drawAreaWidth = display.getWidth();
-	drawParameters.drawAreaHeight = display.getHeight();
+
+	course.clearDynamicData();
+	course = Pseudo3DCourse(nextCourseSpec);
+	course.setupDynamicData();
+
+	course.drawAreaWidth = display.getWidth();
+	course.drawAreaHeight = display.getHeight();
+	course.drawDistance = 300;
+	course.cameraDepth = 0.84;
+
+	if(imgBackground != null)
+		delete imgBackground;
+
+	imgBackground = new Image(course.spec.landscapeFilename);
+
+	backgroundScale = 0.2 * display.getHeight() / (float) imgBackground->getHeight();
+
+	bgColor = course.spec.colorLandscape;
+	bgColorHorizon = course.spec.colorHorizon;
+
+	if(music != null)
+		delete music;
+
+	if(not course.spec.musicFilename.empty())
+		music = new fgeal::Music(course.spec.musicFilename);
+	else
+		music = null;
 
 	playerVehicle.clearDynamicData();
 	playerVehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
@@ -207,44 +228,12 @@ void Pseudo3DRaceState::onEnter()
 	if(playerVehicle.shadowSprite != null)
 		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
-	if(imgBackground != null)
-		delete imgBackground;
-
-	imgBackground = new Image(course.landscapeFilename);
-
-	backgroundScale = 0.2 * display.getHeight() / (float) imgBackground->getHeight();
-
-	if(not drawParameters.sprites.empty())
-	{
-		for(unsigned i = 0; i < drawParameters.sprites.size(); i++)
-			delete drawParameters.sprites[i];
-
-		drawParameters.sprites.clear();
-	}
-
-	for(unsigned i = 0; i < course.spritesFilenames.size(); i++)
-		if(not course.spritesFilenames[i].empty())
-			drawParameters.sprites.push_back(new Image(course.spritesFilenames[i]));
-		else
-			drawParameters.sprites.push_back(null);
-
-	bgColor = course.colorLandscape;
-	bgColorHorizon = course.colorHorizon;
-
 	playerVehicle.engineSound.setProfile(playerVehicle.engineSoundProfile, playerVehicle.body.engine.maxRpm);
 
-	if(settings.raceType != RACE_TYPE_DEBUG)
-	{
-		onSceneIntro = true;
-		onSceneFinish = false;
-		timerSceneIntro = 4.5;
-		debugMode = false;
-	}
-	else
-	{
-		onSceneIntro = false;
-		debugMode = true;
-	}
+	spriteSmokeLeft->scale.x =
+			spriteSmokeLeft->scale.y =
+					spriteSmokeRight->scale.x =
+							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
@@ -297,10 +286,18 @@ void Pseudo3DRaceState::onEnter()
 	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
 	posHudFinishedCaption.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
 
-	spriteSmokeLeft->scale.x =
-			spriteSmokeLeft->scale.y =
-					spriteSmokeRight->scale.x =
-							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
+	if(settings.raceType != RACE_TYPE_DEBUG)
+	{
+		onSceneIntro = true;
+		onSceneFinish = false;
+		timerSceneIntro = 4.5;
+		debugMode = false;
+	}
+	else
+	{
+		onSceneIntro = false;
+		debugMode = true;
+	}
 
 	playerVehicle.corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
 	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
@@ -319,14 +316,14 @@ void Pseudo3DRaceState::onEnter()
 
 	playerVehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
 
-	music->loop();
+	if(music != null) music->loop();
 	playerVehicle.engineSound.playIdle();
 }
 
 void Pseudo3DRaceState::onLeave()
 {
 	playerVehicle.engineSound.haltSound();
-	music->stop();
+	if(music != null) music->stop();
 	sndTireBurnoutIntro->stop();
 	sndTireBurnoutLoop->stop();
 	sndTireBurnoutStandIntro->stop();
@@ -336,8 +333,8 @@ void Pseudo3DRaceState::onLeave()
 
 void Pseudo3DRaceState::render()
 {
-	const float displayWidth = drawParameters.drawAreaWidth,
-				displayHeight = drawParameters.drawAreaHeight;
+	const float displayWidth = course.drawAreaWidth,
+				displayHeight = course.drawAreaHeight;
 
 	game.getDisplay().clear();
 
@@ -349,7 +346,7 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 2*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition, drawParameters);
+	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord
@@ -380,7 +377,7 @@ void Pseudo3DRaceState::render()
 	}
 	else if(isRaceTypePointToPoint(settings.raceType))
 	{
-		const float courseLength = (course.lines.size()*course.roadSegmentLength)/coursePositionFactor,
+		const float courseLength = (course.spec.lines.size()*course.spec.roadSegmentLength)/coursePositionFactor,
 					progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));
 		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
@@ -705,10 +702,10 @@ void Pseudo3DRaceState::update(float delta)
 	}
 
 	// course looping control
-	const unsigned N = course.lines.size();
-	while(playerVehicle.position * coursePositionFactor >= N*course.roadSegmentLength)
+	const unsigned N = course.spec.lines.size();
+	while(playerVehicle.position * coursePositionFactor >= N*course.spec.roadSegmentLength)
 	{
-		playerVehicle.position -= N*course.roadSegmentLength / coursePositionFactor;
+		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
 
 		if(not onSceneFinish)
 		{
@@ -738,7 +735,7 @@ void Pseudo3DRaceState::update(float delta)
 
 	}
 	while(playerVehicle.position < 0)
-		playerVehicle.position += N*course.roadSegmentLength / coursePositionFactor;
+		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
 
 	playerVehicle.engineSound.updateSound(playerVehicle.body.engine.rpm);
 
@@ -857,25 +854,28 @@ void Pseudo3DRaceState::handleInput()
 					playerVehicle.body.automaticShiftingEnabled = !playerVehicle.body.automaticShiftingEnabled;
 					break;
 				case Keyboard::KEY_M:
-					if(music->isPlaying())
-						music->pause();
-					else
-						music->resume();
+					if(music != null)
+					{
+						if(music->isPlaying())
+							music->pause();
+						else
+							music->resume();
+					}
 					break;
 				case Keyboard::KEY_D:
 					debugMode = !debugMode;
 					break;
 				case Keyboard::KEY_PAGE_UP:
-					drawParameters.drawDistance++;
+					course.drawDistance++;
 					break;
 				case Keyboard::KEY_PAGE_DOWN:
-					drawParameters.drawDistance--;
+					course.drawDistance--;
 					break;
 				case Keyboard::KEY_O:
-					drawParameters.cameraDepth += 0.1;
+					course.cameraDepth += 0.1;
 					break;
 				case Keyboard::KEY_L:
-					drawParameters.cameraDepth -= 0.1;
+					course.cameraDepth -= 0.1;
 					break;
 				default:
 					break;

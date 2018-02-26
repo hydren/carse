@@ -9,65 +9,57 @@
 #define PSEUDO3D_COURSE_HPP_
 #include <ciso646>
 
+#include "racing/course.hpp"
+
 #include "fgeal/fgeal.hpp"
-#include "fgeal/extra/sprite.hpp"
-#include "futil/properties.hpp"
 
-#include <vector>
-
-struct Course
+struct Pseudo3DCourse
 {
-	struct Segment
+	struct Spec extends CourseSpec
 	{
-		float x, y, z;  // 3d center of line (delta coordinates)
-		float curve;  //fixme this "curve" field completely renders the "x" field useless
-		float slope;
+		std::string name, filename, author, credits, comments;
 
-		//todo add a slope field to control y-variation
+		std::string landscapeFilename;
+		fgeal::Color colorLandscape, colorHorizon,
+					 colorRoadPrimary, colorRoadSecondary,
+					 colorOffRoadPrimary, colorOffRoadSecondary,
+					 colorHumblePrimary, colorHumbleSecondary;
 
-		float clip;
-		int spriteID;  // the "ID" of the sprite to show. -1 means no sprite.
-		float spriteX;   // the position of this segment's sprite
+		std::vector<std::string> spritesFilenames;
 
-		Segment();
+		std::string musicFilename;
+
+		Spec(float segmentLength, float roadWidth)
+		: CourseSpec(segmentLength, roadWidth) {}
+
+		inline std::string toString() const { return not name.empty()? name : not filename.empty()? filename : "<unnamed>"; }
+		inline operator std::string() const { return this->toString(); }
 	};
 
-	std::vector<Segment> lines;
-	float roadSegmentLength, roadWidth;
+	Spec spec;
+	std::vector<fgeal::Image*> sprites;
 
-	std::string name, filename, author, credits, comments;
+	int drawAreaWidth, drawAreaHeight;
+	unsigned drawDistance;
+	float cameraDepth;
 
-	std::vector<std::string> spritesFilenames;
+	Pseudo3DCourse();
+	Pseudo3DCourse(Spec spec);
 
-	std::string landscapeFilename;
-	fgeal::Color colorLandscape, colorHorizon,
-				 colorRoadPrimary, colorRoadSecondary,
-	             colorOffRoadPrimary, colorOffRoadSecondary,
-				 colorHumblePrimary, colorHumbleSecondary;
+	void draw(int positionZ, int positionX);
 
-	Course(float segmentLength, float roadWidth);
+	void clearDynamicData();
 
-	struct DrawParameters
-	{
-		int drawAreaWidth, drawAreaHeight;
-		unsigned drawDistance;
-		float cameraDepth;
+	void setupDynamicData();
 
-		std::vector<fgeal::Image*> sprites;
-	};
+	/* Generates a debug course spec. */
+	static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
 
-	void draw(int positionZ, int positionX, const DrawParameters& param);
+	/* Generates a random course spec, with given length and curveness factor. */
+	static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
 
-	operator std::string() const;
-
-	/** Creates a debug course. */
-	static Course createDebugCourse(float segmentLength, float roadWidth);
-
-	/** Creates a random course, with given length and curveness factor. */
-	static Course createRandomCourse(float segmentLength, float roadWidth, float length, float curveness);
-
-	/** Creates a course from the given file. */
-	static Course createCourseFromFile(const futil::Properties& properties);
+	/* Reads a course spec. from the given filename. */
+	static Spec parseCourseSpecFromFile(const std::string& filename);
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

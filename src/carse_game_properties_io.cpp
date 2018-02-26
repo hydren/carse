@@ -119,11 +119,7 @@ void CarseGameLogic::loadCourses()
 	{
 		if(ends_with(courseFiles[i], ".properties"))
 		{
-			Properties prop;
-			prop.load(courseFiles[i]);
-			prop.put("filename", courseFiles[i]);  // done so we can later get properties filename
-			prop.put("base_dir", courseFiles[i].substr(0, courseFiles[i].find_last_of("/\\")+1));  // done so we can later get properties base dir
-			try { courses.push_back(Course::createCourseFromFile(prop)); }
+			try { courses.push_back(Pseudo3DCourse::parseCourseSpecFromFile(courseFiles[i])); }
 			catch(const std::exception& e) { cout << "error while reading course: " << e.what() << endl; continue; }
 			cout << "read course: " << courseFiles[i] << endl;
 		}

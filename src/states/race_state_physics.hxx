@@ -36,13 +36,13 @@ static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
-	const Course::Segment& segment = course.lines[((int)(playerVehicle.position*coursePositionFactor/course.roadSegmentLength))%course.lines.size()];
+	const CourseSpec::Segment& segment = course.spec.lines[((int)(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength))%course.spec.lines.size()];
 	const float wheelAngleFactor = 1 - playerVehicle.corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	playerVehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
 	playerVehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
 	playerVehicle.body.arbitraryForceFactor = wheelAngleFactor;
-	playerVehicle.body.slopeAngle = atan2(segment.y - playerVehicle.verticalPosition, course.roadSegmentLength);
+	playerVehicle.body.slopeAngle = atan2(segment.y - playerVehicle.verticalPosition, course.spec.roadSegmentLength);
 
 	if(onSceneIntro)
 		playerVehicle.body.engine.gear = 0;
@@ -80,7 +80,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	// update curve pull
 	//curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;
-	playerVehicle.curvePull = sin(atan2(segment.curve*50, course.roadSegmentLength));
+	playerVehicle.curvePull = sin(atan2(segment.curve*50, course.spec.roadSegmentLength));
 	playerVehicle.curvePull *= playerVehicle.body.speed * coursePositionFactor;
 
 	// update strafe position
@@ -130,7 +130,7 @@ void Pseudo3DRaceState::shiftGear(int gear)
 
 Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()
 {
-	if(fabs(playerVehicle.horizontalPosition) > 1.2*course.roadWidth)
+	if(fabs(playerVehicle.horizontalPosition) > 1.2*course.spec.roadWidth)
 		return SURFACE_TYPE_GRASS;
 	else
 		return SURFACE_TYPE_DRY_ASPHALT;

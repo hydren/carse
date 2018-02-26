@@ -47,35 +47,35 @@ EngineSoundProfile& CarseGameLogic::getPresetEngineSoundProfile(const std::strin
 		return presetEngineSoundProfiles["default"];
 }
 
-const vector<Course>& CarseGameLogic::getCourseList()
+const vector<Pseudo3DCourse::Spec>& CarseGameLogic::getCourseList()
 {
 	return courses;
 }
 
 void CarseGameLogic::setNextCourse(unsigned courseIndex)
 {
-	getRaceStateInstance().course = courses[courseIndex];
+	getRaceStateInstance().nextCourseSpec = courses[courseIndex];
 }
 
-void CarseGameLogic::setNextCourse(const Course& c)
+void CarseGameLogic::setNextCourse(const Pseudo3DCourse::Spec& c)
 {
-	getRaceStateInstance().course = c;
+	getRaceStateInstance().nextCourseSpec = c;
 }
 
 void CarseGameLogic::setNextCourseRandom()
 {
-	getRaceStateInstance().course = Course::createRandomCourse(200, 3000, 6400, 1.5);
+	getRaceStateInstance().nextCourseSpec = Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5);
 }
 
 void CarseGameLogic::setNextCourseDebug()
 {
-	getRaceStateInstance().course = Course::createDebugCourse(200, 3000);
+	getRaceStateInstance().nextCourseSpec = Pseudo3DCourse::generateDebugCourseSpec(200, 3000);
 	getRaceStateInstance().settings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 
-const Course& CarseGameLogic::getNextCourse()
+const Pseudo3DCourse::Spec& CarseGameLogic::getNextCourse()
 {
-	return getRaceStateInstance().course;
+	return getRaceStateInstance().nextCourseSpec;
 }
 
 fgeal::Image* CarseGameLogic::getNextCoursePreviewImage()

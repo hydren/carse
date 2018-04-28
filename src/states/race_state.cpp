@@ -47,6 +47,10 @@ static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
 static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
+#if __cplusplus < 201103L
+	double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
+#endif
+
 // -------------------------------------------------------------------------------
 
 int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }

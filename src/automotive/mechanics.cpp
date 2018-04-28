@@ -7,6 +7,8 @@
 
 #include "mechanics.hpp"
 
+#include "futil/math_constants.h"
+
 #include <algorithm>
 
 #include <cmath>

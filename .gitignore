@@ -1,6 +1,8 @@
 # Build configurations folders
 /Debug/
 /Release/
+/linux-gcc-allegro4.4-debug/
+/linux-gcc-allegro4.4-release/
 /linux-gcc-allegro5.0-debug/
 /linux-gcc-allegro5.0-release/
 /linux-gcc-sdl1.2-debug/

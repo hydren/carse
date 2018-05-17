@@ -64,6 +64,9 @@ VehicleSelectionState::~VehicleSelectionState()
 		for(unsigned j = 0; j < previews[i].altSprites.size(); j++)
 			delete previews[i].altSprites[j];
 	}
+
+	if(layout != null)
+		delete layout;
 }
 
 void VehicleSelectionState::initialize()

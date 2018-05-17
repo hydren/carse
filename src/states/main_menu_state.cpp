@@ -40,6 +40,10 @@ MainMenuState::~MainMenuState()
 {
 	if(menu != null) delete menu;
 	if(layout != null) delete layout;
+	if(imgBackground != null) delete imgBackground;
+	if(imgRace != null) delete imgRace;
+	if(imgExit != null) delete imgExit;
+	if(imgSettings != null) delete imgSettings;
 }
 
 // xxx THESE ENUM MUST MATCH MENU ENTRIES' ORDER.

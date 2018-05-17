@@ -57,7 +57,7 @@ int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), shared(*game->sharedResources),
-  fontSmall(null), fontCountdown(null), font3(null), fontDebug(null),
+  fontSmall(null), fontCountdown(null), font3(null),
   imgBackground(null),
   music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
@@ -106,7 +106,6 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(fontSmall != null) delete fontSmall;
 	if(fontCountdown != null) delete fontCountdown;
 	if(font3 != null) delete font3;
-	if(fontDebug != null) delete fontDebug;
 
 	if(imgBackground != null) delete imgBackground;
 	if(music != null) delete music;
@@ -128,7 +127,6 @@ void Pseudo3DRaceState::initialize()
 	fontSmall = new Font(shared.font1Path);
 	fontCountdown = new Font(shared.font2Path, dip(36));
 	font3 = new Font(shared.font1Path, dip(24));
-	fontDebug = new Font(shared.fontDev);
 
 	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
 	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
@@ -413,136 +411,136 @@ void Pseudo3DRaceState::render()
 	{
 		char buffer[512];
 		float offset = 25;
-		fontDebug->drawText("FPS:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("FPS:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%d", game.getFpsCount());
 		fontSmall->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
-		fontDebug->drawText("Position:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Position:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", playerVehicle.position);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", playerVehicle.body.speed*3.6);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
-		fontDebug->drawText("0-60mph: ", 175, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("0-60mph: ", 175, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fs", acc0to60time);
 		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.acceleration);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		fontDebug->drawText("Height:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Height:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", playerVehicle.verticalPosition);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 //		offset += 18;
-//		fontDebug->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
+//		shared.fontDev.drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 //		sprintf(buffer, "%2.2fm/s", verticalSpeed);
 //		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		fontDebug->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f", playerVehicle.pseudoAngle);
 		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f", playerVehicle.body.slopeAngle);
 		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", playerVehicle.strafeSpeed/coursePositionFactor);
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
-		fontDebug->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", playerVehicle.curvePull/coursePositionFactor);
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.slopePullForce);
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.brakingForce);
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.rollingResistanceForce);
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.airDragForce);
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", (playerVehicle.curvePull/coursePositionFactor + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
-		fontDebug->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.getDriveForce());
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Torque:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fNm", playerVehicle.body.engine.getCurrentTorque());
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f%%", 100.f*playerVehicle.body.engine.getCurrentTorque()/playerVehicle.body.engine.maximumTorque);
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Power:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Power:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fhp", (playerVehicle.body.engine.getCurrentTorque()*playerVehicle.body.engine.rpm)/(5252.0 * 1.355818));
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
-		fontDebug->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", playerVehicle.body.getDrivenWheelsWeightLoad());
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Downforce:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Downforce:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fN", -playerVehicle.body.downforce);
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		fontDebug->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2frad/s", playerVehicle.body.wheelAngularSpeed);
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("RPM:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.f", playerVehicle.body.engine.rpm);
 		fontSmall->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
 
 		offset += 18;
-		fontDebug->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Gear:", 25, offset, fgeal::Color::WHITE);
 		const char* autoLabelTxt = (playerVehicle.body.automaticShiftingEnabled? " (auto)":"");
 		sprintf(buffer, "%d %s", playerVehicle.body.engine.gear, autoLabelTxt);
 		fontSmall->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
 
 		offset += 25;
-		fontDebug->drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
+		shared.fontDev.drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2f%%", 100*playerVehicle.body.slipRatio);
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 

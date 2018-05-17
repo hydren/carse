@@ -35,7 +35,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	CarseSharedResources& shared;
 
-	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDebug;
+	fgeal::Font* fontSmall, *fontCountdown, *font3;
 	fgeal::Image* imgBackground;
 	fgeal::Music* music;
 

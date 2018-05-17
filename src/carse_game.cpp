@@ -27,6 +27,12 @@ Pseudo3DCarseGame::Pseudo3DCarseGame()
 	this->maxFps = 60;
 }
 
+Pseudo3DCarseGame::~Pseudo3DCarseGame()
+{
+	if(sharedResources != null)
+		delete sharedResources;
+}
+
 void Pseudo3DCarseGame::initializeStatesList()
 {
 	this->sharedResources = new CarseSharedResources();

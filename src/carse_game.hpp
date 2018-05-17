@@ -27,6 +27,7 @@ class Pseudo3DCarseGame extends public fgeal::Game
 		OPTIONS_MENU_STATE_ID;
 
 	Pseudo3DCarseGame();
+	~Pseudo3DCarseGame();
 	void initializeStatesList();
 
 	CarseSharedResources* sharedResources;

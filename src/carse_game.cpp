@@ -33,11 +33,14 @@ Pseudo3DCarseGame::~Pseudo3DCarseGame()
 		delete sharedResources;
 }
 
-void Pseudo3DCarseGame::initializeStatesList()
+void Pseudo3DCarseGame::preInitialize()
 {
 	this->sharedResources = new CarseSharedResources();
 	this->logic.initialize();
+}
 
+void Pseudo3DCarseGame::initializeStatesList()
+{
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuState(this));
 	this->addState(new VehicleSelectionState(this));
@@ -45,6 +48,7 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->addState(new OptionsMenuState(this));
 
 	this->setInitialState(MAIN_MENU_STATE_ID);
+	this->setInputManagerEnabled();
 
 	this->logic.onStatesListInitFinished();
 }

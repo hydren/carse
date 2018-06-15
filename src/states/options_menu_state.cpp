@@ -79,6 +79,9 @@ void OptionsMenuState::onEnter()
 void OptionsMenuState::onLeave()
 {}
 
+void OptionsMenuState::update(float delta)
+{}
+
 void OptionsMenuState::render()
 {
 	Display& display = game.getDisplay();
@@ -106,47 +109,34 @@ void OptionsMenuState::render()
 	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getHeight(), Color::WHITE);
 }
 
-void OptionsMenuState::update(float delta)
+void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 {
-	Event event;
-	EventQueue& eventQueue = EventQueue::getInstance();
-	while(eventQueue.hasEvents())
+	if(isResolutionMenuActive)
+		updateOnResolutionMenu(key);
+	else switch(key)
 	{
-		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
-		{
-			game.running = false;
-		}
-		else if(isResolutionMenuActive)
-			updateOnResolutionMenu(event);
-		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
-		{
-			switch(event.getEventKeyCode())
-			{
-				case Keyboard::KEY_ESCAPE:
-					shared.sndCursorOut.stop();
-					shared.sndCursorOut.play();
-					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
-					break;
-				case Keyboard::KEY_ENTER:
-					shared.sndCursorIn.stop();
-					shared.sndCursorIn.play();
-					this->onMenuSelect();
-					break;
-				case Keyboard::KEY_ARROW_UP:
-					shared.sndCursorMove.stop();
-					shared.sndCursorMove.play();
-					menu->moveCursorUp();
-					break;
-				case Keyboard::KEY_ARROW_DOWN:
-					shared.sndCursorMove.stop();
-					shared.sndCursorMove.play();
-					menu->moveCursorDown();
-					break;
-				default:
-					break;
-			}
-		}
+		case Keyboard::KEY_ESCAPE:
+			shared.sndCursorOut.stop();
+			shared.sndCursorOut.play();
+			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			break;
+		case Keyboard::KEY_ENTER:
+			shared.sndCursorIn.stop();
+			shared.sndCursorIn.play();
+			this->onMenuSelect();
+			break;
+		case Keyboard::KEY_ARROW_UP:
+			shared.sndCursorMove.stop();
+			shared.sndCursorMove.play();
+			menu->moveCursorUp();
+			break;
+		case Keyboard::KEY_ARROW_DOWN:
+			shared.sndCursorMove.stop();
+			shared.sndCursorMove.play();
+			menu->moveCursorDown();
+			break;
+		default:
+			break;
 	}
 }
 
@@ -200,32 +190,29 @@ void OptionsMenuState::updateLabels()
 	menu->at(4).label = "Tachometer type: " + string(logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
 }
 
-void OptionsMenuState::updateOnResolutionMenu(Event& event)
+void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 {
-	if(event.getEventType() == Event::TYPE_KEY_PRESS)
+	switch(key)
 	{
-		switch(event.getEventKeyCode())
+		case Keyboard::KEY_ESCAPE:
+			isResolutionMenuActive = false;
+			break;
+		case Keyboard::KEY_ENTER:
 		{
-			case Keyboard::KEY_ESCAPE:
-				isResolutionMenuActive = false;
-				break;
-			case Keyboard::KEY_ENTER:
-			{
-				Display::Resolution resolution = Display::Resolution::getList()[menuResolution->getSelectedIndex()];
-				game.getDisplay().setSize(resolution.width, resolution.height);
-				updateFonts();
-				isResolutionMenuActive = false;
-				break;
-			}
-			case Keyboard::KEY_ARROW_UP:
-				menuResolution->moveCursorUp();
-				break;
-			case Keyboard::KEY_ARROW_DOWN:
-				menuResolution->moveCursorDown();
-				break;
-			default:
-				break;
+			Display::Resolution resolution = Display::Resolution::getList()[menuResolution->getSelectedIndex()];
+			game.getDisplay().setSize(resolution.width, resolution.height);
+			updateFonts();
+			isResolutionMenuActive = false;
+			break;
 		}
+		case Keyboard::KEY_ARROW_UP:
+			menuResolution->moveCursorUp();
+			break;
+		case Keyboard::KEY_ARROW_DOWN:
+			menuResolution->moveCursorDown();
+			break;
+		default:
+			break;
 	}
 }
 

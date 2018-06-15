@@ -157,18 +157,21 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	bool isPlayerSteeringRight();
 
 	public:
-	int getId();
+	virtual int getId();
 
 	Pseudo3DRaceState(Pseudo3DCarseGame* game);
 	~Pseudo3DRaceState();
 
-	void initialize();
+	virtual void initialize();
 
-	void onEnter();
-	void onLeave();
+	virtual void onEnter();
+	virtual void onLeave();
 
-	void update(float delta);
-	void render();
+	virtual void update(float delta);
+	virtual void render();
+
+	virtual void onKeyPressed(fgeal::Keyboard::Key);
+	virtual void onJoystickButtonPressed(unsigned joystick, unsigned button);
 
 	// returns true if the given race type is a loop-type
 	static bool isRaceTypeLoop(RaceType type);
@@ -177,7 +180,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	static bool isRaceTypePointToPoint(RaceType type);
 
 	private:
-	void handleInput();
 	void handlePhysics(float delta);
 
 	void drawVehicle(const Pseudo3DVehicle&, const fgeal::Point&);

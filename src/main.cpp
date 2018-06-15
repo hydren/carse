@@ -48,12 +48,6 @@ void runSplash()
 	fgeal::rest(0.5);
 }
 
-void runGameTest()
-{
-	CarseGame game;
-	game.start();
-}
-
 int main(int argc, char** argv)
 {
 	int screenWidth = 800, screenHeight = 600;
@@ -101,7 +95,7 @@ int main(int argc, char** argv)
 		if(centered) options.positioning = Display::Options::POSITION_CENTERED;
 		Display::create(options);
 		runSplash();
-		runGameTest();
+		CarseGame().start();
 		fgeal::finalize();
 	}
 	catch(const fgeal::AdapterException& e)

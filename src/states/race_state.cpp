@@ -664,7 +664,6 @@ static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 
 void Pseudo3DRaceState::update(float delta)
 {
-	handleInput();
 	handlePhysics(delta);
 
 	if(onSceneIntro)
@@ -816,82 +815,70 @@ void Pseudo3DRaceState::update(float delta)
 		sndOnDirtLoop->stop();
 }
 
-void Pseudo3DRaceState::handleInput()
+void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 {
-	Event event;
-	EventQueue& eventQueue = EventQueue::getInstance();
-	while(not eventQueue.isEmpty())
+	if(key == controlKeyShiftUp)
+		shiftGear(playerVehicle.body.engine.gear+1);
+	else if(key == controlKeyShiftDown)
+		shiftGear(playerVehicle.body.engine.gear-1);
+
+	else switch(key)
 	{
-		eventQueue.waitNextEvent(&event);
-		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
-			game.running = false;
-
-		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
-		{
-			if(event.getEventKeyCode() == controlKeyShiftUp)
-				shiftGear(playerVehicle.body.engine.gear+1);
-			else if(event.getEventKeyCode() == controlKeyShiftDown)
-				shiftGear(playerVehicle.body.engine.gear-1);
-
-			else switch(event.getEventKeyCode())
-			{
-				case Keyboard::KEY_ESCAPE:
-					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
-					break;
-				case Keyboard::KEY_R:
-					playerVehicle.position = 0;
-					playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
+		case Keyboard::KEY_ESCAPE:
+			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			break;
+		case Keyboard::KEY_R:
+			playerVehicle.position = 0;
+			playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //					verticalSpeed = 0;
-					playerVehicle.body.reset();
-					playerVehicle.pseudoAngle = 0;
-					parallax.x = parallax.y = 0;
-					lapTimeCurrent = 0;
-					lapCurrent = 1;
-					onSceneIntro = true;
-					timerSceneIntro = 4.5;
+			playerVehicle.body.reset();
+			playerVehicle.pseudoAngle = 0;
+			parallax.x = parallax.y = 0;
+			lapTimeCurrent = 0;
+			lapCurrent = 1;
+			onSceneIntro = true;
+			timerSceneIntro = 4.5;
 //					isBurningRubber = onAir = onLongAir = false;
-					acc0to60time = acc0to60clock = 0;
-					break;
-				case Keyboard::KEY_T:
-					playerVehicle.body.automaticShiftingEnabled = !playerVehicle.body.automaticShiftingEnabled;
-					break;
-				case Keyboard::KEY_M:
-					if(music != null)
-					{
-						if(music->isPlaying())
-							music->pause();
-						else
-							music->resume();
-					}
-					break;
-				case Keyboard::KEY_D:
-					debugMode = !debugMode;
-					break;
-				case Keyboard::KEY_PAGE_UP:
-					course.drawDistance++;
-					break;
-				case Keyboard::KEY_PAGE_DOWN:
-					course.drawDistance--;
-					break;
-				case Keyboard::KEY_O:
-					course.cameraDepth += 0.1;
-					break;
-				case Keyboard::KEY_L:
-					course.cameraDepth -= 0.1;
-					break;
-				default:
-					break;
+			acc0to60time = acc0to60clock = 0;
+			break;
+		case Keyboard::KEY_T:
+			playerVehicle.body.automaticShiftingEnabled = !playerVehicle.body.automaticShiftingEnabled;
+			break;
+		case Keyboard::KEY_M:
+			if(music != null)
+			{
+				if(music->isPlaying())
+					music->pause();
+				else
+					music->resume();
 			}
-		}
-
-		else if(event.getEventType() == Event::TYPE_JOYSTICK_BUTTON_PRESS)
-		{
-			if(event.getEventJoystickButtonIndex() == (int) controlJoystickKeyShiftUp)
-				shiftGear(playerVehicle.body.engine.gear+1);
-			else if(event.getEventJoystickButtonIndex() == (int) controlJoystickKeyShiftDown)
-				shiftGear(playerVehicle.body.engine.gear-1);
-		}
+			break;
+		case Keyboard::KEY_D:
+			debugMode = !debugMode;
+			break;
+		case Keyboard::KEY_PAGE_UP:
+			course.drawDistance++;
+			break;
+		case Keyboard::KEY_PAGE_DOWN:
+			course.drawDistance--;
+			break;
+		case Keyboard::KEY_O:
+			course.cameraDepth += 0.1;
+			break;
+		case Keyboard::KEY_L:
+			course.cameraDepth -= 0.1;
+			break;
+		default:
+			break;
 	}
+}
+
+void Pseudo3DRaceState::onJoystickButtonPressed(unsigned joystick, unsigned button)
+{
+	if(button == controlJoystickKeyShiftUp)
+		shiftGear(playerVehicle.body.engine.gear+1);
+	else if(button == controlJoystickKeyShiftDown)
+		shiftGear(playerVehicle.body.engine.gear-1);
 }
 
 bool Pseudo3DRaceState::isPlayerAccelerating()

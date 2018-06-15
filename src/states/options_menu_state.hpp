@@ -32,21 +32,23 @@ class OptionsMenuState extends public fgeal::Game::State
 	bool isResolutionMenuActive;
 
 	public:
-	int getId();
+	virtual int getId();
 
 	OptionsMenuState(Pseudo3DCarseGame* game);
 	~OptionsMenuState();
 
-	void initialize();
-	void onEnter();
-	void onLeave();
+	virtual void initialize();
+	virtual void onEnter();
+	virtual void onLeave();
 
-	void render();
-	void update(float delta);
+	virtual void render();
+	virtual void update(float delta);
+
+	virtual void onKeyPressed(fgeal::Keyboard::Key);
 
 	private:
 	void onMenuSelect();
-	void updateOnResolutionMenu(fgeal::Event&);
+	void updateOnResolutionMenu(fgeal::Keyboard::Key);
 	void updateLabels();
 
 	void updateFonts();

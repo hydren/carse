@@ -51,11 +51,11 @@ class VehicleSelectionState extends public fgeal::Game::State
 	struct ListLayout extends GenericMenuStateLayout<VehicleSelectionState>
 	{
 		ListLayout(VehicleSelectionState& state);
-		void draw();
-		void update(float delta);
-		void navigate(NavigationDirection navDir);
+		virtual void draw();
+		virtual void update(float delta);
+		virtual void navigate(NavigationDirection navDir);
 		void onCursorChange();
-		void onCursorAccept();
+		virtual void onCursorAccept();
 	};
 
 	struct ShowroomLayout extends GenericMenuStateLayout<VehicleSelectionState>
@@ -66,25 +66,27 @@ class VehicleSelectionState extends public fgeal::Game::State
 		float selectionTransitionProgress;
 
 		ShowroomLayout(VehicleSelectionState& state);
-		void draw();
-		void update(float delta);
-		void navigate(NavigationDirection navDir);
+		virtual void draw();
+		virtual void update(float delta);
+		virtual void navigate(NavigationDirection navDir);
 		void onCursorChange();
-		void onCursorAccept();
+		virtual void onCursorAccept();
 	};
 
 	public:
-	int getId();
+	virtual int getId();
 
 	VehicleSelectionState(Pseudo3DCarseGame* game);
 	~VehicleSelectionState();
 
-	void initialize();
-	void onEnter();
-	void onLeave();
+	virtual void initialize();
+	virtual void onEnter();
+	virtual void onLeave();
 
-	void render();
-	void update(float delta);
+	virtual void render();
+	virtual void update(float delta);
+
+	virtual void onKeyPressed(fgeal::Keyboard::Key);
 
 	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
 	void drawVehicleSpec(float x, float y, float index=-1);

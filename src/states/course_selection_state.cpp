@@ -195,10 +195,7 @@ void CourseSelectionState::render()
 	}
 }
 
-void CourseSelectionState::update(float delta)
-{
-	this->handleInput();
-}
+void CourseSelectionState::update(float delta) {}
 
 void CourseSelectionState::updateLapCount()
 {
@@ -208,59 +205,46 @@ void CourseSelectionState::updateLapCount()
 		menuSettings->at(1).label = "Laps: --";
 }
 
-void CourseSelectionState::handleInput()
+void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 {
-	Event event;
-	EventQueue& eventQueue = EventQueue::getInstance();
-	while(eventQueue.hasEvents())
+	if(key == Keyboard::KEY_ESCAPE and status != STATUS_ON_COURSE_LIST_SELECTION)
 	{
-		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
-		{
-			game.running = false;
-		}
-		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
-		{
-			if(event.getEventKeyCode() == Keyboard::KEY_ESCAPE and status != STATUS_ON_COURSE_LIST_SELECTION)
-			{
-				shared.sndCursorOut.stop();
-				shared.sndCursorOut.play();
-				if(isLoadedCourseSelected)
-					logic.setNextCourse(menuCourse->getSelectedIndex()-2);
-				else if(isDebugCourseSelected)
-					logic.setNextCourseDebug();
-				else
-					logic.setNextCourseRandom();
+		shared.sndCursorOut.stop();
+		shared.sndCursorOut.play();
+		if(isLoadedCourseSelected)
+			logic.setNextCourse(menuCourse->getSelectedIndex()-2);
+		else if(isDebugCourseSelected)
+			logic.setNextCourseDebug();
+		else
+			logic.setNextCourseRandom();
 
-				game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
-			}
-			else switch(status)
+		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+	}
+	else switch(status)
+	{
+		case STATUS_HOVERING_COURSE_LIST:
+			if(key == Keyboard::KEY_ENTER)
 			{
-				case STATUS_HOVERING_COURSE_LIST:
-					if(event.getEventKeyCode() == Keyboard::KEY_ENTER)
-					{
-						shared.sndCursorIn.stop();
-						shared.sndCursorIn.play();
-						status = STATUS_ON_COURSE_LIST_SELECTION;
-					}
-					else if(event.getEventKeyCode() == Keyboard::KEY_ARROW_DOWN)
-					{
-						shared.sndCursorMove.stop();
-						shared.sndCursorMove.play();
-						status = STATUS_HOVERING_SETTINGS_LIST;
-					}
-					break;
-
-				case STATUS_HOVERING_SETTINGS_LIST: handleInputOnSettings(event); break;
-				case STATUS_ON_COURSE_LIST_SELECTION: handleInputOnCourseList(event); break;
+				shared.sndCursorIn.stop();
+				shared.sndCursorIn.play();
+				status = STATUS_ON_COURSE_LIST_SELECTION;
 			}
-		}
+			else if(key == Keyboard::KEY_ARROW_DOWN)
+			{
+				shared.sndCursorMove.stop();
+				shared.sndCursorMove.play();
+				status = STATUS_HOVERING_SETTINGS_LIST;
+			}
+			break;
+
+		case STATUS_HOVERING_SETTINGS_LIST: handleInputOnSettings(key); break;
+		case STATUS_ON_COURSE_LIST_SELECTION: handleInputOnCourseList(key); break;
 	}
 }
 
-void CourseSelectionState::handleInputOnCourseList(Event& event)
+void CourseSelectionState::handleInputOnCourseList(fgeal::Keyboard::Key key)
 {
-	switch(event.getEventKeyCode())
+	switch(key)
 	{
 		case Keyboard::KEY_ARROW_UP:
 			shared.sndCursorMove.stop();
@@ -286,14 +270,14 @@ void CourseSelectionState::handleInputOnCourseList(Event& event)
 	isLoadedCourseSelected = (menuCourse->getSelectedIndex() > 1);
 }
 
-void CourseSelectionState::handleInputOnSettings(Event& event)
+void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 {
-	switch(event.getEventKeyCode())
+	switch(key)
 	{
 		case Keyboard::KEY_ARROW_LEFT:
 		case Keyboard::KEY_ARROW_RIGHT:
 		{
-			const bool isCursorLeft = (event.getEventKeyCode() == Keyboard::KEY_ARROW_LEFT);
+			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
 			shared.sndCursorMove.stop();
 			shared.sndCursorMove.play();
 			switch(menuSettings->getSelectedIndex())

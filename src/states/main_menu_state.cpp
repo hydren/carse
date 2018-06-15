@@ -100,70 +100,56 @@ void MainMenuState::render()
 
 void MainMenuState::update(float delta)
 {
-	this->handleInput();
 	this->layout->update(delta);
 }
 
-void MainMenuState::handleInput()
+void MainMenuState::onKeyPressed(Keyboard::Key key)
 {
-	Event event;
-	EventQueue& eventQueue = EventQueue::getInstance();
-	while(eventQueue.hasEvents())
+	switch(key)
 	{
-		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
+		case Keyboard::KEY_ESCAPE:
 		{
-			game.running = false;
+			layout->onQuit();
+			break;
 		}
-		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
+		case Keyboard::KEY_ENTER:
 		{
-			switch(event.getEventKeyCode())
-			{
-				case Keyboard::KEY_ESCAPE:
-				{
-					layout->onQuit();
-					break;
-				}
-				case Keyboard::KEY_ENTER:
-				{
-					layout->onCursorAccept();
-					break;
-				}
-				case Keyboard::KEY_ARROW_UP:
-				{
-					layout->navigate(Layout::NAV_UP);
-					break;
-				}
-				case Keyboard::KEY_ARROW_DOWN:
-				{
-					layout->navigate(Layout::NAV_DOWN);
-					break;
-				}
-				case Keyboard::KEY_ARROW_LEFT:
-				{
-					layout->navigate(Layout::NAV_LEFT);
-					break;
-				}
-				case Keyboard::KEY_ARROW_RIGHT:
-				{
-					layout->navigate(Layout::NAV_RIGHT);
-					break;
-				}
-				case Keyboard::KEY_1:
-				{
-					delete layout;
-					layout = new PrototypeSimpleLayout(*this);
-					break;
-				}
-				case Keyboard::KEY_2:
-				{
-					delete layout;
-					layout = new PrototypeGridLayout(*this);
-					break;
-				}
-				default:break;
-			}
+			layout->onCursorAccept();
+			break;
 		}
+		case Keyboard::KEY_ARROW_UP:
+		{
+			layout->navigate(Layout::NAV_UP);
+			break;
+		}
+		case Keyboard::KEY_ARROW_DOWN:
+		{
+			layout->navigate(Layout::NAV_DOWN);
+			break;
+		}
+		case Keyboard::KEY_ARROW_LEFT:
+		{
+			layout->navigate(Layout::NAV_LEFT);
+			break;
+		}
+		case Keyboard::KEY_ARROW_RIGHT:
+		{
+			layout->navigate(Layout::NAV_RIGHT);
+			break;
+		}
+		case Keyboard::KEY_1:
+		{
+			delete layout;
+			layout = new PrototypeSimpleLayout(*this);
+			break;
+		}
+		case Keyboard::KEY_2:
+		{
+			delete layout;
+			layout = new PrototypeGridLayout(*this);
+			break;
+		}
+		default:break;
 	}
 }
 

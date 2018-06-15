@@ -41,24 +41,25 @@ class CourseSelectionState extends public fgeal::Game::State
 	status;
 
 	public:
-	int getId();
+	virtual int getId();
 
 	CourseSelectionState(Pseudo3DCarseGame* game);
 	~CourseSelectionState();
 
-	void initialize();
-	void onEnter();
-	void onLeave();
+	virtual void initialize();
+	virtual void onEnter();
+	virtual void onLeave();
 
-	void render();
-	void update(float delta);
+	virtual void onKeyPressed(fgeal::Keyboard::Key k);
+
+	virtual void render();
+	virtual void update(float delta);
 
 	fgeal::Image* getSelectedCoursePreview();
 
 	private:
-	void handleInput();
-	void handleInputOnCourseList(fgeal::Event&);
-	void handleInputOnSettings(fgeal::Event&);
+	void handleInputOnCourseList(fgeal::Keyboard::Key k);
+	void handleInputOnSettings(fgeal::Keyboard::Key k);
 
 	void updateLapCount();
 };

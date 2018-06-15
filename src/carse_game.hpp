@@ -28,7 +28,8 @@ class Pseudo3DCarseGame extends public fgeal::Game
 
 	Pseudo3DCarseGame();
 	~Pseudo3DCarseGame();
-	void initializeStatesList();
+	virtual void preInitialize();
+	virtual void initializeStatesList();
 
 	CarseSharedResources* sharedResources;
 	CarseGameLogic logic;

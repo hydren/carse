@@ -118,68 +118,54 @@ void VehicleSelectionState::render()
 
 void VehicleSelectionState::update(float delta)
 {
-	this->handleInput();
 	layout->update(delta);
 }
 
-void VehicleSelectionState::handleInput()
+void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 {
-	Event event;
-	EventQueue& eventQueue = EventQueue::getInstance();
-	while(eventQueue.hasEvents())
+	switch(key)
 	{
-		eventQueue.getNextEvent(&event);
-		if(event.getEventType() == Event::TYPE_DISPLAY_CLOSURE)
-		{
-			game.running = false;
-		}
-		else if(event.getEventType() == Event::TYPE_KEY_PRESS)
-		{
-			switch(event.getEventKeyCode())
-			{
-				case Keyboard::KEY_ESCAPE:
-					shared.sndCursorOut.stop();
-					shared.sndCursorOut.play();
-					menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
-					previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
-					game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
-					break;
-				case Keyboard::KEY_ENTER:
-					shared.sndCursorIn.stop();
-					shared.sndCursorIn.play();
-					this->menuSelectionAction();
-					break;
+		case Keyboard::KEY_ESCAPE:
+			shared.sndCursorOut.stop();
+			shared.sndCursorOut.play();
+			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
+			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
+			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			break;
+		case Keyboard::KEY_ENTER:
+			shared.sndCursorIn.stop();
+			shared.sndCursorIn.play();
+			this->menuSelectionAction();
+			break;
 
-				case Keyboard::KEY_ARROW_UP:
-					layout->navigate(Layout::NAV_UP);
-					break;
+		case Keyboard::KEY_ARROW_UP:
+			layout->navigate(Layout::NAV_UP);
+			break;
 
-				case Keyboard::KEY_ARROW_DOWN:
-					layout->navigate(Layout::NAV_DOWN);
-					break;
+		case Keyboard::KEY_ARROW_DOWN:
+			layout->navigate(Layout::NAV_DOWN);
+			break;
 
-				case Keyboard::KEY_ARROW_LEFT:
-					layout->navigate(Layout::NAV_LEFT);
-					break;
+		case Keyboard::KEY_ARROW_LEFT:
+			layout->navigate(Layout::NAV_LEFT);
+			break;
 
-				case Keyboard::KEY_ARROW_RIGHT:
-					layout->navigate(Layout::NAV_RIGHT);
-					break;
+		case Keyboard::KEY_ARROW_RIGHT:
+			layout->navigate(Layout::NAV_RIGHT);
+			break;
 
-				case Keyboard::KEY_1:
-					delete layout;
-					layout = new ListLayout(*this);
-					break;
+		case Keyboard::KEY_1:
+			delete layout;
+			layout = new ListLayout(*this);
+			break;
 
-				case Keyboard::KEY_2:
-					delete layout;
-					layout = new ShowroomLayout(*this);
-					break;
+		case Keyboard::KEY_2:
+			delete layout;
+			layout = new ShowroomLayout(*this);
+			break;
 
-				default:
-					break;
-			}
-		}
+		default:
+			break;
 	}
 }
 

@@ -43,11 +43,11 @@ class MainMenuState extends public fgeal::Game::State
 	{
 		fgeal::Font fontMain;
 		PrototypeSimpleLayout(MainMenuState& state);
-		void draw();
-		void update(float delta);
-		void navigate(NavigationDirection navDir);
+		virtual void draw();
+		virtual void update(float delta);
+		virtual void navigate(NavigationDirection navDir);
 		void onCursorChange();
-		void onCursorAccept();
+		virtual void onCursorAccept();
 	};
 
 	// todo once this PrototypeGridLayout becames time-tested, make it all virtual (and remove Prototype prefix)
@@ -57,27 +57,28 @@ class MainMenuState extends public fgeal::Game::State
 		fgeal::Color selectedSlotColor;
 		PrototypeGridLayout(MainMenuState& state);
 		void drawGridSlot(const fgeal::Rectangle&, const fgeal::Vector2D&, int);
-		void draw();
-		void update(float delta);
-		void navigate(NavigationDirection navDir);
-		void onCursorAccept();
+		virtual void draw();
+		virtual void update(float delta);
+		virtual void navigate(NavigationDirection navDir);
+		virtual void onCursorAccept();
 	};
 
 	public:
-	int getId();
+	virtual int getId();
 
 	MainMenuState(Pseudo3DCarseGame* game);
 	~MainMenuState();
 
-	void initialize();
-	void onEnter();
-	void onLeave();
+	virtual void initialize();
+	virtual void onEnter();
+	virtual void onLeave();
 
-	void render();
-	void update(float delta);
+	virtual void onKeyPressed(fgeal::Keyboard::Key k);
+
+	virtual void render();
+	virtual void update(float delta);
 
 	private:
-	void handleInput();
 	void menuSelectionAction();
 };
 

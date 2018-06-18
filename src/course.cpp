@@ -114,6 +114,8 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    if (clipH<0) clipH=0;
 
 	    if (clipH>=destH) continue;
+	    if(destW > this->drawAreaWidth) destW = drawAreaWidth;
+	    if(destH > this->drawAreaHeight) destH = drawAreaHeight;
 	    s.drawScaledRegion(destX, destY, destW/w, destH/h, Image::FLIP_NONE, 0, 0, w, h-h*clipH/destH);
 	}
 }

@@ -342,8 +342,8 @@ void Pseudo3DRaceState::render()
 
 	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale;
 
-	Image::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	Image::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
+	fgeal::Graphics::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
+	fgeal::Graphics::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
 
 	for(float bg = 0; bg < 2*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);

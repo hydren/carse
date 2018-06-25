@@ -191,8 +191,8 @@ namespace Hud
 				backgroundImage->drawScaled(bounds.x, bounds.y, bounds.w/backgroundImage->getWidth(), bounds.h/backgroundImage->getHeight());
 			else
 			{
-				fgeal::Image::drawFilledEllipse(center.x, center.y, 0.5*bounds.w, 0.5*bounds.h, borderColor);
-				fgeal::Image::drawFilledEllipse(center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness), backgroundColor);
+				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*bounds.w, 0.5*bounds.h, borderColor);
+				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness), backgroundColor);
 			}
 
 			if(pointerImage != null)
@@ -203,17 +203,17 @@ namespace Hud
 			}
 			else
 			{
-				fgeal::Image::drawLine(
+				fgeal::Graphics::drawLine(
 						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
 						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle), needleColor);
-				fgeal::Image::drawFilledEllipse(center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w, boltColor);
+				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w, boltColor);
 			}
 
 			if(graduationLevel >= 1)  // primary graduation
 			for(unsigned i = 0; i < graduationPrimaryCache.size(); i++)
 			{
 				const Line& line = graduationPrimaryCache[i];
-				fgeal::Image::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
+				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
 				// numerical graduation
 				if(graduationFont != null and i < graduationPrimaryNumericCache.size())
 				{
@@ -226,14 +226,14 @@ namespace Hud
 			for(unsigned i = 0; i < graduationSecondaryCache.size(); i++)
 			{
 				const Line& line = graduationSecondaryCache[i];
-				fgeal::Image::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
+				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
 			}
 
 			if(graduationLevel >= 3)  // tertiary graduation
 			for(unsigned i = 0; i < graduationTertiaryCache.size(); i++)
 			{
 				const Line& line = graduationTertiaryCache[i];
-				fgeal::Image::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
+				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
 			}
 
 			if(foregroundImage != null)
@@ -278,10 +278,10 @@ namespace Hud
 		void draw()
 		{
 			const float fillRatio = (value-min)/(max-min);
-			fgeal::Image::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
-			fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+			fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
+			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
 											  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
-			fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
 											  fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness, fillColor);
 		}
 	};
@@ -347,8 +347,8 @@ namespace Hud
 		{
 			if(not disableBackground)
 			{
-				fgeal::Image::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
-				fgeal::Image::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
+				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
+				fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
 												  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
 			}
 
@@ -378,8 +378,8 @@ namespace Hud
 		{
 			if(not this->disableBackground)
 			{
-				fgeal::Image::drawFilledRectangle(this->bounds.x, this->bounds.y, this->bounds.w, this->bounds.h, this->borderColor);
-				fgeal::Image::drawFilledRectangle(this->bounds.x + 0.5*this->borderThickness, this->bounds.y + 0.5*this->borderThickness,
+				fgeal::Graphics::drawFilledRectangle(this->bounds.x, this->bounds.y, this->bounds.w, this->bounds.h, this->borderColor);
+				fgeal::Graphics::drawFilledRectangle(this->bounds.x + 0.5*this->borderThickness, this->bounds.y + 0.5*this->borderThickness,
 						this->bounds.w - this->borderThickness, this->bounds.h - this->borderThickness, this->backgroundColor);
 			}
 

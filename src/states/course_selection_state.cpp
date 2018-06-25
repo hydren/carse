@@ -120,7 +120,7 @@ void CourseSelectionState::render()
 								 (62/64.f)*displayWidth, displayHeight - titleBounds.h - titleBounds.y - (2/64.f)*displayHeight};
 
 	// draw panel bg
-	Image::drawFilledRectangle(paneBounds, Color(0,0,0, 96));
+	fgeal::Graphics::drawFilledRectangle(paneBounds, Color(0,0,0, 96));
 
 	const Rectangle portraitBounds = {
 			paneBounds.x + (1/32.f)*paneBounds.w,
@@ -129,7 +129,7 @@ void CourseSelectionState::render()
 			(1/3.f)*paneBounds.h
 	};
 	// portrait frame
-	Image::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
+	fgeal::Graphics::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
 
 	const Rectangle portraitImgBounds = {
 			portraitBounds.x + portraitBounds.w*0.02f,
@@ -188,8 +188,8 @@ void CourseSelectionState::render()
 		switch(status)
 		{
 			case STATUS_ON_COURSE_LIST_SELECTION:
-			case STATUS_HOVERING_COURSE_LIST: Image::drawRectangle(courseListFocusArea, Color::RED); break;
-			case STATUS_HOVERING_SETTINGS_LIST: Image::drawRectangle(settingsFocusArea, Color::RED); break;
+			case STATUS_HOVERING_COURSE_LIST: fgeal::Graphics::drawRectangle(courseListFocusArea, Color::RED); break;
+			case STATUS_HOVERING_SETTINGS_LIST: fgeal::Graphics::drawRectangle(settingsFocusArea, Color::RED); break;
 			default:break;
 		}
 	}

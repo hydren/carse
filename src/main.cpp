@@ -42,7 +42,7 @@ void runSplash()
 {
 	Display& display = Display::getInstance();
 	Image logoImage("assets/carse_logo.png");
-	Image::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(), Color::WHITE);
+	fgeal::Graphics::drawFilledRectangle(0, 0, display.getWidth(), display.getHeight(), Color::WHITE);
 	logoImage.draw(0.5*display.getWidth() - 0.5*logoImage.getWidth(), 0.5*display.getHeight() - 0.5*logoImage.getHeight());
 	display.refresh();
 	fgeal::rest(0.5);

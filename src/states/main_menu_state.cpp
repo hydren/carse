@@ -239,11 +239,11 @@ MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
 void MainMenuState::PrototypeGridLayout::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
 {
 	const bool isSelected = (index == (int) state.menu->getSelectedIndex());
-	Image::drawFilledRectangle(slot.x, slot.y, slot.w, slot.h, Color::DARK_GREY);
-	Image::drawFilledRectangle(slot.x + margin.x, slot.y + margin.y, slot.w - margin.x*2, slot.h - margin.y*2, isSelected? Color::LIGHT_GREY : Color::GREY);
+	fgeal::Graphics::drawFilledRectangle(slot.x, slot.y, slot.w, slot.h, Color::DARK_GREY);
+	fgeal::Graphics::drawFilledRectangle(slot.x + margin.x, slot.y + margin.y, slot.w - margin.x*2, slot.h - margin.y*2, isSelected? Color::LIGHT_GREY : Color::GREY);
 	const float textWidth = fontMain.getTextWidth(state.menu->at(index).label);
 	fontMain.drawText(state.menu->at(index).label, slot.x + 0.5*(slot.w - textWidth), slot.y * 1.02f, isSelected? selectedSlotColor : Color::WHITE);
-	if(isSelected) Image::drawRectangle(slot.x, slot.y, slot.w, slot.h, selectedSlotColor);
+	if(isSelected) fgeal::Graphics::drawRectangle(slot.x, slot.y, slot.w, slot.h, selectedSlotColor);
 }
 
 void MainMenuState::PrototypeGridLayout::draw()

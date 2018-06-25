@@ -32,7 +32,7 @@ Pseudo3DCourse::Pseudo3DCourse(Spec spec)
 //custom call to draw quad
 inline static void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
 {
-	Image::drawFilledQuadrangle(x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1, c);
+	fgeal::Graphics::drawFilledQuadrangle(x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1, c);
 }
 
 namespace // static
@@ -129,8 +129,6 @@ void Pseudo3DCourse::clearDynamicData()
 
 		sprites.clear();
 	}
-
-
 }
 
 void Pseudo3DCourse::setupDynamicData()
@@ -140,8 +138,6 @@ void Pseudo3DCourse::setupDynamicData()
 			sprites.push_back(new Image(spec.spritesFilenames[i]));
 		else
 			sprites.push_back(null);
-
-
 }
 
 // ========================================================================================================================

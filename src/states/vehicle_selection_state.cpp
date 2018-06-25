@@ -278,8 +278,8 @@ void VehicleSelectionState::ListLayout::draw()
 	const fgeal::Point skinArrowRight1 = { 0.88f*dw, 0.45f*dh }, skinArrowRight2 = { 0.87f*dw, 0.44f*dh }, skinArrowRight3 = { 0.87f*dw, 0.46f*dh};
 	if(not preview.altSprites.empty())
 	{
-		Image::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::AZURE);
-		Image::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::AZURE);
+		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::AZURE);
+		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::AZURE);
 		if(preview.altIndex != -1)
 		{
 			const string txt = "Alternate appearance" + (preview.altSprites.size() == 1? " " : " " + futil::to_string(preview.altIndex+1) + " ");
@@ -288,8 +288,8 @@ void VehicleSelectionState::ListLayout::draw()
 	}
 	else
 	{
-		Image::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::DARK_GREY);
-		Image::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::DARK_GREY);
+		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::DARK_GREY);
+		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::DARK_GREY);
 	}
 }
 
@@ -376,14 +376,14 @@ void VehicleSelectionState::ShowroomLayout::draw()
 	}
 
 	// darkening other vehicles
-	Image::drawFilledRectangle(0, 0, dw, dh,Color(0, 0, 0, 128));
+	fgeal::Graphics::drawFilledRectangle(0, 0, dw, dh,Color(0, 0, 0, 128));
 
 	// draw current vehicle
 	state.drawVehiclePreview((0.5-doff)*dw, (0.45-doffc)*dh, 1.0+0.05*fabs(trans), index, trans > 0.5? -1 : trans < -0.5? +1 : 0);
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
-	Image::drawFilledRectangle(0.9*dw - fontMain.getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain.getHeight(), Color::DARK_GREEN);
+	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontMain.getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain.getHeight(), Color::DARK_GREEN);
 	fontMain.drawText(lblChooseVehicle, 0.95*dw - fontMain.getTextWidth(lblChooseVehicle), 0.03*fontMain.getHeight(), Color::WHITE);
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;
@@ -391,9 +391,9 @@ void VehicleSelectionState::ShowroomLayout::draw()
 	const int nameOffset = nameWidth > dw? 0.6*sin(fgeal::uptime())*(nameWidth - dw) : 0;
 	const int infoX = 0.25*dw; int infoY = 0.75*dh;
 
-	Image::drawFilledRectangle(0, infoY - 1.1*fontSub.getHeight(), dw, fontSub.getHeight(), Color::AZURE);
+	fgeal::Graphics::drawFilledRectangle(0, infoY - 1.1*fontSub.getHeight(), dw, fontSub.getHeight(), Color::AZURE);
 	fontSub.drawText(name, 0.5*(dw-fontSub.getTextWidth(name)) + nameOffset, infoY - 1.1*fontSub.getHeight(), Color::WHITE);
-	Image::drawFilledRectangle(0, infoY - 0.1*fontSub.getHeight(), dw, 0.25*dh, Color::NAVY);
+	fgeal::Graphics::drawFilledRectangle(0, infoY - 0.1*fontSub.getHeight(), dw, 0.25*dh, Color::NAVY);
 	state.drawVehicleSpec(infoX,  infoY);
 
 	VehiclePreview& preview = state.previews[state.menu->getSelectedIndex()];
@@ -407,8 +407,8 @@ void VehicleSelectionState::ShowroomLayout::draw()
 
 	if(not preview.altSprites.empty())
 	{
-		Image::drawFilledTriangle(skinArrowDown1, skinArrowDown2, skinArrowDown3, Color(0  , 127, 255, 192));
-		Image::drawFilledTriangle(skinArrowUp1, skinArrowUp2, skinArrowUp3, Color(0  , 127, 255, 192));
+		fgeal::Graphics::drawFilledTriangle(skinArrowDown1, skinArrowDown2, skinArrowDown3, Color(0  , 127, 255, 192));
+		fgeal::Graphics::drawFilledTriangle(skinArrowUp1, skinArrowUp2, skinArrowUp3, Color(0  , 127, 255, 192));
 
 		if(preview.altIndex != -1)
 		{

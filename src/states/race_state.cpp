@@ -275,6 +275,7 @@ void Pseudo3DRaceState::onEnter()
 
 	hudCurrentLap.bounds = gaugeSize;
 	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + font3->getHeight()*1.05;
+	hudCurrentLap.bounds.w = hudCurrentLap.font->getTextWidth("999");
 
 	hudLapCountGoal.bounds = gaugeSize;
 	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");

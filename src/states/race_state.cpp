@@ -386,7 +386,7 @@ void Pseudo3DRaceState::render()
 	}
 
 	hudSpeedometer.draw();
-	fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.bounds.h, fgeal::Color::WHITE);
+	fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
 
 	if(settings.useBarTachometer)
 		hudBarTachometer.draw();

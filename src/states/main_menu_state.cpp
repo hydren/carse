@@ -95,7 +95,9 @@ void MainMenuState::render()
 	display.clear();
 	imgBackground->drawScaled(0, 0, scaledToSize(imgBackground, display));
 	layout->draw();
-	shared.fontDev.drawText(string("carse v")+CARSE_VERSION+" (using fgeal v"+fgeal::VERSION+" on "+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")", 4, 4, Color::CREAM);
+
+	const static string txtVersion = string("v")+CARSE_VERSION+" (fgeal v"+fgeal::VERSION+"/"+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")";
+	shared.fontDev.drawText(txtVersion, 4, 4, Color::CREAM);
 }
 
 void MainMenuState::update(float delta)

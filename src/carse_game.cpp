@@ -14,13 +14,6 @@
 #include "states/course_selection_state.hpp"
 #include "states/options_menu_state.hpp"
 
-const int  // states IDs
-	Pseudo3DCarseGame::RACE_STATE_ID = 0,
-	Pseudo3DCarseGame::MAIN_MENU_STATE_ID = 1,
-	Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID = 2,
-	Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID = 3,
-	Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID = 4;
-
 Pseudo3DCarseGame::Pseudo3DCarseGame()
 : Game("Carse", null, 800, 600), sharedResources(null), logic(*this)
 {

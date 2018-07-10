@@ -19,12 +19,14 @@ extern const std::string CARSE_VERSION;
 class Pseudo3DCarseGame extends public fgeal::Game
 {
 	public:
-	static const int
+	enum StateID
+	{
 		RACE_STATE_ID,
 		MAIN_MENU_STATE_ID,
 		VEHICLE_SELECTION_STATE_ID,
 		COURSE_SELECTION_STATE_ID,
-		OPTIONS_MENU_STATE_ID;
+		OPTIONS_MENU_STATE_ID,
+	};
 
 	Pseudo3DCarseGame();
 	~Pseudo3DCarseGame();

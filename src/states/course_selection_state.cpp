@@ -235,6 +235,8 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 				shared.sndCursorMove.play();
 				status = STATUS_HOVERING_SETTINGS_LIST;
 			}
+			else if(key == Keyboard::KEY_SPACE)
+				game.enterState(Pseudo3DCarseGame::COURSE_EDITOR_STATE_ID);  //xxx to debug editor state
 			break;
 
 		case STATUS_HOVERING_SETTINGS_LIST: handleInputOnSettings(key); break;

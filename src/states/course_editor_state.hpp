@@ -11,6 +11,8 @@
 
 #include "carse_game.hpp"
 
+#include "course.hpp"
+
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
@@ -23,6 +25,16 @@ class CourseEditorState extends public fgeal::Game::State
 	CarseGameLogic& logic;
 
 	fgeal::Menu* menuFile;
+
+	fgeal::Rectangle boundsMap;
+
+	fgeal::Rectangle boundsCourseView;
+
+	fgeal::Rectangle boundsStatusBar;
+
+	fgeal::Rectangle boundsToolsPanel;
+
+	Pseudo3DCourse course;
 
 	enum StateFocus
 	{

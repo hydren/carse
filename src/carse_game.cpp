@@ -13,6 +13,7 @@
 #include "states/vehicle_selection_state.hpp"
 #include "states/course_selection_state.hpp"
 #include "states/options_menu_state.hpp"
+#include "states/course_editor_state.hpp"
 
 Pseudo3DCarseGame::Pseudo3DCarseGame()
 : Game("Carse", null, 800, 600), sharedResources(null), logic(*this)
@@ -39,6 +40,7 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->addState(new VehicleSelectionState(this));
 	this->addState(new CourseSelectionState(this));
 	this->addState(new OptionsMenuState(this));
+	this->addState(new CourseEditorState(this));
 
 	this->setInitialState(MAIN_MENU_STATE_ID);
 	this->setInputManagerEnabled();

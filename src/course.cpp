@@ -16,7 +16,10 @@
 using std::string;
 using std::vector;
 using fgeal::Image;
+using fgeal::Graphics;
 using fgeal::Color;
+using fgeal::Vector2D;
+using fgeal::Point;
 using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
@@ -117,6 +120,35 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    if(destW > this->drawAreaWidth) destW = drawAreaWidth;
 	    if(destH > this->drawAreaHeight) destH = drawAreaHeight;
 	    s.drawScaledRegion(destX, destY, destW/w, destH/h, Image::FLIP_NONE, 0, 0, w, h-h*clipH/destH);
+	}
+}
+
+void Pseudo3DCourse::drawMap(const fgeal::Rectangle& bounds, fgeal::Color color)
+{
+	if(bounds.w == 0 or bounds.h == 0)
+		return;
+
+	float xmin = 0, xmax = 0, xval = 0;
+	for(unsigned i = 0; i < spec.lines.size()-1; i++)
+	{
+		xval += spec.lines[i].curve;
+		if(xval < xmin)
+			xmin = xval;
+		if(xval > xmax)
+			xmax = xval;
+	}
+
+	const float courseWidth = xmax-xmin, courseHeight = spec.roadSegmentLength*spec.lines.size();
+
+	const Vector2D scale = { 0.95f*bounds.w/(courseWidth!=0? courseWidth : bounds.w), 0.95f*bounds.h/courseHeight };
+	Point pt = { 0.025f*bounds.w-xmin*scale.x, 0.975f*bounds.h };
+	for(unsigned i = 0; i < spec.lines.size(); i++)
+	{
+		Point pt2 = pt;
+		pt2.x += spec.lines[i].curve*scale.x;
+		pt2.y -= spec.roadSegmentLength*scale.y;
+		Graphics::drawLine(bounds.x + pt.x, bounds.y + pt.y, bounds.x + pt2.x, bounds.y + pt2.y, color);
+		pt = pt2;
 	}
 }
 

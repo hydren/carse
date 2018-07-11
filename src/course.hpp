@@ -48,6 +48,8 @@ struct Pseudo3DCourse
 
 	void draw(int positionZ, int positionX);
 
+	void drawMap(const fgeal::Rectangle& bounds, fgeal::Color color);
+
 	void clearDynamicData();
 
 	void setupDynamicData();

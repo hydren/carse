@@ -79,14 +79,17 @@ void Pseudo3DCourse::draw(int pos, int posX)
 		dx += l.curve;
 
 		l.clip=maxY;
-		if(lt.Y > maxY) continue;
+
+		if(lt.Y > maxY)
+			continue;
+
 		maxY = lt.Y;
 
-		Color grass  = (n/3)%2? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary;
-		Color rumble = (n/3)%2? spec.colorHumblePrimary : spec.colorHumbleSecondary;
-		Color road   = (n/3)%2? spec.colorRoadPrimary : spec.colorRoadSecondary;
+		const Color grass  = (n/3)%2? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary,
+					rumble = (n/3)%2? spec.colorHumblePrimary : spec.colorHumbleSecondary,
+					road   = (n/3)%2? spec.colorRoadPrimary : spec.colorRoadSecondary;
 
-		ScreenCoordCache& p = lts[(n-1)%N];
+		const ScreenCoordCache& p = lts[(n-1)%N];
 
 		drawRoadQuad(grass,  0,  p.Y, drawAreaWidth, 0, lt.Y, drawAreaWidth);
 		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, lt.X, lt.Y, lt.W*1.2);
@@ -95,15 +98,13 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 	for(unsigned n = fromPos + drawDistance; n >= fromPos+1; n--)
 	{
-		CourseSpec::Segment& l = spec.lines[n%N];
+		const CourseSpec::Segment& l = spec.lines[n%N];
 		if(l.spriteID == -1)
 			continue;
 
 	    Image& s = *sprites[l.spriteID];
-	    int w = s.getWidth();
-	    int h = s.getHeight();
-
-	    ScreenCoordCache& lt = lts[n%N];
+	    const int w = s.getWidth(), h = s.getHeight();
+	    const ScreenCoordCache& lt = lts[n%N];
 
 	    float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
 	    float destY = lt.Y + 4;
@@ -114,12 +115,15 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    destY += destH * (-1);    //offsetY
 
 	    float clipH = destY+destH-l.clip;
-	    if (clipH<0) clipH=0;
+	    if(clipH < 0)
+	    	clipH = 0;
 
-	    if (clipH>=destH) continue;
-	    if(destW > this->drawAreaWidth) destW = drawAreaWidth;
-	    if(destH > this->drawAreaHeight) destH = drawAreaHeight;
-	    s.drawScaledRegion(destX, destY, destW/w, destH/h, Image::FLIP_NONE, 0, 0, w, h-h*clipH/destH);
+	    const float sw = w, sh = h-h*clipH/destH;
+
+	    if(clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1)
+	    	continue;
+
+	    s.drawScaledRegion(destX, destY, destW/w, destH/h, Image::FLIP_NONE, 0, 0, sw, sh);
 	}
 }
 

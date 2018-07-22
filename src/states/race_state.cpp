@@ -241,9 +241,11 @@ void Pseudo3DRaceState::onEnter()
 	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
 
 	hudTachometer.min = playerVehicle.body.engine.minRpm;
-	hudTachometer.max = playerVehicle.body.engine.maxRpm;
+//	hudTachometer.max = playerVehicle.body.engine.maxRpm;
+	hudTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
 	hudTachometer.bounds = gaugeSize;
 	hudTachometer.compile();
+
 
 	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
 	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;

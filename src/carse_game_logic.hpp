@@ -14,7 +14,7 @@
 #include "automotive/engine_sound.hpp"
 #include "automotive/mechanics.hpp"
 
-#include "states/race_state.hpp"
+#include "race_state.hpp"
 
 #include "futil/language.hpp"
 #include "futil/properties.hpp"

@@ -8,12 +8,12 @@
 #include "carse_game.hpp"
 
 // states
-#include "states/race_state.hpp"
-#include "states/main_menu_state.hpp"
-#include "states/vehicle_selection_state.hpp"
-#include "states/course_selection_state.hpp"
-#include "states/options_menu_state.hpp"
-#include "states/course_editor_state.hpp"
+#include "race_state.hpp"
+#include "main_menu_state.hpp"
+#include "vehicle_selection_state.hpp"
+#include "course_selection_state.hpp"
+#include "options_menu_state.hpp"
+#include "course_editor_state.hpp"
 
 Pseudo3DCarseGame::Pseudo3DCarseGame()
 : Game("Carse", null, 800, 600), sharedResources(null), logic(*this)

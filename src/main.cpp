@@ -86,16 +86,22 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
+
 		Display::Options options;
 		options.title = "carse";
 		options.iconFilename = "assets/carse-icon.png";
 		options.fullscreen = fullscreen;
 		options.width = screenWidth;
 		options.height = screenHeight;
-		if(centered) options.positioning = Display::Options::POSITION_CENTERED;
+		if(centered)
+			options.positioning = Display::Options::POSITION_CENTERED;
+
 		Display::create(options);
+
 		runSplash();
+
 		CarseGame().start();
+
 		fgeal::finalize();
 	}
 	catch(const fgeal::AdapterException& e)

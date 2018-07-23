@@ -1,12 +1,12 @@
 /*
- * vehicle.hpp
+ * vehicle_spec.hpp
  *
  *  Created on: 30 de nov de 2017
  *      Author: carlosfaruolo
  */
 
-#ifndef AUTOMOTIVE_VEHICLE_HPP_
-#define AUTOMOTIVE_VEHICLE_HPP_
+#ifndef AUTOMOTIVE_VEHICLE_SPEC_HPP_
+#define AUTOMOTIVE_VEHICLE_SPEC_HPP_
 #include <ciso646>
 
 #include "motor.hpp"
@@ -81,4 +81,4 @@ struct VehicleSpec
 	EngineSoundProfile soundProfile;
 };
 
-#endif /* AUTOMOTIVE_VEHICLE_HPP_ */
+#endif /* AUTOMOTIVE_VEHICLE_SPEC_HPP_ */

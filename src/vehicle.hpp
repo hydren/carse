@@ -10,7 +10,7 @@
 #include <ciso646>
 
 #include "pseudo3d/vehicle_gfx.hpp"
-#include "automotive/vehicle.hpp"
+#include "automotive/vehicle_spec.hpp"
 #include "futil/properties.hpp"
 #include "fgeal/extra/sprite.hpp"
 

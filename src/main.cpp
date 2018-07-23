@@ -23,7 +23,7 @@
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"
 
-#define CARSE_VERSION_MACRO "0.4.9"
+#define CARSE_VERSION_MACRO "0.5-dev"
 
 using std::cout;
 using std::endl;

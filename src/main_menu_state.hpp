@@ -38,11 +38,10 @@ class MainMenuState extends public fgeal::Game::State
 	GenericMenuStateLayout<MainMenuState>* layout;
 	friend class GenericMenuStateLayout<MainMenuState>;
 
-	// todo once this PrototypeSimpleLayout becames time-tested, make it all virtual (and remove Prototype prefix)
-	struct PrototypeSimpleLayout extends GenericMenuStateLayout<MainMenuState>
+	struct SimpleListLayout extends GenericMenuStateLayout<MainMenuState>
 	{
 		fgeal::Font fontMain;
-		PrototypeSimpleLayout(MainMenuState& state);
+		SimpleListLayout(MainMenuState& state);
 		virtual void draw();
 		virtual void update(float delta);
 		virtual void onCursorUp();

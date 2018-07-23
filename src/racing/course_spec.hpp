@@ -5,8 +5,8 @@
  *      Author: carlosfaruolo
  */
 
-#ifndef RACING_COURSE_HPP_
-#define RACING_COURSE_HPP_
+#ifndef RACING_COURSE_SPEC_HPP_
+#define RACING_COURSE_SPEC_HPP_
 #include <ciso646>
 
 #include <vector>
@@ -36,4 +36,4 @@ struct CourseSpec
 	{}
 };
 
-#endif /* RACING_COURSE_HPP_ */
+#endif /* RACING_COURSE_SPEC_HPP_ */

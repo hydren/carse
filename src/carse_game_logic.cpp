@@ -9,9 +9,9 @@
 
 #include "carse_game.hpp"
 
-#include "states/race_state.hpp"
-#include "states/vehicle_selection_state.hpp"
-#include "states/course_selection_state.hpp"
+#include "race_state.hpp"
+#include "vehicle_selection_state.hpp"
+#include "course_selection_state.hpp"
 
 using std::vector;
 using std::string;

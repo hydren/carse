@@ -53,8 +53,10 @@ class VehicleSelectionState extends public fgeal::Game::State
 		ListLayout(VehicleSelectionState& state);
 		virtual void draw();
 		virtual void update(float delta);
-		virtual void navigate(NavigationDirection navDir);
-		void onCursorChange();
+		virtual void onCursorUp();
+		virtual void onCursorDown();
+		virtual void onCursorLeft();
+		virtual void onCursorRight();
 		virtual void onCursorAccept();
 	};
 
@@ -68,8 +70,10 @@ class VehicleSelectionState extends public fgeal::Game::State
 		ShowroomLayout(VehicleSelectionState& state);
 		virtual void draw();
 		virtual void update(float delta);
-		virtual void navigate(NavigationDirection navDir);
-		void onCursorChange();
+		virtual void onCursorUp();
+		virtual void onCursorDown();
+		virtual void onCursorLeft();
+		virtual void onCursorRight();
 		virtual void onCursorAccept();
 	};
 

@@ -110,47 +110,39 @@ void MainMenuState::onKeyPressed(Keyboard::Key key)
 	switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-		{
 			layout->onQuit();
 			break;
-		}
+
 		case Keyboard::KEY_ENTER:
-		{
 			layout->onCursorAccept();
 			break;
-		}
+
 		case Keyboard::KEY_ARROW_UP:
-		{
-			layout->navigate(Layout::NAV_UP);
+			layout->onCursorUp();
 			break;
-		}
+
 		case Keyboard::KEY_ARROW_DOWN:
-		{
-			layout->navigate(Layout::NAV_DOWN);
+			layout->onCursorDown();
 			break;
-		}
+
 		case Keyboard::KEY_ARROW_LEFT:
-		{
-			layout->navigate(Layout::NAV_LEFT);
+			layout->onCursorLeft();
 			break;
-		}
+
 		case Keyboard::KEY_ARROW_RIGHT:
-		{
-			layout->navigate(Layout::NAV_RIGHT);
+			layout->onCursorRight();
 			break;
-		}
+
 		case Keyboard::KEY_1:
-		{
 			delete layout;
 			layout = new PrototypeSimpleLayout(*this);
 			break;
-		}
+
 		case Keyboard::KEY_2:
-		{
 			delete layout;
 			layout = new PrototypeGridLayout(*this);
 			break;
-		}
+
 		default:break;
 	}
 }
@@ -194,30 +186,16 @@ void MainMenuState::PrototypeSimpleLayout::draw()
 void MainMenuState::PrototypeSimpleLayout::update(float delta)
 {}
 
-void MainMenuState::PrototypeSimpleLayout::navigate(NavigationDirection navDir)
+void MainMenuState::PrototypeSimpleLayout::onCursorUp()
 {
-	switch(navDir)
-	{
-		case NAV_UP:
-		{
-			state.menu->moveCursorUp();
-			this->onCursorChange();
-			break;
-		}
-		case NAV_DOWN:
-		{
-			state.menu->moveCursorDown();
-			this->onCursorChange();
-			break;
-		}
-		case NAV_LEFT:
-		case NAV_RIGHT:
-		default:break;
-	}
+	state.menu->moveCursorUp();
+	state.shared.sndCursorMove.stop();
+	state.shared.sndCursorMove.play();
 }
 
-void MainMenuState::PrototypeSimpleLayout::onCursorChange()
+void MainMenuState::PrototypeSimpleLayout::onCursorDown()
 {
+	state.menu->moveCursorDown();
 	state.shared.sndCursorMove.stop();
 	state.shared.sndCursorMove.play();
 }
@@ -328,52 +306,47 @@ void MainMenuState::PrototypeGridLayout::update(float delta)
 	selectedSlotColor = cos(20*fgeal::uptime()) > 0? Color::RED : Color::MAROON;
 }
 
-void MainMenuState::PrototypeGridLayout::navigate(NavigationDirection navDir)
+void MainMenuState::PrototypeGridLayout::onCursorUp()
 {
 	const unsigned index = state.menu->getSelectedIndex();
-	switch(navDir)
+	if(index == 2 or index == 4)
 	{
-		case NAV_UP:
-		{
-			if(index == 2 or index == 4)
-			{
-				state.menu->setSelectedIndex(index-1);
-				state.shared.sndCursorMove.stop();
-				state.shared.sndCursorMove.play();
-			}
-			break;
-		}
-		case NAV_DOWN:
-		{
-			if(index == 1 or index == 3)
-			{
-				state.menu->setSelectedIndex(index+1);
-				state.shared.sndCursorMove.stop();
-				state.shared.sndCursorMove.play();
-			}
-			break;
-		}
-		case NAV_LEFT:
-		{
-			if(index == 0 or index == 3 or index == 4)
-			{
-				state.menu->setSelectedIndex(index==0? 1 : 0);
-				state.shared.sndCursorMove.stop();
-				state.shared.sndCursorMove.play();
-			}
-			break;
-		}
-		case NAV_RIGHT:
-		{
-			if(index == 0 or index == 1 or index == 2)
-			{
-				state.menu->setSelectedIndex(index==0? 3 : 0);
-				state.shared.sndCursorMove.stop();
-				state.shared.sndCursorMove.play();
-			}
-			break;
-		}
-		default:break;
+		state.menu->setSelectedIndex(index-1);
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+	}
+}
+
+void MainMenuState::PrototypeGridLayout::onCursorDown()
+{
+	const unsigned index = state.menu->getSelectedIndex();
+	if(index == 1 or index == 3)
+	{
+		state.menu->setSelectedIndex(index+1);
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+	}
+}
+
+void MainMenuState::PrototypeGridLayout::onCursorLeft()
+{
+	const unsigned index = state.menu->getSelectedIndex();
+	if(index == 0 or index == 3 or index == 4)
+	{
+		state.menu->setSelectedIndex(index==0? 1 : 0);
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+	}
+}
+
+void MainMenuState::PrototypeGridLayout::onCursorRight()
+{
+	const unsigned index = state.menu->getSelectedIndex();
+	if(index == 0 or index == 1 or index == 2)
+	{
+		state.menu->setSelectedIndex(index==0? 3 : 0);
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
 	}
 }
 

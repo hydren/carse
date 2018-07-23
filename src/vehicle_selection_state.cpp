@@ -139,19 +139,19 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ARROW_UP:
-			layout->navigate(Layout::NAV_UP);
+			layout->onCursorUp();
 			break;
 
 		case Keyboard::KEY_ARROW_DOWN:
-			layout->navigate(Layout::NAV_DOWN);
+			layout->onCursorDown();
 			break;
 
 		case Keyboard::KEY_ARROW_LEFT:
-			layout->navigate(Layout::NAV_LEFT);
+			layout->onCursorLeft();
 			break;
 
 		case Keyboard::KEY_ARROW_RIGHT:
-			layout->navigate(Layout::NAV_RIGHT);
+			layout->onCursorRight();
 			break;
 
 		case Keyboard::KEY_1:
@@ -296,43 +296,32 @@ void VehicleSelectionState::ListLayout::draw()
 void VehicleSelectionState::ListLayout::update(float delta)
 {}
 
-void VehicleSelectionState::ListLayout::navigate(NavigationDirection navDir)
+void VehicleSelectionState::ListLayout::onCursorUp()
 {
-	switch(navDir)
-	{
-		case NAV_UP:
-		{
-			state.menu->moveCursorUp();
-			this->onCursorChange();
-			break;
-		}
-		case NAV_DOWN:
-		{
-			state.menu->moveCursorDown();
-			this->onCursorChange();
-			break;
-		}
-		case NAV_LEFT:
-		{
-			state.changeSprite(false);
-			break;
-		}
-		case NAV_RIGHT:
-		{
-			state.changeSprite();
-			break;
-		}
-		default:break;
-	}
-}
-
-void VehicleSelectionState::ListLayout::onCursorChange()
-{
+	state.menu->moveCursorUp();
 	state.shared.sndCursorMove.stop();
 	state.shared.sndCursorMove.play();
 }
 
-void VehicleSelectionState::ListLayout::onCursorAccept() {}
+void VehicleSelectionState::ListLayout::onCursorDown()
+{
+	state.menu->moveCursorDown();
+	state.shared.sndCursorMove.stop();
+	state.shared.sndCursorMove.play();
+}
+
+void VehicleSelectionState::ListLayout::onCursorLeft()
+{
+	state.changeSprite(false);
+}
+
+void VehicleSelectionState::ListLayout::onCursorRight()
+{
+	state.changeSprite();
+}
+
+void VehicleSelectionState::ListLayout::onCursorAccept()
+{}
 
 // -------------------------------------------------
 // ShowroomLayout
@@ -432,56 +421,45 @@ void VehicleSelectionState::ShowroomLayout::update(float delta)
 	}
 }
 
-void VehicleSelectionState::ShowroomLayout::navigate(NavigationDirection navDir)
+void VehicleSelectionState::ShowroomLayout::onCursorUp()
 {
-	switch(navDir)
+	if(not isSelectionTransitioning)
+		state.changeSprite(false);
+}
+
+void VehicleSelectionState::ShowroomLayout::onCursorDown()
+{
+	if(not isSelectionTransitioning)
+		state.changeSprite();
+}
+
+void VehicleSelectionState::ShowroomLayout::onCursorLeft()
+{
+	if(not isSelectionTransitioning)
 	{
-		case NAV_UP:
-		{
-			if(not isSelectionTransitioning)
-				state.changeSprite(false);
-			break;
-		}
-		case NAV_DOWN:
-		{
-			if(not isSelectionTransitioning)
-				state.changeSprite();
-			break;
-		}
-		case NAV_LEFT:
-		{
-			if(not isSelectionTransitioning)
-			{
-				isSelectionTransitioning = true;
-				previousIndex = state.menu->getSelectedIndex();
-				selectionTransitionProgress = 0;
+		isSelectionTransitioning = true;
+		previousIndex = state.menu->getSelectedIndex();
+		selectionTransitionProgress = 0;
 
-				state.menu->moveCursorUp();
-				this->onCursorChange();
-			}
-			break;
-		}
-		case NAV_RIGHT:
-		{
-			if(not isSelectionTransitioning)
-			{
-				isSelectionTransitioning = true;
-				previousIndex = state.menu->getSelectedIndex();
-				selectionTransitionProgress = 0;
-
-				state.menu->moveCursorDown();
-				this->onCursorChange();
-			}
-			break;
-		}
-		default:break;
+		state.menu->moveCursorUp();
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
 	}
 }
 
-void VehicleSelectionState::ShowroomLayout::onCursorChange()
+void VehicleSelectionState::ShowroomLayout::onCursorRight()
 {
-	state.shared.sndCursorMove.stop();
-	state.shared.sndCursorMove.play();
+	if(not isSelectionTransitioning)
+	{
+		isSelectionTransitioning = true;
+		previousIndex = state.menu->getSelectedIndex();
+		selectionTransitionProgress = 0;
+
+		state.menu->moveCursorDown();
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+	}
 }
 
-void VehicleSelectionState::ShowroomLayout::onCursorAccept() {}
+void VehicleSelectionState::ShowroomLayout::onCursorAccept()
+{}

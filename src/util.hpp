@@ -72,12 +72,13 @@ struct GenericMenuStateLayout
 	virtual void draw() abstract;
 
 	// performs any logic-related updates, if needed
-	virtual void update(float delta) abstract;
-
-	enum NavigationDirection { NAV_UP, NAV_DOWN, NAV_LEFT, NAV_RIGHT };
+	virtual void update(float delta) {};
 
 	// action when user navigates
-	virtual void navigate(NavigationDirection navDir) abstract;
+	virtual void onCursorUp() {};
+	virtual void onCursorDown() {};
+	virtual void onCursorLeft() {};
+	virtual void onCursorRight() {};
 
 	// action when user accept or selects and confirm a item of the menu
 	virtual void onCursorAccept() { state.menuSelectionAction(); }

@@ -45,8 +45,8 @@ class MainMenuState extends public fgeal::Game::State
 		PrototypeSimpleLayout(MainMenuState& state);
 		virtual void draw();
 		virtual void update(float delta);
-		virtual void navigate(NavigationDirection navDir);
-		void onCursorChange();
+		virtual void onCursorUp();
+		virtual void onCursorDown();
 		virtual void onCursorAccept();
 	};
 
@@ -59,7 +59,10 @@ class MainMenuState extends public fgeal::Game::State
 		void drawGridSlot(const fgeal::Rectangle&, const fgeal::Vector2D&, int);
 		virtual void draw();
 		virtual void update(float delta);
-		virtual void navigate(NavigationDirection navDir);
+		virtual void onCursorUp();
+		virtual void onCursorDown();
+		virtual void onCursorLeft();
+		virtual void onCursorRight();
 		virtual void onCursorAccept();
 	};
 

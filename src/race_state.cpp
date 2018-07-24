@@ -40,8 +40,7 @@ using fgeal::Rectangle;
 #define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
 
 static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
-static const float MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
-
+const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
@@ -936,5 +935,3 @@ string to_string(Pseudo3DRaceState::RaceType type)
 		default: return "???";
 	}
 }
-
-#include "race_state_physics.hxx"

@@ -55,6 +55,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	bool onSceneIntro, onSceneFinish;
 	float timerSceneIntro, timerSceneFinish;
 
+	static const float MAXIMUM_STRAFE_SPEED;
+
 	public:
 	enum RaceType
 	{
@@ -191,7 +193,5 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	float getTireKineticFrictionCoefficient();
 	float getTireRollingResistanceCoefficient();
 };
-
-std::string to_string(Pseudo3DRaceState::RaceType);
 
 #endif /* PSEUDO3D_RACE_STATE_HPP_ */

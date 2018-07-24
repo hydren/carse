@@ -1,9 +1,11 @@
 /*
- * race_state_physics.hxx
+ * race_state_physics.cpp
  *
- *  Created on: 29 de ago de 2017
+ *  Created on: 24 de jul de 2018
  *      Author: carlosfaruolo
  */
+
+#include "race_state.hpp"
 
 /* Tire coefficients
  *

@@ -6,7 +6,6 @@
  */
 
 #include "main_menu_state.hpp"
-#include "main_menu_item.h"
 
 #include "carse_game.hpp"
 

@@ -35,6 +35,16 @@ class MainMenuState extends public fgeal::Game::State
 	// ilustrations
 	fgeal::Image* imgRace, *imgExit, *imgSettings;
 
+	// these guys helps giving semantics to menu indexes.
+	enum MenuItem
+	{
+		MENU_ITEM_RACE = 0,
+		MENU_ITEM_VEHICLE = 1,
+		MENU_ITEM_COURSE = 2,
+		MENU_ITEM_SETTINGS = 3,
+		MENU_ITEM_EXIT = 4
+	};
+
 	GenericMenuStateLayout<MainMenuState>* layout;
 	friend class GenericMenuStateLayout<MainMenuState>;
 

@@ -15,17 +15,50 @@ using std::string;
 using fgeal::Display;
 using fgeal::Color;
 using fgeal::Image;
+using fgeal::Point;
 using fgeal::Rectangle;
 
 typedef GenericMenuStateLayout<MainMenuState> Layout;
 
-MainMenuState::PrototypeGridLayout::PrototypeGridLayout(MainMenuState& state)
+MainMenuState::CarPanelLayout::CarPanelLayout(MainMenuState& state)
 : Layout(state),
   fontMain(state.shared.font1Path,   18 * (state.game.getDisplay().getHeight()/480.0)),
   fontTitle(state.shared.font2Path, 40 * (state.game.getDisplay().getHeight()/480.0))
-{}
+{
+	const float w = state.game.getDisplay().getWidth(),
+				h = state.game.getDisplay().getHeight(),
+				titleHeaderHeight = 0.2 * w,
+				marginX = w * 0.01, marginY = h * 0.01;
 
-void MainMenuState::PrototypeGridLayout::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
+	const Rectangle slotSize = {0, 0, (w - 4*marginX)/3.0f, (h - titleHeaderHeight - 3*marginY)/2.0f};
+
+	slotMenuItemRace.x = 0.5f*(w - slotSize.w);
+	slotMenuItemRace.y = titleHeaderHeight + 0.5f*(h - titleHeaderHeight - slotSize.h);
+	slotMenuItemRace.w = slotSize.w;
+	slotMenuItemRace.h = slotSize.h;
+
+	slotMenuItemVehicle.x = marginX;
+	slotMenuItemVehicle.y = titleHeaderHeight + marginY;
+	slotMenuItemVehicle.w = slotSize.w;
+	slotMenuItemVehicle.h = slotSize.h;
+
+	slotMenuItemCourse.x = marginX;
+	slotMenuItemCourse.y = slotMenuItemVehicle.y + slotMenuItemVehicle.h + marginY;
+	slotMenuItemCourse.w = slotSize.w;
+	slotMenuItemCourse.h = slotSize.h;
+
+	slotMenuItemSettings.x = slotMenuItemRace.x + slotMenuItemRace.w + marginX;
+	slotMenuItemSettings.y = titleHeaderHeight + marginY;
+	slotMenuItemSettings.w = slotSize.w;
+	slotMenuItemSettings.h = slotSize.h;
+
+	slotMenuItemExit.x = slotMenuItemRace.x + slotMenuItemRace.w + marginX;
+	slotMenuItemExit.y = slotMenuItemSettings.y + slotMenuItemSettings.h + marginY;
+	slotMenuItemExit.w = slotSize.w;
+	slotMenuItemExit.h = slotSize.h;
+}
+
+void MainMenuState::CarPanelLayout::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
 {
 	const bool isSelected = (index == (int) state.menu->getSelectedIndex());
 	fgeal::Graphics::drawFilledRectangle(slot.x, slot.y, slot.w, slot.h, Color::DARK_GREY);
@@ -35,42 +68,21 @@ void MainMenuState::PrototypeGridLayout::drawGridSlot(const fgeal::Rectangle& sl
 	if(isSelected) fgeal::Graphics::drawRectangle(slot.x, slot.y, slot.w, slot.h, selectedSlotColor);
 }
 
-void MainMenuState::PrototypeGridLayout::draw()
+void MainMenuState::CarPanelLayout::draw()
 {
 	const float w = state.game.getDisplay().getWidth(),
 				h = state.game.getDisplay().getHeight(),
-				titleHeaderHeight = 0.2 * w,
 				marginX = w * 0.01, marginY = h * 0.01;
 
 	const fgeal::Vector2D margin = {marginX, marginY};
 
-	const Rectangle slotSize = {0, 0, (w - 4*marginX)/3.0f, (h - titleHeaderHeight - 3*marginY)/2.0f};
-
-	// draw MENU_ITEM_RACE
-	const Rectangle slotMenuItemRace = {
-		0.5f*(w - slotSize.w),
-		titleHeaderHeight + 0.5f*(h - titleHeaderHeight - slotSize.h),
-		slotSize.w, slotSize.h
-	};
 	drawGridSlot(slotMenuItemRace, margin, MENU_ITEM_RACE);
 	state.imgRace->drawScaled(slotMenuItemRace.x*1.01, slotMenuItemRace.y*1.01,
 		slotMenuItemRace.w * 0.98f / state.imgRace->getWidth(), slotMenuItemRace.h * 0.98f / state.imgRace->getHeight());
 
-	// draw MENU_ITEM_VEHICLE
-	const Rectangle slotMenuItemVehicle = {
-		marginX,
-		titleHeaderHeight + marginY,
-		slotSize.w, slotSize.h
-	};
 	drawGridSlot(slotMenuItemVehicle, margin, MENU_ITEM_VEHICLE);
 	state.logic.drawPickedVehicle(slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w, slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h, 0.75);
 
-	// draw MENU_ITEM_COURSE
-	const Rectangle slotMenuItemCourse = {
-		marginX,
-		slotMenuItemVehicle.y + slotMenuItemVehicle.h + marginY,
-		slotSize.w, slotSize.h
-	};
 	drawGridSlot(slotMenuItemCourse, margin, MENU_ITEM_COURSE);
 	Image* portrait = state.logic.getNextCoursePreviewImage();
 	const float portraitX = slotMenuItemCourse.x + 0.125f*slotMenuItemCourse.w*(1 - 0.75f/portrait->getWidth()),
@@ -79,12 +91,6 @@ void MainMenuState::PrototypeGridLayout::draw()
 				portraitScaleY = 0.75f*slotMenuItemCourse.h/portrait->getHeight();
 	portrait->drawScaled(portraitX, portraitY, portraitScaleX, portraitScaleY);
 
-	// draw MENU_ITEM_SETTINGS
-	const Rectangle slotMenuItemSettings = {
-		slotMenuItemRace.x + slotMenuItemRace.w + marginX,
-		titleHeaderHeight + marginY,
-		slotSize.w, slotSize.h
-	};
 	drawGridSlot(slotMenuItemSettings, margin, MENU_ITEM_SETTINGS);
 	const float imgSettingsX = slotMenuItemSettings.x + 0.125f*slotMenuItemSettings.w*(1 - 0.75f/state.imgSettings->getWidth()),
 				imgSettingsY = slotMenuItemSettings.y + 0.1750f*slotMenuItemSettings.h*(1 - 0.75f/state.imgSettings->getHeight()),
@@ -92,12 +98,6 @@ void MainMenuState::PrototypeGridLayout::draw()
 				imgSettingsScaleY = 0.75f*slotMenuItemSettings.h/state.imgSettings->getHeight();
 	state.imgSettings->drawScaled(imgSettingsX, imgSettingsY, imgSettingsScaleX, imgSettingsScaleY);
 
-	// draw MENU_ITEM_EXIT
-	const Rectangle slotMenuItemExit = {
-		slotMenuItemRace.x + slotMenuItemRace.w + marginX,
-		slotMenuItemSettings.y + slotMenuItemSettings.h + marginY,
-		slotSize.w, slotSize.h
-	};
 	drawGridSlot(slotMenuItemExit, margin, MENU_ITEM_EXIT);
 	const float imgExitX = slotMenuItemExit.x + 0.125f*slotMenuItemExit.w*(1 - 0.75f/state.imgExit->getWidth()),
 				imgExitY = slotMenuItemExit.y + 0.1750f*slotMenuItemExit.h*(1 - 0.75f/state.imgExit->getHeight()),
@@ -110,12 +110,12 @@ void MainMenuState::PrototypeGridLayout::draw()
 							  0.1*(state.game.getDisplay().getHeight() - fontTitle.getHeight()), Color::WHITE);
 }
 
-void MainMenuState::PrototypeGridLayout::update(float delta)
+void MainMenuState::CarPanelLayout::update(float delta)
 {
 	selectedSlotColor = cos(20*fgeal::uptime()) > 0? Color::RED : Color::MAROON;
 }
 
-void MainMenuState::PrototypeGridLayout::onCursorUp()
+void MainMenuState::CarPanelLayout::onCursorUp()
 {
 	const unsigned index = state.menu->getSelectedIndex();
 	if(index == 2 or index == 4)
@@ -126,7 +126,7 @@ void MainMenuState::PrototypeGridLayout::onCursorUp()
 	}
 }
 
-void MainMenuState::PrototypeGridLayout::onCursorDown()
+void MainMenuState::CarPanelLayout::onCursorDown()
 {
 	const unsigned index = state.menu->getSelectedIndex();
 	if(index == 1 or index == 3)
@@ -137,7 +137,7 @@ void MainMenuState::PrototypeGridLayout::onCursorDown()
 	}
 }
 
-void MainMenuState::PrototypeGridLayout::onCursorLeft()
+void MainMenuState::CarPanelLayout::onCursorLeft()
 {
 	const unsigned index = state.menu->getSelectedIndex();
 	if(index == 0 or index == 3 or index == 4)
@@ -148,7 +148,7 @@ void MainMenuState::PrototypeGridLayout::onCursorLeft()
 	}
 }
 
-void MainMenuState::PrototypeGridLayout::onCursorRight()
+void MainMenuState::CarPanelLayout::onCursorRight()
 {
 	const unsigned index = state.menu->getSelectedIndex();
 	if(index == 0 or index == 1 or index == 2)
@@ -159,8 +159,54 @@ void MainMenuState::PrototypeGridLayout::onCursorRight()
 	}
 }
 
-void MainMenuState::PrototypeGridLayout::onCursorAccept()
+void MainMenuState::CarPanelLayout::onCursorAccept()
 {
 	state.shared.sndCursorIn.play();
 	Layout::onCursorAccept();
 }
+
+void MainMenuState::CarPanelLayout::onMouseClick(float x, float y)
+{
+	const Point pt = {x, y};
+
+	if(slotMenuItemRace.contains(pt))
+	{
+		state.shared.sndCursorIn.stop();
+		state.shared.sndCursorIn.play();
+		state.menu->setSelectedIndex(MENU_ITEM_RACE);
+		Layout::onCursorAccept();
+	}
+
+	if(slotMenuItemCourse.contains(pt))
+	{
+		state.shared.sndCursorIn.stop();
+		state.shared.sndCursorIn.play();
+		state.menu->setSelectedIndex(MENU_ITEM_COURSE);
+		Layout::onCursorAccept();
+	}
+
+	if(slotMenuItemVehicle.contains(pt))
+	{
+		state.shared.sndCursorIn.stop();
+		state.shared.sndCursorIn.play();
+		state.menu->setSelectedIndex(MENU_ITEM_VEHICLE);
+		Layout::onCursorAccept();
+	}
+
+	if(slotMenuItemSettings.contains(pt))
+	{
+		state.shared.sndCursorIn.stop();
+		state.shared.sndCursorIn.play();
+		state.menu->setSelectedIndex(MENU_ITEM_SETTINGS);
+		Layout::onCursorAccept();
+	}
+
+	if(slotMenuItemExit.contains(pt))
+	{
+		state.shared.sndCursorIn.stop();
+		state.shared.sndCursorIn.play();
+		state.menu->setSelectedIndex(MENU_ITEM_EXIT);
+		Layout::onCursorAccept();
+	}
+}
+

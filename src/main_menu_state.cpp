@@ -18,6 +18,7 @@ using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
 using fgeal::Keyboard;
+using fgeal::Mouse;
 using fgeal::Font;
 using fgeal::Color;
 using fgeal::Sound;
@@ -65,7 +66,7 @@ void MainMenuState::initialize()
 	imgExit = new Image("assets/exit.png");
 	imgSettings = new Image("assets/settings.png");
 
-	layout = new PrototypeGridLayout(*this);
+	layout = new CarPanelLayout(*this);
 }
 
 void MainMenuState::onEnter()
@@ -129,11 +130,19 @@ void MainMenuState::onKeyPressed(Keyboard::Key key)
 
 		case Keyboard::KEY_2:
 			delete layout;
-			layout = new PrototypeGridLayout(*this);
+			layout = new CarPanelLayout(*this);
 			break;
 
 		default:break;
 	}
+}
+
+void MainMenuState::onMouseButtonPressed(Mouse::Button button, int x, int y)
+{
+	if(button != Mouse::BUTTON_LEFT)
+		return;
+
+	layout->onMouseClick(x, y);
 }
 
 void MainMenuState::menuSelectionAction()

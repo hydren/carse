@@ -59,12 +59,12 @@ class MainMenuState extends public fgeal::Game::State
 		virtual void onCursorAccept();
 	};
 
-	// todo once this PrototypeGridLayout becames time-tested, make it all virtual (and remove Prototype prefix)
-	struct PrototypeGridLayout extends GenericMenuStateLayout<MainMenuState>
+	struct CarPanelLayout extends GenericMenuStateLayout<MainMenuState>
 	{
 		fgeal::Font fontMain, fontTitle;
 		fgeal::Color selectedSlotColor;
-		PrototypeGridLayout(MainMenuState& state);
+		fgeal::Rectangle slotMenuItemRace, slotMenuItemVehicle, slotMenuItemCourse, slotMenuItemSettings, slotMenuItemExit;
+		CarPanelLayout(MainMenuState& state);
 		void drawGridSlot(const fgeal::Rectangle&, const fgeal::Vector2D&, int);
 		virtual void draw();
 		virtual void update(float delta);
@@ -73,6 +73,7 @@ class MainMenuState extends public fgeal::Game::State
 		virtual void onCursorLeft();
 		virtual void onCursorRight();
 		virtual void onCursorAccept();
+		virtual void onMouseClick(float x, float y);
 	};
 
 	public:
@@ -86,6 +87,7 @@ class MainMenuState extends public fgeal::Game::State
 	virtual void onLeave();
 
 	virtual void onKeyPressed(fgeal::Keyboard::Key k);
+	virtual void onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y);
 
 	virtual void render();
 	virtual void update(float delta);

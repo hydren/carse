@@ -62,11 +62,11 @@ void OptionsMenuState::initialize()
 	menuResolution = new Menu(Rectangle(), font, Color::GREY);
 	menuResolution->bgColor = Color(0, 0, 0, 96);
 	menuResolution->borderColor = Color::_TRANSPARENT;
-	for(unsigned i = 0; i < Display::Resolution::getList().size(); i++)
+	for(unsigned i = 0; i < Display::Mode::getList().size(); i++)
 	{
-		Display::Resolution resolution = Display::Resolution::getList()[i];
+		Display::Mode resolution = Display::Mode::getList()[i];
 		menuResolution->addEntry(futil::to_string(resolution.width)+"x"+futil::to_string(resolution.height)
-			+ " ("+futil::to_string(resolution.aspect.first)+":"+futil::to_string(resolution.aspect.second)+")"
+			+ " ("+futil::to_string(resolution.aspectRatio.first)+":"+futil::to_string(resolution.aspectRatio.second)+")"
 			+ (resolution.description.empty()? "" : " ("+resolution.description+")"));
 	}
 }
@@ -199,7 +199,7 @@ void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 			break;
 		case Keyboard::KEY_ENTER:
 		{
-			Display::Resolution resolution = Display::Resolution::getList()[menuResolution->getSelectedIndex()];
+			Display::Mode resolution = Display::Mode::getList()[menuResolution->getSelectedIndex()];
 			game.getDisplay().setSize(resolution.width, resolution.height);
 			updateFonts();
 			isResolutionMenuActive = false;

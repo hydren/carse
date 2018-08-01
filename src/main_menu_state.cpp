@@ -145,6 +145,11 @@ void MainMenuState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	layout->onMouseClick(x, y);
 }
 
+void MainMenuState::onMouseMoved(int oldx, int oldy, int newx, int newy)
+{
+	layout->onMouseMoved(oldx, oldy, newx, newy);
+}
+
 void MainMenuState::menuSelectionAction()
 {
 	switch(menu->getSelectedIndex())

@@ -79,7 +79,8 @@ struct GenericMenuStateLayout
 	virtual void onCursorDown() {};
 	virtual void onCursorLeft() {};
 	virtual void onCursorRight() {};
-	virtual void onMouseClick(float x, float y) {};
+	virtual void onMouseClick(int x, int y) {};
+	virtual void onMouseMoved(int oldx, int oldy, int newx, int newy) {};
 
 	// action when user accept or selects and confirm a item of the menu
 	virtual void onCursorAccept() { state.menuSelectionAction(); }

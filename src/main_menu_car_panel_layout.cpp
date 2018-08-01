@@ -165,10 +165,9 @@ void MainMenuState::CarPanelLayout::onCursorAccept()
 	Layout::onCursorAccept();
 }
 
-void MainMenuState::CarPanelLayout::onMouseClick(float x, float y)
+void MainMenuState::CarPanelLayout::onMouseClick(int x, int y)
 {
-	const Point pt = {x, y};
-
+	const Point pt = {(float) x, (float) y};
 	if(slotMenuItemRace.contains(pt))
 	{
 		state.shared.sndCursorIn.stop();
@@ -207,6 +206,45 @@ void MainMenuState::CarPanelLayout::onMouseClick(float x, float y)
 		state.shared.sndCursorIn.play();
 		state.menu->setSelectedIndex(MENU_ITEM_EXIT);
 		Layout::onCursorAccept();
+	}
+}
+
+void MainMenuState::CarPanelLayout::onMouseMoved(int oldx, int oldy, int newx, int newy)
+{
+	const Point pt = {(float) newx, (float) newy};
+	if(slotMenuItemRace.contains(pt) and state.menu->getSelectedIndex() != MENU_ITEM_RACE)
+	{
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+		state.menu->setSelectedIndex(MENU_ITEM_RACE);
+	}
+
+	if(slotMenuItemCourse.contains(pt) and state.menu->getSelectedIndex() != MENU_ITEM_COURSE)
+	{
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+		state.menu->setSelectedIndex(MENU_ITEM_COURSE);
+	}
+
+	if(slotMenuItemVehicle.contains(pt) and state.menu->getSelectedIndex() != MENU_ITEM_VEHICLE)
+	{
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+		state.menu->setSelectedIndex(MENU_ITEM_VEHICLE);
+	}
+
+	if(slotMenuItemSettings.contains(pt) and state.menu->getSelectedIndex() != MENU_ITEM_SETTINGS)
+	{
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+		state.menu->setSelectedIndex(MENU_ITEM_SETTINGS);
+	}
+
+	if(slotMenuItemExit.contains(pt) and state.menu->getSelectedIndex() != MENU_ITEM_EXIT)
+	{
+		state.shared.sndCursorMove.stop();
+		state.shared.sndCursorMove.play();
+		state.menu->setSelectedIndex(MENU_ITEM_EXIT);
 	}
 }
 

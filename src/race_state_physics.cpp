@@ -32,7 +32,7 @@ static const float ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013;
 static const float ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100;
 
 static const float PSEUDO_ANGLE_MAX = 1.0;
-static const float CURVE_PULL_FACTOR = 0.2;
+static const float CURVE_PULL_FACTOR = 0.2; // @suppress("Unused variable declaration in file scope")
 static const float STEERING_SPEED = 2.0;
 static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 

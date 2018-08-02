@@ -218,7 +218,7 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 		else
 			logic.setNextCourseRandom();
 
-		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+		game.enterState(logic.getCurrentMainMenuStateId());
 	}
 	else switch(status)
 	{

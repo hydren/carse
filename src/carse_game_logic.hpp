@@ -36,6 +36,8 @@ class CarseGameLogic
 	std::vector<Pseudo3DCourse::Spec> courses;
 	std::vector<Pseudo3DVehicle::Spec> vehicles;
 
+	int currentMainMenuStateId;
+
 	CarseGameLogic(Pseudo3DCarseGame& game);
 
 	// intended to run on startup
@@ -74,6 +76,12 @@ class CarseGameLogic
 
 	Mechanics::SimulationType getSimulationType();
 	void setSimulationType(Mechanics::SimulationType type);
+
+	// returns the id of the current main menu state
+	int getCurrentMainMenuStateId();
+
+	// sets the id of the current main menu state
+	void setCurrentMainMenuStateId(int id);
 
 	// spec. loading functions
 	void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);

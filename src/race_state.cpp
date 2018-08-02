@@ -55,7 +55,7 @@ static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
-: State(*game), shared(*game->sharedResources),
+: State(*game), logic(game->logic), shared(*game->sharedResources),
   fontSmall(null), fontCountdown(null), font3(null),
   imgBackground(null),
   music(null),
@@ -690,7 +690,7 @@ void Pseudo3DRaceState::update(float delta)
 		if(timerSceneFinish < 1)
 		{
 			onSceneFinish = false;
-			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			game.enterState(logic.getCurrentMainMenuStateId());
 		}
 	}
 
@@ -827,7 +827,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 	else switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			game.enterState(logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_R:
 			playerVehicle.position = 0;

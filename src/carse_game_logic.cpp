@@ -20,7 +20,7 @@ using std::string;
 
 // logic constructor, booooooring!
 CarseGameLogic::CarseGameLogic(Pseudo3DCarseGame& game)
-: game(game) {}
+: game(game), currentMainMenuStateId(Pseudo3DCarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID) {}
 
 void CarseGameLogic::initialize()
 {
@@ -123,6 +123,16 @@ Mechanics::SimulationType CarseGameLogic::getSimulationType()
 void CarseGameLogic::setSimulationType(Mechanics::SimulationType type)
 {
 	getRaceStateInstance().simulationType = type;
+}
+
+int CarseGameLogic::getCurrentMainMenuStateId()
+{
+	return currentMainMenuStateId;
+}
+
+void CarseGameLogic::setCurrentMainMenuStateId(int id)
+{
+	currentMainMenuStateId = id;
 }
 
 // ----------------------------------------------------------------------------------------------------------

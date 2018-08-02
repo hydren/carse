@@ -126,7 +126,7 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 			shared.sndCursorOut.play();
 			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
 			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
-			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			game.enterState(gameLogic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_ENTER:
 			shared.sndCursorIn.stop();
@@ -168,7 +168,7 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 void VehicleSelectionState::menuSelectionAction()
 {
 	gameLogic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
-	game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+	game.enterState(gameLogic.getCurrentMainMenuStateId());
 }
 
 void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, int index, int angleType)

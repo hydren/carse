@@ -33,6 +33,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	friend class CarseGameLogic;
 
+	CarseGameLogic& logic;
 	CarseSharedResources& shared;
 
 	fgeal::Font* fontSmall, *fontCountdown, *font3;

@@ -118,7 +118,7 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 		case Keyboard::KEY_ESCAPE:
 			shared.sndCursorOut.stop();
 			shared.sndCursorOut.play();
-			game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+			game.enterState(logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_ENTER:
 			shared.sndCursorIn.stop();
@@ -168,7 +168,7 @@ void OptionsMenuState::onMenuSelect()
 		logic.getNextRaceSettings().useBarTachometer = !logic.getNextRaceSettings().useBarTachometer;
 
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
-		game.enterState(Pseudo3DCarseGame::MAIN_MENU_STATE_ID);
+		game.enterState(logic.getCurrentMainMenuStateId());
 }
 
 void OptionsMenuState::updateLabels()

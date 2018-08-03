@@ -182,10 +182,9 @@ namespace Hud
 			}
 		}
 
-		void draw()
+		void drawBackground()
 		{
 			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
-			const float angle = -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
 
 			if(backgroundImage != null)
 				backgroundImage->drawScaled(bounds.x, bounds.y, bounds.w/backgroundImage->getWidth(), bounds.h/backgroundImage->getHeight());
@@ -193,20 +192,6 @@ namespace Hud
 			{
 				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*bounds.w, 0.5*bounds.h, borderColor);
 				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness), backgroundColor);
-			}
-
-			if(pointerImage != null)
-			{
-				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset,
-						0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(), 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(),
-						angle, 0.5*pointerImage->getWidth(), pointerOffset);
-			}
-			else
-			{
-				fgeal::Graphics::drawLine(
-						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
-						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle), needleColor);
-				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w, boltColor);
 			}
 
 			if(graduationLevel >= 1)  // primary graduation
@@ -234,6 +219,28 @@ namespace Hud
 			{
 				const Line& line = graduationTertiaryCache[i];
 				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
+			}
+		}
+
+		void draw()
+		{
+			this->drawBackground();
+
+			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
+			const float angle = -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
+
+			if(pointerImage != null)
+			{
+				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset,
+						0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(), 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(),
+						angle, 0.5*pointerImage->getWidth(), pointerOffset);
+			}
+			else
+			{
+				fgeal::Graphics::drawLine(
+						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
+						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle), needleColor);
+				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w, boltColor);
 			}
 
 			if(foregroundImage != null)

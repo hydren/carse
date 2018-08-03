@@ -37,7 +37,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	CarseSharedResources& shared;
 
 	fgeal::Font* fontSmall, *fontCountdown, *font3;
-	fgeal::Image* imgBackground;
+	fgeal::Image* imgBackground, *imgCacheTachometer;
 	fgeal::Music* music;
 
 	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
@@ -89,6 +89,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		unsigned lapCountGoal;
 		bool isImperialUnit;
 		bool useBarTachometer;
+		bool useCachedTachometer;
 	};
 
 	private:

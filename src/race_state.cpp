@@ -57,7 +57,7 @@ int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), logic(game->logic), shared(*game->sharedResources),
   fontSmall(null), fontCountdown(null), font3(null),
-  imgBackground(null),
+  imgBackground(null), imgCacheTachometer(null),
   music(null),
   sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
 
@@ -107,6 +107,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(font3 != null) delete font3;
 
 	if(imgBackground != null) delete imgBackground;
+	if(imgCacheTachometer != null) delete imgCacheTachometer;
 	if(music != null) delete music;
 
 	if(sndTireBurnoutStandIntro != null) delete sndTireBurnoutStandIntro;
@@ -243,8 +244,9 @@ void Pseudo3DRaceState::onEnter()
 //	hudTachometer.max = playerVehicle.body.engine.maxRpm;
 	hudTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
 	hudTachometer.bounds = gaugeSize;
+	hudTachometer.graduationLevel = 2;
+	hudTachometer.backgroundImage = null;
 	hudTachometer.compile();
-
 
 	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
 	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
@@ -289,6 +291,35 @@ void Pseudo3DRaceState::onEnter()
 	posHudCountdown.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
 	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
 	posHudFinishedCaption.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
+
+	if(settings.useCachedTachometer and not settings.useBarTachometer)
+	{
+		if(imgCacheTachometer != null)
+		{
+			delete imgCacheTachometer;
+			imgCacheTachometer = null;
+		}
+
+		imgCacheTachometer = new Image(hudTachometer.bounds.w, hudTachometer.bounds.h);
+		fgeal::Graphics::setDrawTarget(imgCacheTachometer);
+		fgeal::Graphics::drawFilledRectangle(0, 0, imgCacheTachometer->getWidth(), imgCacheTachometer->getHeight(), Color::_TRANSPARENT);
+		float oldx = hudTachometer.bounds.x, oldy = hudTachometer.bounds.y;
+		hudTachometer.bounds.x = 0;
+		hudTachometer.bounds.y = 0;
+		hudTachometer.compile();
+		hudTachometer.drawBackground();
+		fgeal::Graphics::setDefaultDrawTarget();
+		hudTachometer.backgroundImage = imgCacheTachometer;
+		hudTachometer.imagesAreShared = true;
+		hudTachometer.graduationLevel = 0;
+		hudTachometer.bounds.x = oldx;
+		hudTachometer.bounds.y = oldy;
+		hudTachometer.compile();
+	}
+	else
+	{
+		hudTachometer.backgroundImage = null;
+	}
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{

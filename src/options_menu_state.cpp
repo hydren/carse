@@ -52,11 +52,13 @@ void OptionsMenuState::initialize()
 	menu->focusedEntryFontColor = Color::WHITE;
 	menu->borderColor = Color::_TRANSPARENT;
 
+	// DO NOT USE ':' CHARACTER FOR OTHER MEANS OTHER THAN TO SEPARATE MENU ITEM AND ITEM VALUE
 	menu->addEntry("Resolution: ");
 	menu->addEntry("Fullscreen: ");
 	menu->addEntry("Unit: ");
 	menu->addEntry("Simulation mode: ");
 	menu->addEntry("Tachometer type: ");
+	menu->addEntry("Use cached tachometer (if possible): ");
 	menu->addEntry("Back to main menu");
 
 	menuResolution = new Menu(Rectangle(), font, Color::GREY);
@@ -142,16 +144,16 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 
 void OptionsMenuState::onMenuSelect()
 {
-	if(menu->getSelectedIndex() == 0)
+	if(menu->getSelectedIndex() == MENU_ITEM_RESOLUTION)
 		isResolutionMenuActive = true;
 
-	if(menu->getSelectedIndex() == 1)
+	if(menu->getSelectedIndex() == MENU_ITEM_FULLSCREEN)
 		game.getDisplay().setFullscreen(!game.getDisplay().isFullscreen());
 
-	if(menu->getSelectedIndex() == 2)
+	if(menu->getSelectedIndex() == MENU_ITEM_UNIT)
 		logic.getNextRaceSettings().isImperialUnit = !logic.getNextRaceSettings().isImperialUnit;
 
-	if(menu->getSelectedIndex() == 3)
+	if(menu->getSelectedIndex() == MENU_ITEM_SIMULATION_TYPE)
 	{
 		Mechanics::SimulationType newType;
 		switch(logic.getSimulationType())
@@ -164,19 +166,24 @@ void OptionsMenuState::onMenuSelect()
 		logic.setSimulationType(newType);
 	}
 
-	if(menu->getSelectedIndex() == 4)
+	if(menu->getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
 		logic.getNextRaceSettings().useBarTachometer = !logic.getNextRaceSettings().useBarTachometer;
+
+	if(menu->getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
+		logic.getNextRaceSettings().useCachedTachometer = !logic.getNextRaceSettings().useCachedTachometer;
 
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
 		game.enterState(logic.getCurrentMainMenuStateId());
 }
 
+#define setMenuItemValueText(item, valueTxt) menu->at(item).label.erase(menu->at(item).label.find(':')).append(": ").append(valueTxt)
+
 void OptionsMenuState::updateLabels()
 {
 	Display& display = game.getDisplay();
-	menu->at(0).label = string("Resolution: ") + futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight());
-	menu->at(1).label = string("Fullscreen: ") + (display.isFullscreen()? "yes" : "no");
-	menu->at(2).label = string("Unit: ") + (logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
+	setMenuItemValueText(MENU_ITEM_RESOLUTION, futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight()));
+	setMenuItemValueText(MENU_ITEM_FULLSCREEN, display.isFullscreen()? "yes" : "no");
+	setMenuItemValueText(MENU_ITEM_UNIT, logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
 
 	string strSimType;
 	switch(logic.getSimulationType())
@@ -186,8 +193,9 @@ void OptionsMenuState::updateLabels()
 		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load-capped power)"; break;
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
-	menu->at(3).label = "Simulation mode: " + strSimType;
-	menu->at(4).label = "Tachometer type: " + string(logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
+	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
+	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
+	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
 }
 
 void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)

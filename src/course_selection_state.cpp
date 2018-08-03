@@ -87,7 +87,7 @@ void CourseSelectionState::initialize()
 	menuSettings->bgColor = menuCourse->bgColor;
 	menuSettings->borderColor = menuCourse->borderColor;
 	menuSettings->focusedEntryFontColor = menuCourse->focusedEntryFontColor;
-	menuSettings->addEntry("Race type: " + to_string(logic.getNextRaceSettings().raceType));
+	menuSettings->addEntry("Race type: " + Pseudo3DRaceState::toString(logic.getNextRaceSettings().raceType));
 	menuSettings->addEntry("Laps: " + to_string(logic.getNextRaceSettings().lapCountGoal));
 	menuSettings->cursorWrapAroundEnabled = false;
 }
@@ -299,7 +299,7 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 							nextType = logic.getNextRaceSettings().raceType+1;
 
 					logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
-					menuSettings->at(SETTINGS_RACE_TYPE).label = "Race type: " + to_string(logic.getNextRaceSettings().raceType);
+					menuSettings->at(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(logic.getNextRaceSettings().raceType);
 					menuSettings->at(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(logic.getNextRaceSettings().raceType);
 					updateLapCount();
 					break;

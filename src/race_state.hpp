@@ -83,6 +83,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		RACE_TYPE_COUNT
 	};
 
+	static std::string toString(Pseudo3DRaceState::RaceType type);
+
 	struct RaceSettings
 	{
 		RaceType raceType;

@@ -953,7 +953,7 @@ bool Pseudo3DRaceState::isRaceTypePointToPoint(RaceType t)
 		or t == RACE_TYPE_POINT_TO_POINT_TIME_TRIAL;
 }
 
-string to_string(Pseudo3DRaceState::RaceType type)
+string Pseudo3DRaceState::toString(Pseudo3DRaceState::RaceType type)
 {
 	switch(type)
 	{

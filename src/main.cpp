@@ -11,6 +11,8 @@
 
 #include <cstdlib>
 
+#include <tclap/CmdLine.h>
+
 //#define TOPDOWN_EXAMPLE_MODE
 
 #ifdef TOPDOWN_EXAMPLE_MODE
@@ -29,6 +31,10 @@ using std::cout;
 using std::endl;
 using std::string;
 
+using TCLAP::CmdLine;
+using TCLAP::SwitchArg;
+using TCLAP::ValueArg;
+
 using fgeal::Image;
 using fgeal::Display;
 using fgeal::Color;
@@ -36,7 +42,8 @@ using fgeal::Color;
 using futil::starts_with;
 using futil::split;
 
-const string CARSE_VERSION = CARSE_VERSION_MACRO;
+const string CARSE_VERSION = CARSE_VERSION_MACRO,
+             programPresentation = "carse - pseudo 3d racing engine";
 
 void runSplash()
 {
@@ -50,38 +57,44 @@ void runSplash()
 
 int main(int argc, char** argv)
 {
+	//configure arguments parser
+	CmdLine cmd(programPresentation, ' ', CARSE_VERSION, true);
+
+	//trick to modify the output from --version
+	struct MyOutput : public TCLAP::StdOutput { virtual void version(TCLAP::CmdLineInterface& c) {
+	cout << "\n" << programPresentation << " - version " << CARSE_VERSION << "\n" << endl;
+	}} my_output; cmd.setOutput(&my_output);
+
+	SwitchArg argFullscreen("f", "fullscreen", "Tells carse to go start in fullscreen mode.", false);
+	cmd.add(argFullscreen);
+
+	SwitchArg argCentered("c", "centered", "Tells carse to attempt to center the window. Does nothing in fullscreen mode", false);
+	cmd.add(argCentered);
+
+	ValueArg<string> argResolution("r", "resolution", "If in windowed mode, tells carse to attempt to create a window of the given size."
+			" If in fullscreen mode, tells carse to set the given resolution", false, string(), "<WIDTHxHEIGHT>");
+	cmd.add(argResolution);
+
+	cmd.parse(argc, argv);
+
 	int screenWidth = 800, screenHeight = 600;
-	bool fullscreen = false, centered=false;
-	for(int i = 0; i < argc; i++)
+	if(argResolution.isSet())
 	{
-		if(starts_with(string(argv[i]), "-r"))
+		std::vector<string> tokens = split(argResolution.getValue(), 'x');
+		if(tokens.size() == 2)
 		{
-			if(i+1 < argc)
+			int customWidth =  atoi(tokens[0].c_str());
+			int customHeight = atoi(tokens[1].c_str());
+			if(customWidth != 0 and customHeight != 0)
 			{
-				string txtResolution(argv[i+1]);
-				std::vector<string> tokens = split(txtResolution, 'x');
-				if(tokens.size() == 2)
-				{
-					int customWidth =  atoi(tokens[0].c_str());
-					int customHeight = atoi(tokens[1].c_str());
-					if(customWidth != 0 and customHeight != 0)
-					{
-						screenWidth = customWidth;
-						screenHeight = customHeight;
-					}
-
-				}
-				else cout << "Failed to parse custom resolution" << endl;
+				screenWidth = customWidth;
+				screenHeight = customHeight;
 			}
-			else cout << "Missing argument to -r parameter" << endl;
 		}
-
-		if(string(argv[i]) == "-f" or string(argv[i]) == "--fullscreen")
-			fullscreen = true;
-
-		if(string(argv[i]) == "-c" or string(argv[i]) == "--centered")
-			centered = true;
 	}
+
+	//greeter :)
+	cout << programPresentation << " - version " << CARSE_VERSION << endl;
 
 	try
 	{
@@ -90,10 +103,10 @@ int main(int argc, char** argv)
 		Display::Options options;
 		options.title = "carse";
 		options.iconFilename = "assets/carse-icon.png";
-		options.fullscreen = fullscreen;
+		options.fullscreen = argFullscreen.getValue();
 		options.width = screenWidth;
 		options.height = screenHeight;
-		if(centered)
+		if(argCentered.getValue())
 			options.positioning = Display::Options::POSITION_CENTERED;
 
 		Display::create(options);

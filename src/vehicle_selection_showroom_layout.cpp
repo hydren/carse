@@ -29,7 +29,7 @@ void VehicleSelectionState::ShowroomLayout::draw()
 	const float dw = display.getWidth(), dh = display.getHeight();
 	Font& fontMain = *state.fontMain, &fontSub = *state.fontSub;
 	Menu* const menu = state.menu;
-	const vector<Pseudo3DVehicle::Spec>& vehicles = state.gameLogic.getVehicleList();
+	const vector<Pseudo3DVehicle::Spec>& vehicles = state.game.logic.getVehicleList();
 	const unsigned index = isSelectionTransitioning? previousIndex : menu->getSelectedIndex();
 	const Pseudo3DVehicle::Spec& vehicle = vehicles[index];
 

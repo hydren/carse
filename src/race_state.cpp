@@ -55,7 +55,7 @@ static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
-: State(*game), logic(game->logic), shared(*game->sharedResources),
+: State(*game), game(*game), shared(*game->sharedResources),
   fontSmall(null), fontCountdown(null), font3(null),
   imgBackground(null), imgCacheTachometer(null),
   music(null),
@@ -70,8 +70,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
-  nextCourseSpec(0, 0), course(),
-  playerVehicleSpec(), playerVehicleSpecAlternateSpriteIndex(-1), playerVehicle(),
+  course(), playerVehicle(),
 
   hudTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
@@ -190,8 +189,11 @@ void Pseudo3DRaceState::onEnter()
 {
 	Display& display = game.getDisplay();
 
+	settings = game.logic.getNextRaceSettings();
+	simulationType = game.logic.getSimulationType();
+
 	course.clearDynamicData();
-	course = Pseudo3DCourse(nextCourseSpec);
+	course = Pseudo3DCourse(game.logic.getNextCourse());
 	course.setupDynamicData();
 
 	course.drawAreaWidth = display.getWidth();
@@ -218,7 +220,7 @@ void Pseudo3DRaceState::onEnter()
 		music = null;
 
 	playerVehicle.clearDynamicData();
-	playerVehicle = Pseudo3DVehicle(playerVehicleSpec, playerVehicleSpecAlternateSpriteIndex);
+	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
 	playerVehicle.setupDynamicData();
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
@@ -721,7 +723,7 @@ void Pseudo3DRaceState::update(float delta)
 		if(timerSceneFinish < 1)
 		{
 			onSceneFinish = false;
-			game.enterState(logic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.getCurrentMainMenuStateId());
 		}
 	}
 
@@ -858,7 +860,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 	else switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			game.enterState(logic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_R:
 			playerVehicle.position = 0;

@@ -29,71 +29,7 @@
 extern const std::string CARSE_VERSION;
 
 // fwd decl
-class CarseGame;
 class Vehicle;
-
-/** Class to wrap together all between-states game logic. */
-class CarseGameLogic
-{
-	friend class CarseGame;
-	CarseGame& game;
-
-	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
-	std::vector<Pseudo3DCourse::Spec> courses;
-	std::vector<Pseudo3DVehicle::Spec> vehicles;
-
-	int currentMainMenuStateId;
-
-	CarseGameLogic(CarseGame& game);
-
-	// intended to run on startup
-	void initialize();
-
-	// intended to run on startup, after initializing all states
-	void onStatesListInitFinished();
-
-	// intended to run on startup, loads all engine sound presets in assets/sound/engine/
-	void loadPresetEngineSoundProfiles();
-
-	// intended to run on startup, loads all courses in the data/courses folder
-	void loadCourses();
-
-	// intended to run on startup, loads all vehicles in the data/vehicles folder
-	void loadVehicles();
-
-	public:
-	bool raceOnlyMode;
-
-	// gets one of the built-in engine sound presets, by name
-	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
-
-	const std::vector<Pseudo3DCourse::Spec>& getCourseList();
-	void setNextCourse(unsigned courseIndex);
-	void setNextCourse(const Pseudo3DCourse::Spec& c);
-	void setNextCourseRandom();
-	void setNextCourseDebug();
-	const Pseudo3DCourse::Spec& getNextCourse();
-	fgeal::Image* getNextCoursePreviewImage();
-	Pseudo3DRaceState::RaceSettings& getNextRaceSettings();
-
-	const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
-	void setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex=-1);
-	void setPickedVehicle(const Pseudo3DVehicle::Spec& v, int altSpriteIndex=-1);
-	const Pseudo3DVehicle::Spec& getPickedVehicle();
-	void drawPickedVehicle(float x, float y, float scale=1.0f, int angleType=0);
-
-	Mechanics::SimulationType getSimulationType();
-	void setSimulationType(Mechanics::SimulationType type);
-
-	// returns the id of the current main menu state
-	int getCurrentMainMenuStateId();
-
-	// sets the id of the current main menu state
-	void setCurrentMainMenuStateId(int id);
-
-	// spec. loading functions
-	void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
-};
 
 /** Wrapper to resources shared between states. */
 struct CarseSharedResources
@@ -108,6 +44,78 @@ struct CarseSharedResources
 class CarseGame extends public fgeal::Game
 {
 	public:
+
+	/** Class to wrap together all between-states game logic. */
+	class Logic
+	{
+		friend class CarseGame;
+
+		std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
+		std::vector<Pseudo3DCourse::Spec> courses;
+		std::vector<Pseudo3DVehicle::Spec> vehicles;
+
+		int currentMainMenuStateId;
+
+		// parameters for next match
+		Pseudo3DRaceState::RaceSettings nextMatchRaceSettings;
+		Mechanics::SimulationType nextMatchSimulationType;
+		Pseudo3DCourse::Spec nextMatchCourseSpec;
+		Pseudo3DVehicle::Spec nextMatchPlayerVehicleSpec;
+		int nextMatchPlayerVehicleSpecAlternateSpriteIndex;
+
+		Logic();
+
+		// intended to run on startup
+		void initialize();
+
+		// intended to run on startup, after initializing all states
+		void onStatesListInitFinished();
+
+		// intended to run on startup, loads all engine sound presets in assets/sound/engine/
+		void loadPresetEngineSoundProfiles();
+
+		// intended to run on startup, loads all courses in the data/courses folder
+		void loadCourses();
+
+		// intended to run on startup, loads all vehicles in the data/vehicles folder
+		void loadVehicles();
+
+		public:
+		bool raceOnlyMode;
+
+		// gets one of the built-in engine sound presets, by name
+		EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
+
+		const std::vector<Pseudo3DCourse::Spec>& getCourseList();
+		void setNextCourse(unsigned courseIndex);
+		void setNextCourse(const Pseudo3DCourse::Spec& c);
+		void setNextCourseRandom();
+		void setNextCourseDebug();
+		const Pseudo3DCourse::Spec& getNextCourse();
+		Pseudo3DRaceState::RaceSettings& getNextRaceSettings();
+
+		const std::vector<Pseudo3DVehicle::Spec>& getVehicleList();
+		void setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex=-1);
+		void setPickedVehicle(const Pseudo3DVehicle::Spec& v, int altSpriteIndex=-1);
+		const Pseudo3DVehicle::Spec& getPickedVehicle();
+		const int getPickedVehicleAlternateSpriteIndex();
+
+		Mechanics::SimulationType getSimulationType();
+		void setSimulationType(Mechanics::SimulationType type);
+
+		// returns the id of the current main menu state
+		int getCurrentMainMenuStateId();
+
+		// sets the id of the current main menu state
+		void setCurrentMainMenuStateId(int id);
+
+		// spec. loading functions
+		void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
+
+	} logic;
+
+	CarseSharedResources* sharedResources;
+
 	enum StateID
 	{
 		RACE_STATE_ID,
@@ -123,9 +131,6 @@ class CarseGame extends public fgeal::Game
 	~CarseGame();
 	virtual void preInitialize();
 	virtual void initializeStatesList();
-
-	CarseSharedResources* sharedResources;
-	CarseGameLogic logic;
 };
 
 #endif /* CARSE_GAME_HPP_ */

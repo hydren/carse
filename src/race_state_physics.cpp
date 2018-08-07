@@ -7,6 +7,8 @@
 
 #include "race_state.hpp"
 
+#include "carse_game.hpp"
+
 /* Tire coefficients
  *
  *          Rolling resist. | Peak static frict. | Kinetic frict.

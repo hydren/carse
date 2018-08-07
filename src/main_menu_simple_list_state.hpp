@@ -17,13 +17,12 @@
 
 #include "util.hpp"
 
-class CarseGameLogic;
-class CarseSharedResources;
 class CarseGame;
+class CarseSharedResources;
 
 class MainMenuSimpleListState extends public fgeal::Game::State
 {
-	CarseGameLogic& logic;
+	CarseGame& game;
 	CarseSharedResources& shared;
 
 	// version string

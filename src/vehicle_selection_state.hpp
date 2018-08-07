@@ -24,12 +24,11 @@
 // fwd decl.
 class CarseGame;
 class CarseSharedResources;
-class CarseGameLogic;
 
 class VehicleSelectionState extends public fgeal::Game::State
 {
+	CarseGame& game;
 	CarseSharedResources& shared;
-	CarseGameLogic& gameLogic;
 
 	fgeal::Font* fontMain, *fontInfo, *fontSub;
 	fgeal::Menu* menu;

@@ -20,7 +20,7 @@ using fgeal::Keyboard;
 int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 
 MainMenuSimpleListState::MainMenuSimpleListState(CarseGame* game)
-: State(*game), logic(game->logic), shared(*game->sharedResources), menu(null),
+: State(*game), game(*game), shared(*game->sharedResources), menu(null),
   imgBackground(null), fntTitle(null)
 {}
 
@@ -114,7 +114,7 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_2:
-			logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+			game.logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
 			game.enterState(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
 			break;
 

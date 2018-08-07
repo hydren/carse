@@ -24,7 +24,7 @@
 class CourseSelectionState extends public fgeal::Game::State
 {
 	CarseSharedResources& shared;
-	CarseGameLogic& logic;
+	CarseGame::Logic& logic;
 
 	fgeal::Image* background, *imgRandom, *imgCircuit;
 	fgeal::Font* fontMain, *fontInfo;

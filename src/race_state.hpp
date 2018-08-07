@@ -27,13 +27,10 @@
 
 class CarseGame;
 class CarseSharedResources;
-class CarseGameLogic;
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
-	friend class CarseGameLogic;
-
-	CarseGameLogic& logic;
+	CarseGame& game;
 	CarseSharedResources& shared;
 
 	fgeal::Font* fontSmall, *fontCountdown, *font3;
@@ -103,11 +100,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	//debug
 	float acc0to60clock, acc0to60time;
 
-	Pseudo3DCourse::Spec nextCourseSpec;
 	Pseudo3DCourse course;
 
-	Pseudo3DVehicle::Spec playerVehicleSpec;
-	int playerVehicleSpecAlternateSpriteIndex;
 	Pseudo3DVehicle playerVehicle;
 
 	Hud::DialGauge<float> hudTachometer;

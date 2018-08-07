@@ -18,6 +18,7 @@ struct Pseudo3DCourse
 	struct Spec extends CourseSpec
 	{
 		std::string name, filename, author, credits, comments;
+		std::string previewFilename;
 
 		std::string landscapeFilename;
 		fgeal::Color colorLandscape, colorHorizon,

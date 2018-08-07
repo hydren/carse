@@ -41,7 +41,7 @@ static string toStrRounded(float value, unsigned placesCount=1)
 int VehicleSelectionState::getId() { return CarseGame::VEHICLE_SELECTION_STATE_ID; }
 
 VehicleSelectionState::VehicleSelectionState(CarseGame* game)
-: State(*game), shared(*game->sharedResources), gameLogic(game->logic),
+: State(*game), game(*game), shared(*game->sharedResources),
   fontMain(null), fontInfo(null), fontSub(null), menu(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   layout(null)
@@ -80,7 +80,7 @@ void VehicleSelectionState::initialize()
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
 
-	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = gameLogic.getVehicleList();
+	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = game.logic.getVehicleList();
 	const_foreach(const Pseudo3DVehicle::Spec&, vspec, vector<Pseudo3DVehicle::Spec>, vehiclesSpecs)
 	{
 		menu->addEntry(vspec.name);
@@ -126,7 +126,7 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 			shared.sndCursorOut.play();
 			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
 			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
-			game.enterState(gameLogic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_ENTER:
 			shared.sndCursorIn.stop();
@@ -167,8 +167,8 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 
 void VehicleSelectionState::menuSelectionAction()
 {
-	gameLogic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
-	game.enterState(gameLogic.getCurrentMainMenuStateId());
+	game.logic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
+	game.enterState(game.logic.getCurrentMainMenuStateId());
 }
 
 void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, int index, int angleType)
@@ -180,7 +180,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 	VehiclePreview& preview = previews[index];
 	const bool isNotAlternateSprite = (preview.altIndex == -1 or preview.altSprites.empty());
 
-	const Pseudo3DVehicle::Spec& vspec = gameLogic.getVehicleList()[index];
+	const Pseudo3DVehicle::Spec& vspec = game.logic.getVehicleList()[index];
 	const Pseudo3DVehicleAnimationSpec& spriteSpec = (isNotAlternateSprite? vspec.sprite : vspec.alternateSprites[preview.altIndex]);
 	Image& sprite = *(isNotAlternateSprite? preview.sprite : preview.altSprites[preview.altIndex]);
 
@@ -197,7 +197,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 void VehicleSelectionState::drawVehicleSpec(float infoX, float infoY, float index)
 {
 	// info sheet
-	const Pseudo3DVehicle::Spec& vehicle = gameLogic.getVehicleList()[index != -1? index : menu->getSelectedIndex()];
+	const Pseudo3DVehicle::Spec& vehicle = game.logic.getVehicleList()[index != -1? index : menu->getSelectedIndex()];
 
 	const string txtVehicleType = string("Type: ") + (vehicle.type == Mechanics::TYPE_CAR? "Car" : vehicle.type == Mechanics::TYPE_BIKE? "Bike" : "Other");
 	fontInfo->drawText(txtVehicleType, infoX, infoY, Color::WHITE);

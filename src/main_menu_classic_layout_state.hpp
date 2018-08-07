@@ -16,13 +16,12 @@
 
 #include "util.hpp"
 
-class CarseGameLogic;
-class CarseSharedResources;
 class CarseGame;
+class CarseSharedResources;
 
 class MainMenuClassicPanelState extends public fgeal::Game::State
 {
-	CarseGameLogic& logic;
+	CarseGame& game;
 	CarseSharedResources& shared;
 
 	std::string strVersion, strTitle;
@@ -31,7 +30,7 @@ class MainMenuClassicPanelState extends public fgeal::Game::State
 	fgeal::Image* imgBackground;
 
 	// ilustrations
-	fgeal::Image* imgRace, *imgExit, *imgSettings;
+	fgeal::Image* imgRace, *imgExit, *imgSettings, *imgCourse, *imgVehicle;
 
 	// fonts
 	fgeal::Font* fntTitle, *fntMain;
@@ -46,6 +45,11 @@ class MainMenuClassicPanelState extends public fgeal::Game::State
 
 	// the geometry of the menu slots
 	fgeal::Rectangle slotMenuItemRace, slotMenuItemVehicle, slotMenuItemCourse, slotMenuItemSettings, slotMenuItemExit;
+
+	// used for vehicle preview
+	fgeal::Point ptVehiclePreview;
+	fgeal::Rectangle rtSrcVehiclePreview;
+	fgeal::Vector2D scaleVehiclePreview;
 
 	// these guys helps giving semantics to menu indexes.
 	enum MenuItem

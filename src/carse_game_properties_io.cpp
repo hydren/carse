@@ -44,7 +44,7 @@ const static string
 	CARSE_COURSES_FOLDER = "data/courses",
 	CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine";
 
-void CarseGameLogic::loadPresetEngineSoundProfiles()
+void CarseGame::Logic::loadPresetEngineSoundProfiles()
 {
 	cout << "reading preset engine sound profiles..." << endl;
 	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER);
@@ -110,7 +110,7 @@ void CarseGameLogic::loadPresetEngineSoundProfiles()
 	}
 }
 
-void CarseGameLogic::loadCourses()
+void CarseGame::Logic::loadCourses()
 {
 	cout << "reading courses..." << endl;
 
@@ -126,7 +126,7 @@ void CarseGameLogic::loadCourses()
 	}
 }
 
-void CarseGameLogic::loadVehicles()
+void CarseGame::Logic::loadVehicles()
 {
 	cout << "reading vehicles specs..." << endl;
 
@@ -197,7 +197,7 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec&, const Properties&);
 static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
 static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec&, const Properties&);
 
-void CarseGameLogic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& prop)
+void CarseGame::Logic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& prop)
 {
 	// aux. var
 	string key;

@@ -14,30 +14,31 @@
 using std::vector;
 using std::string;
 
-#define getRaceStateInstance() (*static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID)))
-
 // logic constructor, booooooring!
-CarseGameLogic::CarseGameLogic(CarseGame& game)
-: game(game), currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID) {}
+CarseGame::Logic::Logic()
+: currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
+  nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
+  raceOnlyMode()
+{}
 
-void CarseGameLogic::initialize()
+void CarseGame::Logic::initialize()
 {
 	this->loadPresetEngineSoundProfiles();
 	this->loadCourses();
 	this->loadVehicles();
 }
 
-void CarseGameLogic::onStatesListInitFinished()
+void CarseGame::Logic::onStatesListInitFinished()
 {
 	this->setNextCourseRandom();  // set default course
-	getRaceStateInstance().settings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
-	getRaceStateInstance().settings.lapCountGoal = 2;    // set default lap count
-	getRaceStateInstance().settings.isImperialUnit = false;
+	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
+	nextMatchRaceSettings.lapCountGoal = 2;    // set default lap count
+	nextMatchRaceSettings.isImperialUnit = false;
 	this->setPickedVehicle(vehicles[0]);  // set default vehicle
 	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
 }
 
-EngineSoundProfile& CarseGameLogic::getPresetEngineSoundProfile(const std::string presetName)
+EngineSoundProfile& CarseGame::Logic::getPresetEngineSoundProfile(const std::string presetName)
 {
 	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
 		return presetEngineSoundProfiles[presetName];
@@ -45,90 +46,90 @@ EngineSoundProfile& CarseGameLogic::getPresetEngineSoundProfile(const std::strin
 		return presetEngineSoundProfiles["default"];
 }
 
-const vector<Pseudo3DCourse::Spec>& CarseGameLogic::getCourseList()
+const vector<Pseudo3DCourse::Spec>& CarseGame::Logic::getCourseList()
 {
 	return courses;
 }
 
-void CarseGameLogic::setNextCourse(unsigned courseIndex)
+void CarseGame::Logic::setNextCourse(unsigned courseIndex)
 {
-	getRaceStateInstance().nextCourseSpec = courses[courseIndex];
+	nextMatchCourseSpec = courses[courseIndex];
 }
 
-void CarseGameLogic::setNextCourse(const Pseudo3DCourse::Spec& c)
+void CarseGame::Logic::setNextCourse(const Pseudo3DCourse::Spec& c)
 {
-	getRaceStateInstance().nextCourseSpec = c;
+	nextMatchCourseSpec = c;
 }
 
-void CarseGameLogic::setNextCourseRandom()
+void CarseGame::Logic::setNextCourseRandom()
 {
-	getRaceStateInstance().nextCourseSpec = Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+	nextMatchCourseSpec = Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5);
 }
 
-void CarseGameLogic::setNextCourseDebug()
+void CarseGame::Logic::setNextCourseDebug()
 {
-	getRaceStateInstance().nextCourseSpec = Pseudo3DCourse::generateDebugCourseSpec(200, 3000);
-	getRaceStateInstance().settings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
+	nextMatchCourseSpec = Pseudo3DCourse::generateDebugCourseSpec(200, 3000);
+	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 
-const Pseudo3DCourse::Spec& CarseGameLogic::getNextCourse()
+const Pseudo3DCourse::Spec& CarseGame::Logic::getNextCourse()
 {
-	return getRaceStateInstance().nextCourseSpec;
+	return nextMatchCourseSpec;
 }
 
-fgeal::Image* CarseGameLogic::getNextCoursePreviewImage()
+Pseudo3DRaceState::RaceSettings& CarseGame::Logic::getNextRaceSettings()
 {
-	return static_cast<CourseSelectionState*>(game.getState(CarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
+	return nextMatchRaceSettings;
 }
 
-Pseudo3DRaceState::RaceSettings& CarseGameLogic::getNextRaceSettings()
-{
-	return getRaceStateInstance().settings;
-}
-
-const vector<Pseudo3DVehicle::Spec>& CarseGameLogic::getVehicleList()
+const vector<Pseudo3DVehicle::Spec>& CarseGame::Logic::getVehicleList()
 {
 	return vehicles;
 }
 
-const Pseudo3DVehicle::Spec& CarseGameLogic::getPickedVehicle()
+const Pseudo3DVehicle::Spec& CarseGame::Logic::getPickedVehicle()
 {
-	return getRaceStateInstance().playerVehicleSpec;
+	return nextMatchPlayerVehicleSpec;
 }
 
-void CarseGameLogic::setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex)
+const int CarseGame::Logic::getPickedVehicleAlternateSpriteIndex()
 {
-	getRaceStateInstance().playerVehicleSpec = vehicles[vehicleIndex];
-	getRaceStateInstance().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+	return nextMatchPlayerVehicleSpecAlternateSpriteIndex;
 }
 
-void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int altSpriteIndex)
+void CarseGame::Logic::setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex)
 {
-	getRaceStateInstance().playerVehicleSpec = vspec;
-	getRaceStateInstance().playerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+	nextMatchPlayerVehicleSpec = vehicles[vehicleIndex];
+	nextMatchPlayerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
 }
 
-void CarseGameLogic::drawPickedVehicle(float x, float y, float scale, int angleType)
+void CarseGame::Logic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int altSpriteIndex)
 {
-	static_cast<VehicleSelectionState*>(game.getState(CarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
+	nextMatchPlayerVehicleSpec = vspec;
+	nextMatchPlayerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
 }
 
-Mechanics::SimulationType CarseGameLogic::getSimulationType()
+//void CarseGame::Logic::drawPickedVehicle(float x, float y, float scale, int angleType)
+//{
+//	static_cast<VehicleSelectionState*>(game.getState(CarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
+//}
+
+Mechanics::SimulationType CarseGame::Logic::getSimulationType()
 {
-	return getRaceStateInstance().simulationType;
+	return nextMatchSimulationType;
 }
 
-void CarseGameLogic::setSimulationType(Mechanics::SimulationType type)
+void CarseGame::Logic::setSimulationType(Mechanics::SimulationType type)
 {
-	getRaceStateInstance().simulationType = type;
+	nextMatchSimulationType = type;
 }
 
-int CarseGameLogic::getCurrentMainMenuStateId()
+int CarseGame::Logic::getCurrentMainMenuStateId()
 {
 	return currentMainMenuStateId;
 }
 
-void CarseGameLogic::setCurrentMainMenuStateId(int id)
+void CarseGame::Logic::setCurrentMainMenuStateId(int id)
 {
 	currentMainMenuStateId = id;
 }

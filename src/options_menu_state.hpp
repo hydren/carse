@@ -17,13 +17,12 @@
 
 #include "futil/language.hpp"
 
-class CarseGameLogic;
-class CarseSharedResources;
 class CarseGame;
+class CarseSharedResources;
 
 class OptionsMenuState extends public fgeal::Game::State
 {
-	CarseGameLogic& logic;
+	CarseGame& game;
 	CarseSharedResources& shared;
 	fgeal::Menu* menu, *menuResolution;
 	fgeal::Font* fontTitle, *font;

@@ -26,7 +26,7 @@ using std::string;
 int OptionsMenuState::getId() { return CarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(CarseGame* game)
-: State(*game), logic(game->logic), shared(*game->sharedResources), menu(null), menuResolution(null),
+: State(*game), game(*game), shared(*game->sharedResources), menu(null), menuResolution(null),
   fontTitle(null), font(null), background(null), isResolutionMenuActive(false)
 {}
 
@@ -120,7 +120,7 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 		case Keyboard::KEY_ESCAPE:
 			shared.sndCursorOut.stop();
 			shared.sndCursorOut.play();
-			game.enterState(logic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_ENTER:
 			shared.sndCursorIn.stop();
@@ -151,29 +151,29 @@ void OptionsMenuState::onMenuSelect()
 		game.getDisplay().setFullscreen(!game.getDisplay().isFullscreen());
 
 	if(menu->getSelectedIndex() == MENU_ITEM_UNIT)
-		logic.getNextRaceSettings().isImperialUnit = !logic.getNextRaceSettings().isImperialUnit;
+		game.logic.getNextRaceSettings().isImperialUnit = !game.logic.getNextRaceSettings().isImperialUnit;
 
 	if(menu->getSelectedIndex() == MENU_ITEM_SIMULATION_TYPE)
 	{
 		Mechanics::SimulationType newType;
-		switch(logic.getSimulationType())
+		switch(game.logic.getSimulationType())
 		{
 			default:
 			case Mechanics::SIMULATION_TYPE_SLIPLESS:	newType = Mechanics::SIMULATION_TYPE_FAKESLIP; break;
 			case Mechanics::SIMULATION_TYPE_FAKESLIP:	newType = Mechanics::SIMULATION_TYPE_PACEJKA_BASED; break;
 			case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	newType = Mechanics::SIMULATION_TYPE_SLIPLESS; break;
 		}
-		logic.setSimulationType(newType);
+		game.logic.setSimulationType(newType);
 	}
 
 	if(menu->getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
-		logic.getNextRaceSettings().useBarTachometer = !logic.getNextRaceSettings().useBarTachometer;
+		game.logic.getNextRaceSettings().useBarTachometer = !game.logic.getNextRaceSettings().useBarTachometer;
 
 	if(menu->getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
-		logic.getNextRaceSettings().useCachedTachometer = !logic.getNextRaceSettings().useCachedTachometer;
+		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
 
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
-		game.enterState(logic.getCurrentMainMenuStateId());
+		game.enterState(game.logic.getCurrentMainMenuStateId());
 }
 
 #define setMenuItemValueText(item, valueTxt) menu->at(item).label.erase(menu->at(item).label.find(':')).append(": ").append(valueTxt)
@@ -183,10 +183,10 @@ void OptionsMenuState::updateLabels()
 	Display& display = game.getDisplay();
 	setMenuItemValueText(MENU_ITEM_RESOLUTION, futil::to_string(display.getWidth()) + "x" + futil::to_string(display.getHeight()));
 	setMenuItemValueText(MENU_ITEM_FULLSCREEN, display.isFullscreen()? "yes" : "no");
-	setMenuItemValueText(MENU_ITEM_UNIT, logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
+	setMenuItemValueText(MENU_ITEM_UNIT, game.logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
 
 	string strSimType;
-	switch(logic.getSimulationType())
+	switch(game.logic.getSimulationType())
 	{
 		default:
 		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Arcade (slipless)"; break;
@@ -194,8 +194,8 @@ void OptionsMenuState::updateLabels()
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
 	}
 	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
-	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
-	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
+	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
+	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
 }
 
 void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)

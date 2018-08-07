@@ -22,7 +22,7 @@
 class CourseEditorState extends public fgeal::Game::State
 {
 	CarseSharedResources& shared;
-	CarseGameLogic& logic;
+	CarseGame::Logic& logic;
 
 	fgeal::Menu* menuFile;
 

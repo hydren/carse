@@ -24,8 +24,9 @@ using fgeal::Mouse;
 int MainMenuClassicPanelState::getId() { return CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
 
 MainMenuClassicPanelState::MainMenuClassicPanelState(CarseGame* game)
-: State(*game), logic(game->logic), shared(*game->sharedResources),
-  imgBackground(null), imgRace(null), imgExit(null), imgSettings(null), fntTitle(null), fntMain(null),
+: State(*game), game(*game), shared(*game->sharedResources),
+  imgBackground(null), imgRace(null), imgExit(null), imgSettings(null), imgCourse(null), imgVehicle(null),
+  fntTitle(null), fntMain(null),
   selectedItemIndex(0)
 {}
 
@@ -35,6 +36,8 @@ MainMenuClassicPanelState::~MainMenuClassicPanelState()
 	if(imgRace != null) delete imgRace;
 	if(imgExit != null) delete imgExit;
 	if(imgSettings != null) delete imgSettings;
+	if(imgCourse != null) delete imgCourse;
+	if(imgVehicle != null) delete imgVehicle;
 	if(fntTitle != null) delete fntTitle;
 	if(fntMain != null) delete fntMain;
 }
@@ -98,6 +101,23 @@ void MainMenuClassicPanelState::onEnter()
 	slotMenuItemExit.h = slotSize.h;
 
 	selectedItemIndex = 0;
+
+	if(imgCourse != null)
+		delete imgCourse;
+
+	imgCourse = new Image(game.logic.getNextCourse().previewFilename.empty()? "assets/portrait-circuit.png" : game.logic.getNextCourse().previewFilename);
+
+	if(imgVehicle != null)
+		delete imgVehicle;
+
+	const Pseudo3DVehicleAnimationSpec& vspec = game.logic.getPickedVehicle().sprite;
+	imgVehicle = new Image(vspec.sheetFilename);
+	ptVehiclePreview.x = slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w;
+	ptVehiclePreview.y = slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h;
+	rtSrcVehiclePreview.x = rtSrcVehiclePreview.y = 0;
+	rtSrcVehiclePreview.w = vspec.frameWidth;
+	rtSrcVehiclePreview.h = vspec.frameHeight;
+	scaleVehiclePreview.x = scaleVehiclePreview.y = 0.75;
 }
 
 void MainMenuClassicPanelState::onLeave()
@@ -120,15 +140,15 @@ void MainMenuClassicPanelState::render()
 		slotMenuItemRace.w * 0.98f / imgRace->getWidth(), slotMenuItemRace.h * 0.98f / imgRace->getHeight());
 
 	drawGridSlot(slotMenuItemVehicle, margin, MENU_ITEM_VEHICLE);
-	logic.drawPickedVehicle(slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w, slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h, 0.75);
+
+	imgVehicle->drawScaledRegion(ptVehiclePreview, scaleVehiclePreview, Image::FLIP_NONE, rtSrcVehiclePreview);
 
 	drawGridSlot(slotMenuItemCourse, margin, MENU_ITEM_COURSE);
-	Image* portrait = logic.getNextCoursePreviewImage();
-	const float portraitX = slotMenuItemCourse.x + 0.125f*slotMenuItemCourse.w*(1 - 0.75f/portrait->getWidth()),
-				portraitY = slotMenuItemCourse.y + 0.1750f*slotMenuItemCourse.h*(1 - 0.75f/portrait->getHeight()),
-				portraitScaleX = 0.75f*slotMenuItemCourse.w/portrait->getWidth(),
-				portraitScaleY = 0.75f*slotMenuItemCourse.h/portrait->getHeight();
-	portrait->drawScaled(portraitX, portraitY, portraitScaleX, portraitScaleY);
+	const float portraitX = slotMenuItemCourse.x + 0.125f*slotMenuItemCourse.w*(1 - 0.75f/imgCourse->getWidth()),
+				portraitY = slotMenuItemCourse.y + 0.1750f*slotMenuItemCourse.h*(1 - 0.75f/imgCourse->getHeight()),
+				portraitScaleX = 0.75f*slotMenuItemCourse.w/imgCourse->getWidth(),
+				portraitScaleY = 0.75f*slotMenuItemCourse.h/imgCourse->getHeight();
+	imgCourse->drawScaled(portraitX, portraitY, portraitScaleX, portraitScaleY);
 
 	drawGridSlot(slotMenuItemSettings, margin, MENU_ITEM_SETTINGS);
 	const float imgSettingsX = slotMenuItemSettings.x + 0.125f*slotMenuItemSettings.w*(1 - 0.75f/imgSettings->getWidth()),
@@ -227,7 +247,7 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_1:
-			logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
+			game.logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
 			game.enterState(CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
 			break;
 

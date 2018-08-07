@@ -5,7 +5,7 @@
  *      Author: carlosfaruolo
  */
 
-#include "carse_game_logic.hpp"
+#include "carse_game.hpp"
 
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"

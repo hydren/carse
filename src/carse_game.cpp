@@ -44,7 +44,7 @@ void Pseudo3DCarseGame::initializeStatesList()
 	this->addState(new OptionsMenuState(this));
 	this->addState(new CourseEditorState(this));
 
-	this->setInitialState(MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+	this->setInitialState(logic.raceOnlyMode? RACE_STATE_ID : MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
 	this->setInputManagerEnabled();
 
 	this->logic.onStatesListInitFinished();

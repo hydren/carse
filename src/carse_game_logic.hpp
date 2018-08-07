@@ -56,6 +56,8 @@ class CarseGameLogic
 	void loadVehicles();
 
 	public:
+	bool raceOnlyMode;
+
 	// gets one of the built-in engine sound presets, by name
 	EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
 

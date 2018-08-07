@@ -75,6 +75,9 @@ int main(int argc, char** argv)
 			" If in fullscreen mode, tells carse to set the given resolution", false, string(), "<WIDTHxHEIGHT>");
 	cmd.add(argResolution);
 
+	SwitchArg argRace("R", "race", "Tells carse to go directly start a race with current vehicle and course.", false);
+	cmd.add(argRace);
+
 	cmd.parse(argc, argv);
 
 	int screenWidth = 800, screenHeight = 600;
@@ -99,27 +102,50 @@ int main(int argc, char** argv)
 	try
 	{
 		fgeal::initialize();
+	}
+	catch (const fgeal::AdapterException& e)
+	{
+		cout << "failed to initialize: " << e.what() << endl;
+	}
 
-		Display::Options options;
-		options.title = "carse";
-		options.iconFilename = "assets/carse-icon.png";
-		options.fullscreen = argFullscreen.getValue();
-		options.width = screenWidth;
-		options.height = screenHeight;
-		if(argCentered.getValue())
-			options.positioning = Display::Options::POSITION_CENTERED;
+	Display::Options options;
+	options.title = "carse";
+	options.iconFilename = "assets/carse-icon.png";
+	options.fullscreen = argFullscreen.getValue();
+	options.width = screenWidth;
+	options.height = screenHeight;
+	if(argCentered.getValue())
+		options.positioning = Display::Options::POSITION_CENTERED;
 
+	try
+	{
 		Display::create(options);
+	}
+	catch (const fgeal::AdapterException& e)
+	{
+		cout << "failed to open display: " << e.what() << endl;
+	}
 
+	try
+	{
 		runSplash();
-
-		CarseGame().start();
-
-		fgeal::finalize();
+		CarseGame game;
+		if(argRace.isSet())
+			game.logic.raceOnlyMode = true;
+		game.start();
 	}
 	catch(const fgeal::AdapterException& e)
 	{
 		cout << e.what() << endl;
+	}
+
+	try
+	{
+		fgeal::finalize();
+	}
+	catch (const fgeal::AdapterException& e)
+	{
+		cout << "failed to deinitialize: " << e.what() << endl;
 	}
 
 	return EXIT_SUCCESS;

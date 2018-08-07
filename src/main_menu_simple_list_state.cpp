@@ -17,9 +17,9 @@ using fgeal::Font;
 using fgeal::Color;
 using fgeal::Keyboard;
 
-int MainMenuSimpleListState::getId() { return Pseudo3DCarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
+int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 
-MainMenuSimpleListState::MainMenuSimpleListState(Pseudo3DCarseGame* game)
+MainMenuSimpleListState::MainMenuSimpleListState(CarseGame* game)
 : State(*game), logic(game->logic), shared(*game->sharedResources), menu(null),
   imgBackground(null), fntTitle(null)
 {}
@@ -92,10 +92,10 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			shared.sndCursorIn.play();
 			switch(menu->getSelectedIndex())
 			{
-				case MENU_ITEM_RACE:     game.enterState(Pseudo3DCarseGame::RACE_STATE_ID); break;
-				case MENU_ITEM_VEHICLE:  game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID); break;
-				case MENU_ITEM_COURSE:   game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID); break;
-				case MENU_ITEM_SETTINGS: game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID); break;
+				case MENU_ITEM_RACE:     game.enterState(CarseGame::RACE_STATE_ID); break;
+				case MENU_ITEM_VEHICLE:  game.enterState(CarseGame::VEHICLE_SELECTION_STATE_ID); break;
+				case MENU_ITEM_COURSE:   game.enterState(CarseGame::COURSE_SELECTION_STATE_ID); break;
+				case MENU_ITEM_SETTINGS: game.enterState(CarseGame::OPTIONS_MENU_STATE_ID); break;
 				case MENU_ITEM_EXIT:     game.running = false; break;
 				default: break;
 			}
@@ -114,8 +114,8 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_2:
-			logic.setCurrentMainMenuStateId(Pseudo3DCarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
-			game.enterState(Pseudo3DCarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+			logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+			game.enterState(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
 			break;
 
 		default:break;

@@ -29,14 +29,14 @@
 extern const std::string CARSE_VERSION;
 
 // fwd decl
-class Pseudo3DCarseGame;
+class CarseGame;
 class Vehicle;
 
 /** Class to wrap together all between-states game logic. */
 class CarseGameLogic
 {
-	friend class Pseudo3DCarseGame;
-	Pseudo3DCarseGame& game;
+	friend class CarseGame;
+	CarseGame& game;
 
 	std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 	std::vector<Pseudo3DCourse::Spec> courses;
@@ -44,7 +44,7 @@ class CarseGameLogic
 
 	int currentMainMenuStateId;
 
-	CarseGameLogic(Pseudo3DCarseGame& game);
+	CarseGameLogic(CarseGame& game);
 
 	// intended to run on startup
 	void initialize();
@@ -105,7 +105,7 @@ struct CarseSharedResources
 	CarseSharedResources();
 };
 
-class Pseudo3DCarseGame extends public fgeal::Game
+class CarseGame extends public fgeal::Game
 {
 	public:
 	enum StateID
@@ -119,15 +119,13 @@ class Pseudo3DCarseGame extends public fgeal::Game
 		COURSE_EDITOR_STATE_ID,
 	};
 
-	Pseudo3DCarseGame();
-	~Pseudo3DCarseGame();
+	CarseGame();
+	~CarseGame();
 	virtual void preInitialize();
 	virtual void initializeStatesList();
 
 	CarseSharedResources* sharedResources;
 	CarseGameLogic logic;
 };
-
-typedef Pseudo3DCarseGame CarseGame;
 
 #endif /* CARSE_GAME_HPP_ */

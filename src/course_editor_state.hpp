@@ -46,7 +46,7 @@ class CourseEditorState extends public fgeal::Game::State
 	public:
 	virtual int getId();
 
-	CourseEditorState(Pseudo3DCarseGame* game);
+	CourseEditorState(CarseGame* game);
 	~CourseEditorState();
 
 	virtual void initialize();

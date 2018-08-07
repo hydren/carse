@@ -19,7 +19,7 @@
 
 class CarseGameLogic;
 class CarseSharedResources;
-class Pseudo3DCarseGame;
+class CarseGame;
 
 class MainMenuSimpleListState extends public fgeal::Game::State
 {
@@ -50,7 +50,7 @@ class MainMenuSimpleListState extends public fgeal::Game::State
 	};
 
 	public:
-	MainMenuSimpleListState(Pseudo3DCarseGame* game);
+	MainMenuSimpleListState(CarseGame* game);
 	~MainMenuSimpleListState();
 
 	virtual int getId();

@@ -25,7 +25,7 @@
 #include <vector>
 #include <utility>
 
-class Pseudo3DCarseGame;
+class CarseGame;
 class CarseSharedResources;
 class CarseGameLogic;
 
@@ -165,7 +165,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	public:
 	virtual int getId();
 
-	Pseudo3DRaceState(Pseudo3DCarseGame* game);
+	Pseudo3DRaceState(CarseGame* game);
 	~Pseudo3DRaceState();
 
 	virtual void initialize();

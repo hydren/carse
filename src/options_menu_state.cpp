@@ -23,9 +23,9 @@ using fgeal::Rectangle;
 
 using std::string;
 
-int OptionsMenuState::getId() { return Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID; }
+int OptionsMenuState::getId() { return CarseGame::OPTIONS_MENU_STATE_ID; }
 
-OptionsMenuState::OptionsMenuState(Pseudo3DCarseGame* game)
+OptionsMenuState::OptionsMenuState(CarseGame* game)
 : State(*game), logic(game->logic), shared(*game->sharedResources), menu(null), menuResolution(null),
   fontTitle(null), font(null), background(null), isResolutionMenuActive(false)
 {}

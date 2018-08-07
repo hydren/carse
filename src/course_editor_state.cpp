@@ -16,9 +16,9 @@ using fgeal::Mouse;
 using fgeal::Rectangle;
 using fgeal::Point;
 
-int CourseEditorState::getId() { return Pseudo3DCarseGame::COURSE_EDITOR_STATE_ID; }
+int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
-CourseEditorState::CourseEditorState(Pseudo3DCarseGame* game)
+CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), shared(*game->sharedResources), logic(game->logic),
   menuFile(null), focus(ON_EDITOR)
 {}
@@ -99,7 +99,7 @@ void CourseEditorState::update(float delta)
 void CourseEditorState::onKeyPressed(Keyboard::Key key)
 {
 	if(key == Keyboard::KEY_ESCAPE)
-		game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID);
+		game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
 }
 
 void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)

@@ -36,9 +36,9 @@ enum SettingsMenuIndex
 	SETTINGS_LAPS = 1
 };
 
-int CourseSelectionState::getId() { return Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID; }
+int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID; }
 
-CourseSelectionState::CourseSelectionState(Pseudo3DCarseGame* game)
+CourseSelectionState::CourseSelectionState(CarseGame* game)
 : State(*game), shared(*game->sharedResources), logic(game->logic),
   background(null), imgRandom(null), imgCircuit(null),
   fontMain(null), fontInfo(null), menuCourse(null), menuSettings(null),
@@ -236,7 +236,7 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 				status = STATUS_HOVERING_SETTINGS_LIST;
 			}
 			else if(key == Keyboard::KEY_SPACE)
-				game.enterState(Pseudo3DCarseGame::COURSE_EDITOR_STATE_ID);  //xxx to debug editor state
+				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);  //xxx to debug editor state
 			break;
 
 		case STATUS_HOVERING_SETTINGS_LIST: handleInputOnSettings(key); break;

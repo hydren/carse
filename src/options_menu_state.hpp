@@ -19,7 +19,7 @@
 
 class CarseGameLogic;
 class CarseSharedResources;
-class Pseudo3DCarseGame;
+class CarseGame;
 
 class OptionsMenuState extends public fgeal::Game::State
 {
@@ -45,7 +45,7 @@ class OptionsMenuState extends public fgeal::Game::State
 	public:
 	virtual int getId();
 
-	OptionsMenuState(Pseudo3DCarseGame* game);
+	OptionsMenuState(CarseGame* game);
 	~OptionsMenuState();
 
 	virtual void initialize();

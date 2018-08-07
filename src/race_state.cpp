@@ -52,7 +52,7 @@ static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
 // -------------------------------------------------------------------------------
 
-int Pseudo3DRaceState::getId(){ return Pseudo3DCarseGame::RACE_STATE_ID; }
+int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), logic(game->logic), shared(*game->sharedResources),

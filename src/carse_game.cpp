@@ -16,25 +16,25 @@
 #include "options_menu_state.hpp"
 #include "course_editor_state.hpp"
 
-Pseudo3DCarseGame::Pseudo3DCarseGame()
+CarseGame::CarseGame()
 : Game("Carse", null, 800, 600), sharedResources(null), logic(*this)
 {
 	this->maxFps = 60;
 }
 
-Pseudo3DCarseGame::~Pseudo3DCarseGame()
+CarseGame::~CarseGame()
 {
 	if(sharedResources != null)
 		delete sharedResources;
 }
 
-void Pseudo3DCarseGame::preInitialize()
+void CarseGame::preInitialize()
 {
 	this->sharedResources = new CarseSharedResources();
 	this->logic.initialize();
 }
 
-void Pseudo3DCarseGame::initializeStatesList()
+void CarseGame::initializeStatesList()
 {
 	this->addState(new Pseudo3DRaceState(this));
 	this->addState(new MainMenuSimpleListState(this));

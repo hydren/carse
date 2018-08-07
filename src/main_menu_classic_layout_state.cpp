@@ -21,7 +21,7 @@ using fgeal::Point;
 using fgeal::Keyboard;
 using fgeal::Mouse;
 
-int MainMenuClassicPanelState::getId() { return Pseudo3DCarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
+int MainMenuClassicPanelState::getId() { return CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
 
 MainMenuClassicPanelState::MainMenuClassicPanelState(CarseGame* game)
 : State(*game), logic(game->logic), shared(*game->sharedResources),
@@ -162,10 +162,10 @@ void MainMenuClassicPanelState::onMenuAccept()
 {
 	switch(selectedItemIndex)
 	{
-		case MENU_ITEM_RACE:     game.enterState(Pseudo3DCarseGame::RACE_STATE_ID); break;
-		case MENU_ITEM_VEHICLE:  game.enterState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID); break;
-		case MENU_ITEM_COURSE:   game.enterState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID); break;
-		case MENU_ITEM_SETTINGS: game.enterState(Pseudo3DCarseGame::OPTIONS_MENU_STATE_ID); break;
+		case MENU_ITEM_RACE:     game.enterState(CarseGame::RACE_STATE_ID); break;
+		case MENU_ITEM_VEHICLE:  game.enterState(CarseGame::VEHICLE_SELECTION_STATE_ID); break;
+		case MENU_ITEM_COURSE:   game.enterState(CarseGame::COURSE_SELECTION_STATE_ID); break;
+		case MENU_ITEM_SETTINGS: game.enterState(CarseGame::OPTIONS_MENU_STATE_ID); break;
 		case MENU_ITEM_EXIT:     game.running = false; break;
 		default: break;
 	}
@@ -227,8 +227,8 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_1:
-			logic.setCurrentMainMenuStateId(Pseudo3DCarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
-			game.enterState(Pseudo3DCarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
+			logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
+			game.enterState(CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID);
 			break;
 
 		default:break;

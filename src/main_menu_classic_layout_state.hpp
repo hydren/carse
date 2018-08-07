@@ -18,7 +18,7 @@
 
 class CarseGameLogic;
 class CarseSharedResources;
-class Pseudo3DCarseGame;
+class CarseGame;
 
 class MainMenuClassicPanelState extends public fgeal::Game::State
 {
@@ -61,7 +61,7 @@ class MainMenuClassicPanelState extends public fgeal::Game::State
 	void onMenuAccept();
 
 	public:
-	MainMenuClassicPanelState(Pseudo3DCarseGame* game);
+	MainMenuClassicPanelState(CarseGame* game);
 	~MainMenuClassicPanelState();
 
 	virtual int getId();

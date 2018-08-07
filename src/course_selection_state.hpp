@@ -43,7 +43,7 @@ class CourseSelectionState extends public fgeal::Game::State
 	public:
 	virtual int getId();
 
-	CourseSelectionState(Pseudo3DCarseGame* game);
+	CourseSelectionState(CarseGame* game);
 	~CourseSelectionState();
 
 	virtual void initialize();

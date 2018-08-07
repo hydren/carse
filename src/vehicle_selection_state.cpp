@@ -38,9 +38,9 @@ static string toStrRounded(float value, unsigned placesCount=1)
 	return ss.str();
 }
 
-int VehicleSelectionState::getId() { return Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID; }
+int VehicleSelectionState::getId() { return CarseGame::VEHICLE_SELECTION_STATE_ID; }
 
-VehicleSelectionState::VehicleSelectionState(Pseudo3DCarseGame* game)
+VehicleSelectionState::VehicleSelectionState(CarseGame* game)
 : State(*game), shared(*game->sharedResources), gameLogic(game->logic),
   fontMain(null), fontInfo(null), fontSub(null), menu(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),

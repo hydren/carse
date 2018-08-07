@@ -14,11 +14,11 @@
 using std::vector;
 using std::string;
 
-#define getRaceStateInstance() (*static_cast<Pseudo3DRaceState*>(game.getState(Pseudo3DCarseGame::RACE_STATE_ID)))
+#define getRaceStateInstance() (*static_cast<Pseudo3DRaceState*>(game.getState(CarseGame::RACE_STATE_ID)))
 
 // logic constructor, booooooring!
-CarseGameLogic::CarseGameLogic(Pseudo3DCarseGame& game)
-: game(game), currentMainMenuStateId(Pseudo3DCarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID) {}
+CarseGameLogic::CarseGameLogic(CarseGame& game)
+: game(game), currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID) {}
 
 void CarseGameLogic::initialize()
 {
@@ -78,7 +78,7 @@ const Pseudo3DCourse::Spec& CarseGameLogic::getNextCourse()
 
 fgeal::Image* CarseGameLogic::getNextCoursePreviewImage()
 {
-	return static_cast<CourseSelectionState*>(game.getState(Pseudo3DCarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
+	return static_cast<CourseSelectionState*>(game.getState(CarseGame::COURSE_SELECTION_STATE_ID))->getSelectedCoursePreview();
 }
 
 Pseudo3DRaceState::RaceSettings& CarseGameLogic::getNextRaceSettings()
@@ -110,7 +110,7 @@ void CarseGameLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int al
 
 void CarseGameLogic::drawPickedVehicle(float x, float y, float scale, int angleType)
 {
-	static_cast<VehicleSelectionState*>(game.getState(Pseudo3DCarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
+	static_cast<VehicleSelectionState*>(game.getState(CarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
 }
 
 Mechanics::SimulationType CarseGameLogic::getSimulationType()

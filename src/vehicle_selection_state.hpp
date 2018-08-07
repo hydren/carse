@@ -22,7 +22,7 @@
 #include "util.hpp"
 
 // fwd decl.
-class Pseudo3DCarseGame;
+class CarseGame;
 class CarseSharedResources;
 class CarseGameLogic;
 
@@ -80,7 +80,7 @@ class VehicleSelectionState extends public fgeal::Game::State
 	public:
 	virtual int getId();
 
-	VehicleSelectionState(Pseudo3DCarseGame* game);
+	VehicleSelectionState(CarseGame* game);
 	~VehicleSelectionState();
 
 	virtual void initialize();

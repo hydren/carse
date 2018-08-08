@@ -74,6 +74,7 @@ class CarseGame extends public fgeal::Game
 		bool raceOnlyMode, raceOnlyDebug, raceOnlyRandomCourse;
 		unsigned raceOnlyCourseIndex, raceOnlyPlayerVehicleIndex;
 		int raceOnlyPlayerVehicleAlternateSpriteIndex, raceOnlyRaceType;
+		unsigned raceOnlyLapCount;
 
 		// gets one of the built-in engine sound presets, by name
 		EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);

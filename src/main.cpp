@@ -82,6 +82,10 @@ int main(int argc, char** argv)
 			"run, represented by its index", false, -1, "integer");
 	cmd.add(argRaceType);
 
+	ValueArg<unsigned> argLapCount("L", "lap-count", "When used in conjunction with the --race-type parameter with value loop types, "
+			"tells carse the number of laps of the race", false, 0, "unsigned integer");
+	cmd.add(argLapCount);
+
 	ValueArg<unsigned> argCourse("C", "course", "When used in conjunction with the --race parameter, tells carse to use the given course,"
 			" represented by its index", false, 0, "unsigned integer");
 	cmd.add(argCourse);
@@ -159,6 +163,8 @@ int main(int argc, char** argv)
 			game.logic.raceOnlyMode = true;
 			if(argRaceType.isSet())
 				game.logic.raceOnlyRaceType = argRaceType.getValue();
+			if(argLapCount.isSet())
+				game.logic.raceOnlyLapCount = argLapCount.getValue();
 			if(argDebugCourse.isSet())
 				game.logic.raceOnlyDebug = true;
 			else if(argRandomCourse.isSet())

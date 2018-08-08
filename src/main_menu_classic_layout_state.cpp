@@ -112,12 +112,13 @@ void MainMenuClassicPanelState::onEnter()
 
 	const Pseudo3DVehicleAnimationSpec& vspec = game.logic.getPickedVehicle().sprite;
 	imgVehicle = new Image(vspec.sheetFilename);
-	ptVehiclePreview.x = slotMenuItemVehicle.x + 0.5*slotMenuItemVehicle.w;
-	ptVehiclePreview.y = slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h;
+	scaleVehiclePreview.x = vspec.scale.x * display.getWidth() * 0.0037;
+	scaleVehiclePreview.y = vspec.scale.y * display.getWidth() * 0.0037;
 	rtSrcVehiclePreview.x = rtSrcVehiclePreview.y = 0;
 	rtSrcVehiclePreview.w = vspec.frameWidth;
 	rtSrcVehiclePreview.h = vspec.frameHeight;
-	scaleVehiclePreview.x = scaleVehiclePreview.y = 0.75;
+	ptVehiclePreview.x = slotMenuItemVehicle.x + 0.500*slotMenuItemVehicle.w - 0.5*vspec.frameWidth  * scaleVehiclePreview.x;
+	ptVehiclePreview.y = slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h - 0.5*vspec.frameHeight * scaleVehiclePreview.y;
 }
 
 void MainMenuClassicPanelState::onLeave()

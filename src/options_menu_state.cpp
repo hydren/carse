@@ -26,8 +26,10 @@ using std::string;
 int OptionsMenuState::getId() { return CarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(CarseGame* game)
-: State(*game), game(*game), shared(*game->sharedResources), menu(null), menuResolution(null),
-  fontTitle(null), font(null), background(null), isResolutionMenuActive(false)
+: State(*game), game(*game), menu(null), menuResolution(null),
+  fontTitle(null), font(null), background(null),
+  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  isResolutionMenuActive(false)
 {}
 
 OptionsMenuState::~OptionsMenuState()
@@ -43,8 +45,8 @@ void OptionsMenuState::initialize()
 {
 	Display& display = game.getDisplay();
 	background = new Image("assets/options-bg.jpg");
-	fontTitle = new Font(shared.font2Path, dip(48));
-	font = new Font(shared.font1Path, dip(16));
+	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
+	font = new Font(game.sharedResources->font1Path, dip(16));
 
 	menu = new Menu(Rectangle(), font, Color(16, 24, 192));
 	menu->bgColor = Color(0, 0, 0, 128);
@@ -71,6 +73,11 @@ void OptionsMenuState::initialize()
 			+ " ("+futil::to_string(resolution.aspectRatio.first)+":"+futil::to_string(resolution.aspectRatio.second)+")"
 			+ (resolution.description.empty()? "" : " ("+resolution.description+")"));
 	}
+
+	// loan some shared resources
+	sndCursorMove = &game.sharedResources->sndCursorMove;
+	sndCursorIn   = &game.sharedResources->sndCursorIn;
+	sndCursorOut  = &game.sharedResources->sndCursorOut;
 }
 
 void OptionsMenuState::onEnter()
@@ -118,23 +125,23 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 	else switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			shared.sndCursorOut.stop();
-			shared.sndCursorOut.play();
+			sndCursorOut->stop();
+			sndCursorOut->play();
 			game.enterState(game.logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_ENTER:
-			shared.sndCursorIn.stop();
-			shared.sndCursorIn.play();
+			sndCursorIn->stop();
+			sndCursorIn->play();
 			this->onMenuSelect();
 			break;
 		case Keyboard::KEY_ARROW_UP:
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menu->moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menu->moveCursorDown();
 			break;
 		default:
@@ -229,10 +236,10 @@ void OptionsMenuState::updateFonts()
 	Display& display = game.getDisplay();
 
 	if(font != null) delete font;
-	font = new Font(shared.font1Path, dip(16));
+	font = new Font(game.sharedResources->font1Path, dip(16));
 
 	if(fontTitle != null) delete fontTitle;
-	fontTitle = new Font(shared.font2Path, dip(48));
+	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
 
 	if(menuResolution != null)
 	{

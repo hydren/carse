@@ -30,7 +30,7 @@ CarseGame::~CarseGame()
 
 void CarseGame::preInitialize()
 {
-	this->sharedResources = new CarseSharedResources();
+	this->sharedResources = new SharedResources();
 	this->logic.initialize();
 }
 

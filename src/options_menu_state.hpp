@@ -18,15 +18,16 @@
 #include "futil/language.hpp"
 
 class CarseGame;
-class CarseSharedResources;
 
 class OptionsMenuState extends public fgeal::Game::State
 {
 	CarseGame& game;
-	CarseSharedResources& shared;
+
 	fgeal::Menu* menu, *menuResolution;
 	fgeal::Font* fontTitle, *font;
 	fgeal::Image* background;
+
+	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	bool isResolutionMenuActive;
 

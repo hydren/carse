@@ -9,8 +9,6 @@
 #define STATES_COURSE_EDITOR_STATE_HPP_
 #include <ciso646>
 
-#include "carse_game.hpp"
-
 #include "course.hpp"
 
 #include "fgeal/fgeal.hpp"
@@ -19,10 +17,11 @@
 
 #include "futil/language.hpp"
 
+class CarseGame;
+
 class CourseEditorState extends public fgeal::Game::State
 {
-	CarseSharedResources& shared;
-	CarseGame::Logic& logic;
+	CarseGame& game;
 
 	fgeal::Menu* menuFile;
 

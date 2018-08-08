@@ -26,14 +26,12 @@
 #include <utility>
 
 class CarseGame;
-class CarseSharedResources;
 
 class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	CarseGame& game;
-	CarseSharedResources& shared;
 
-	fgeal::Font* fontSmall, *fontCountdown, *font3;
+	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDev;
 	fgeal::Image* imgBackground, *imgCacheTachometer;
 	fgeal::Music* music;
 

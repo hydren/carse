@@ -24,10 +24,11 @@ using fgeal::Mouse;
 int MainMenuClassicPanelState::getId() { return CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
 
 MainMenuClassicPanelState::MainMenuClassicPanelState(CarseGame* game)
-: State(*game), game(*game), shared(*game->sharedResources),
+: State(*game), game(*game),
   imgBackground(null), imgRace(null), imgExit(null), imgSettings(null), imgCourse(null), imgVehicle(null),
-  fntTitle(null), fntMain(null),
-  selectedItemIndex(0)
+  fntTitle(null), fntMain(null), fntDev(null),
+  selectedItemIndex(0),
+  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
 
 MainMenuClassicPanelState::~MainMenuClassicPanelState()
@@ -56,10 +57,16 @@ void MainMenuClassicPanelState::initialize()
 	imgExit = new Image("assets/exit.png");
 	imgSettings = new Image("assets/settings.png");
 
-	strTitle = "Carse Project";
-	fntTitle = new Font(shared.font2Path, dip(40));
+	// loan some shared resources
+	sndCursorMove = &game.sharedResources->sndCursorMove;
+	sndCursorIn   = &game.sharedResources->sndCursorIn;
+	sndCursorOut  = &game.sharedResources->sndCursorOut;
+	fntDev = &game.sharedResources->fontDev;
 
-	fntMain = new Font(shared.font1Path, dip(18));
+	strTitle = "Carse Project";
+	fntTitle = new Font(game.sharedResources->font2Path, dip(40));
+
+	fntMain = new Font(game.sharedResources->font1Path, dip(18));
 
 	strVersion = string("v")+CARSE_VERSION+" (fgeal v"+fgeal::VERSION+"/"+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")";
 }
@@ -167,7 +174,7 @@ void MainMenuClassicPanelState::render()
 
 	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.1*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
 
-	shared.fontDev.drawText(strVersion, 4, 4, Color::CREAM);
+	fntDev->drawText(strVersion, 4, 4, Color::CREAM);
 }
 
 void MainMenuClassicPanelState::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
@@ -206,8 +213,8 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ENTER:
-			shared.sndCursorIn.stop();
-			shared.sndCursorIn.play();
+			sndCursorIn->stop();
+			sndCursorIn->play();
 			this->onMenuAccept();
 			break;
 
@@ -215,8 +222,8 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 2 or selectedItemIndex == 4)
 			{
 				selectedItemIndex--;
-				shared.sndCursorMove.stop();
-				shared.sndCursorMove.play();
+				sndCursorMove->stop();
+				sndCursorMove->play();
 			}
 			break;
 
@@ -224,8 +231,8 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 1 or selectedItemIndex == 3)
 			{
 				selectedItemIndex++;
-				shared.sndCursorMove.stop();
-				shared.sndCursorMove.play();
+				sndCursorMove->stop();
+				sndCursorMove->play();
 			}
 			break;
 
@@ -233,8 +240,8 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 0 or selectedItemIndex == 3 or selectedItemIndex == 4)
 			{
 				selectedItemIndex = (selectedItemIndex == 0? 1 : 0);
-				shared.sndCursorMove.stop();
-				shared.sndCursorMove.play();
+				sndCursorMove->stop();
+				sndCursorMove->play();
 			}
 			break;
 
@@ -242,8 +249,8 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 0 or selectedItemIndex == 1 or selectedItemIndex == 2)
 			{
 				selectedItemIndex = (selectedItemIndex == 0? 3 : 0);
-				shared.sndCursorMove.stop();
-				shared.sndCursorMove.play();
+				sndCursorMove->stop();
+				sndCursorMove->play();
 			}
 			break;
 
@@ -264,40 +271,40 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 	const Point pt = {(float) x, (float) y};
 	if(slotMenuItemRace.contains(pt))
 	{
-		shared.sndCursorIn.stop();
-		shared.sndCursorIn.play();
+		sndCursorIn->stop();
+		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_RACE;
 		this->onMenuAccept();
 	}
 
 	if(slotMenuItemCourse.contains(pt))
 	{
-		shared.sndCursorIn.stop();
-		shared.sndCursorIn.play();
+		sndCursorIn->stop();
+		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_COURSE;
 		this->onMenuAccept();
 	}
 
 	if(slotMenuItemVehicle.contains(pt))
 	{
-		shared.sndCursorIn.stop();
-		shared.sndCursorIn.play();
+		sndCursorIn->stop();
+		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_VEHICLE;
 		this->onMenuAccept();
 	}
 
 	if(slotMenuItemSettings.contains(pt))
 	{
-		shared.sndCursorIn.stop();
-		shared.sndCursorIn.play();
+		sndCursorIn->stop();
+		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_SETTINGS;
 		this->onMenuAccept();
 	}
 
 	if(slotMenuItemExit.contains(pt))
 	{
-		shared.sndCursorIn.stop();
-		shared.sndCursorIn.play();
+		sndCursorIn->stop();
+		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_EXIT;
 		this->onMenuAccept();
 	}
@@ -308,36 +315,36 @@ void MainMenuClassicPanelState::onMouseMoved(int oldx, int oldy, int newx, int n
 	const Point pt = {(float) newx, (float) newy};
 	if(slotMenuItemRace.contains(pt) and selectedItemIndex != MENU_ITEM_RACE)
 	{
-		shared.sndCursorMove.stop();
-		shared.sndCursorMove.play();
+		sndCursorMove->stop();
+		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_RACE;
 	}
 
 	if(slotMenuItemCourse.contains(pt) and selectedItemIndex != MENU_ITEM_COURSE)
 	{
-		shared.sndCursorMove.stop();
-		shared.sndCursorMove.play();
+		sndCursorMove->stop();
+		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_COURSE;
 	}
 
 	if(slotMenuItemVehicle.contains(pt) and selectedItemIndex != MENU_ITEM_VEHICLE)
 	{
-		shared.sndCursorMove.stop();
-		shared.sndCursorMove.play();
+		sndCursorMove->stop();
+		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_VEHICLE;
 	}
 
 	if(slotMenuItemSettings.contains(pt) and selectedItemIndex != MENU_ITEM_SETTINGS)
 	{
-		shared.sndCursorMove.stop();
-		shared.sndCursorMove.play();
+		sndCursorMove->stop();
+		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_SETTINGS;
 	}
 
 	if(slotMenuItemExit.contains(pt) and selectedItemIndex != MENU_ITEM_EXIT)
 	{
-		shared.sndCursorMove.stop();
-		shared.sndCursorMove.play();
+		sndCursorMove->stop();
+		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_EXIT;
 	}
 }

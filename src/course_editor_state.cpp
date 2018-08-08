@@ -7,6 +7,8 @@
 
 #include "course_editor_state.hpp"
 
+#include "carse_game.hpp"
+
 using fgeal::Display;
 using fgeal::Color;
 using fgeal::Graphics;
@@ -19,7 +21,7 @@ using fgeal::Point;
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
-: State(*game), shared(*game->sharedResources), logic(game->logic),
+: State(*game), game(*game),
   menuFile(null), focus(ON_EDITOR)
 {}
 
@@ -30,7 +32,7 @@ CourseEditorState::~CourseEditorState()
 
 void CourseEditorState::initialize()
 {
-	menuFile = new fgeal::Menu(fgeal::Rectangle(), &shared.fontDev, Color::GREEN);
+	menuFile = new fgeal::Menu(fgeal::Rectangle(), &game.sharedResources->fontDev, Color::GREEN);
 }
 
 void CourseEditorState::onEnter()
@@ -62,7 +64,6 @@ void CourseEditorState::onEnter()
 	boundsStatusBar.h = 0.05*dh;
 
 	focus = ON_EDITOR;
-
 
 	//xxx debug
 	course.clearDynamicData();

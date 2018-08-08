@@ -56,15 +56,15 @@ void VehicleSelectionState::ListLayout::update(float delta)
 void VehicleSelectionState::ListLayout::onCursorUp()
 {
 	state.menu->moveCursorUp();
-	state.shared.sndCursorMove.stop();
-	state.shared.sndCursorMove.play();
+	state.game.sharedResources->sndCursorMove.stop();
+	state.game.sharedResources->sndCursorMove.play();
 }
 
 void VehicleSelectionState::ListLayout::onCursorDown()
 {
 	state.menu->moveCursorDown();
-	state.shared.sndCursorMove.stop();
-	state.shared.sndCursorMove.play();
+	state.game.sharedResources->sndCursorMove.stop();
+	state.game.sharedResources->sndCursorMove.play();
 }
 
 void VehicleSelectionState::ListLayout::onCursorLeft()

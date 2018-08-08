@@ -39,9 +39,11 @@ enum SettingsMenuIndex
 int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(CarseGame* game)
-: State(*game), shared(*game->sharedResources), logic(game->logic),
+: State(*game), game(*game),
   background(null), imgRandom(null), imgCircuit(null),
-  fontMain(null), fontInfo(null), menuCourse(null), menuSettings(null),
+  fontMain(null), fontInfo(null),
+  menuCourse(null), menuSettings(null),
+  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   isLoadedCourseSelected(false), isDebugCourseSelected(false),
   status(STATUS_HOVERING_COURSE_LIST)
 {}
@@ -65,11 +67,11 @@ void CourseSelectionState::initialize()
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
 
-	fontMain = new Font(shared.font2Path, dip(32));
-	fontInfo = new Font(shared.font1Path, dip(14));
+	fontMain = new Font(game.sharedResources->font2Path, dip(32));
+	fontInfo = new Font(game.sharedResources->font1Path, dip(14));
 
 	menuCourse = new Menu();
-	menuCourse->setFont(new Font(shared.font1Path, dip(12)), false);
+	menuCourse->setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
 	menuCourse->setColor(Color::RED);
 	menuCourse->bgColor = Color(0, 0, 0, 128);
 	menuCourse->borderColor = Color(0, 0, 0, 192);
@@ -77,19 +79,24 @@ void CourseSelectionState::initialize()
 
 	menuCourse->addEntry("<Random course>");
 	menuCourse->addEntry("<Debug course>");
-	const vector<Pseudo3DCourse::Spec>& courses = logic.getCourseList();
+	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
 	for(unsigned i = 0; i < courses.size(); i++)
 		menuCourse->addEntry((string) courses[i]);
 
 	menuSettings = new Menu();
-	menuSettings->setFont(new Font(shared.font1Path, dip(12)), false);
+	menuSettings->setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
 	menuSettings->setColor(Color::RED);
 	menuSettings->bgColor = menuCourse->bgColor;
 	menuSettings->borderColor = menuCourse->borderColor;
 	menuSettings->focusedEntryFontColor = menuCourse->focusedEntryFontColor;
-	menuSettings->addEntry("Race type: " + Pseudo3DRaceState::toString(logic.getNextRaceSettings().raceType));
-	menuSettings->addEntry("Laps: " + to_string(logic.getNextRaceSettings().lapCountGoal));
+	menuSettings->addEntry("Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType));
+	menuSettings->addEntry("Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal));
 	menuSettings->cursorWrapAroundEnabled = false;
+
+	// loan some shared resources
+	sndCursorMove = &game.sharedResources->sndCursorMove;
+	sndCursorIn   = &game.sharedResources->sndCursorIn;
+	sndCursorOut  = &game.sharedResources->sndCursorOut;
 }
 
 void CourseSelectionState::onEnter()
@@ -157,7 +164,7 @@ void CourseSelectionState::render()
 	fontInfo->drawText(menuCourse->getSelectedEntry().label, portraitBounds.x, 1.1*(portraitBounds.y + portraitBounds.h), Color::WHITE);
 	if(menuCourse->getSelectedIndex() > 1)
 	{
-		const Pseudo3DCourse::Spec& course = logic.getCourseList()[menuCourse->getSelectedIndex() - 2];
+		const Pseudo3DCourse::Spec& course = game.logic.getCourseList()[menuCourse->getSelectedIndex() - 2];
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
 		fontInfo->drawText(txtLength, portraitBounds.x, 1.1*(portraitBounds.y + portraitBounds.h) + fontInfo->getHeight(), Color::WHITE);
@@ -200,7 +207,7 @@ void CourseSelectionState::update(float delta) {}
 void CourseSelectionState::updateLapCount()
 {
 	if(menuSettings->at(1).enabled)
-		menuSettings->at(1).label = "Laps: " + to_string(logic.getNextRaceSettings().lapCountGoal);
+		menuSettings->at(1).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
 	else
 		menuSettings->at(1).label = "Laps: --";
 }
@@ -209,30 +216,30 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 {
 	if(key == Keyboard::KEY_ESCAPE and status != STATUS_ON_COURSE_LIST_SELECTION)
 	{
-		shared.sndCursorOut.stop();
-		shared.sndCursorOut.play();
+		sndCursorOut->stop();
+		sndCursorOut->play();
 		if(isLoadedCourseSelected)
-			logic.setNextCourse(menuCourse->getSelectedIndex()-2);
+			game.logic.setNextCourse(menuCourse->getSelectedIndex()-2);
 		else if(isDebugCourseSelected)
-			logic.setNextCourseDebug();
+			game.logic.setNextCourseDebug();
 		else
-			logic.setNextCourseRandom();
+			game.logic.setNextCourseRandom();
 
-		game.enterState(logic.getCurrentMainMenuStateId());
+		game.enterState(game.logic.getCurrentMainMenuStateId());
 	}
 	else switch(status)
 	{
 		case STATUS_HOVERING_COURSE_LIST:
 			if(key == Keyboard::KEY_ENTER)
 			{
-				shared.sndCursorIn.stop();
-				shared.sndCursorIn.play();
+				sndCursorIn->stop();
+				sndCursorIn->play();
 				status = STATUS_ON_COURSE_LIST_SELECTION;
 			}
 			else if(key == Keyboard::KEY_ARROW_DOWN)
 			{
-				shared.sndCursorMove.stop();
-				shared.sndCursorMove.play();
+				sndCursorMove->stop();
+				sndCursorMove->play();
 				status = STATUS_HOVERING_SETTINGS_LIST;
 			}
 			else if(key == Keyboard::KEY_SPACE)
@@ -249,19 +256,19 @@ void CourseSelectionState::handleInputOnCourseList(fgeal::Keyboard::Key key)
 	switch(key)
 	{
 		case Keyboard::KEY_ARROW_UP:
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menuCourse->moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menuCourse->moveCursorDown();
 			break;
 		case Keyboard::KEY_ENTER:
 		case Keyboard::KEY_ESCAPE:
-			shared.sndCursorIn.stop();
-			shared.sndCursorIn.play();
+			sndCursorIn->stop();
+			sndCursorIn->play();
 			status = STATUS_HOVERING_COURSE_LIST;
 			break;
 		default:
@@ -280,27 +287,27 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 		case Keyboard::KEY_ARROW_RIGHT:
 		{
 			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			switch(menuSettings->getSelectedIndex())
 			{
 				case SETTINGS_RACE_TYPE:  // race type
 				{
 					unsigned nextType;
 					if(isCursorLeft)
-						if(logic.getNextRaceSettings().raceType == 0)
+						if(game.logic.getNextRaceSettings().raceType == 0)
 							nextType = Pseudo3DRaceState::RACE_TYPE_COUNT-1;
 						else
-							nextType = logic.getNextRaceSettings().raceType-1;
+							nextType = game.logic.getNextRaceSettings().raceType-1;
 					else
-						if(logic.getNextRaceSettings().raceType == Pseudo3DRaceState::RACE_TYPE_COUNT-1)
+						if(game.logic.getNextRaceSettings().raceType == Pseudo3DRaceState::RACE_TYPE_COUNT-1)
 							nextType = 0;
 						else
-							nextType = logic.getNextRaceSettings().raceType+1;
+							nextType = game.logic.getNextRaceSettings().raceType+1;
 
-					logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
-					menuSettings->at(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(logic.getNextRaceSettings().raceType);
-					menuSettings->at(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(logic.getNextRaceSettings().raceType);
+					game.logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
+					menuSettings->at(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType);
+					menuSettings->at(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(game.logic.getNextRaceSettings().raceType);
 					updateLapCount();
 					break;
 				}
@@ -312,11 +319,11 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 
 					if(isCursorLeft)
 					{
-						if(logic.getNextRaceSettings().lapCountGoal > 2)
-							logic.getNextRaceSettings().lapCountGoal--;
+						if(game.logic.getNextRaceSettings().lapCountGoal > 2)
+							game.logic.getNextRaceSettings().lapCountGoal--;
 					}
 					else
-						logic.getNextRaceSettings().lapCountGoal++;
+						game.logic.getNextRaceSettings().lapCountGoal++;
 
 					updateLapCount();
 					break;
@@ -326,16 +333,16 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 			break;
 		}
 		case Keyboard::KEY_ARROW_UP:
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			if(menuSettings->getSelectedIndex() == 0)
 				status = STATUS_HOVERING_COURSE_LIST;
 			else
 				menuSettings->moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menuSettings->moveCursorDown();
 			break;
 		default:

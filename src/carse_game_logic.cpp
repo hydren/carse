@@ -146,7 +146,7 @@ static string getFontFilename(const string& key)
 	return "assets/fonts/"+properties.get(key, "default.ttf");
 }
 
-CarseSharedResources::CarseSharedResources()
+CarseGame::SharedResources::SharedResources()
 : sndCursorMove("assets/sound/cursor_move.ogg"),
   sndCursorIn("assets/sound/cursor_accept.ogg"),
   sndCursorOut("assets/sound/cursor_out.ogg"),

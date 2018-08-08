@@ -134,8 +134,8 @@ void VehicleSelectionState::ShowroomLayout::onCursorLeft()
 		selectionTransitionProgress = 0;
 
 		state.menu->moveCursorUp();
-		state.shared.sndCursorMove.stop();
-		state.shared.sndCursorMove.play();
+		state.game.sharedResources->sndCursorMove.stop();
+		state.game.sharedResources->sndCursorMove.play();
 	}
 }
 
@@ -148,8 +148,8 @@ void VehicleSelectionState::ShowroomLayout::onCursorRight()
 		selectionTransitionProgress = 0;
 
 		state.menu->moveCursorDown();
-		state.shared.sndCursorMove.stop();
-		state.shared.sndCursorMove.play();
+		state.game.sharedResources->sndCursorMove.stop();
+		state.game.sharedResources->sndCursorMove.play();
 	}
 }
 

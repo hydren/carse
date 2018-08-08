@@ -20,8 +20,9 @@ using fgeal::Keyboard;
 int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 
 MainMenuSimpleListState::MainMenuSimpleListState(CarseGame* game)
-: State(*game), game(*game), shared(*game->sharedResources), menu(null),
-  imgBackground(null), fntTitle(null)
+: State(*game), game(*game), menu(null),
+  imgBackground(null), fntTitle(null), fntDev(null),
+  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
 
 MainMenuSimpleListState::~MainMenuSimpleListState()
@@ -35,7 +36,7 @@ void MainMenuSimpleListState::initialize()
 {
 	Display& display = game.getDisplay();
 	menu = new Menu();
-	menu->setFont(new Font(shared.font1Path, dip(18)), false);
+	menu->setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
 	menu->setColor(Color::WHITE);
 	menu->bgColor = Color::AZURE;
 	menu->focusedEntryFontColor = Color::NAVY;
@@ -47,7 +48,13 @@ void MainMenuSimpleListState::initialize()
 
 	imgBackground = new Image("assets/options-bg.jpg");
 
-	fntTitle = new Font(shared.font2Path, dip(32));
+	// loan some shared resources
+	sndCursorMove = &game.sharedResources->sndCursorMove;
+	sndCursorIn   = &game.sharedResources->sndCursorIn;
+	sndCursorOut  = &game.sharedResources->sndCursorOut;
+	fntDev        = &game.sharedResources->fontDev;
+
+	fntTitle = new Font(game.sharedResources->font2Path, dip(32));
 	strTitle = "Carse Project";
 
 	strVersion = string("v")+CARSE_VERSION+" (fgeal v"+fgeal::VERSION+"/"+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")";
@@ -73,7 +80,7 @@ void MainMenuSimpleListState::render()
 	imgBackground->drawScaled(0, 0, scaledToSize(imgBackground, display));
 	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.05*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
 	menu->draw();
-	shared.fontDev.drawText(strVersion, 4, 4, Color::CREAM);
+	fntDev->drawText(strVersion, 4, 4, Color::CREAM);
 }
 
 void MainMenuSimpleListState::update(float delta)
@@ -88,8 +95,8 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ENTER:
-			shared.sndCursorIn.stop();
-			shared.sndCursorIn.play();
+			sndCursorIn->stop();
+			sndCursorIn->play();
 			switch(menu->getSelectedIndex())
 			{
 				case MENU_ITEM_RACE:     game.enterState(CarseGame::RACE_STATE_ID); break;
@@ -103,14 +110,14 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 
 		case Keyboard::KEY_ARROW_UP:
 			menu->moveCursorUp();
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			break;
 
 		case Keyboard::KEY_ARROW_DOWN:
 			menu->moveCursorDown();
-			shared.sndCursorMove.stop();
-			shared.sndCursorMove.play();
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			break;
 
 		case Keyboard::KEY_2:

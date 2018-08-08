@@ -18,12 +18,10 @@
 #include "util.hpp"
 
 class CarseGame;
-class CarseSharedResources;
 
 class MainMenuSimpleListState extends public fgeal::Game::State
 {
 	CarseGame& game;
-	CarseSharedResources& shared;
 
 	// version string
 	std::string strVersion;
@@ -36,7 +34,9 @@ class MainMenuSimpleListState extends public fgeal::Game::State
 	fgeal::Image* imgBackground;
 
 	// title font
-	fgeal::Font* fntTitle;
+	fgeal::Font* fntTitle, *fntDev;
+
+	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	// these guys helps giving semantics to menu indexes.
 	enum MenuItem

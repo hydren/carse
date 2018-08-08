@@ -41,8 +41,9 @@ static string toStrRounded(float value, unsigned placesCount=1)
 int VehicleSelectionState::getId() { return CarseGame::VEHICLE_SELECTION_STATE_ID; }
 
 VehicleSelectionState::VehicleSelectionState(CarseGame* game)
-: State(*game), game(*game), shared(*game->sharedResources),
+: State(*game), game(*game),
   fontMain(null), fontInfo(null), fontSub(null), menu(null),
+  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   layout(null)
 {}
@@ -69,12 +70,17 @@ void VehicleSelectionState::initialize()
 {
 	Display& display = game.getDisplay();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
-	fontMain = new Font(shared.font2Path, dip(28));
-	fontInfo = new Font(shared.font1Path, dip(12));
-	fontSub = new Font(shared.font3Path, dip(36));
+	fontMain = new Font(game.sharedResources->font2Path, dip(28));
+	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
+	fontSub = new Font(game.sharedResources->font3Path, dip(36));
+
+	// loan some shared resources
+	sndCursorMove = &game.sharedResources->sndCursorMove;
+	sndCursorIn   = &game.sharedResources->sndCursorIn;
+	sndCursorOut  = &game.sharedResources->sndCursorOut;
 
 	menu = new Menu(menuBounds);
-	menu->setFont(new Font(shared.font1Path, dip(18)), false);
+	menu->setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
 	menu->setColor(Color::WHITE);
 	menu->cursorWrapAroundEnabled = true;
 	menu->bgColor = Color::AZURE;
@@ -122,15 +128,15 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 	switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			shared.sndCursorOut.stop();
-			shared.sndCursorOut.play();
+			sndCursorOut->stop();
+			sndCursorOut->play();
 			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
 			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
 			game.enterState(game.logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_ENTER:
-			shared.sndCursorIn.stop();
-			shared.sndCursorIn.play();
+			sndCursorIn->stop();
+			sndCursorIn->play();
 			this->menuSelectionAction();
 			break;
 
@@ -233,8 +239,8 @@ void VehicleSelectionState::changeSprite(bool forward)
 	VehiclePreview& preview = previews[menu->getSelectedIndex()];
 	if(not preview.altSprites.empty())
 	{
-		shared.sndCursorMove.stop();
-		shared.sndCursorMove.play();
+		sndCursorMove->stop();
+		sndCursorMove->play();
 
 		if(forward)
 		{

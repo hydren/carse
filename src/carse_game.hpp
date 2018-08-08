@@ -31,16 +31,6 @@ extern const std::string CARSE_VERSION;
 // fwd decl
 class Vehicle;
 
-/** Wrapper to resources shared between states. */
-struct CarseSharedResources
-{
-	fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
-	fgeal::Font fontDev;
-	std::string font1Path, font2Path, font3Path;
-
-	CarseSharedResources();
-};
-
 class CarseGame extends public fgeal::Game
 {
 	public:
@@ -114,7 +104,15 @@ class CarseGame extends public fgeal::Game
 
 	} logic;
 
-	CarseSharedResources* sharedResources;
+	/** Wrapper to resources shared between states. */
+	struct SharedResources
+	{
+		fgeal::Sound sndCursorMove, sndCursorIn, sndCursorOut;
+		fgeal::Font fontDev;
+		std::string font1Path, font2Path, font3Path;
+
+		SharedResources();
+	} *sharedResources;
 
 	enum StateID
 	{

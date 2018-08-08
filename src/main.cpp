@@ -78,6 +78,10 @@ int main(int argc, char** argv)
 	SwitchArg argRace("R", "race", "Tells carse to go directly start a race with current vehicle and course.", false);
 	cmd.add(argRace);
 
+	ValueArg<int> argRaceType("T", "race-type", "When used in conjunction with the --race parameter, tells carse which race type to "
+			"run, represented by its index", false, -1, "integer");
+	cmd.add(argRaceType);
+
 	ValueArg<unsigned> argCourse("C", "course", "When used in conjunction with the --race parameter, tells carse to use the given course,"
 			" represented by its index", false, 0, "unsigned integer");
 	cmd.add(argCourse);
@@ -153,6 +157,8 @@ int main(int argc, char** argv)
 		if(argRace.isSet())
 		{
 			game.logic.raceOnlyMode = true;
+			if(argRaceType.isSet())
+				game.logic.raceOnlyRaceType = argRaceType.getValue();
 			if(argDebugCourse.isSet())
 				game.logic.raceOnlyDebug = true;
 			else if(argRandomCourse.isSet())

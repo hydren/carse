@@ -18,7 +18,8 @@ using std::string;
 CarseGame::Logic::Logic()
 : currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
   nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
-  raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0), raceOnlyPlayerVehicleAlternateSpriteIndex(-1)
+  raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0),
+  raceOnlyPlayerVehicleAlternateSpriteIndex(-1), raceOnlyRaceType(-1)
 {}
 
 void CarseGame::Logic::initialize()
@@ -43,6 +44,13 @@ void CarseGame::Logic::onStatesListInitFinished()
 			this->setNextCourseRandom();
 		else
 			nextMatchCourseSpec = courses[raceOnlyCourseIndex < courses.size()? raceOnlyCourseIndex : courses.size()-1];
+
+		if(raceOnlyRaceType < 0)
+			nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;
+		else if(raceOnlyRaceType < Pseudo3DRaceState::RACE_TYPE_COUNT)
+			nextMatchRaceSettings.raceType = (Pseudo3DRaceState::RaceType) raceOnlyRaceType;
+		else
+			nextMatchRaceSettings.raceType = (Pseudo3DRaceState::RaceType) (Pseudo3DRaceState::RACE_TYPE_COUNT - 1);
 
 		nextMatchPlayerVehicleSpec = vehicles[raceOnlyPlayerVehicleIndex < vehicles.size()? raceOnlyPlayerVehicleIndex : vehicles.size()-1];
 		nextMatchPlayerVehicleSpecAlternateSpriteIndex = raceOnlyPlayerVehicleAlternateSpriteIndex < (int) nextMatchPlayerVehicleSpec.alternateSprites.size()? raceOnlyPlayerVehicleAlternateSpriteIndex : nextMatchPlayerVehicleSpec.alternateSprites.size()-1;
@@ -149,9 +157,6 @@ void CarseGame::Logic::setCurrentMainMenuStateId(int id)
 {
 	currentMainMenuStateId = id;
 }
-
-// ----------------------------------------------------------------------------------------------------------
-
 
 // ########################################################################################################################################################
 

@@ -17,7 +17,7 @@ using std::string;
 // logic constructor, booooooring!
 CarseGame::Logic::Logic()
 : currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
-  nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
+  nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
   raceOnlyMode()
 {}
 

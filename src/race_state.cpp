@@ -863,7 +863,10 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 	else switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			game.enterState(game.logic.getCurrentMainMenuStateId());
+			if(game.logic.raceOnlyMode)
+				game.running = false;
+			else
+				game.enterState(game.logic.getCurrentMainMenuStateId());
 			break;
 		case Keyboard::KEY_R:
 			playerVehicle.position = 0;

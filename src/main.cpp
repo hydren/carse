@@ -78,6 +78,26 @@ int main(int argc, char** argv)
 	SwitchArg argRace("R", "race", "Tells carse to go directly start a race with current vehicle and course.", false);
 	cmd.add(argRace);
 
+	ValueArg<unsigned> argCourse("C", "course", "When used in conjunction with the --race parameter, tells carse to use the given course,"
+			" represented by its index", false, 0, "unsigned integer");
+	cmd.add(argCourse);
+
+	SwitchArg argRandomCourse("X", "random-course", "When used in conjunction with the --race parameter, tells carse to use a generated"
+			" random course", false);
+	cmd.add(argRandomCourse);
+
+	SwitchArg argDebugCourse("D", "debug-course", "When used in conjunction with the --race parameter, tells carse to use a predefined"
+			" debug course, in debug mode.", false);
+	cmd.add(argDebugCourse);
+
+	ValueArg<unsigned> argVehicle("V", "vehicle", "When used in conjunction with the --race parameter, tells carse to use the given vehicle,"
+			" represented by its index", false, 0, "unsigned integer");
+	cmd.add(argVehicle);
+
+	ValueArg<int> argVehicleAltSprite("S", "vehicle-alternate-sprite", "When used in conjunction with the --vehicle parameter, tells carse to "
+			"use the given vehicle alternate sprite, represented by its index", false, -1, "integer");
+	cmd.add(argVehicleAltSprite);
+
 	cmd.parse(argc, argv);
 
 	int screenWidth = 800, screenHeight = 600;
@@ -131,7 +151,21 @@ int main(int argc, char** argv)
 		runSplash();
 		CarseGame game;
 		if(argRace.isSet())
+		{
 			game.logic.raceOnlyMode = true;
+			if(argDebugCourse.isSet())
+				game.logic.raceOnlyDebug = true;
+			else if(argRandomCourse.isSet())
+				game.logic.raceOnlyRandomCourse = true;
+			else if(argCourse.isSet())
+				game.logic.raceOnlyCourseIndex = argCourse.getValue();
+			if(argVehicle.isSet())
+			{
+				game.logic.raceOnlyPlayerVehicleIndex = argVehicle.getValue();
+				if(argVehicleAltSprite.isSet())
+					game.logic.raceOnlyPlayerVehicleAlternateSpriteIndex = argVehicleAltSprite.getValue();
+			}
+		}
 		game.start();
 	}
 	catch(const fgeal::AdapterException& e)

@@ -18,7 +18,7 @@ using std::string;
 CarseGame::Logic::Logic()
 : currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
   nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
-  raceOnlyMode()
+  raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0), raceOnlyPlayerVehicleAlternateSpriteIndex(-1)
 {}
 
 void CarseGame::Logic::initialize()
@@ -30,12 +30,28 @@ void CarseGame::Logic::initialize()
 
 void CarseGame::Logic::onStatesListInitFinished()
 {
-	this->setNextCourseRandom();  // set default course
 	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
 	nextMatchRaceSettings.lapCountGoal = 2;    // set default lap count
 	nextMatchRaceSettings.isImperialUnit = false;
-	this->setPickedVehicle(vehicles[0]);  // set default vehicle
-	this->setSimulationType(Mechanics::SIMULATION_TYPE_SLIPLESS);
+	nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
+
+	if(raceOnlyMode)
+	{
+		if(raceOnlyDebug)
+			this->setNextCourseDebug();
+		else if(raceOnlyRandomCourse)
+			this->setNextCourseRandom();
+		else
+			nextMatchCourseSpec = courses[raceOnlyCourseIndex < courses.size()? raceOnlyCourseIndex : courses.size()-1];
+
+		nextMatchPlayerVehicleSpec = vehicles[raceOnlyPlayerVehicleIndex < vehicles.size()? raceOnlyPlayerVehicleIndex : vehicles.size()-1];
+		nextMatchPlayerVehicleSpecAlternateSpriteIndex = raceOnlyPlayerVehicleAlternateSpriteIndex < (int) nextMatchPlayerVehicleSpec.alternateSprites.size()? raceOnlyPlayerVehicleAlternateSpriteIndex : nextMatchPlayerVehicleSpec.alternateSprites.size()-1;
+	}
+	else
+	{
+		this->setNextCourseRandom();  // set default course
+		this->setPickedVehicle(vehicles[0]);  // set default vehicle
+	}
 }
 
 EngineSoundProfile& CarseGame::Logic::getPresetEngineSoundProfile(const std::string presetName)

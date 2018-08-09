@@ -37,15 +37,18 @@ void CarseGame::preInitialize()
 void CarseGame::initializeStatesList()
 {
 	this->addState(new Pseudo3DRaceState(this));
-	this->addState(new MainMenuSimpleListState(this));
-	this->addState(new MainMenuClassicPanelState(this));
-	this->addState(new VehicleSelectionState(this));
-	this->addState(new CourseSelectionState(this));
-	this->addState(new OptionsMenuState(this));
-	this->addState(new CourseEditorState(this));
 
-	this->setInitialState(logic.raceOnlyMode? RACE_STATE_ID : MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+	if(not logic.raceOnlyMode)
+	{
+		this->addState(new MainMenuSimpleListState(this));
+		this->addState(new MainMenuClassicPanelState(this));
+		this->addState(new VehicleSelectionState(this));
+		this->addState(new CourseSelectionState(this));
+		this->addState(new OptionsMenuState(this));
+		this->addState(new CourseEditorState(this));
+		this->setInitialState(MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+	}
+
 	this->setInputManagerEnabled();
-
 	this->logic.onStatesListInitFinished();
 }

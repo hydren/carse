@@ -117,7 +117,11 @@ void MainMenuClassicPanelState::onEnter()
 	if(imgVehicle != null)
 		delete imgVehicle;
 
-	const Pseudo3DVehicleAnimationSpec& vspec = game.logic.getPickedVehicle().sprite;
+	const Pseudo3DVehicleAnimationSpec& vspec = (
+		game.logic.getPickedVehicleAlternateSpriteIndex() == -1? game.logic.getPickedVehicle().sprite
+															   : game.logic.getPickedVehicle().alternateSprites[game.logic.getPickedVehicleAlternateSpriteIndex()]
+	);
+
 	imgVehicle = new Image(vspec.sheetFilename);
 	scaleVehiclePreview.x = vspec.scale.x * display.getWidth() * 0.0037;
 	scaleVehiclePreview.y = vspec.scale.y * display.getWidth() * 0.0037;

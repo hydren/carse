@@ -11,7 +11,7 @@
 
 #include "util.hpp"
 
-#include "race_state.hpp"
+#include "pseudo3d_race_state.hpp"
 
 #include <cmath>
 

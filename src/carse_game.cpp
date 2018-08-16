@@ -8,7 +8,7 @@
 #include "carse_game.hpp"
 
 // states
-#include "race_state.hpp"
+#include "pseudo3d_race_state.hpp"
 #include "main_menu_simple_list_state.hpp"
 #include "main_menu_classic_layout_state.hpp"
 #include "vehicle_selection_state.hpp"

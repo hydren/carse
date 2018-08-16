@@ -21,7 +21,7 @@
 #include "course.hpp"
 #include "vehicle.hpp"
 
-#include "race_state.hpp"
+#include "pseudo3d_race_state.hpp"
 
 #include <map>
 #include <vector>

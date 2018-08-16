@@ -7,7 +7,7 @@
 
 #include "carse_game.hpp"
 
-#include "race_state.hpp"
+#include "pseudo3d_race_state.hpp"
 #include "vehicle_selection_state.hpp"
 #include "course_selection_state.hpp"
 

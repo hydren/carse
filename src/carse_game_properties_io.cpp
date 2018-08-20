@@ -509,7 +509,7 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 
 static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)
 {
-	return p1.isRedline? false : p2.isRedline? true : p1.rpm < p2.rpm;
+	return p1.startRpm < p2.startRpm;
 }
 
 // load a custom sound profile from properties. if a non-custom (preset) profile is specified, a std::logic_error is thrown.
@@ -540,24 +540,26 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 				// now try to read _rpm property
 				key += "_rpm";
 				short rpm = -1;
-				bool isRedline = false;
 				if(prop.containsKey(key))
-				{
-					if(prop.get(key) == "redline")
-						isRedline = true;
-					else
-						rpm = atoi(prop.get(key).c_str());
-				}
+					rpm = atoi(prop.get(key).c_str());
 
 				// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
-				if(rpm < 0 and not isRedline)
+				if(rpm < 0)
 				{
 					if(i == 0) rpm = 0;
-					else       rpm = (maxRpm - profile.ranges.rbegin()->rpm)/2;
+					else       rpm = (maxRpm - profile.ranges.rbegin()->startRpm)/2;
 				}
 
+				key = baseKey + futil::to_string(i) + "_reference_rpm";
+				short refRpm = -1;
+				if(prop.containsKey(key))
+					refRpm = atoi(prop.get(key).c_str());
+
+				if(refRpm < 0)
+					refRpm = rpm;
+
 				// save filename and settings for given rpm
-				EngineSoundProfile::RangeProfile range = {rpm, filename, isRedline};
+				EngineSoundProfile::RangeProfile range = {rpm, refRpm, filename};
 				profile.ranges.push_back(range);
 				i += 1;
 				key = baseKey + futil::to_string(i);

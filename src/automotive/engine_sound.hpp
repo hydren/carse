@@ -18,10 +18,16 @@ struct EngineSoundProfile
 {
 	struct RangeProfile
 	{
-		short rpm;
-		std::string filename;
-		bool isRedline; // if true, treat the this range as a redline range (and the rpm field will be ignored)
+		short startRpm;  // the initial RPM of this range
+		short soundRpm;  // the RPM depicted by this range's sound when played at normal playback speed/pitch
+		std::string soundFilename;
 	};
+
+	// controls whether the ranges should be pitched according to the current RPM or not at all
+	bool allowRangePitch;
+
+	// if range pitching is allowed, specifies how much the sound pitch changes according to RPM variation
+	float pitchVariationFactor;
 
 	// information about each sound for each range
 	std::vector<RangeProfile> ranges;

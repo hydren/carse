@@ -31,17 +31,9 @@ void EngineSoundSimulator::setProfile(const EngineSoundProfile& profile, short m
 
 	// loads sound data
 	for(unsigned i = 0; i < profile.ranges.size(); i++)
-		this->soundData.push_back(new Sound(profile.ranges[i].filename));
+		this->soundData.push_back(new Sound(profile.ranges[i].soundFilename));
 
 	this->simulatedMaximumRpm = maxRpm;
-
-	// assign max rpm if contains a 'redline'-type range
-	for(unsigned i = 0; i < this->profile.ranges.size(); i++)
-		if(this->profile.ranges[i].isRedline)
-		{
-			this->profile.ranges[i].rpm = maxRpm-50;
-			break;
-		}
 }
 
 void EngineSoundSimulator::setSimulatedMaximumRpm(short rpm)
@@ -53,7 +45,7 @@ unsigned EngineSoundSimulator::getRangeIndex(float rpm)
 {
 	unsigned rangeIndex = 0;
 	for(unsigned i = 0; i < soundData.size(); i++)
-		if(rpm > profile.ranges[i].rpm)
+		if(rpm > profile.ranges[i].startRpm)
 			rangeIndex = i;
 
 	return rangeIndex;
@@ -66,13 +58,14 @@ vector<Sound*>& EngineSoundSimulator::getSoundData()
 
 float EngineSoundSimulator::calculatePitch(float rpmDiff)
 {
-	return exp(rpmDiff/simulatedMaximumRpm);
+//	return exp(rpmDiff/simulatedMaximumRpm);
+	return profile.pitchVariationFactor*rpmDiff;
 }
 
 void EngineSoundSimulator::playIdle()
 {
 	if(not profile.ranges.empty())
-		updateSound(profile.ranges[0].rpm+1); // this +1 may be unneccessary
+		updateSound(profile.ranges[0].startRpm+1);  //xxx this +1 may be unneccessary
 }
 
 void EngineSoundSimulator::updateSound(float currentRpm)
@@ -85,12 +78,12 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 
 		// some aliases
 		Sound& currentSound = *soundData[currentRangeIndex];
-		const float lowerRpmCurrent = profile.ranges[currentRangeIndex].rpm;
-		const float upperRpmCurrent = currentRangeIndex + 1 < soundCount? profile.ranges[currentRangeIndex + 1].rpm : simulatedMaximumRpm;
+		const float lowerRpmCurrent = profile.ranges[currentRangeIndex].startRpm;
+		const float upperRpmCurrent = currentRangeIndex + 1 < soundCount? profile.ranges[currentRangeIndex + 1].startRpm : simulatedMaximumRpm;
 		const float rangeSizeCurrent = upperRpmCurrent - lowerRpmCurrent;
 
 		currentSound.setVolume(1.0f);
-		if(not profile.ranges[currentRangeIndex].isRedline)
+		if(profile.allowRangePitch)
 			currentSound.setPlaybackSpeed(calculatePitch(currentRpm - lowerRpmCurrent), true);
 
 		if(not currentSound.isPlaying())
@@ -100,7 +93,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 		{
 			// some aliases
 			Sound& rangeSound = *soundData[i];
-			const short rangeRpm = profile.ranges[i].rpm;
+			const short rangeRpm = profile.ranges[i].startRpm;
 
 			// current range
 			if(i == currentRangeIndex)
@@ -120,8 +113,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 
 			// succeeding range
 			else if(i == currentRangeIndex + 1                                       // this range is succeeding the current range
-					and currentRpm - lowerRpmCurrent > 0.75*rangeSizeCurrent         // current RPM is within 75-100% of current range
-					and not profile.ranges[i].isRedline)                             // this range is NOT a redline range
+					and currentRpm - lowerRpmCurrent > 0.75*rangeSizeCurrent)         // current RPM is within 75-100% of current range
 			{
 //				snd.setVolume(-3.0 + 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade in
 				rangeSound.setVolume(sqrt(1-pow(4*((currentRpm - lowerRpmCurrent)/rangeSizeCurrent)-4, 2)) ); // quadratic fade in

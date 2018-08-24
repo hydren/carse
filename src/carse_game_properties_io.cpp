@@ -507,19 +507,13 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 
 // ========================================================================================================================
 
-static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2)
-{
-	return p1.startRpm < p2.startRpm;
-}
-
 // load a custom sound profile from properties. if a non-custom (preset) profile is specified, a std::logic_error is thrown.
 static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& prop)
 {
-	short maxRpm = 0;
+	const short maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", 7000);
+	profile.allowRpmPitching = true;
 
-	maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", 7000);
-
-	string baseKey = "sound";
+	const string baseKey = "sound";
 	if(prop.containsKey(baseKey))
 	{
 		if(prop.get(baseKey) == "none")
@@ -528,17 +522,31 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 		}
 		else if(prop.get(baseKey) == "custom")
 		{
-			int i = 0;
-			string key = baseKey + futil::to_string(i);
-			while(prop.containsKey(key))
+			string key = baseKey + "_rpm_pitching";
+			if(isValueSpecified(prop, key))
 			{
-				const string filename = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/", CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
+				string value = futil::trim(prop.get(key));
+				if(value == "false" or value == "no")
+					profile.allowRpmPitching = false;
+			}
+
+			key = baseKey + "_rpm_pitching_factor";
+			profile.pitchVariationFactor = isValueSpecified(prop, key)? prop.getParsedCStrAllowDefault<double, atof>(key, 2) : 2;
+			profile.pitchVariationFactor /= 120*100;
+
+			key = baseKey + "_count";
+			unsigned soundCount = prop.getParsedCStrAllowDefault<int, atoi>(key, 16);
+
+			string subBaseKey = baseKey + '0';
+			for(unsigned i = 0; i < soundCount;) if(prop.containsKey(subBaseKey))
+			{
+				const string filename = getContextualizedFilename(prop.get(subBaseKey), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/", CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
 				if(filename.empty())
-					cout << "warning: sound file \"" << prop.get(key) << "\" could not be found!"  // todo use default sound?
+					cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
 					<< " (specified by \"" << prop.get("filename") << "\")" << endl;
 
 				// now try to read _rpm property
-				key += "_rpm";
+				key = subBaseKey + "_rpm";
 				short rpm = -1;
 				if(prop.containsKey(key))
 					rpm = atoi(prop.get(key).c_str());
@@ -550,22 +558,31 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 					else       rpm = (maxRpm - profile.ranges.rbegin()->startRpm)/2;
 				}
 
-				key = baseKey + futil::to_string(i) + "_reference_rpm";
-				short refRpm = -1;
+				key = subBaseKey + "_depicted_rpm";
+				short depictedRpm = -1;
 				if(prop.containsKey(key))
-					refRpm = atoi(prop.get(key).c_str());
+					depictedRpm = atoi(prop.get(key).c_str());
 
-				if(refRpm < 0)
-					refRpm = rpm;
+				key = subBaseKey + "_pitch_factor";
+				if(prop.containsKey(key))
+				{
+					const double pitchFactor = atof(prop.get(key).c_str());
+					if(pitchFactor > 0)
+						depictedRpm = rpm*pitchFactor;
+				}
+
+				if(depictedRpm < 0)
+					depictedRpm = rpm;
 
 				// save filename and settings for given rpm
-				EngineSoundProfile::RangeProfile range = {rpm, refRpm, filename};
+				const EngineSoundProfile::RangeProfile range = {rpm, depictedRpm, filename};
 				profile.ranges.push_back(range);
 				i += 1;
-				key = baseKey + futil::to_string(i);
+				subBaseKey = baseKey + futil::to_string(i);
 			}
 
-			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), rangeProfileCompareFunction);
+			struct tmp { static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2) { return p1.startRpm < p2.startRpm; } };
+			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), tmp::rangeProfileCompareFunction);
 		}
 		else throw std::logic_error("properties specify a preset profile instead of a custom one");
 	}

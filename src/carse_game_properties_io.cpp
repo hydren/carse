@@ -537,48 +537,50 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 			key = baseKey + "_count";
 			unsigned soundCount = prop.getParsedCStrAllowDefault<int, atoi>(key, 16);
 
-			string subBaseKey = baseKey + '0';
-			for(unsigned i = 0; i < soundCount;) if(prop.containsKey(subBaseKey))
+			for(unsigned i = 0; i < soundCount; i++)
 			{
-				const string filename = getContextualizedFilename(prop.get(subBaseKey), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/", CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
-				if(filename.empty())
-					cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
-					<< " (specified by \"" << prop.get("filename") << "\")" << endl;
-
-				// now try to read _rpm property
-				key = subBaseKey + "_rpm";
-				short rpm = -1;
-				if(prop.containsKey(key))
-					rpm = atoi(prop.get(key).c_str());
-
-				// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
-				if(rpm < 0)
+				const string subBaseKey = baseKey + futil::to_string(i);
+				if(prop.containsKey(subBaseKey))
 				{
-					if(i == 0) rpm = 0;
-					else       rpm = (maxRpm - profile.ranges.rbegin()->startRpm)/2;
+					const string filename = getContextualizedFilename(prop.get(subBaseKey), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/", CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
+					if(filename.empty())
+						cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
+						<< " (specified by \"" << prop.get("filename") << "\")" << endl;
+
+					// now try to read _rpm property
+					key = subBaseKey + "_rpm";
+					short rpm = -1;
+					if(prop.containsKey(key))
+						rpm = atoi(prop.get(key).c_str());
+
+					// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
+					if(rpm < 0)
+					{
+						if(i == 0) rpm = 0;
+						else       rpm = (maxRpm - profile.ranges.rbegin()->startRpm)/2;
+					}
+
+					key = subBaseKey + "_depicted_rpm";
+					short depictedRpm = -1;
+					if(prop.containsKey(key))
+						depictedRpm = atoi(prop.get(key).c_str());
+
+					key = subBaseKey + "_pitch_factor";
+					if(prop.containsKey(key))
+					{
+						const double pitchFactor = atof(prop.get(key).c_str());
+						if(pitchFactor > 0)
+							depictedRpm = rpm*pitchFactor;
+					}
+
+					if(depictedRpm < 0)
+						depictedRpm = rpm;
+
+					// save filename and settings for given rpm
+					const EngineSoundProfile::RangeProfile range = {rpm, depictedRpm, filename};
+					profile.ranges.push_back(range);
 				}
-
-				key = subBaseKey + "_depicted_rpm";
-				short depictedRpm = -1;
-				if(prop.containsKey(key))
-					depictedRpm = atoi(prop.get(key).c_str());
-
-				key = subBaseKey + "_pitch_factor";
-				if(prop.containsKey(key))
-				{
-					const double pitchFactor = atof(prop.get(key).c_str());
-					if(pitchFactor > 0)
-						depictedRpm = rpm*pitchFactor;
-				}
-
-				if(depictedRpm < 0)
-					depictedRpm = rpm;
-
-				// save filename and settings for given rpm
-				const EngineSoundProfile::RangeProfile range = {rpm, depictedRpm, filename};
-				profile.ranges.push_back(range);
-				i += 1;
-				subBaseKey = baseKey + futil::to_string(i);
+				else cout << "warning: missing expected entry \"" << subBaseKey << "\" (specified by \"" << prop.get("filename") << "\")" << endl;
 			}
 
 			struct tmp { static bool rangeProfileCompareFunction(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2) { return p1.startRpm < p2.startRpm; } };

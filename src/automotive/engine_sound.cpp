@@ -56,12 +56,6 @@ vector<Sound*>& EngineSoundSimulator::getSoundData()
 	return soundData;
 }
 
-float EngineSoundSimulator::calculatePitch(float rpmDiff)
-{
-//	return exp(rpmDiff/simulatedMaximumRpm);
-	return 1+profile.pitchVariationFactor*rpmDiff;
-}
-
 void EngineSoundSimulator::playIdle()
 {
 	if(not profile.ranges.empty())
@@ -84,8 +78,9 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 					currentRangeSoundDepictedRpm = profile.ranges[currentRangeIndex].depictedRpm;
 
 		currentSound.setVolume(1.0f);
+
 		if(profile.allowRpmPitching)
-			currentSound.setPlaybackSpeed(calculatePitch(currentRpm - currentRangeSoundDepictedRpm), true);
+			currentSound.setPlaybackSpeed(currentRpm/currentRangeSoundDepictedRpm, true);
 
 		if(not currentSound.isPlaying())
 			currentSound.loop();
@@ -101,25 +96,29 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 				continue;  // already handled
 
 			// preceding range
-			else if(i + 1 == currentRangeIndex                                    // this range is preceding the current range
-					and currentRpm - currentRangeLowerRpm < 0.25*currentRangeSize)     // current RPM is within 0-25% of current range
+			else if(i + 1 == currentRangeIndex                                      // this range is preceding the current range
+					and currentRpm - currentRangeLowerRpm < 0.25*currentRangeSize)  // current RPM is within 0-25% of current range
 			{
-//				snd.setVolume(1.0 - 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade out
-				rangeSound.setVolume(sqrt(1-16*pow((currentRpm - currentRangeLowerRpm)/currentRangeSize, 2))); // quadratic fade out
+//				snd.setVolume(1.0 - 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent);  // linear fade out
+				rangeSound.setVolume(sqrt(1-16*pow((currentRpm - currentRangeLowerRpm)/currentRangeSize, 2)));  // quadratic fade out
 
-				rangeSound.setPlaybackSpeed(calculatePitch(currentRpm - rangeSoundDepictedRpm), true);
+				if(profile.allowRpmPitching)
+					rangeSound.setPlaybackSpeed(currentRpm/rangeSoundDepictedRpm, true);
+
 				if(not rangeSound.isPlaying())
 					rangeSound.loop();
 			}
 
 			// succeeding range
-			else if(i == currentRangeIndex + 1                                       // this range is succeeding the current range
-					and currentRpm - currentRangeLowerRpm > 0.75*currentRangeSize)         // current RPM is within 75-100% of current range
+			else if(i == currentRangeIndex + 1                                      // this range is succeeding the current range
+					and currentRpm - currentRangeLowerRpm > 0.75*currentRangeSize)  // current RPM is within 75-100% of current range
 			{
-//				snd.setVolume(-3.0 + 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent); // linear fade in
-				rangeSound.setVolume(sqrt(1-pow(4*((currentRpm - currentRangeLowerRpm)/currentRangeSize)-4, 2)) ); // quadratic fade in
+//				snd.setVolume(-3.0 + 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent);  // linear fade in
+				rangeSound.setVolume(sqrt(1-pow(4*((currentRpm - currentRangeLowerRpm)/currentRangeSize)-4, 2)) );  // quadratic fade in
 
-				rangeSound.setPlaybackSpeed(calculatePitch(currentRpm - rangeSoundDepictedRpm), true);
+				if(profile.allowRpmPitching)
+					rangeSound.setPlaybackSpeed(currentRpm/rangeSoundDepictedRpm, true);
+
 				if(not rangeSound.isPlaying())
 					rangeSound.loop();
 			}

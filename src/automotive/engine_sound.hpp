@@ -26,9 +26,6 @@ struct EngineSoundProfile
 	// controls whether the ranges should be pitched according to the current RPM or not at all
 	bool allowRpmPitching;
 
-	// if range pitching is allowed, specifies how much the sound pitch changes according to RPM variation
-	float pitchVariationFactor;
-
 	// information about each sound for each range
 	std::vector<RangeProfile> ranges;
 };

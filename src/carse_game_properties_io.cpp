@@ -530,10 +530,6 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 					profile.allowRpmPitching = false;
 			}
 
-			key = baseKey + "_rpm_pitching_factor";
-			profile.pitchVariationFactor = isValueSpecified(prop, key)? prop.getParsedCStrAllowDefault<double, atof>(key, 2) : 2;
-			profile.pitchVariationFactor /= 120*100;
-
 			key = baseKey + "_count";
 			unsigned soundCount = prop.getParsedCStrAllowDefault<int, atoi>(key, 16);
 
@@ -575,6 +571,9 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 
 					if(depictedRpm < 0)
 						depictedRpm = rpm;
+
+					if(depictedRpm == 0)
+						depictedRpm = 1;  // to avoid division by zero
 
 					// save filename and settings for given rpm
 					const EngineSoundProfile::RangeProfile range = {rpm, depictedRpm, filename};

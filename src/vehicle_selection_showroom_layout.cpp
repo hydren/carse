@@ -64,7 +64,7 @@ void VehicleSelectionState::ShowroomLayout::draw()
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
-	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontMain.getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain.getHeight(), Color::DARK_GREEN);
+	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontMain.getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain.getHeight(), Color::MAROON);
 	fontMain.drawText(lblChooseVehicle, 0.95*dw - fontMain.getTextWidth(lblChooseVehicle), 0.03*fontMain.getHeight(), Color::WHITE);
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;

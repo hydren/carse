@@ -63,7 +63,7 @@ VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
 void VehicleSelectionSimpleListState::initialize()
 {
 	Display& display = game.getDisplay();
-	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
+	Rectangle menuBounds = {(1/64.f)*display.getWidth(), (1/5.f)*display.getHeight(), (2/5.f)*display.getWidth(), (3/4.f)*display.getHeight()};
 	fontMain = new Font(game.sharedResources->font2Path, dip(28));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
 	fontSub = new Font(game.sharedResources->font3Path, dip(36));
@@ -111,7 +111,7 @@ void VehicleSelectionSimpleListState::render()
 	menu->draw();
 	fontSub->drawText("Choose your vehicle", 32, 25, Color::WHITE);
 	drawVehiclePreview(0.7*dw, 0.35*dh);
-	drawVehicleSpec(0.525*dw,  0.525*dh);
+	drawVehicleSpec((4/9.f)*dw, 0.6*dh);
 
 	VehiclePreview& preview = previews[menu->getSelectedIndex()];
 	const fgeal::Point skinArrowLeft1 =  { 0.52f*dw, 0.45f*dh }, skinArrowLeft2  = { 0.53f*dw, 0.44f*dh }, skinArrowLeft3 =  { 0.53f*dw, 0.46f*dh};

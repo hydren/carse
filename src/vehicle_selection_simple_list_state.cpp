@@ -1,19 +1,17 @@
 /*
- * vehicle_selection_state.cpp
+ * vehicle_selection_simple_list_state.cpp
  *
- *  Created on: 7 de abr de 2017
+ *  Created on: 17 de set de 2018
  *      Author: carlosfaruolo
  */
 
-#include "vehicle_selection_state.hpp"
+#include "vehicle_selection_simple_list_state.hpp"
 
 #include "carse_game.hpp"
 
 #include <vector>
 #include <iomanip>
 #include <sstream>
-
-typedef GenericMenuStateLayout<VehicleSelectionState> Layout;
 
 using fgeal::Display;
 using fgeal::Event;
@@ -38,17 +36,16 @@ static string toStrRounded(float value, unsigned placesCount=1)
 	return ss.str();
 }
 
-int VehicleSelectionState::getId() { return CarseGame::VEHICLE_SELECTION_STATE_ID; }
+int VehicleSelectionSimpleListState::getId() { return CarseGame::VEHICLE_SELECTION_SIMPLE_LIST_STATE_ID; }
 
-VehicleSelectionState::VehicleSelectionState(CarseGame* game)
+VehicleSelectionSimpleListState::VehicleSelectionSimpleListState(CarseGame* game)
 : State(*game), game(*game),
   fontMain(null), fontInfo(null), fontSub(null), menu(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
-  lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
-  layout(null)
+  lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0)
 {}
 
-VehicleSelectionState::~VehicleSelectionState()
+VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
 {
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
@@ -61,12 +58,9 @@ VehicleSelectionState::~VehicleSelectionState()
 		for(unsigned j = 0; j < previews[i].altSprites.size(); j++)
 			delete previews[i].altSprites[j];
 	}
-
-	if(layout != null)
-		delete layout;
 }
 
-void VehicleSelectionState::initialize()
+void VehicleSelectionSimpleListState::initialize()
 {
 	Display& display = game.getDisplay();
 	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
@@ -98,32 +92,51 @@ void VehicleSelectionState::initialize()
 			const_foreach(const Pseudo3DVehicleAnimationSpec&, alternateSprite, vector<Pseudo3DVehicleAnimationSpec>, vspec.alternateSprites)
 				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
 	}
-
-	layout = new ShowroomLayout(*this);
 }
 
-void VehicleSelectionState::onEnter()
+void VehicleSelectionSimpleListState::onEnter()
 {
 	lastEnterSelectedVehicleIndex = menu->getSelectedIndex();
 	lastEnterSelectedVehicleAltIndex = previews[menu->getSelectedIndex()].altIndex;
 }
 
-void VehicleSelectionState::onLeave()
+void VehicleSelectionSimpleListState::onLeave()
 {}
 
-void VehicleSelectionState::render()
+void VehicleSelectionSimpleListState::render()
 {
 	Display& display = game.getDisplay();
 	display.clear();
-	layout->draw();
+	const float dw = display.getWidth(), dh = display.getHeight();
+	menu->draw();
+	fontSub->drawText("Choose your vehicle", 32, 25, Color::WHITE);
+	drawVehiclePreview(0.7*dw, 0.35*dh);
+	drawVehicleSpec(0.525*dw,  0.525*dh);
+
+	VehiclePreview& preview = previews[menu->getSelectedIndex()];
+	const fgeal::Point skinArrowLeft1 =  { 0.52f*dw, 0.45f*dh }, skinArrowLeft2  = { 0.53f*dw, 0.44f*dh }, skinArrowLeft3 =  { 0.53f*dw, 0.46f*dh};
+	const fgeal::Point skinArrowRight1 = { 0.88f*dw, 0.45f*dh }, skinArrowRight2 = { 0.87f*dw, 0.44f*dh }, skinArrowRight3 = { 0.87f*dw, 0.46f*dh};
+	if(not preview.altSprites.empty())
+	{
+		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::AZURE);
+		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::AZURE);
+		if(preview.altIndex != -1)
+		{
+			const string txt = "Alternate appearance" + (preview.altSprites.size() == 1? " " : " " + futil::to_string(preview.altIndex+1) + " ");
+			fontInfo->drawText(txt, dw - fontInfo->getTextWidth(txt), 0.5*dh, Color::AZURE);
+		}
+	}
+	else
+	{
+		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::DARK_GREY);
+		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::DARK_GREY);
+	}
 }
 
-void VehicleSelectionState::update(float delta)
-{
-	layout->update(delta);
-}
+void VehicleSelectionSimpleListState::update(float delta)
+{}
 
-void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
+void VehicleSelectionSimpleListState::onKeyPressed(Keyboard::Key key)
 {
 	switch(key)
 	{
@@ -132,7 +145,7 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 			sndCursorOut->play();
 			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
 			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
-			game.enterState(game.logic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
 			sndCursorIn->stop();
@@ -141,29 +154,28 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ARROW_UP:
-			layout->onCursorUp();
+			menu->moveCursorUp();
+			game.sharedResources->sndCursorMove.stop();
+			game.sharedResources->sndCursorMove.play();
 			break;
 
 		case Keyboard::KEY_ARROW_DOWN:
-			layout->onCursorDown();
+			menu->moveCursorDown();
+			game.sharedResources->sndCursorMove.stop();
+			game.sharedResources->sndCursorMove.play();
 			break;
 
 		case Keyboard::KEY_ARROW_LEFT:
-			layout->onCursorLeft();
+			changeSprite(false);
 			break;
 
 		case Keyboard::KEY_ARROW_RIGHT:
-			layout->onCursorRight();
-			break;
-
-		case Keyboard::KEY_1:
-			delete layout;
-			layout = new ListLayout(*this);
+			changeSprite();
 			break;
 
 		case Keyboard::KEY_2:
-			delete layout;
-			layout = new ShowroomLayout(*this);
+			game.logic.currentVehicleSelectionStateId = CarseGame::VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID;
+			game.enterState(game.logic.currentVehicleSelectionStateId);
 			break;
 
 		default:
@@ -171,13 +183,13 @@ void VehicleSelectionState::onKeyPressed(Keyboard::Key key)
 	}
 }
 
-void VehicleSelectionState::menuSelectionAction()
+void VehicleSelectionSimpleListState::menuSelectionAction()
 {
 	game.logic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
-	game.enterState(game.logic.getCurrentMainMenuStateId());
+	game.enterState(game.logic.currentMainMenuStateId);
 }
 
-void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, int index, int angleType)
+void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float scale, int index, int angleType)
 {
 	Display& display = game.getDisplay();
 	if(index < 0)
@@ -200,7 +212,7 @@ void VehicleSelectionState::drawVehiclePreview(float x, float y, float scale, in
 	sprite.drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
 }
 
-void VehicleSelectionState::drawVehicleSpec(float infoX, float infoY, float index)
+void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, float index)
 {
 	// info sheet
 	const Pseudo3DVehicle::Spec& vehicle = game.logic.getVehicleList()[index != -1? index : menu->getSelectedIndex()];
@@ -234,7 +246,7 @@ void VehicleSelectionState::drawVehicleSpec(float infoX, float infoY, float inde
 	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
 }
 
-void VehicleSelectionState::changeSprite(bool forward)
+void VehicleSelectionSimpleListState::changeSprite(bool forward)
 {
 	VehiclePreview& preview = previews[menu->getSelectedIndex()];
 	if(not preview.altSprites.empty())

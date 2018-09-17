@@ -44,8 +44,6 @@ class CarseGame extends public fgeal::Game
 		std::vector<Pseudo3DCourse::Spec> courses;
 		std::vector<Pseudo3DVehicle::Spec> vehicles;
 
-		int currentMainMenuStateId;
-
 		// parameters for next match
 		Pseudo3DRaceState::RaceSettings nextMatchRaceSettings;
 		Mechanics::SimulationType nextMatchSimulationType;
@@ -76,6 +74,8 @@ class CarseGame extends public fgeal::Game
 		int raceOnlyPlayerVehicleAlternateSpriteIndex, raceOnlyRaceType;
 		unsigned raceOnlyLapCount;
 
+		int currentMainMenuStateId, currentVehicleSelectionStateId;
+
 		// gets one of the built-in engine sound presets, by name
 		EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
 
@@ -95,12 +95,6 @@ class CarseGame extends public fgeal::Game
 
 		Mechanics::SimulationType getSimulationType();
 		void setSimulationType(Mechanics::SimulationType type);
-
-		// returns the id of the current main menu state
-		int getCurrentMainMenuStateId();
-
-		// sets the id of the current main menu state
-		void setCurrentMainMenuStateId(int id);
 
 		// spec. loading functions
 		void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
@@ -123,7 +117,8 @@ class CarseGame extends public fgeal::Game
 		MAIN_MENU_SIMPLE_LIST_STATE_ID,
 		MAIN_MENU_CLASSIC_LAYOUT_STATE_ID,
 		OPTIONS_MENU_STATE_ID,
-		VEHICLE_SELECTION_STATE_ID,
+		VEHICLE_SELECTION_SIMPLE_LIST_STATE_ID,
+		VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID,
 		COURSE_SELECTION_STATE_ID,
 		COURSE_EDITOR_STATE_ID,
 	};

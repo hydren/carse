@@ -726,7 +726,7 @@ void Pseudo3DRaceState::update(float delta)
 		if(timerSceneFinish < 1)
 		{
 			onSceneFinish = false;
-			game.enterState(game.logic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.currentMainMenuStateId);
 		}
 	}
 
@@ -866,7 +866,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			if(game.logic.raceOnlyMode)
 				game.running = false;
 			else
-				game.enterState(game.logic.getCurrentMainMenuStateId());
+				game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_R:
 			playerVehicle.position = 0;

@@ -8,7 +8,6 @@
 #include "carse_game.hpp"
 
 #include "pseudo3d_race_state.hpp"
-#include "vehicle_selection_state.hpp"
 #include "course_selection_state.hpp"
 
 using std::vector;
@@ -16,10 +15,10 @@ using std::string;
 
 // logic constructor, booooooring!
 CarseGame::Logic::Logic()
-: currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
-  nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
+: nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
   raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0),
-  raceOnlyPlayerVehicleAlternateSpriteIndex(-1), raceOnlyRaceType(-1), raceOnlyLapCount(2)
+  raceOnlyPlayerVehicleAlternateSpriteIndex(-1), raceOnlyRaceType(-1), raceOnlyLapCount(2),
+  currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID), currentVehicleSelectionStateId(CarseGame::VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID)
 {}
 
 void CarseGame::Logic::initialize()
@@ -149,14 +148,4 @@ Mechanics::SimulationType CarseGame::Logic::getSimulationType()
 void CarseGame::Logic::setSimulationType(Mechanics::SimulationType type)
 {
 	nextMatchSimulationType = type;
-}
-
-int CarseGame::Logic::getCurrentMainMenuStateId()
-{
-	return currentMainMenuStateId;
-}
-
-void CarseGame::Logic::setCurrentMainMenuStateId(int id)
-{
-	currentMainMenuStateId = id;
 }

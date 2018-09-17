@@ -127,7 +127,7 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 		case Keyboard::KEY_ESCAPE:
 			sndCursorOut->stop();
 			sndCursorOut->play();
-			game.enterState(game.logic.getCurrentMainMenuStateId());
+			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
 			sndCursorIn->stop();
@@ -180,7 +180,7 @@ void OptionsMenuState::onMenuSelect()
 		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
 
 	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
-		game.enterState(game.logic.getCurrentMainMenuStateId());
+		game.enterState(game.logic.currentMainMenuStateId);
 }
 
 #define setMenuItemValueText(item, valueTxt) menu->at(item).label.erase(menu->at(item).label.find(':')).append(": ").append(valueTxt)

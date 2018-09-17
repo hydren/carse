@@ -100,7 +100,7 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			switch(menu->getSelectedIndex())
 			{
 				case MENU_ITEM_RACE:     game.enterState(CarseGame::RACE_STATE_ID); break;
-				case MENU_ITEM_VEHICLE:  game.enterState(CarseGame::VEHICLE_SELECTION_STATE_ID); break;
+				case MENU_ITEM_VEHICLE:  game.enterState(game.logic.currentVehicleSelectionStateId); break;
 				case MENU_ITEM_COURSE:   game.enterState(CarseGame::COURSE_SELECTION_STATE_ID); break;
 				case MENU_ITEM_SETTINGS: game.enterState(CarseGame::OPTIONS_MENU_STATE_ID); break;
 				case MENU_ITEM_EXIT:     game.running = false; break;
@@ -121,8 +121,8 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_2:
-			game.logic.setCurrentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
-			game.enterState(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID);
+			game.logic.currentMainMenuStateId = CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID;
+			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 
 		default:break;

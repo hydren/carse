@@ -225,7 +225,7 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 		else
 			game.logic.setNextCourseRandom();
 
-		game.enterState(game.logic.getCurrentMainMenuStateId());
+		game.enterState(game.logic.currentMainMenuStateId);
 	}
 	else switch(status)
 	{

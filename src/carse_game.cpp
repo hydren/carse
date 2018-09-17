@@ -11,7 +11,8 @@
 #include "pseudo3d_race_state.hpp"
 #include "main_menu_simple_list_state.hpp"
 #include "main_menu_classic_layout_state.hpp"
-#include "vehicle_selection_state.hpp"
+#include "vehicle_selection_simple_list_state.hpp"
+#include "vehicle_selection_showroom_layout_state.hpp"
 #include "course_selection_state.hpp"
 #include "options_menu_state.hpp"
 #include "course_editor_state.hpp"
@@ -42,7 +43,8 @@ void CarseGame::initializeStatesList()
 	{
 		this->addState(new MainMenuSimpleListState(this));
 		this->addState(new MainMenuClassicPanelState(this));
-		this->addState(new VehicleSelectionState(this));
+		this->addState(new VehicleSelectionSimpleListState(this));
+		this->addState(new VehicleSelectionShowroomLayoutState(this));
 		this->addState(new CourseSelectionState(this));
 		this->addState(new OptionsMenuState(this));
 		this->addState(new CourseEditorState(this));

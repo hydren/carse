@@ -65,6 +65,10 @@ void CourseEditorState::onEnter()
 
 	focus = ON_EDITOR;
 
+	offset.x = boundsMap.x;
+	offset.y = boundsMap.y;
+	scale.x = scale.y = 1.f;
+
 	//xxx debug
 	course.clearDynamicData();
 	course = Pseudo3DCourse(Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5));
@@ -88,14 +92,45 @@ void CourseEditorState::render()
 	Graphics::drawFilledRectangle(boundsToolsPanel, Color::DARK_GREY);
 	Graphics::drawFilledRectangle(boundsStatusBar, Color::GREY);
 
-	course.drawMap(boundsMap, Color::GREY);
+
+	course.drawMap(Color::RED, offset, scale, boundsMap);
 
 	if(focus == ON_FILE_MENU)
 		menuFile->draw();
 }
 
 void CourseEditorState::update(float delta)
-{}
+{
+	if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
+		scale.y *= 1+delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_A))
+		scale.y *= 1-delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_X))
+		scale.x *= 1+delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_Z))
+		scale.x *= 1-delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_E))
+		scale *= 1+delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_S))
+		scale *= 1-delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
+		offset.y -= 100*delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
+		offset.y += 100*delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
+		offset.x -= 100*delta;
+
+	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
+		offset.x += 100*delta;
+}
 
 void CourseEditorState::onKeyPressed(Keyboard::Key key)
 {

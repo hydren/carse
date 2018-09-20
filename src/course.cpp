@@ -20,6 +20,7 @@ using fgeal::Graphics;
 using fgeal::Color;
 using fgeal::Vector2D;
 using fgeal::Point;
+using fgeal::Rectangle;
 using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
@@ -127,6 +128,23 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	}
 }
 
+void Pseudo3DCourse::drawMap(const Color& color, const Point& offset, const Vector2D& scale, const Rectangle& bounds)
+{
+	const Color color2(255-color.r, 255-color.g, 255-color.b);
+	Point p1 = offset;
+	for(unsigned i = 0; i < spec.lines.size(); i++)
+	{
+		Point p2 = p1;
+		p2.x += spec.lines[i].curve * scale.x;
+		p2.y += spec.roadSegmentLength * scale.y;
+
+		Graphics::drawLine(p1.x, p1.y, p2.x, p2.y, (i % 2? color : color2));
+		p1 = p2;
+	}
+}
+
+/*
+
 void Pseudo3DCourse::drawMap(const fgeal::Rectangle& bounds, fgeal::Color color)
 {
 	if(bounds.w == 0 or bounds.h == 0)
@@ -155,6 +173,8 @@ void Pseudo3DCourse::drawMap(const fgeal::Rectangle& bounds, fgeal::Color color)
 		pt = pt2;
 	}
 }
+
+ */
 
 void Pseudo3DCourse::clearDynamicData()
 {

@@ -57,36 +57,4 @@ inline std::string getContextualizedFilename(const std::string& specifiedFilenam
 	return getContextualizedFilename(specifiedFilename, baseDir, baseDir, baseDir);
 }
 
-template<class GameStateClass>
-struct GenericMenuStateLayout
-{
-	GameStateClass& state;
-
-	GenericMenuStateLayout(GameStateClass& state)
-	: state(state)
-	{}
-
-	virtual ~GenericMenuStateLayout() {}
-
-	// draws the layout
-	virtual void draw() abstract;
-
-	// performs any logic-related updates, if needed
-	virtual void update(float delta) {};
-
-	// action when user navigates
-	virtual void onCursorUp() {};
-	virtual void onCursorDown() {};
-	virtual void onCursorLeft() {};
-	virtual void onCursorRight() {};
-	virtual void onMouseClick(int x, int y) {};
-	virtual void onMouseMoved(int oldx, int oldy, int newx, int newy) {};
-
-	// action when user accept or selects and confirm a item of the menu
-	virtual void onCursorAccept() { state.menuSelectionAction(); }
-
-	// stuff to be done when exiting the menu
-	virtual void onQuit() { state.game.running = false; }
-};
-
 #endif /* UTIL_HPP_ */

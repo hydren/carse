@@ -120,16 +120,16 @@ void CourseEditorState::update(float delta)
 		scale *= 1-delta;
 
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-		offset.y -= 100*delta;
+		offset.y -= 100*delta/scale.y;
 
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
-		offset.y += 100*delta;
+		offset.y += 100*delta/scale.y;
 
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
-		offset.x -= 100*delta;
+		offset.x -= 100*delta/scale.x;
 
 	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
-		offset.x += 100*delta;
+		offset.x += 100*delta/scale.x;
 }
 
 void CourseEditorState::onKeyPressed(Keyboard::Key key)

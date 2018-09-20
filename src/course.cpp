@@ -39,6 +39,24 @@ inline static void drawRoadQuad(const Color& c, float x1, float y1, float w1, fl
 	fgeal::Graphics::drawFilledQuadrangle(x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1, c);
 }
 
+inline static void rotatePoint(Point& p, const Point& center, float angle)
+{
+	const float s = sin(angle),
+				c = cos(angle);
+
+	// translate point back to origin:
+	p.x -= center.x;
+	p.y -= center.y;
+
+	// rotate point
+	float xnew = p.x * c - p.y * s;
+	float ynew = p.x * s + p.y * c;
+
+	// translate point back:
+	p.x = xnew + center.x;
+	p.y = ynew + center.y;
+}
+
 namespace // static
 {
 	struct ScreenCoordCache
@@ -132,13 +150,17 @@ void Pseudo3DCourse::drawMap(const Color& color, const Point& offset, const Vect
 {
 	const Color color2(255-color.r, 255-color.g, 255-color.b);
 	Point p1 = offset;
+	float angle = 0;
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{
 		Point p2 = p1;
-		p2.x += spec.lines[i].curve * scale.x;
-		p2.y += spec.roadSegmentLength * scale.y;
+		p2.x += spec.lines[i].curve;
+		p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
+		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
+		rotatePoint(p2, p1, angle);
 
-		Graphics::drawLine(p1.x, p1.y, p2.x, p2.y, (i % 2? color : color2));
+		Graphics::drawLine(p1.x * scale.x, p1.y * scale.y, p2.x * scale.x, p2.y * scale.y, (i % 2? color : color2));
+
 		p1 = p2;
 	}
 }

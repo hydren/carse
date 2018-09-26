@@ -99,6 +99,11 @@ class CarseGame extends public fgeal::Game
 		// spec. loading functions
 		void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
 
+		// special locations
+		const static std::string
+			VEHICLES_FOLDER,
+			COURSES_FOLDER,
+			PRESET_ENGINE_SOUND_PROFILES_FOLDER;
 	} logic;
 
 	/** Wrapper to resources shared between states. */

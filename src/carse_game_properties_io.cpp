@@ -39,15 +39,15 @@ static void loadEngineSoundSpec(EngineSoundProfile&, const Properties&);
 
 // ========================================================================================================================
 
-const static string
-	CARSE_VEHICLES_FOLDER = "data/vehicles",
-	CARSE_COURSES_FOLDER = "data/courses",
-	CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine";
+const string
+	CarseGame::Logic::VEHICLES_FOLDER = "data/vehicles",
+	CarseGame::Logic::COURSES_FOLDER = "data/courses",
+	CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine";
 
 void CarseGame::Logic::loadPresetEngineSoundProfiles()
 {
 	cout << "reading preset engine sound profiles..." << endl;
-	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER);
+	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER);
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
 		string& filename = presetFiles[i];
@@ -114,7 +114,7 @@ void CarseGame::Logic::loadCourses()
 {
 	cout << "reading courses..." << endl;
 
-	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_COURSES_FOLDER);
+	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::COURSES_FOLDER);
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 	{
 		if(ends_with(courseFiles[i], ".properties"))
@@ -132,7 +132,7 @@ void CarseGame::Logic::loadVehicles()
 
 	// create a list of files inside the vehicles folder and inside its subfolders (but not recursively)
 	vector<string> possibleVehiclePropertiesFilenames;
-	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CARSE_VEHICLES_FOLDER);
+	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::VEHICLES_FOLDER);
 	for(unsigned i = 0; i < vehiclesFolderFilenames.size(); i++)
 	{
 		const string& filename = vehiclesFolderFilenames[i];
@@ -248,7 +248,7 @@ void CarseGame::Logic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil:
 		key = "alternate_sprite_sheet" + futil::to_string(i) + "_definition_file";
 		if(isValueSpecified(prop, key))
 		{
-			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
 			if(alternateSpritePropFile.empty())
 			{
 				cout << "warning: alternate sprite sheet " << i << " definition file could not be found!"
@@ -274,7 +274,7 @@ void CarseGame::Logic::loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil:
 			key = "alternate_sprite_sheet" + futil::to_string(i) + "_file";
 			if(isValueSpecified(prop, key))
 			{
-				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
 				if(alternateSpriteSheetFile.empty())
 				{
 					cout << "warning: alternate sprite sheet " << i << " file could not be found!"
@@ -538,7 +538,7 @@ static void loadEngineSoundSpec(EngineSoundProfile& profile, const Properties& p
 				const string subBaseKey = baseKey + futil::to_string(i);
 				if(prop.containsKey(subBaseKey))
 				{
-					const string filename = getContextualizedFilename(prop.get(subBaseKey), prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/", CARSE_PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
+					const string filename = getContextualizedFilename(prop.get(subBaseKey), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/", CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
 					if(filename.empty())
 						cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
 						<< " (specified by \"" << prop.get("filename") << "\")" << endl;
@@ -612,7 +612,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
 
 	if(not spec.sheetFilename.empty() and spec.sheetFilename != "default")
-		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
 
 	if(spec.sheetFilename == "default" or spec.sheetFilename.empty())
 	{
@@ -744,7 +744,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 	else if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "none")
 	{
-		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
 
 		if(spec.brakelightsSheetFilename.empty())
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
@@ -855,7 +855,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 	else if(not spec.shadowSheetFilename.empty())
 	{
-		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CARSE_VEHICLES_FOLDER+"/");
+		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
 
 		if(spec.shadowSheetFilename.empty())
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"

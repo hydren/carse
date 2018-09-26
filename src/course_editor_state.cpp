@@ -17,6 +17,10 @@ using fgeal::Keyboard;
 using fgeal::Mouse;
 using fgeal::Rectangle;
 using fgeal::Point;
+using std::vector;
+using std::string;
+using futil::ends_with;
+using futil::Properties;
 
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
@@ -43,6 +47,8 @@ void CourseEditorState::onEnter()
 	menuFile->bounds.y = 0.25*dh;
 	menuFile->bounds.w = 0.50*dw;
 	menuFile->bounds.h = 0.50*dh;
+
+	reloadFileList();
 
 	boundsMap.x = 0.25*dw;
 	boundsMap.y = 0;
@@ -92,7 +98,6 @@ void CourseEditorState::render()
 	Graphics::drawFilledRectangle(boundsToolsPanel, Color::DARK_GREY);
 	Graphics::drawFilledRectangle(boundsStatusBar, Color::GREY);
 
-
 	course.drawMap(Color::RED, offset, scale, boundsMap);
 
 	if(focus == ON_FILE_MENU)
@@ -101,49 +106,84 @@ void CourseEditorState::render()
 
 void CourseEditorState::update(float delta)
 {
-	if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
-		scale.y *= 1+delta;
+	if(focus == ON_EDITOR)
+	{
+		if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
+			scale.y *= 1+delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_A))
-		scale.y *= 1-delta;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_A))
+			scale.y *= 1-delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_X))
-		scale.x *= 1+delta;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_X))
+			scale.x *= 1+delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_Z))
-		scale.x *= 1-delta;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_Z))
+			scale.x *= 1-delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_E))
-		scale *= 1+delta;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_E))
+			scale *= 1+delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_S))
-		scale *= 1-delta;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_S))
+			scale *= 1-delta;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-		offset.y -= 100*delta/scale.y;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
+			offset.y -= 100*delta/scale.y;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
-		offset.y += 100*delta/scale.y;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
+			offset.y += 100*delta/scale.y;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
-		offset.x -= 100*delta/scale.x;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
+			offset.x -= 100*delta/scale.x;
 
-	if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
-		offset.x += 100*delta/scale.x;
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
+			offset.x += 100*delta/scale.x;
+	}
 }
 
 void CourseEditorState::onKeyPressed(Keyboard::Key key)
 {
-	if(key == Keyboard::KEY_ESCAPE)
-		game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+	if(focus == ON_EDITOR)
+	{
+		if(key == Keyboard::KEY_ESCAPE)
+			focus = ON_FILE_MENU;
+	}
+	else if(focus == ON_FILE_MENU)
+	{
+		if(key == Keyboard::KEY_ESCAPE)
+			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+
+		if(key == Keyboard::KEY_ARROW_UP)
+			menuFile->moveCursorUp();
+
+		if(key == Keyboard::KEY_ARROW_DOWN)
+			menuFile->moveCursorDown();
+
+		if(key == Keyboard::KEY_ENTER)
+		{
+			course.clearDynamicData();
+			course = Pseudo3DCourse::parseCourseSpecFromFile(menuFile->getSelectedEntry().label);
+			course.setupDynamicData();
+			course.drawAreaWidth = boundsCourseView.w;
+			course.drawAreaHeight = boundsCourseView.h;
+			course.drawDistance = 300;
+			course.cameraDepth = 0.84;
+			focus = ON_EDITOR;
+		}
+	}
 }
 
 void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {}
 
-/*
-	// remove all entries and repopulate file list
-	while(menuFile->getEntryCount() != 0)
+void CourseEditorState::reloadFileList()
+{
+	// clear menu
+	while(menuFile->getEntryCount() > 0)
 		menuFile->removeEntry(0);
 
- */
+	// populate menu
+	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::COURSES_FOLDER);
+	for(unsigned i = 0; i < courseFiles.size(); i++)
+		if(ends_with(courseFiles[i], ".properties"))
+			menuFile->addEntry(courseFiles[i]);
+}

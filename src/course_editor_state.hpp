@@ -61,6 +61,9 @@ class CourseEditorState extends public fgeal::Game::State
 
 	virtual void render();
 	virtual void update(float delta);
+
+	private:
+	void reloadFileList();
 };
 
 #endif /* STATES_COURSE_EDITOR_STATE_HPP_ */

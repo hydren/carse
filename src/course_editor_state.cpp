@@ -75,9 +75,8 @@ void CourseEditorState::onEnter()
 	offset.y = boundsMap.y;
 	scale.x = scale.y = 1.f;
 
-	//xxx debug
 	course.clearDynamicData();
-	course = Pseudo3DCourse(Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5));
+	course = Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000));
 	course.setupDynamicData();
 	course.drawAreaWidth = boundsCourseView.w;
 	course.drawAreaHeight = boundsCourseView.h;

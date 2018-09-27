@@ -40,7 +40,7 @@ int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID;
 
 CourseSelectionState::CourseSelectionState(CarseGame* game)
 : State(*game), game(*game),
-  background(null), imgRandom(null), imgCircuit(null),
+  background(null), imgRandom(null), imgCircuit(null), imgCourseEditor(null),
   fontMain(null), fontInfo(null),
   menuCourse(null), menuSettings(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
@@ -53,6 +53,7 @@ CourseSelectionState::~CourseSelectionState()
 	if(background != null) delete background;
 	if(imgRandom != null) delete imgRandom;
 	if(imgCircuit != null) delete imgCircuit;
+	if(imgCourseEditor != null) delete imgCourseEditor;
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(menuCourse != null) delete menuCourse;
@@ -66,6 +67,7 @@ void CourseSelectionState::initialize()
 	background = new Image("assets/course-menu-bg.jpg");
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
+	imgCourseEditor = new Image("assets/portrait-course-editor.png");
 
 	fontMain = new Font(game.sharedResources->font2Path, dip(32));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(14));
@@ -152,6 +154,12 @@ void CourseSelectionState::render()
 		// todo choose correct portrait based on course specification
 		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
 
+	// draw course editor portrait
+	imgCourseEditor->drawScaled(paneBounds.x + paneBounds.w - portraitImgBounds.w - 2*focusSpacing, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
+
+	fontInfo->drawText("Course editor", paneBounds.x + paneBounds.w - portraitImgBounds.w - 2*focusSpacing, portraitImgBounds.y, Color::WHITE);
+
+
 	// update menu bounds
 	menuCourse->bounds.x = portraitBounds.x;
 	menuCourse->bounds.y = portraitBounds.y + portraitBounds.h + (1/32.f)*paneBounds.h;
@@ -190,6 +198,12 @@ void CourseSelectionState::render()
 			courseListFocusArea.y + courseListFocusArea.h + focusSpacing,
 			courseListFocusArea.w,
 			menuSettings->bounds.h + 3*focusSpacing,
+		},
+		courseEditorPortrairFocusArea = {
+			paneBounds.x + paneBounds.w - portraitImgBounds.w - 3*focusSpacing,
+			portraitImgBounds.y - focusSpacing,
+			portraitImgBounds.w + 2*focusSpacing,
+			portraitImgBounds.h + 2*focusSpacing
 		};
 
 		switch(status)
@@ -197,6 +211,7 @@ void CourseSelectionState::render()
 			case STATUS_ON_COURSE_LIST_SELECTION:
 			case STATUS_HOVERING_COURSE_LIST: fgeal::Graphics::drawRectangle(courseListFocusArea, Color::RED); break;
 			case STATUS_HOVERING_SETTINGS_LIST: fgeal::Graphics::drawRectangle(settingsFocusArea, Color::RED); break;
+			case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT: fgeal::Graphics::drawRectangle(courseEditorPortrairFocusArea, Color::RED); break;
 			default:break;
 		}
 	}
@@ -242,8 +257,23 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 				sndCursorMove->play();
 				status = STATUS_HOVERING_SETTINGS_LIST;
 			}
-			else if(key == Keyboard::KEY_SPACE)
-				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);  //xxx to debug editor state
+			else if(key == Keyboard::KEY_ARROW_UP)
+			{
+				sndCursorMove->stop();
+				sndCursorMove->play();
+				status = STATUS_HOVERING_COURSE_EDITOR_PORTRAIT;
+			}
+			break;
+
+		case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT:
+			if(key == Keyboard::KEY_ENTER)
+				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);
+			else if(key == Keyboard::KEY_ARROW_DOWN)
+			{
+				sndCursorMove->stop();
+				sndCursorMove->play();
+				status = STATUS_HOVERING_COURSE_LIST;
+			}
 			break;
 
 		case STATUS_HOVERING_SETTINGS_LIST: handleInputOnSettings(key); break;

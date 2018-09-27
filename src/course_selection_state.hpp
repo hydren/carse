@@ -25,7 +25,7 @@ class CourseSelectionState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
-	fgeal::Image* background, *imgRandom, *imgCircuit;
+	fgeal::Image* background, *imgRandom, *imgCircuit, *imgCourseEditor;
 	fgeal::Font* fontMain, *fontInfo;
 	fgeal::Menu* menuCourse, *menuSettings;
 
@@ -37,7 +37,8 @@ class CourseSelectionState extends public fgeal::Game::State
 	{
 		STATUS_ON_COURSE_LIST_SELECTION,
 		STATUS_HOVERING_COURSE_LIST,
-		STATUS_HOVERING_SETTINGS_LIST
+		STATUS_HOVERING_SETTINGS_LIST,
+		STATUS_HOVERING_COURSE_EDITOR_PORTRAIT
 	}
 	status;
 

@@ -132,8 +132,8 @@ void CourseSelectionState::render()
 	const Rectangle portraitBounds = {
 			paneBounds.x + (1/32.f)*paneBounds.w,
 			paneBounds.y + (1/32.f)*paneBounds.h,
-			(1/3.f)*paneBounds.h,
-			(1/3.f)*paneBounds.h
+			(1/4.f)*paneBounds.h,
+			(1/4.f)*paneBounds.h
 	};
 	// portrait frame
 	fgeal::Graphics::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
@@ -153,28 +153,28 @@ void CourseSelectionState::render()
 		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
 
 	// update menu bounds
-	menuCourse->bounds.x = portraitBounds.x + portraitBounds.w + (1/32.f)*paneBounds.w;
-	menuCourse->bounds.y = portraitBounds.y;
+	menuCourse->bounds.x = portraitBounds.x;
+	menuCourse->bounds.y = portraitBounds.y + portraitBounds.h + (1/32.f)*paneBounds.h;
 	menuCourse->bounds.w = paneBounds.w - menuCourse->bounds.x;
-	menuCourse->bounds.h = portraitBounds.h;
+	menuCourse->bounds.h = (paneBounds.w - portraitBounds.h)/4;
 
 	menuCourse->draw();
 
 	// draw info
-	fontInfo->drawText(menuCourse->getSelectedEntry().label, portraitBounds.x, 1.1*(portraitBounds.y + portraitBounds.h), Color::WHITE);
+	fontInfo->drawText(menuCourse->getSelectedEntry().label, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y, Color::WHITE);
 	if(menuCourse->getSelectedIndex() > 1)
 	{
 		const Pseudo3DCourse::Spec& course = game.logic.getCourseList()[menuCourse->getSelectedIndex() - 2];
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
-		fontInfo->drawText(txtLength, portraitBounds.x, 1.1*(portraitBounds.y + portraitBounds.h) + fontInfo->getHeight(), Color::WHITE);
+		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getHeight(), Color::WHITE);
 	}
 
 	// draw race settings
 	menuSettings->bounds.x = menuCourse->bounds.x;
 	menuSettings->bounds.y = menuCourse->bounds.y + menuCourse->bounds.h + 4*focusSpacing;
 	menuSettings->bounds.w = menuCourse->bounds.w;
-	menuSettings->bounds.h = (4/7.f)*paneBounds.h;
+	menuSettings->bounds.h = (paneBounds.w - portraitBounds.h)/4;
 	menuSettings->draw();
 
 	if(cos(20*fgeal::uptime()) > 0 or status == STATUS_ON_COURSE_LIST_SELECTION)

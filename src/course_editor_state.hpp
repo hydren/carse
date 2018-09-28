@@ -25,13 +25,10 @@ class CourseEditorState extends public fgeal::Game::State
 
 	fgeal::Menu* menuFile;
 
-	fgeal::Rectangle boundsMap;
+	fgeal::Font* font;
 
-	fgeal::Rectangle boundsCourseView;
-
-	fgeal::Rectangle boundsStatusBar;
-
-	fgeal::Rectangle boundsToolsPanel;
+	fgeal::Rectangle boundsMap, boundsCourseView, boundsStatusBar, boundsToolsPanel,
+		boundsButtonNew, boundsButtonLoad, boundsButtonSave;
 
 	Pseudo3DCourse course;
 

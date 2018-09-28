@@ -18,6 +18,19 @@
 // device-independent pixel (size based on a 480px tall display); can only be used if there is a 'display' instance in the scope
 #define dip(px) (px*(display.getHeight()/480.0))
 
+// returns a spaced outline, like a margin or something
+inline fgeal::Rectangle getSpacedOutline(const fgeal::Rectangle& bounds, float spacing)
+{
+	const fgeal::Rectangle outline = {
+		bounds.x - spacing,
+		bounds.y - spacing,
+		bounds.w + 2*spacing,
+		bounds.h + 2*spacing
+	};
+
+	return outline;
+}
+
 /** Attempt to get a contextualized filename.
  *  First it attempts to check if "baseDir1 + specifiedFilename" is a valid file and returns it if true.
  *  If not, then it tries the same with "baseDir2 + specifiedFilename".

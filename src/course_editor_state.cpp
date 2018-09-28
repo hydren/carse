@@ -9,10 +9,13 @@
 
 #include "carse_game.hpp"
 
+#include "util.hpp"
+
 using fgeal::Display;
 using fgeal::Color;
 using fgeal::Graphics;
 using fgeal::Image;
+using fgeal::Font;
 using fgeal::Keyboard;
 using fgeal::Mouse;
 using fgeal::Rectangle;
@@ -26,23 +29,28 @@ int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game),
-  menuFile(null), focus(ON_EDITOR)
+  menuFile(null), font(null), focus(ON_EDITOR)
 {}
 
 CourseEditorState::~CourseEditorState()
 {
 	if(menuFile != null) delete menuFile;
+	if(font != null) delete font;
 }
 
 void CourseEditorState::initialize()
 {
+	Display& display = game.getDisplay();
 	menuFile = new fgeal::Menu(fgeal::Rectangle(), &game.sharedResources->fontDev, Color::GREEN);
+	font = new Font(game.sharedResources->font1Path, dip(15));
 }
 
 void CourseEditorState::onEnter()
 {
 	Display& display = game.getDisplay();
 	const unsigned dw = display.getWidth(), dh = display.getHeight();
+	const float widgetSpacing = 0.02*dh;
+
 	menuFile->bounds.x = 0.25*dw;
 	menuFile->bounds.y = 0.25*dh;
 	menuFile->bounds.w = 0.50*dw;
@@ -69,6 +77,17 @@ void CourseEditorState::onEnter()
 	boundsStatusBar.w = dw;
 	boundsStatusBar.h = 0.05*dh;
 
+	boundsButtonNew.x = boundsToolsPanel.x + widgetSpacing;
+	boundsButtonNew.y = boundsToolsPanel.y + widgetSpacing + font->getHeight();
+	boundsButtonNew.w = 0.08*dh;
+	boundsButtonNew.h = 0.05*dh;
+
+	boundsButtonLoad = boundsButtonNew;
+	boundsButtonLoad.x += boundsButtonNew.w + widgetSpacing;
+
+	boundsButtonSave = boundsButtonLoad;
+	boundsButtonSave.x += boundsButtonLoad.w + widgetSpacing;
+
 	focus = ON_EDITOR;
 
 	offset.x = boundsMap.x;
@@ -89,13 +108,41 @@ void CourseEditorState::onLeave()
 
 void CourseEditorState::render()
 {
+	const float widgetSpacing = 0.01*game.getDisplay().getHeight();
+
 	Graphics::drawFilledRectangle(boundsCourseView, Color::CYAN);
 	course.draw(0, 0.5*course.drawAreaWidth);
 	Graphics::drawRectangle(boundsCourseView, Color::AZURE);
 
+
 	Graphics::drawFilledRectangle(boundsMap, Color::DARK_GREEN);
+
+
 	Graphics::drawFilledRectangle(boundsToolsPanel, Color::DARK_GREY);
+	font->drawText("Course editor", boundsToolsPanel.x, boundsToolsPanel.y, Color::WHITE);
+
+	Graphics::drawFilledRectangle(boundsButtonNew, Color::GREY);
+	font->drawText("New", boundsButtonNew.x, boundsButtonNew.y, Color::BLACK);
+
+	Graphics::drawFilledRectangle(boundsButtonLoad, Color::GREY);
+	font->drawText("Load", boundsButtonLoad.x, boundsButtonLoad.y, Color::BLACK);
+
+	Graphics::drawFilledRectangle(boundsButtonSave, Color::GREY);
+	font->drawText("Save", boundsButtonSave.x, boundsButtonSave.y, Color::BLACK);
+
+	if(focus == ON_EDITOR and cos(20*fgeal::uptime()) > 0)
+	{
+		if(boundsButtonNew.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(boundsButtonNew, widgetSpacing), Color::RED);
+		else if(boundsButtonLoad.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(boundsButtonLoad, widgetSpacing), Color::RED);
+		else if(boundsButtonSave.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(boundsButtonSave, widgetSpacing), Color::RED);
+	}
+
+
 	Graphics::drawFilledRectangle(boundsStatusBar, Color::GREY);
+
 
 	course.drawMap(Color::RED, offset, scale, boundsMap);
 

@@ -130,8 +130,7 @@ class CarseGame extends public fgeal::Game
 
 	CarseGame();
 	~CarseGame();
-	virtual void preInitialize();
-	virtual void initializeStatesList();
+	virtual void initialize();
 };
 
 #endif /* CARSE_GAME_HPP_ */

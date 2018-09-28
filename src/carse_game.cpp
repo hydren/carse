@@ -29,14 +29,11 @@ CarseGame::~CarseGame()
 		delete sharedResources;
 }
 
-void CarseGame::preInitialize()
+void CarseGame::initialize()
 {
 	this->sharedResources = new SharedResources();
 	this->logic.initialize();
-}
 
-void CarseGame::initializeStatesList()
-{
 	this->addState(new Pseudo3DRaceState(this));
 
 	if(not logic.raceOnlyMode)
@@ -53,4 +50,6 @@ void CarseGame::initializeStatesList()
 
 	this->setInputManagerEnabled();
 	this->logic.onStatesListInitFinished();
+
+	Game::initialize();
 }

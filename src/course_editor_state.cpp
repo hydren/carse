@@ -29,7 +29,9 @@ int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game),
-  menuFile(null), font(null), focus(ON_EDITOR)
+  menuFile(null), font(null),
+  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  focus(ON_EDITOR)
 {}
 
 CourseEditorState::~CourseEditorState()
@@ -43,6 +45,11 @@ void CourseEditorState::initialize()
 	Display& display = game.getDisplay();
 	menuFile = new fgeal::Menu(fgeal::Rectangle(), &game.sharedResources->fontDev, Color::GREEN);
 	font = new Font(game.sharedResources->font1Path, dip(15));
+
+	// loan some shared resources
+	sndCursorMove = &game.sharedResources->sndCursorMove;
+	sndCursorIn   = &game.sharedResources->sndCursorIn;
+	sndCursorOut  = &game.sharedResources->sndCursorOut;
 }
 
 void CourseEditorState::onEnter()
@@ -51,7 +58,7 @@ void CourseEditorState::onEnter()
 	const unsigned dw = display.getWidth(), dh = display.getHeight();
 	const float widgetSpacing = 0.02*dh;
 
-	menuFile->bounds.x = 0.25*dw;
+	menuFile->bounds.x = 0.20*dw;
 	menuFile->bounds.y = 0.25*dh;
 	menuFile->bounds.w = 0.50*dw;
 	menuFile->bounds.h = 0.50*dh;
@@ -191,12 +198,12 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	if(focus == ON_EDITOR)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
-			focus = ON_FILE_MENU;
+			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
 	}
 	else if(focus == ON_FILE_MENU)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
-			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+			focus = ON_EDITOR;
 
 		if(key == Keyboard::KEY_ARROW_UP)
 			menuFile->moveCursorUp();
@@ -219,7 +226,16 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 }
 
 void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
-{}
+{
+	if(boundsButtonLoad.contains(x, y))
+	{
+		sndCursorIn->stop();
+		sndCursorIn->play();
+		focus = ON_FILE_MENU;
+	}
+
+	//game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+}
 
 void CourseEditorState::reloadFileList()
 {

@@ -27,6 +27,8 @@ class CourseEditorState extends public fgeal::Game::State
 
 	fgeal::Font* font;
 
+	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
+
 	fgeal::Rectangle boundsMap, boundsCourseView, boundsStatusBar, boundsToolsPanel,
 		boundsButtonNew, boundsButtonLoad, boundsButtonSave;
 

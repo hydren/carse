@@ -227,14 +227,24 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 
 void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
-	if(boundsButtonLoad.contains(x, y))
+	if(focus == ON_EDITOR)
 	{
-		sndCursorIn->stop();
-		sndCursorIn->play();
-		focus = ON_FILE_MENU;
+		if(boundsButtonLoad.contains(x, y))
+		{
+			sndCursorIn->stop();
+			sndCursorIn->play();
+			focus = ON_FILE_MENU;
+		}
 	}
-
-	//game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+	else if(focus == ON_FILE_MENU)
+	{
+		if(menuFile->bounds.contains(x, y))
+		{
+			sndCursorIn->stop();
+			sndCursorIn->play();
+			menuFile->setSelectedIndexByLocation(x, y);
+		}
+	}
 }
 
 void CourseEditorState::reloadFileList()

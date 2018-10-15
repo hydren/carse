@@ -130,14 +130,14 @@ void VehicleSelectionShowroomLayoutState::render()
 	// draw previous vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 1))
 	{
-		const unsigned i = index == 0? menu->getNumberOfEntries()-1 : index-1;
+		const unsigned i = index == 0? menu->getEntries().size()-1 : index-1;
 		drawVehiclePreview((0.2-doff)*dw, (0.5-doffp)*dh, 1.05-0.05*fabs(trans), i, trans < -0.5? 0 : -1);
 	}
 
 	// draw next vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 0))
 	{
-		const unsigned i = index == menu->getNumberOfEntries()-1? 0 : index+1;
+		const unsigned i = index == menu->getEntries().size()-1? 0 : index+1;
 		drawVehiclePreview((0.8-doff)*dw, (0.5-doffn)*dh, 1.05-0.05*fabs(trans), i, trans > 0.5? 0 : +1);
 	}
 

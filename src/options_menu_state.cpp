@@ -179,11 +179,11 @@ void OptionsMenuState::onMenuSelect()
 	if(menu->getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
 		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
 
-	if(menu->getSelectedIndex() == menu->getEntryCount()-1)
+	if(menu->getSelectedIndex() == menu->getEntries().size()-1)
 		game.enterState(game.logic.currentMainMenuStateId);
 }
 
-#define setMenuItemValueText(item, valueTxt) menu->at(item).label.erase(menu->at(item).label.find(':')).append(": ").append(valueTxt)
+#define setMenuItemValueText(item, valueTxt) menu->getEntryAt(item).label.erase(menu->getEntryAt(item).label.find(':')).append(": ").append(valueTxt)
 
 void OptionsMenuState::updateLabels()
 {

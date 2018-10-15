@@ -221,10 +221,10 @@ void CourseSelectionState::update(float delta) {}
 
 void CourseSelectionState::updateLapCount()
 {
-	if(menuSettings->at(1).enabled)
-		menuSettings->at(1).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
+	if(menuSettings->getEntryAt(1).enabled)
+		menuSettings->getEntryAt(1).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
 	else
-		menuSettings->at(1).label = "Laps: --";
+		menuSettings->getEntryAt(1).label = "Laps: --";
 }
 
 void CourseSelectionState::onKeyPressed(Keyboard::Key key)
@@ -336,15 +336,15 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 							nextType = game.logic.getNextRaceSettings().raceType+1;
 
 					game.logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
-					menuSettings->at(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType);
-					menuSettings->at(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(game.logic.getNextRaceSettings().raceType);
+					menuSettings->getEntryAt(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType);
+					menuSettings->getEntryAt(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(game.logic.getNextRaceSettings().raceType);
 					updateLapCount();
 					break;
 				}
 				case SETTINGS_LAPS:  // laps
 				{
 					// if not a loop type race, do nothing
-					if(not menuSettings->at(SETTINGS_LAPS).enabled)
+					if(not menuSettings->getEntryAt(SETTINGS_LAPS).enabled)
 						break;
 
 					if(isCursorLeft)

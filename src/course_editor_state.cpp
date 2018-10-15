@@ -250,7 +250,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 void CourseEditorState::reloadFileList()
 {
 	// clear menu
-	while(menuFile->getEntryCount() > 0)
+	while(not menuFile->getEntries().empty())
 		menuFile->removeEntry(0);
 
 	// populate menu

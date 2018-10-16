@@ -30,7 +30,8 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	fgeal::Rectangle boundsMap, boundsCourseView, boundsStatusBar, boundsToolsPanel,
-		boundsButtonNew, boundsButtonLoad, boundsButtonSave;
+		boundsButtonNew, boundsButtonLoad, boundsButtonSave,
+		boundsFileDialog, boundsFileDialogButtonSelect, boundsFileDialogButtonCancel;
 
 	Pseudo3DCourse course;
 
@@ -63,6 +64,7 @@ class CourseEditorState extends public fgeal::Game::State
 
 	private:
 	void reloadFileList();
+	void loadCurrentlySelectedFile();
 };
 
 #endif /* STATES_COURSE_EDITOR_STATE_HPP_ */

@@ -57,11 +57,6 @@ void CourseEditorState::onEnter()
 	const unsigned dw = display.getWidth(), dh = display.getHeight();
 	const float widgetSpacing = 0.02*dh;
 
-	menuFile.bounds.x = 0.20*dw;
-	menuFile.bounds.y = 0.25*dh;
-	menuFile.bounds.w = 0.50*dw;
-	menuFile.bounds.h = 0.50*dh;
-
 	reloadFileList();
 
 	boundsMap.x = 0.25*dw;
@@ -93,6 +88,29 @@ void CourseEditorState::onEnter()
 
 	boundsButtonSave = boundsButtonLoad;
 	boundsButtonSave.x += boundsButtonLoad.w + widgetSpacing;
+
+	boundsFileDialog.x = 0.20*dw;
+	boundsFileDialog.y = 0.25*dh;
+	boundsFileDialog.w = 0.50*dw;
+	boundsFileDialog.h = 0.50*dh;
+
+	menuFile.bounds.x = 1.05*boundsFileDialog.x;
+	menuFile.bounds.y = 1.05*boundsFileDialog.y;
+	menuFile.bounds.w = 0.95*boundsFileDialog.w;
+	menuFile.bounds.h = 0.83*boundsFileDialog.h;
+
+	boundsFileDialog.x = 0.20*dw;
+	boundsFileDialog.y = 0.25*dh;
+	boundsFileDialog.w = 0.50*dw;
+	boundsFileDialog.h = 0.50*dh;
+
+	boundsFileDialogButtonSelect.w = 0.20*boundsFileDialog.w;
+	boundsFileDialogButtonSelect.h = 0.10*boundsFileDialog.h;
+	boundsFileDialogButtonSelect.x = 0.55*(boundsFileDialog.x + boundsFileDialog.w - boundsFileDialogButtonSelect.w);
+	boundsFileDialogButtonSelect.y = boundsFileDialog.y + boundsFileDialog.h - 1.2*boundsFileDialogButtonSelect.h;
+
+	boundsFileDialogButtonCancel = boundsFileDialogButtonSelect;
+	boundsFileDialogButtonCancel.x += boundsFileDialogButtonSelect.w * 1.1;
 
 	focus = ON_EDITOR;
 
@@ -153,7 +171,26 @@ void CourseEditorState::render()
 	course.drawMap(Color::RED, offset, scale, boundsMap);
 
 	if(focus == ON_FILE_MENU)
+	{
+		Graphics::drawFilledRectangle(boundsFileDialog, Color::GREY);
+		Graphics::drawRectangle(boundsFileDialog, Color::DARK_GREY);
+
 		menuFile.draw();
+
+		Graphics::drawFilledRectangle(boundsFileDialogButtonSelect, Color::LIGHT_GREY);
+		font->drawText("Select", boundsFileDialogButtonSelect.x, boundsFileDialogButtonSelect.y, Color::BLACK);
+
+		Graphics::drawFilledRectangle(boundsFileDialogButtonCancel, Color::LIGHT_GREY);
+		font->drawText("Cancel", boundsFileDialogButtonCancel.x, boundsFileDialogButtonCancel.y, Color::BLACK);
+
+		if(cos(20*fgeal::uptime()) > 0)
+		{
+			if(boundsFileDialogButtonSelect.contains(Mouse::getPosition()))
+				Graphics::drawRectangle(getSpacedOutline(boundsFileDialogButtonSelect, widgetSpacing), Color::RED);
+			else if(boundsFileDialogButtonCancel.contains(Mouse::getPosition()))
+				Graphics::drawRectangle(getSpacedOutline(boundsFileDialogButtonCancel, widgetSpacing), Color::RED);
+		}
+	}
 }
 
 void CourseEditorState::update(float delta)
@@ -202,24 +239,31 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	else if(focus == ON_FILE_MENU)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
+		{
+			sndCursorOut->stop();
+			sndCursorOut->play();
 			focus = ON_EDITOR;
+		}
 
 		if(key == Keyboard::KEY_ARROW_UP)
+		{
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menuFile.moveCursorUp();
+		}
 
 		if(key == Keyboard::KEY_ARROW_DOWN)
+		{
+			sndCursorMove->stop();
+			sndCursorMove->play();
 			menuFile.moveCursorDown();
+		}
 
 		if(key == Keyboard::KEY_ENTER)
 		{
-			course.clearDynamicData();
-			course = Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label);
-			course.setupDynamicData();
-			course.drawAreaWidth = boundsCourseView.w;
-			course.drawAreaHeight = boundsCourseView.h;
-			course.drawDistance = 300;
-			course.cameraDepth = 0.84;
-			focus = ON_EDITOR;
+			sndCursorIn->stop();
+			sndCursorIn->play();
+			loadCurrentlySelectedFile();
 		}
 	}
 }
@@ -239,9 +283,23 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	{
 		if(menuFile.bounds.contains(x, y))
 		{
+			sndCursorMove->stop();
+			sndCursorMove->play();
+			menuFile.setSelectedIndexByLocation(x, y);
+		}
+
+		if(boundsFileDialogButtonSelect.contains(x, y))
+		{
 			sndCursorIn->stop();
 			sndCursorIn->play();
-			menuFile.setSelectedIndexByLocation(x, y);
+			loadCurrentlySelectedFile();
+		}
+
+		if(boundsFileDialogButtonCancel.contains(x, y))
+		{
+			sndCursorIn->stop();
+			sndCursorIn->play();
+			focus = ON_EDITOR;
 		}
 	}
 }
@@ -257,4 +315,16 @@ void CourseEditorState::reloadFileList()
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 		if(ends_with(courseFiles[i], ".properties"))
 			menuFile.addEntry(courseFiles[i]);
+}
+
+void CourseEditorState::loadCurrentlySelectedFile()
+{
+	course.clearDynamicData();
+	course = Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label);
+	course.setupDynamicData();
+	course.drawAreaWidth = boundsCourseView.w;
+	course.drawAreaHeight = boundsCourseView.h;
+	course.drawDistance = 300;
+	course.cameraDepth = 0.84;
+	focus = ON_EDITOR;
 }

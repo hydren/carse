@@ -89,6 +89,10 @@ void CourseEditorState::onEnter()
 	boundsButtonSave = boundsButtonLoad;
 	boundsButtonSave.x += boundsButtonLoad.w + widgetSpacing;
 
+	boundsButtonGenerate = boundsButtonNew;
+	boundsButtonGenerate.w *= 2;
+	boundsButtonGenerate.y += boundsButtonNew.h + widgetSpacing;
+
 	boundsFileDialog.x = 0.20*dw;
 	boundsFileDialog.y = 0.25*dh;
 	boundsFileDialog.w = 0.50*dw;
@@ -118,13 +122,7 @@ void CourseEditorState::onEnter()
 	offset.y = boundsMap.y;
 	scale.x = scale.y = 1.f;
 
-	course.clearDynamicData();
-	course = Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000));
-	course.setupDynamicData();
-	course.drawAreaWidth = boundsCourseView.w;
-	course.drawAreaHeight = boundsCourseView.h;
-	course.drawDistance = 300;
-	course.cameraDepth = 0.84;
+	this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
 }
 
 void CourseEditorState::onLeave()
@@ -132,7 +130,7 @@ void CourseEditorState::onLeave()
 
 void CourseEditorState::render()
 {
-	const float widgetSpacing = 0.01*game.getDisplay().getHeight();
+	const float widgetSpacing = 0.007*game.getDisplay().getHeight();
 
 	Graphics::drawFilledRectangle(boundsCourseView, Color::CYAN);
 	course.draw(0, 0.5*course.drawAreaWidth);
@@ -152,7 +150,10 @@ void CourseEditorState::render()
 	font->drawText("Load", boundsButtonLoad.x, boundsButtonLoad.y, Color::BLACK);
 
 	Graphics::drawFilledRectangle(boundsButtonSave, Color::GREY);
-	font->drawText("Save", boundsButtonSave.x, boundsButtonSave.y, Color::BLACK);
+	font->drawText("Save", boundsButtonSave.x, boundsButtonSave.y, Color::DARK_GREY);
+
+	Graphics::drawFilledRectangle(boundsButtonGenerate, Color::GREY);
+	font->drawText("Generate", boundsButtonGenerate.x, boundsButtonGenerate.y, Color::BLACK);
 
 	if(focus == ON_EDITOR and cos(20*fgeal::uptime()) > 0)
 	{
@@ -160,8 +161,10 @@ void CourseEditorState::render()
 			Graphics::drawRectangle(getSpacedOutline(boundsButtonNew, widgetSpacing), Color::RED);
 		else if(boundsButtonLoad.contains(Mouse::getPosition()))
 			Graphics::drawRectangle(getSpacedOutline(boundsButtonLoad, widgetSpacing), Color::RED);
-		else if(boundsButtonSave.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(boundsButtonSave, widgetSpacing), Color::RED);
+//		else if(boundsButtonSave.contains(Mouse::getPosition()))
+//			Graphics::drawRectangle(getSpacedOutline(boundsButtonSave, widgetSpacing), Color::RED);
+		else if(boundsButtonGenerate.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(boundsButtonGenerate, widgetSpacing), Color::RED);
 	}
 
 
@@ -263,7 +266,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		{
 			sndCursorIn->stop();
 			sndCursorIn->play();
-			loadCurrentlySelectedFile();
+			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label));
 		}
 	}
 }
@@ -272,11 +275,25 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
 	if(focus == ON_EDITOR)
 	{
+		if(boundsButtonNew.contains(x, y))
+		{
+			sndCursorIn->stop();
+			sndCursorIn->play();
+			this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
+		}
+
 		if(boundsButtonLoad.contains(x, y))
 		{
 			sndCursorIn->stop();
 			sndCursorIn->play();
 			focus = ON_FILE_MENU;
+		}
+
+		if(boundsButtonGenerate.contains(x, y))
+		{
+			sndCursorIn->stop();
+			sndCursorIn->play();
+			this->loadCourse(Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5));
 		}
 	}
 	else if(focus == ON_FILE_MENU)
@@ -292,7 +309,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->stop();
 			sndCursorIn->play();
-			loadCurrentlySelectedFile();
+			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label));
 		}
 
 		if(boundsFileDialogButtonCancel.contains(x, y))
@@ -317,10 +334,10 @@ void CourseEditorState::reloadFileList()
 			menuFile.addEntry(courseFiles[i]);
 }
 
-void CourseEditorState::loadCurrentlySelectedFile()
+void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 {
 	course.clearDynamicData();
-	course = Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label);
+	course = c;
 	course.setupDynamicData();
 	course.drawAreaWidth = boundsCourseView.w;
 	course.drawAreaHeight = boundsCourseView.h;

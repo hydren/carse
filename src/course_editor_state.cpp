@@ -93,28 +93,24 @@ void CourseEditorState::onEnter()
 	boundsButtonGenerate.w *= 2;
 	boundsButtonGenerate.y += boundsButtonNew.h + widgetSpacing;
 
-	boundsFileDialog.x = 0.20*dw;
-	boundsFileDialog.y = 0.25*dh;
-	boundsFileDialog.w = 0.50*dw;
-	boundsFileDialog.h = 0.50*dh;
+	boundsFileDialog.x = 0.15*dw;
+	boundsFileDialog.y = 0.20*dh;
+	boundsFileDialog.w = 0.70*dw;
+	boundsFileDialog.h = 0.55*dh;
 
-	menuFile.bounds.x = 1.05*boundsFileDialog.x;
-	menuFile.bounds.y = 1.05*boundsFileDialog.y;
-	menuFile.bounds.w = 0.95*boundsFileDialog.w;
-	menuFile.bounds.h = 0.83*boundsFileDialog.h;
+	menuFile.bounds.x = boundsFileDialog.x + widgetSpacing;
+	menuFile.bounds.y = boundsFileDialog.y + widgetSpacing;
+	menuFile.bounds.w = boundsFileDialog.w - widgetSpacing*2;
+	menuFile.bounds.h = boundsFileDialog.h - widgetSpacing*2 - font->getHeight();
 
-	boundsFileDialog.x = 0.20*dw;
-	boundsFileDialog.y = 0.25*dh;
-	boundsFileDialog.w = 0.50*dw;
-	boundsFileDialog.h = 0.50*dh;
-
-	boundsFileDialogButtonSelect.w = 0.20*boundsFileDialog.w;
-	boundsFileDialogButtonSelect.h = 0.10*boundsFileDialog.h;
-	boundsFileDialogButtonSelect.x = 0.55*(boundsFileDialog.x + boundsFileDialog.w - boundsFileDialogButtonSelect.w);
+	boundsFileDialogButtonSelect.w = 1.1*font->getTextWidth("Select");
+	boundsFileDialogButtonSelect.h = 1.1*font->getHeight();
+	boundsFileDialogButtonSelect.x = 0.5*(boundsFileDialog.x + boundsFileDialog.w - boundsFileDialogButtonSelect.w);
 	boundsFileDialogButtonSelect.y = boundsFileDialog.y + boundsFileDialog.h - 1.2*boundsFileDialogButtonSelect.h;
 
 	boundsFileDialogButtonCancel = boundsFileDialogButtonSelect;
-	boundsFileDialogButtonCancel.x += boundsFileDialogButtonSelect.w * 1.1;
+	boundsFileDialogButtonSelect.w = 1.1*font->getTextWidth("Cancel");
+	boundsFileDialogButtonCancel.x += boundsFileDialogButtonSelect.w + widgetSpacing;
 
 	focus = ON_EDITOR;
 
@@ -175,8 +171,8 @@ void CourseEditorState::render()
 
 	if(focus == ON_FILE_MENU)
 	{
-		Graphics::drawFilledRectangle(boundsFileDialog, Color::GREY);
-		Graphics::drawRectangle(boundsFileDialog, Color::DARK_GREY);
+		Graphics::drawFilledRoundedRectangle(boundsFileDialog, 10, Color::GREY);
+		Graphics::drawRoundedRectangle(boundsFileDialog, 10, Color::DARK_GREY);
 
 		menuFile.draw();
 

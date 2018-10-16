@@ -29,21 +29,20 @@ int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game),
-  menuFile(null), font(null),
-  sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   focus(ON_EDITOR)
 {}
 
 CourseEditorState::~CourseEditorState()
 {
-	if(menuFile != null) delete menuFile;
 	if(font != null) delete font;
 }
 
 void CourseEditorState::initialize()
 {
 	Display& display = game.getDisplay();
-	menuFile = new fgeal::Menu(fgeal::Rectangle(), &game.sharedResources->fontDev, Color::GREEN);
+	menuFile.setFont(&game.sharedResources->fontDev);
+	menuFile.setColor(Color::GREEN);
 	font = new Font(game.sharedResources->font1Path, dip(15));
 
 	// loan some shared resources
@@ -58,10 +57,10 @@ void CourseEditorState::onEnter()
 	const unsigned dw = display.getWidth(), dh = display.getHeight();
 	const float widgetSpacing = 0.02*dh;
 
-	menuFile->bounds.x = 0.20*dw;
-	menuFile->bounds.y = 0.25*dh;
-	menuFile->bounds.w = 0.50*dw;
-	menuFile->bounds.h = 0.50*dh;
+	menuFile.bounds.x = 0.20*dw;
+	menuFile.bounds.y = 0.25*dh;
+	menuFile.bounds.w = 0.50*dw;
+	menuFile.bounds.h = 0.50*dh;
 
 	reloadFileList();
 
@@ -154,7 +153,7 @@ void CourseEditorState::render()
 	course.drawMap(Color::RED, offset, scale, boundsMap);
 
 	if(focus == ON_FILE_MENU)
-		menuFile->draw();
+		menuFile.draw();
 }
 
 void CourseEditorState::update(float delta)
@@ -206,15 +205,15 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 			focus = ON_EDITOR;
 
 		if(key == Keyboard::KEY_ARROW_UP)
-			menuFile->moveCursorUp();
+			menuFile.moveCursorUp();
 
 		if(key == Keyboard::KEY_ARROW_DOWN)
-			menuFile->moveCursorDown();
+			menuFile.moveCursorDown();
 
 		if(key == Keyboard::KEY_ENTER)
 		{
 			course.clearDynamicData();
-			course = Pseudo3DCourse::parseCourseSpecFromFile(menuFile->getSelectedEntry().label);
+			course = Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label);
 			course.setupDynamicData();
 			course.drawAreaWidth = boundsCourseView.w;
 			course.drawAreaHeight = boundsCourseView.h;
@@ -238,11 +237,11 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	}
 	else if(focus == ON_FILE_MENU)
 	{
-		if(menuFile->bounds.contains(x, y))
+		if(menuFile.bounds.contains(x, y))
 		{
 			sndCursorIn->stop();
 			sndCursorIn->play();
-			menuFile->setSelectedIndexByLocation(x, y);
+			menuFile.setSelectedIndexByLocation(x, y);
 		}
 	}
 }
@@ -250,12 +249,12 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 void CourseEditorState::reloadFileList()
 {
 	// clear menu
-	while(not menuFile->getEntries().empty())
-		menuFile->removeEntry(0);
+	while(not menuFile.getEntries().empty())
+		menuFile.removeEntry(0);
 
 	// populate menu
 	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::COURSES_FOLDER);
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 		if(ends_with(courseFiles[i], ".properties"))
-			menuFile->addEntry(courseFiles[i]);
+			menuFile.addEntry(courseFiles[i]);
 }

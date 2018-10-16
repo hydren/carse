@@ -23,7 +23,7 @@ class CourseEditorState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
-	fgeal::Menu* menuFile;
+	fgeal::Menu menuFile;
 
 	fgeal::Font* font;
 

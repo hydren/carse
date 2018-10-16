@@ -261,7 +261,6 @@ Pseudo3DCourse::Spec Pseudo3DCourse::generateDebugCourseSpec(float segmentLength
 Pseudo3DCourse::Spec Pseudo3DCourse::generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness)
 {
 	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
-	srand(time(null));
 
 	float currentCurve = 0;
 

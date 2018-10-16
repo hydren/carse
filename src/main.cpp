@@ -157,6 +157,7 @@ int main(int argc, char** argv)
 	try
 	{
 		runSplash();
+		srand(time(null));
 		CarseGame game;
 		if(argRace.isSet())
 		{

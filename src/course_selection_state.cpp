@@ -36,13 +36,14 @@ enum SettingsMenuIndex
 	SETTINGS_LAPS = 1
 };
 
+static const string TITLE_TEXT = "Choose a course";
+
 int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(CarseGame* game)
 : State(*game), game(*game),
   background(null), imgRandom(null), imgCircuit(null), imgCourseEditor(null),
   fontMain(null), fontInfo(null),
-  menuCourse(null), menuSettings(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   isLoadedCourseSelected(false), isDebugCourseSelected(false),
   status(STATUS_HOVERING_COURSE_LIST)
@@ -56,8 +57,6 @@ CourseSelectionState::~CourseSelectionState()
 	if(imgCourseEditor != null) delete imgCourseEditor;
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
-	if(menuCourse != null) delete menuCourse;
-	if(menuSettings != null) delete menuSettings;
 }
 
 void CourseSelectionState::initialize()
@@ -72,28 +71,26 @@ void CourseSelectionState::initialize()
 	fontMain = new Font(game.sharedResources->font2Path, dip(32));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(14));
 
-	menuCourse = new Menu();
-	menuCourse->setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
-	menuCourse->setColor(Color::RED);
-	menuCourse->bgColor = Color(0, 0, 0, 128);
-	menuCourse->borderColor = Color(0, 0, 0, 192);
-	menuCourse->focusedEntryFontColor = Color::WHITE;
+	menuCourse.setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
+	menuCourse.setColor(Color::RED);
+	menuCourse.bgColor = Color(0, 0, 0, 128);
+	menuCourse.borderColor = Color(0, 0, 0, 192);
+	menuCourse.focusedEntryFontColor = Color::WHITE;
 
-	menuCourse->addEntry("<Random course>");
-	menuCourse->addEntry("<Debug course>");
+	menuCourse.addEntry("<Random course>");
+	menuCourse.addEntry("<Debug course>");
 	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
 	for(unsigned i = 0; i < courses.size(); i++)
-		menuCourse->addEntry((string) courses[i]);
+		menuCourse.addEntry((string) courses[i]);
 
-	menuSettings = new Menu();
-	menuSettings->setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
-	menuSettings->setColor(Color::RED);
-	menuSettings->bgColor = menuCourse->bgColor;
-	menuSettings->borderColor = menuCourse->borderColor;
-	menuSettings->focusedEntryFontColor = menuCourse->focusedEntryFontColor;
-	menuSettings->addEntry("Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType));
-	menuSettings->addEntry("Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal));
-	menuSettings->cursorWrapAroundEnabled = false;
+	menuSettings.setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
+	menuSettings.setColor(Color::RED);
+	menuSettings.bgColor = menuCourse.bgColor;
+	menuSettings.borderColor = menuCourse.borderColor;
+	menuSettings.focusedEntryFontColor = menuCourse.focusedEntryFontColor;
+	menuSettings.addEntry("Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType));
+	menuSettings.addEntry("Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal));
+	menuSettings.cursorWrapAroundEnabled = false;
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -103,6 +100,43 @@ void CourseSelectionState::initialize()
 
 void CourseSelectionState::onEnter()
 {
+	const float displayWidth = game.getDisplay().getWidth(),
+				displayHeight = game.getDisplay().getHeight(),
+				focusSpacing = displayHeight*0.01;
+
+	titleBounds.x = 0.5f*(displayWidth - fontMain->getTextWidth(TITLE_TEXT));
+	titleBounds.y = (1/32.f)*displayHeight;
+	titleBounds.w = fontMain->getTextWidth(TITLE_TEXT);
+	titleBounds.h = fontMain->getHeight();
+
+	paneBounds.x = (1/64.f)*displayWidth;
+	paneBounds.y = titleBounds.y + titleBounds.h + (1/64.f)*displayHeight;
+	paneBounds.w = (62/64.f)*displayWidth;
+	paneBounds.h = displayHeight - titleBounds.h - titleBounds.y - (2/64.f)*displayHeight;
+
+	portraitBounds.x = paneBounds.x + (1/32.f)*paneBounds.w;
+	portraitBounds.y = paneBounds.y + (1/32.f)*paneBounds.h;
+	portraitBounds.w = (1/4.f)*paneBounds.h;
+	portraitBounds.h = (1/4.f)*paneBounds.h;
+
+	portraitImgBounds.x = portraitBounds.x + portraitBounds.w*0.02f;
+	portraitImgBounds.y = portraitBounds.y + portraitBounds.h*0.02f;
+	portraitImgBounds.w = portraitBounds.w * 0.96f;
+	portraitImgBounds.h = portraitBounds.h * 0.96f;
+
+	courseEditorPortraitBounds = portraitImgBounds;
+	courseEditorPortraitBounds.x = paneBounds.x + paneBounds.w - portraitImgBounds.w - 2*focusSpacing;
+
+	menuCourse.bounds.x = portraitBounds.x;
+	menuCourse.bounds.y = portraitBounds.y + portraitBounds.h + (1/32.f)*paneBounds.h;
+	menuCourse.bounds.w = paneBounds.w - menuCourse.bounds.x;
+	menuCourse.bounds.h = (paneBounds.w - portraitBounds.h)/4;
+
+	menuSettings.bounds.x = menuCourse.bounds.x;
+	menuSettings.bounds.y = menuCourse.bounds.y + menuCourse.bounds.h + 4*focusSpacing;
+	menuSettings.bounds.w = menuCourse.bounds.w;
+	menuSettings.bounds.h = (paneBounds.w - portraitBounds.h)/4;
+
 	status = STATUS_HOVERING_COURSE_LIST;
 }
 
@@ -114,117 +148,60 @@ void CourseSelectionState::render()
 	Display& display = game.getDisplay();
 	display.clear();
 
+	const float focusSpacing = display.getHeight()*0.01;
+
 	background->drawScaled(0, 0, scaledToSize(background, display));
 
-	const float displayWidth = display.getWidth(),
-				displayHeight = display.getHeight(),
-				focusSpacing = display.getHeight()*0.01;
-
-	const string txtChooseCourse = "Choose a course";
-	const Rectangle titleBounds = {0.5f*(displayWidth - fontMain->getTextWidth(txtChooseCourse)), (1/32.f)*displayHeight,
-								   fontMain->getTextWidth(txtChooseCourse), fontMain->getHeight()};
-	fontMain->drawText(txtChooseCourse, titleBounds.x, titleBounds.y, Color::WHITE);
-
-	const Rectangle paneBounds = {(1/64.f)*displayWidth, titleBounds.y + titleBounds.h + (1/64.f)*displayHeight,
-								 (62/64.f)*displayWidth, displayHeight - titleBounds.h - titleBounds.y - (2/64.f)*displayHeight};
+	fontMain->drawText(TITLE_TEXT, titleBounds.x, titleBounds.y, Color::WHITE);
 
 	// draw panel bg
 	fgeal::Graphics::drawFilledRectangle(paneBounds, Color(0,0,0, 96));
 
-	const Rectangle portraitBounds = {
-			paneBounds.x + (1/32.f)*paneBounds.w,
-			paneBounds.y + (1/32.f)*paneBounds.h,
-			(1/4.f)*paneBounds.h,
-			(1/4.f)*paneBounds.h
-	};
 	// portrait frame
 	fgeal::Graphics::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
 
-	const Rectangle portraitImgBounds = {
-			portraitBounds.x + portraitBounds.w*0.02f,
-			portraitBounds.y + portraitBounds.h*0.02f,
-			portraitBounds.w * 0.96f,
-			portraitBounds.h * 0.96f
-	};
-
 	// draw portrait
-	if(menuCourse->getSelectedIndex() == 0)
+	if(menuCourse.getSelectedIndex() == 0)
 		imgRandom->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgRandom, portraitImgBounds));
 	else
 		// todo choose correct portrait based on course specification
 		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
 
 	// draw course editor portrait
-	imgCourseEditor->drawScaled(paneBounds.x + paneBounds.w - portraitImgBounds.w - 2*focusSpacing, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
+	imgCourseEditor->drawScaled(courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, scaledToRect(imgCourseEditor, courseEditorPortraitBounds));
+	fontInfo->drawText("Course editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, Color::WHITE);
+	if(status == STATUS_HOVERING_COURSE_EDITOR_PORTRAIT and cos(20*fgeal::uptime()) > 0)
+		fgeal::Graphics::drawRectangle(getSpacedOutline(courseEditorPortraitBounds, focusSpacing), Color::RED);
 
-	fontInfo->drawText("Course editor", paneBounds.x + paneBounds.w - portraitImgBounds.w - 2*focusSpacing, portraitImgBounds.y, Color::WHITE);
-
-
-	// update menu bounds
-	menuCourse->bounds.x = portraitBounds.x;
-	menuCourse->bounds.y = portraitBounds.y + portraitBounds.h + (1/32.f)*paneBounds.h;
-	menuCourse->bounds.w = paneBounds.w - menuCourse->bounds.x;
-	menuCourse->bounds.h = (paneBounds.w - portraitBounds.h)/4;
-
-	menuCourse->draw();
+	// draw course list
+	menuCourse.draw();
+	if(status == STATUS_ON_COURSE_LIST_SELECTION or (status == STATUS_HOVERING_COURSE_LIST and cos(20*fgeal::uptime()) > 0))
+		fgeal::Graphics::drawRectangle(getSpacedOutline(menuCourse.bounds, focusSpacing), Color::RED);
 
 	// draw info
-	fontInfo->drawText(menuCourse->getSelectedEntry().label, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y, Color::WHITE);
-	if(menuCourse->getSelectedIndex() > 1)
+	fontInfo->drawText(menuCourse.getSelectedEntry().label, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y, Color::WHITE);
+	if(menuCourse.getSelectedIndex() > 1)
 	{
-		const Pseudo3DCourse::Spec& course = game.logic.getCourseList()[menuCourse->getSelectedIndex() - 2];
+		const Pseudo3DCourse::Spec& course = game.logic.getCourseList()[menuCourse.getSelectedIndex() - 2];
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
 		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getHeight(), Color::WHITE);
 	}
 
 	// draw race settings
-	menuSettings->bounds.x = menuCourse->bounds.x;
-	menuSettings->bounds.y = menuCourse->bounds.y + menuCourse->bounds.h + 4*focusSpacing;
-	menuSettings->bounds.w = menuCourse->bounds.w;
-	menuSettings->bounds.h = (paneBounds.w - portraitBounds.h)/4;
-	menuSettings->draw();
-
-	if(cos(20*fgeal::uptime()) > 0 or status == STATUS_ON_COURSE_LIST_SELECTION)
-	{
-		const Rectangle courseListFocusArea = {
-			menuCourse->bounds.x - focusSpacing,
-			menuCourse->bounds.y - focusSpacing,
-			menuCourse->bounds.w + 2*focusSpacing,
-			menuCourse->bounds.h + 2*focusSpacing
-		},
-		settingsFocusArea = {
-			courseListFocusArea.x,
-			courseListFocusArea.y + courseListFocusArea.h + focusSpacing,
-			courseListFocusArea.w,
-			menuSettings->bounds.h + 3*focusSpacing,
-		},
-		courseEditorPortrairFocusArea = {
-			paneBounds.x + paneBounds.w - portraitImgBounds.w - 3*focusSpacing,
-			portraitImgBounds.y - focusSpacing,
-			portraitImgBounds.w + 2*focusSpacing,
-			portraitImgBounds.h + 2*focusSpacing
-		};
-
-		switch(status)
-		{
-			case STATUS_ON_COURSE_LIST_SELECTION:
-			case STATUS_HOVERING_COURSE_LIST: fgeal::Graphics::drawRectangle(courseListFocusArea, Color::RED); break;
-			case STATUS_HOVERING_SETTINGS_LIST: fgeal::Graphics::drawRectangle(settingsFocusArea, Color::RED); break;
-			case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT: fgeal::Graphics::drawRectangle(courseEditorPortrairFocusArea, Color::RED); break;
-			default:break;
-		}
-	}
+	menuSettings.draw();
+	if(status == STATUS_HOVERING_SETTINGS_LIST and cos(20*fgeal::uptime()) > 0)
+		fgeal::Graphics::drawRectangle(getSpacedOutline(menuSettings.bounds, focusSpacing), Color::RED);
 }
 
 void CourseSelectionState::update(float delta) {}
 
 void CourseSelectionState::updateLapCount()
 {
-	if(menuSettings->getEntryAt(1).enabled)
-		menuSettings->getEntryAt(1).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
+	if(menuSettings.getEntryAt(1).enabled)
+		menuSettings.getEntryAt(1).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
 	else
-		menuSettings->getEntryAt(1).label = "Laps: --";
+		menuSettings.getEntryAt(1).label = "Laps: --";
 }
 
 void CourseSelectionState::onKeyPressed(Keyboard::Key key)
@@ -234,7 +211,7 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 		sndCursorOut->stop();
 		sndCursorOut->play();
 		if(isLoadedCourseSelected)
-			game.logic.setNextCourse(menuCourse->getSelectedIndex()-2);
+			game.logic.setNextCourse(menuCourse.getSelectedIndex()-2);
 		else if(isDebugCourseSelected)
 			game.logic.setNextCourseDebug();
 		else
@@ -288,12 +265,12 @@ void CourseSelectionState::handleInputOnCourseList(fgeal::Keyboard::Key key)
 		case Keyboard::KEY_ARROW_UP:
 			sndCursorMove->stop();
 			sndCursorMove->play();
-			menuCourse->moveCursorUp();
+			menuCourse.moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
 			sndCursorMove->stop();
 			sndCursorMove->play();
-			menuCourse->moveCursorDown();
+			menuCourse.moveCursorDown();
 			break;
 		case Keyboard::KEY_ENTER:
 		case Keyboard::KEY_ESCAPE:
@@ -305,8 +282,8 @@ void CourseSelectionState::handleInputOnCourseList(fgeal::Keyboard::Key key)
 			break;
 	}
 
-	isDebugCourseSelected = (menuCourse->getSelectedIndex() == 1);
-	isLoadedCourseSelected = (menuCourse->getSelectedIndex() > 1);
+	isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+	isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 }
 
 void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
@@ -319,7 +296,7 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
 			sndCursorMove->stop();
 			sndCursorMove->play();
-			switch(menuSettings->getSelectedIndex())
+			switch(menuSettings.getSelectedIndex())
 			{
 				case SETTINGS_RACE_TYPE:  // race type
 				{
@@ -336,15 +313,15 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 							nextType = game.logic.getNextRaceSettings().raceType+1;
 
 					game.logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
-					menuSettings->getEntryAt(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType);
-					menuSettings->getEntryAt(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(game.logic.getNextRaceSettings().raceType);
+					menuSettings.getEntryAt(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType);
+					menuSettings.getEntryAt(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(game.logic.getNextRaceSettings().raceType);
 					updateLapCount();
 					break;
 				}
 				case SETTINGS_LAPS:  // laps
 				{
 					// if not a loop type race, do nothing
-					if(not menuSettings->getEntryAt(SETTINGS_LAPS).enabled)
+					if(not menuSettings.getEntryAt(SETTINGS_LAPS).enabled)
 						break;
 
 					if(isCursorLeft)
@@ -365,15 +342,15 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 		case Keyboard::KEY_ARROW_UP:
 			sndCursorMove->stop();
 			sndCursorMove->play();
-			if(menuSettings->getSelectedIndex() == 0)
+			if(menuSettings.getSelectedIndex() == 0)
 				status = STATUS_HOVERING_COURSE_LIST;
 			else
-				menuSettings->moveCursorUp();
+				menuSettings.moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
 			sndCursorMove->stop();
 			sndCursorMove->play();
-			menuSettings->moveCursorDown();
+			menuSettings.moveCursorDown();
 			break;
 		default:
 			break;

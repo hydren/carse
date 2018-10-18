@@ -203,14 +203,12 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 	switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			sndCursorOut->stop();
 			sndCursorOut->play();
 			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
 			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
 			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->menuSelectionAction();
 			break;
@@ -233,7 +231,6 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 				selectionTransitionProgress = 0;
 
 				menu->moveCursorUp();
-				game.sharedResources->sndCursorMove.stop();
 				game.sharedResources->sndCursorMove.play();
 			}
 			break;
@@ -246,7 +243,6 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 				selectionTransitionProgress = 0;
 
 				menu->moveCursorDown();
-				game.sharedResources->sndCursorMove.stop();
 				game.sharedResources->sndCursorMove.play();
 			}
 			break;
@@ -329,7 +325,6 @@ void VehicleSelectionShowroomLayoutState::changeSprite(bool forward)
 	VehiclePreview& preview = previews[menu->getSelectedIndex()];
 	if(not preview.altSprites.empty())
 	{
-		sndCursorMove->stop();
 		sndCursorMove->play();
 
 		if(forward)

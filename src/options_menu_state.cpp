@@ -125,22 +125,18 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 	else switch(key)
 	{
 		case Keyboard::KEY_ESCAPE:
-			sndCursorOut->stop();
 			sndCursorOut->play();
 			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->onMenuSelect();
 			break;
 		case Keyboard::KEY_ARROW_UP:
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menu->moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menu->moveCursorDown();
 			break;

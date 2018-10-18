@@ -95,7 +95,6 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ENTER:
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			switch(menu->getSelectedIndex())
 			{
@@ -110,13 +109,11 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 
 		case Keyboard::KEY_ARROW_UP:
 			menu->moveCursorUp();
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			break;
 
 		case Keyboard::KEY_ARROW_DOWN:
 			menu->moveCursorDown();
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			break;
 

@@ -239,28 +239,24 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
 		{
-			sndCursorOut->stop();
 			sndCursorOut->play();
 			focus = ON_EDITOR;
 		}
 
 		if(key == Keyboard::KEY_ARROW_UP)
 		{
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menuFile.moveCursorUp();
 		}
 
 		if(key == Keyboard::KEY_ARROW_DOWN)
 		{
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menuFile.moveCursorDown();
 		}
 
 		if(key == Keyboard::KEY_ENTER)
 		{
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label));
 		}
@@ -273,21 +269,18 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	{
 		if(boundsButtonNew.contains(x, y))
 		{
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
 		}
 
 		if(boundsButtonLoad.contains(x, y))
 		{
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			focus = ON_FILE_MENU;
 		}
 
 		if(boundsButtonGenerate.contains(x, y))
 		{
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5));
 		}
@@ -296,21 +289,18 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	{
 		if(menuFile.bounds.contains(x, y))
 		{
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menuFile.setSelectedIndexByLocation(x, y);
 		}
 
 		if(boundsFileDialogButtonSelect.contains(x, y))
 		{
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label));
 		}
 
 		if(boundsFileDialogButtonCancel.contains(x, y))
 		{
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			focus = ON_EDITOR;
 		}

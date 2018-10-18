@@ -217,7 +217,6 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ENTER:
-			sndCursorIn->stop();
 			sndCursorIn->play();
 			this->onMenuAccept();
 			break;
@@ -226,7 +225,6 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 2 or selectedItemIndex == 4)
 			{
 				selectedItemIndex--;
-				sndCursorMove->stop();
 				sndCursorMove->play();
 			}
 			break;
@@ -235,7 +233,6 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 1 or selectedItemIndex == 3)
 			{
 				selectedItemIndex++;
-				sndCursorMove->stop();
 				sndCursorMove->play();
 			}
 			break;
@@ -244,7 +241,6 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 0 or selectedItemIndex == 3 or selectedItemIndex == 4)
 			{
 				selectedItemIndex = (selectedItemIndex == 0? 1 : 0);
-				sndCursorMove->stop();
 				sndCursorMove->play();
 			}
 			break;
@@ -253,7 +249,6 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 			if(selectedItemIndex == 0 or selectedItemIndex == 1 or selectedItemIndex == 2)
 			{
 				selectedItemIndex = (selectedItemIndex == 0? 3 : 0);
-				sndCursorMove->stop();
 				sndCursorMove->play();
 			}
 			break;
@@ -275,7 +270,6 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 	const Point pt = {(float) x, (float) y};
 	if(slotMenuItemRace.contains(pt))
 	{
-		sndCursorIn->stop();
 		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_RACE;
 		this->onMenuAccept();
@@ -283,7 +277,6 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 
 	if(slotMenuItemCourse.contains(pt))
 	{
-		sndCursorIn->stop();
 		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_COURSE;
 		this->onMenuAccept();
@@ -291,7 +284,6 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 
 	if(slotMenuItemVehicle.contains(pt))
 	{
-		sndCursorIn->stop();
 		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_VEHICLE;
 		this->onMenuAccept();
@@ -299,7 +291,6 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 
 	if(slotMenuItemSettings.contains(pt))
 	{
-		sndCursorIn->stop();
 		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_SETTINGS;
 		this->onMenuAccept();
@@ -307,7 +298,6 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 
 	if(slotMenuItemExit.contains(pt))
 	{
-		sndCursorIn->stop();
 		sndCursorIn->play();
 		selectedItemIndex = MENU_ITEM_EXIT;
 		this->onMenuAccept();
@@ -319,35 +309,30 @@ void MainMenuClassicPanelState::onMouseMoved(int oldx, int oldy, int newx, int n
 	const Point pt = {(float) newx, (float) newy};
 	if(slotMenuItemRace.contains(pt) and selectedItemIndex != MENU_ITEM_RACE)
 	{
-		sndCursorMove->stop();
 		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_RACE;
 	}
 
 	if(slotMenuItemCourse.contains(pt) and selectedItemIndex != MENU_ITEM_COURSE)
 	{
-		sndCursorMove->stop();
 		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_COURSE;
 	}
 
 	if(slotMenuItemVehicle.contains(pt) and selectedItemIndex != MENU_ITEM_VEHICLE)
 	{
-		sndCursorMove->stop();
 		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_VEHICLE;
 	}
 
 	if(slotMenuItemSettings.contains(pt) and selectedItemIndex != MENU_ITEM_SETTINGS)
 	{
-		sndCursorMove->stop();
 		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_SETTINGS;
 	}
 
 	if(slotMenuItemExit.contains(pt) and selectedItemIndex != MENU_ITEM_EXIT)
 	{
-		sndCursorMove->stop();
 		sndCursorMove->play();
 		selectedItemIndex = MENU_ITEM_EXIT;
 	}

@@ -145,6 +145,32 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 	}
 }
 
+void OptionsMenuState::onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y)
+{
+	if(button == fgeal::Mouse::BUTTON_LEFT)
+	{
+		if(isResolutionMenuActive and menuResolution->bounds.contains(x, y))
+		{
+			sndCursorIn->play();
+			menuResolution->setSelectedIndexByLocation(x, y);
+			this->setResolution();
+		}
+		else if(menu->bounds.contains(x, y))
+		{
+			sndCursorIn->play();
+			this->onMenuSelect();
+		}
+	}
+}
+
+void OptionsMenuState::onMouseMoved(int oldx, int oldy, int x, int y)
+{
+	if(isResolutionMenuActive)
+		menuResolution->setSelectedIndexByLocation(x, y);
+	else
+		menu->setSelectedIndexByLocation(x, y);
+}
+
 void OptionsMenuState::onMenuSelect()
 {
 	if(menu->getSelectedIndex() == MENU_ITEM_RESOLUTION)
@@ -210,10 +236,8 @@ void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 			break;
 		case Keyboard::KEY_ENTER:
 		{
-			Display::Mode resolution = Display::Mode::getList()[menuResolution->getSelectedIndex()];
-			game.getDisplay().setSize(resolution.width, resolution.height);
-			updateFonts();
-			isResolutionMenuActive = false;
+			sndCursorIn->play();
+			this->setResolution();
 			break;
 		}
 		case Keyboard::KEY_ARROW_UP:
@@ -225,6 +249,14 @@ void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 		default:
 			break;
 	}
+}
+
+void OptionsMenuState::setResolution()
+{
+	Display::Mode resolution = Display::Mode::getList()[menuResolution->getSelectedIndex()];
+	game.getDisplay().setSize(resolution.width, resolution.height);
+	updateFonts();
+	isResolutionMenuActive = false;
 }
 
 void OptionsMenuState::updateFonts()

@@ -141,7 +141,14 @@ void CourseSelectionState::onEnter()
 }
 
 void CourseSelectionState::onLeave()
-{}
+{
+	if(isLoadedCourseSelected)
+		game.logic.setNextCourse(menuCourse.getSelectedIndex()-2);
+	else if(isDebugCourseSelected)
+		game.logic.setNextCourseDebug();
+	else
+		game.logic.setNextCourseRandom();
+}
 
 void CourseSelectionState::render()
 {
@@ -208,15 +215,7 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 {
 	if(key == Keyboard::KEY_ESCAPE and status != STATUS_ON_COURSE_LIST_SELECTION)
 	{
-		sndCursorOut->stop();
 		sndCursorOut->play();
-		if(isLoadedCourseSelected)
-			game.logic.setNextCourse(menuCourse.getSelectedIndex()-2);
-		else if(isDebugCourseSelected)
-			game.logic.setNextCourseDebug();
-		else
-			game.logic.setNextCourseRandom();
-
 		game.enterState(game.logic.currentMainMenuStateId);
 	}
 	else switch(status)
@@ -224,19 +223,16 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 		case STATUS_HOVERING_COURSE_LIST:
 			if(key == Keyboard::KEY_ENTER)
 			{
-				sndCursorIn->stop();
 				sndCursorIn->play();
 				status = STATUS_ON_COURSE_LIST_SELECTION;
 			}
 			else if(key == Keyboard::KEY_ARROW_DOWN)
 			{
-				sndCursorMove->stop();
 				sndCursorMove->play();
 				status = STATUS_HOVERING_SETTINGS_LIST;
 			}
 			else if(key == Keyboard::KEY_ARROW_UP)
 			{
-				sndCursorMove->stop();
 				sndCursorMove->play();
 				status = STATUS_HOVERING_COURSE_EDITOR_PORTRAIT;
 			}
@@ -244,10 +240,12 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 
 		case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT:
 			if(key == Keyboard::KEY_ENTER)
+			{
+				sndCursorIn->play();
 				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);
+			}
 			else if(key == Keyboard::KEY_ARROW_DOWN)
 			{
-				sndCursorMove->stop();
 				sndCursorMove->play();
 				status = STATUS_HOVERING_COURSE_LIST;
 			}
@@ -263,19 +261,16 @@ void CourseSelectionState::handleInputOnCourseList(fgeal::Keyboard::Key key)
 	switch(key)
 	{
 		case Keyboard::KEY_ARROW_UP:
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menuCourse.moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menuCourse.moveCursorDown();
 			break;
 		case Keyboard::KEY_ENTER:
 		case Keyboard::KEY_ESCAPE:
-			sndCursorIn->stop();
-			sndCursorIn->play();
+			sndCursorOut->play();
 			status = STATUS_HOVERING_COURSE_LIST;
 			break;
 		default:
@@ -294,7 +289,6 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 		case Keyboard::KEY_ARROW_RIGHT:
 		{
 			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			switch(menuSettings.getSelectedIndex())
 			{
@@ -340,7 +334,6 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 			break;
 		}
 		case Keyboard::KEY_ARROW_UP:
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			if(menuSettings.getSelectedIndex() == 0)
 				status = STATUS_HOVERING_COURSE_LIST;
@@ -348,12 +341,72 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 				menuSettings.moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			sndCursorMove->stop();
 			sndCursorMove->play();
 			menuSettings.moveCursorDown();
 			break;
 		default:
 			break;
+	}
+}
+
+void CourseSelectionState::onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y)
+{
+	if(button == fgeal::Mouse::BUTTON_LEFT)
+	{
+		switch(status)
+		{
+			case STATUS_HOVERING_COURSE_LIST:
+			{
+				sndCursorIn->play();
+				status = STATUS_ON_COURSE_LIST_SELECTION;
+				break;
+			}
+			case STATUS_ON_COURSE_LIST_SELECTION:
+			{
+				if(menuCourse.bounds.contains(x, y))
+				{
+					sndCursorMove->play();
+					menuCourse.setSelectedIndexByLocation(x, y);
+				}
+				else
+				{
+					sndCursorOut->play();
+					status = STATUS_HOVERING_COURSE_LIST;
+				}
+				break;
+			}
+			case STATUS_HOVERING_SETTINGS_LIST:
+			{
+				sndCursorMove->play();
+				menuSettings.setSelectedIndexByLocation(x, y);
+				break;
+			}
+			case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT:
+			{
+				sndCursorIn->play();
+				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);
+				break;
+			}
+		}
+	}
+}
+
+void CourseSelectionState::onMouseMoved(int oldx, int oldy, int x, int y)
+{
+	if(status != STATUS_ON_COURSE_LIST_SELECTION)
+	{
+		const MenuStatus oldStatus = status;
+		if(menuCourse.bounds.contains(x, y))
+			status = STATUS_HOVERING_COURSE_LIST;
+
+		if(menuSettings.bounds.contains(x, y))
+			status = STATUS_HOVERING_SETTINGS_LIST;
+
+		if(courseEditorPortraitBounds.contains(x, y))
+			status = STATUS_HOVERING_COURSE_EDITOR_PORTRAIT;
+
+		if(status != oldStatus)
+			sndCursorMove->play();
 	}
 }
 

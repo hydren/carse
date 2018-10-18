@@ -53,6 +53,8 @@ class CourseSelectionState extends public fgeal::Game::State
 	virtual void onLeave();
 
 	virtual void onKeyPressed(fgeal::Keyboard::Key k);
+	virtual void onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y);
+	virtual void onMouseMoved(int oldx, int oldy, int x, int y);
 
 	virtual void render();
 	virtual void update(float delta);

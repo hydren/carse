@@ -10,7 +10,6 @@
 #include "futil/random.h"
 
 #include <cstdlib>
-#include <ctime>
 #include <cmath>
 
 using std::string;

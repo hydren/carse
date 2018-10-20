@@ -10,6 +10,7 @@
 #include <stdexcept>
 
 #include <cstdlib>
+#include <ctime>
 
 #include <tclap/CmdLine.h>
 

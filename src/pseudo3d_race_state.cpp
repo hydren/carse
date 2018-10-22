@@ -695,7 +695,7 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 
 void Pseudo3DRaceState::drawVehicleShadow()
 {
-
+	//todo draw vehicle shadow here
 }
 
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
@@ -726,7 +726,10 @@ void Pseudo3DRaceState::update(float delta)
 		if(timerSceneFinish < 1)
 		{
 			onSceneFinish = false;
-			game.enterState(game.logic.currentMainMenuStateId);
+			if(game.logic.raceOnlyMode)
+				game.running = false;
+			else
+				game.enterState(game.logic.currentMainMenuStateId);
 		}
 	}
 

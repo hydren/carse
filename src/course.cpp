@@ -151,7 +151,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 void Pseudo3DCourse::drawMap(const Color& color, const Point& offset, const Vector2D& scale, const Rectangle& bounds)
 {
 	const Color color2(255-color.r, 255-color.g, 255-color.b);
-	Point p1 = offset;
+	Point p1 = { offset.x + bounds.x, offset.y + bounds.y };
 	float angle = 0;
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{

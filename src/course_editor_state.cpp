@@ -114,8 +114,8 @@ void CourseEditorState::onEnter()
 
 	focus = ON_EDITOR;
 
-	offset.x = boundsMap.x;
-	offset.y = boundsMap.y;
+	offset.x = 0.5*boundsMap.w;
+	offset.y = 0.5*boundsMap.h;
 	scale.x = scale.y = 1.f;
 
 	this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
@@ -196,6 +196,20 @@ void CourseEditorState::update(float delta)
 {
 	if(focus == ON_EDITOR)
 	{
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
+			offset.y -= 100*delta/scale.y;
+
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
+			offset.y += 100*delta/scale.y;
+
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
+			offset.x -= 100*delta/scale.x;
+
+		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
+			offset.x += 100*delta/scale.x;
+
+		const fgeal::Vector2D oldScale = scale;
+
 		if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
 			scale.y *= 1+delta;
 
@@ -214,17 +228,11 @@ void CourseEditorState::update(float delta)
 		if(Keyboard::isKeyPressed(Keyboard::KEY_S))
 			scale *= 1-delta;
 
-		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-			offset.y -= 100*delta/scale.y;
+		if(scale.x != oldScale.x)
+			offset.x *= oldScale.x/scale.x;
 
-		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
-			offset.y += 100*delta/scale.y;
-
-		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
-			offset.x -= 100*delta/scale.x;
-
-		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
-			offset.x += 100*delta/scale.x;
+		if(scale.y != oldScale.y)
+			offset.y *= oldScale.y/scale.y;
 	}
 }
 

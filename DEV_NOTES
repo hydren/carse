@@ -1,19 +1,9 @@
 # to do
 
 - Add documentation/example for the following working fields of vehicle specification
- vehicle_width
- vehicle_height
- vehicle_length
- vehicle_center_of_gravity_height
- vehicle_wheelbase
- transmission_efficiency
- vehicle_frontal_area
- vehicle_drag_coefficient
- vehicle_drag_area
- vehicle_lift_coefficient
- vehicle_lift_area
- vehicle_weight_distribuition
- sprite_asymmetric
+sprite_vehicle_height
+vehicle_width_height_ratio
+sprite_keep_aspect_ratio
 
 - Add mouse input on menus
 - Add gear shifting sounds

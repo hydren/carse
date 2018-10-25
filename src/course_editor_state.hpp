@@ -23,16 +23,17 @@ class CourseEditorState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
-	fgeal::Menu menuFile;
+	fgeal::Menu fileMenu;
 
 	fgeal::Font* font;
 
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
-	fgeal::Rectangle boundsMap, boundsCourseView, boundsStatusBar, boundsToolsPanel,
-		boundsButtonNew, boundsButtonLoad, boundsButtonSave,
-		boundsButtonGenerate,
-		boundsFileDialog, boundsFileDialogButtonSelect, boundsFileDialogButtonCancel;
+	fgeal::Rectangle mapBounds, courseViewBounds, statusBarBounds, toolsPanelBounds,
+		newButtonBounds, loadButtonBounds, saveButtonBounds,
+		generateButtonBounds,
+		loadDialogBounds, loadDialogButtonSelectBounds, loadDialogButtonCancelBounds,
+		saveDialogBounds, saveDialogFilenameTextFieldBounds, saveDialogSaveButtonBounds, saveDialogCancelButtonBounds;
 
 	Pseudo3DCourse course;
 
@@ -40,12 +41,17 @@ class CourseEditorState extends public fgeal::Game::State
 
 	fgeal::Vector2D scale;
 
+	std::string saveDialogFilename;
+
 	enum StateFocus
 	{
 		ON_EDITOR,
 		ON_FILE_MENU,
+		ON_SAVE_DIALOG,
 	}
 	focus;
+
+	int saveDialogFilenameTextFieldCaretPosition;
 
 	public:
 	virtual int getId();

@@ -25,12 +25,14 @@ using std::string;
 using futil::ends_with;
 using futil::Properties;
 
+static char parseKeyStroke(fgeal::Keyboard::Key key);
+
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game),
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
-  focus(ON_EDITOR)
+  focus(), saveDialogFilenameTextFieldCaretPosition()
 {}
 
 CourseEditorState::~CourseEditorState()
@@ -41,8 +43,8 @@ CourseEditorState::~CourseEditorState()
 void CourseEditorState::initialize()
 {
 	Display& display = game.getDisplay();
-	menuFile.setFont(&game.sharedResources->fontDev);
-	menuFile.setColor(Color::GREEN);
+	fileMenu.setFont(&game.sharedResources->fontDev);
+	fileMenu.setColor(Color::GREEN);
 	font = new Font(game.sharedResources->font1Path, dip(15));
 
 	// loan some shared resources
@@ -59,63 +61,84 @@ void CourseEditorState::onEnter()
 
 	reloadFileList();
 
-	boundsMap.x = 0.25*dw;
-	boundsMap.y = 0;
-	boundsMap.w = 0.75*dw;
-	boundsMap.h = 0.95*dh;
+	mapBounds.x = 0.25*dw;
+	mapBounds.y = 0;
+	mapBounds.w = 0.75*dw;
+	mapBounds.h = 0.95*dh;
 
-	boundsCourseView.x = boundsCourseView.y = 0;
-	boundsCourseView.w = 0.25*dw;
-	boundsCourseView.h = 0.20*dh;
+	courseViewBounds.x = courseViewBounds.y = 0;
+	courseViewBounds.w = 0.25*dw;
+	courseViewBounds.h = 0.20*dh;
 
-	boundsToolsPanel.x = 0;
-	boundsToolsPanel.y = 0.20*dh;
-	boundsToolsPanel.w = 0.25*dw;
-	boundsToolsPanel.h = 0.75*dh;
+	toolsPanelBounds.x = 0;
+	toolsPanelBounds.y = 0.20*dh;
+	toolsPanelBounds.w = 0.25*dw;
+	toolsPanelBounds.h = 0.75*dh;
 
-	boundsStatusBar.x = 0;
-	boundsStatusBar.y = 0.95*dh;
-	boundsStatusBar.w = dw;
-	boundsStatusBar.h = 0.05*dh;
+	statusBarBounds.x = 0;
+	statusBarBounds.y = 0.95*dh;
+	statusBarBounds.w = dw;
+	statusBarBounds.h = 0.05*dh;
 
-	boundsButtonNew.x = boundsToolsPanel.x + widgetSpacing;
-	boundsButtonNew.y = boundsToolsPanel.y + widgetSpacing + font->getHeight();
-	boundsButtonNew.w = 0.08*dh;
-	boundsButtonNew.h = 0.05*dh;
+	newButtonBounds.x = toolsPanelBounds.x + widgetSpacing;
+	newButtonBounds.y = toolsPanelBounds.y + widgetSpacing + font->getHeight();
+	newButtonBounds.w = 0.08*dh;
+	newButtonBounds.h = 0.05*dh;
 
-	boundsButtonLoad = boundsButtonNew;
-	boundsButtonLoad.x += boundsButtonNew.w + widgetSpacing;
+	loadButtonBounds = newButtonBounds;
+	loadButtonBounds.x += newButtonBounds.w + widgetSpacing;
 
-	boundsButtonSave = boundsButtonLoad;
-	boundsButtonSave.x += boundsButtonLoad.w + widgetSpacing;
+	saveButtonBounds = loadButtonBounds;
+	saveButtonBounds.x += loadButtonBounds.w + widgetSpacing;
 
-	boundsButtonGenerate = boundsButtonNew;
-	boundsButtonGenerate.w *= 2;
-	boundsButtonGenerate.y += boundsButtonNew.h + widgetSpacing;
+	generateButtonBounds = newButtonBounds;
+	generateButtonBounds.w *= 2;
+	generateButtonBounds.y += newButtonBounds.h + widgetSpacing;
 
-	boundsFileDialog.x = 0.15*dw;
-	boundsFileDialog.y = 0.20*dh;
-	boundsFileDialog.w = 0.70*dw;
-	boundsFileDialog.h = 0.55*dh;
+	loadDialogBounds.x = 0.15*dw;
+	loadDialogBounds.y = 0.20*dh;
+	loadDialogBounds.w = 0.70*dw;
+	loadDialogBounds.h = 0.55*dh;
 
-	menuFile.bounds.x = boundsFileDialog.x + widgetSpacing;
-	menuFile.bounds.y = boundsFileDialog.y + widgetSpacing;
-	menuFile.bounds.w = boundsFileDialog.w - widgetSpacing*2;
-	menuFile.bounds.h = boundsFileDialog.h - widgetSpacing*2 - font->getHeight();
+	fileMenu.bounds.x = loadDialogBounds.x + widgetSpacing;
+	fileMenu.bounds.y = loadDialogBounds.y + widgetSpacing;
+	fileMenu.bounds.w = loadDialogBounds.w - widgetSpacing*2;
+	fileMenu.bounds.h = loadDialogBounds.h - widgetSpacing*2 - font->getHeight();
 
-	boundsFileDialogButtonSelect.w = 1.1*font->getTextWidth("Select");
-	boundsFileDialogButtonSelect.h = 1.1*font->getHeight();
-	boundsFileDialogButtonSelect.x = 0.5*(boundsFileDialog.x + boundsFileDialog.w - boundsFileDialogButtonSelect.w);
-	boundsFileDialogButtonSelect.y = boundsFileDialog.y + boundsFileDialog.h - 1.2*boundsFileDialogButtonSelect.h;
+	loadDialogButtonSelectBounds.w = 1.1*font->getTextWidth("Select");
+	loadDialogButtonSelectBounds.h = 1.1*font->getHeight();
+	loadDialogButtonSelectBounds.x = 0.5*(loadDialogBounds.x + loadDialogBounds.w - loadDialogButtonSelectBounds.w);
+	loadDialogButtonSelectBounds.y = loadDialogBounds.y + loadDialogBounds.h - 1.2*loadDialogButtonSelectBounds.h;
 
-	boundsFileDialogButtonCancel = boundsFileDialogButtonSelect;
-	boundsFileDialogButtonSelect.w = 1.1*font->getTextWidth("Cancel");
-	boundsFileDialogButtonCancel.x += boundsFileDialogButtonSelect.w + widgetSpacing;
+	loadDialogButtonCancelBounds = loadDialogButtonSelectBounds;
+	loadDialogButtonSelectBounds.w = 1.1*font->getTextWidth("Cancel");
+	loadDialogButtonCancelBounds.x += loadDialogButtonSelectBounds.w + widgetSpacing;
+
+	// save dialog
+
+	saveDialogBounds.w = 0.6*dw;
+	saveDialogBounds.h = 0.2*dh;
+	saveDialogBounds.x = 0.5*(dw - saveDialogBounds.w);
+	saveDialogBounds.y = 0.5*(dh - saveDialogBounds.h);
+
+	saveDialogFilenameTextFieldBounds.x = saveDialogBounds.x + widgetSpacing;
+	saveDialogFilenameTextFieldBounds.y = saveDialogBounds.y + widgetSpacing + font->getHeight();
+	saveDialogFilenameTextFieldBounds.w = saveDialogBounds.w - 2*widgetSpacing;
+	saveDialogFilenameTextFieldBounds.h = 1.1*font->getHeight();
+
+	saveDialogSaveButtonBounds = loadDialogButtonSelectBounds;
+	saveDialogSaveButtonBounds.y = saveDialogBounds.y + saveDialogBounds.h - saveDialogSaveButtonBounds.h - widgetSpacing;
+
+	saveDialogCancelButtonBounds = loadDialogButtonCancelBounds;
+	saveDialogCancelButtonBounds.y = saveDialogSaveButtonBounds.y;
+
+	// initial values
 
 	focus = ON_EDITOR;
+	saveDialogFilenameTextFieldCaretPosition = 0;
 
-	offset.x = 0.5*boundsMap.w;
-	offset.y = 0.5*boundsMap.h;
+	offset.x = 0.5*mapBounds.w;
+	offset.y = 0.5*mapBounds.h;
 	scale.x = scale.y = 1.f;
 
 	this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
@@ -128,66 +151,93 @@ void CourseEditorState::render()
 {
 	const float widgetSpacing = 0.007*game.getDisplay().getHeight();
 
-	Graphics::drawFilledRectangle(boundsCourseView, Color::CYAN);
+	Graphics::drawFilledRectangle(courseViewBounds, Color::CYAN);
 	course.draw(0, 0.5*course.drawAreaWidth);
-	Graphics::drawRectangle(boundsCourseView, Color::AZURE);
+	Graphics::drawRectangle(courseViewBounds, Color::AZURE);
 
 
-	Graphics::drawFilledRectangle(boundsMap, Color::DARK_GREEN);
+	Graphics::drawFilledRectangle(mapBounds, Color::DARK_GREEN);
 
 
-	Graphics::drawFilledRectangle(boundsToolsPanel, Color::DARK_GREY);
-	font->drawText("Course editor", boundsToolsPanel.x, boundsToolsPanel.y, Color::WHITE);
+	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
+	font->drawText("Course editor", toolsPanelBounds.x, toolsPanelBounds.y, Color::WHITE);
 
-	Graphics::drawFilledRectangle(boundsButtonNew, Color::GREY);
-	font->drawText("New", boundsButtonNew.x, boundsButtonNew.y, Color::BLACK);
+	Graphics::drawFilledRectangle(newButtonBounds, Color::GREY);
+	font->drawText("New", newButtonBounds.x, newButtonBounds.y, Color::BLACK);
 
-	Graphics::drawFilledRectangle(boundsButtonLoad, Color::GREY);
-	font->drawText("Load", boundsButtonLoad.x, boundsButtonLoad.y, Color::BLACK);
+	Graphics::drawFilledRectangle(loadButtonBounds, Color::GREY);
+	font->drawText("Load", loadButtonBounds.x, loadButtonBounds.y, Color::BLACK);
 
-	Graphics::drawFilledRectangle(boundsButtonSave, Color::GREY);
-	font->drawText("Save", boundsButtonSave.x, boundsButtonSave.y, Color::DARK_GREY);
+	Graphics::drawFilledRectangle(saveButtonBounds, Color::GREY);
+	font->drawText("Save", saveButtonBounds.x, saveButtonBounds.y, Color::BLACK);
 
-	Graphics::drawFilledRectangle(boundsButtonGenerate, Color::GREY);
-	font->drawText("Generate", boundsButtonGenerate.x, boundsButtonGenerate.y, Color::BLACK);
+	Graphics::drawFilledRectangle(generateButtonBounds, Color::GREY);
+	font->drawText("Generate", generateButtonBounds.x, generateButtonBounds.y, Color::BLACK);
 
 	if(focus == ON_EDITOR and cos(20*fgeal::uptime()) > 0)
 	{
-		if(boundsButtonNew.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(boundsButtonNew, widgetSpacing), Color::RED);
-		else if(boundsButtonLoad.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(boundsButtonLoad, widgetSpacing), Color::RED);
-//		else if(boundsButtonSave.contains(Mouse::getPosition()))
-//			Graphics::drawRectangle(getSpacedOutline(boundsButtonSave, widgetSpacing), Color::RED);
-		else if(boundsButtonGenerate.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(boundsButtonGenerate, widgetSpacing), Color::RED);
+		if(newButtonBounds.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(newButtonBounds, widgetSpacing), Color::RED);
+		else if(loadButtonBounds.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(loadButtonBounds, widgetSpacing), Color::RED);
+		else if(saveButtonBounds.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(saveButtonBounds, widgetSpacing), Color::RED);
+		else if(generateButtonBounds.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(generateButtonBounds, widgetSpacing), Color::RED);
 	}
 
 
-	Graphics::drawFilledRectangle(boundsStatusBar, Color::GREY);
+	Graphics::drawFilledRectangle(statusBarBounds, Color::GREY);
 
 
-	course.drawMap(Color::RED, offset, scale, boundsMap);
+	course.drawMap(Color::RED, offset, scale, mapBounds);
 
 	if(focus == ON_FILE_MENU)
 	{
-		Graphics::drawFilledRoundedRectangle(boundsFileDialog, 10, Color::GREY);
-		Graphics::drawRoundedRectangle(boundsFileDialog, 10, Color::DARK_GREY);
+		Graphics::drawFilledRoundedRectangle(loadDialogBounds, 10, Color::GREY);
+		Graphics::drawRoundedRectangle(loadDialogBounds, 10, Color::DARK_GREY);
 
-		menuFile.draw();
+		fileMenu.draw();
 
-		Graphics::drawFilledRectangle(boundsFileDialogButtonSelect, Color::LIGHT_GREY);
-		font->drawText("Select", boundsFileDialogButtonSelect.x, boundsFileDialogButtonSelect.y, Color::BLACK);
+		Graphics::drawFilledRectangle(loadDialogButtonSelectBounds, Color::LIGHT_GREY);
+		font->drawText("Select", loadDialogButtonSelectBounds.x, loadDialogButtonSelectBounds.y, Color::BLACK);
 
-		Graphics::drawFilledRectangle(boundsFileDialogButtonCancel, Color::LIGHT_GREY);
-		font->drawText("Cancel", boundsFileDialogButtonCancel.x, boundsFileDialogButtonCancel.y, Color::BLACK);
+		Graphics::drawFilledRectangle(loadDialogButtonCancelBounds, Color::LIGHT_GREY);
+		font->drawText("Cancel", loadDialogButtonCancelBounds.x, loadDialogButtonCancelBounds.y, Color::BLACK);
 
 		if(cos(20*fgeal::uptime()) > 0)
 		{
-			if(boundsFileDialogButtonSelect.contains(Mouse::getPosition()))
-				Graphics::drawRectangle(getSpacedOutline(boundsFileDialogButtonSelect, widgetSpacing), Color::RED);
-			else if(boundsFileDialogButtonCancel.contains(Mouse::getPosition()))
-				Graphics::drawRectangle(getSpacedOutline(boundsFileDialogButtonCancel, widgetSpacing), Color::RED);
+			if(loadDialogButtonSelectBounds.contains(Mouse::getPosition()))
+				Graphics::drawRectangle(getSpacedOutline(loadDialogButtonSelectBounds, widgetSpacing), Color::RED);
+			else if(loadDialogButtonCancelBounds.contains(Mouse::getPosition()))
+				Graphics::drawRectangle(getSpacedOutline(loadDialogButtonCancelBounds, widgetSpacing), Color::RED);
+		}
+	}
+
+	if(focus == ON_SAVE_DIALOG)
+	{
+		Graphics::drawFilledRoundedRectangle(saveDialogBounds, 10, Color::GREY);
+		Graphics::drawRoundedRectangle(saveDialogBounds, 10, Color::DARK_GREY);
+
+		font->drawText("Enter a filename for the course:", saveDialogBounds.x + widgetSpacing, saveDialogBounds.y + widgetSpacing, Color::BLACK);
+
+		Graphics::drawFilledRectangle(saveDialogFilenameTextFieldBounds, Color(0, 0, 0, 128));
+		font->drawText(saveDialogFilename, saveDialogFilenameTextFieldBounds.x, saveDialogFilenameTextFieldBounds.y, Color::WHITE);
+
+		Graphics::drawFilledRectangle(saveDialogSaveButtonBounds, Color::LIGHT_GREY);
+		font->drawText("Save", saveDialogSaveButtonBounds.x, saveDialogSaveButtonBounds.y, Color::BLACK);
+
+		Graphics::drawFilledRectangle(saveDialogCancelButtonBounds, Color::LIGHT_GREY);
+		font->drawText("Cancel", saveDialogCancelButtonBounds.x, saveDialogCancelButtonBounds.y, Color::BLACK);
+
+		if(cos(20*fgeal::uptime()) > 0)
+		{
+			Graphics::drawFilledRectangle(saveDialogFilenameTextFieldBounds.x+font->getTextWidth(saveDialogFilename), saveDialogFilenameTextFieldBounds.y, 4, font->getHeight(), Color::WHITE);
+
+			if(saveDialogSaveButtonBounds.contains(Mouse::getPosition()))
+				Graphics::drawRectangle(getSpacedOutline(saveDialogSaveButtonBounds, widgetSpacing), Color::RED);
+			else if(saveDialogCancelButtonBounds.contains(Mouse::getPosition()))
+				Graphics::drawRectangle(getSpacedOutline(saveDialogCancelButtonBounds, widgetSpacing), Color::RED);
 		}
 	}
 }
@@ -241,7 +291,11 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	if(focus == ON_EDITOR)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
+		{
 			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+			saveDialogFilename.clear();
+			saveDialogFilenameTextFieldCaretPosition = 0;
+		}
 	}
 	else if(focus == ON_FILE_MENU)
 	{
@@ -254,19 +308,56 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		if(key == Keyboard::KEY_ARROW_UP)
 		{
 			sndCursorMove->play();
-			menuFile.moveCursorUp();
+			fileMenu.moveCursorUp();
 		}
 
 		if(key == Keyboard::KEY_ARROW_DOWN)
 		{
 			sndCursorMove->play();
-			menuFile.moveCursorDown();
+			fileMenu.moveCursorDown();
 		}
 
 		if(key == Keyboard::KEY_ENTER)
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label));
+			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(fileMenu.getSelectedEntry().label));
+		}
+	}
+	else if(focus == ON_SAVE_DIALOG)
+	{
+		if(key== Keyboard::KEY_ESCAPE)
+			focus = ON_EDITOR;
+
+		else if(key == Keyboard::KEY_ENTER)
+		{
+
+		}
+		else if(key == Keyboard::KEY_BACKSPACE)
+		{
+			if(not saveDialogFilename.empty() and saveDialogFilenameTextFieldCaretPosition > 0)
+			{
+				saveDialogFilename.erase(saveDialogFilename.begin() + saveDialogFilenameTextFieldCaretPosition-1);
+				saveDialogFilenameTextFieldCaretPosition--;
+			}
+		}
+		else if(key == Keyboard::KEY_ARROW_LEFT)
+		{
+			if(saveDialogFilenameTextFieldCaretPosition > 0)
+				saveDialogFilenameTextFieldCaretPosition--;
+		}
+		else if(key == Keyboard::KEY_ARROW_RIGHT)
+		{
+			if(saveDialogFilenameTextFieldCaretPosition < (int) saveDialogFilename.size())
+				saveDialogFilenameTextFieldCaretPosition++;
+		}
+		else
+		{
+			const char typed = parseKeyStroke(key);
+			if(typed != '\n')
+			{
+				saveDialogFilename.insert(saveDialogFilename.begin() + saveDialogFilenameTextFieldCaretPosition, 1, typed);
+				saveDialogFilenameTextFieldCaretPosition++;
+			}
 		}
 	}
 }
@@ -275,19 +366,25 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
 	if(focus == ON_EDITOR)
 	{
-		if(boundsButtonNew.contains(x, y))
+		if(newButtonBounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
 		}
 
-		if(boundsButtonLoad.contains(x, y))
+		if(loadButtonBounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_FILE_MENU;
 		}
 
-		if(boundsButtonGenerate.contains(x, y))
+		if(saveButtonBounds.contains(x, y))
+		{
+			sndCursorIn->play();
+			focus = ON_SAVE_DIALOG;
+		}
+
+		if(generateButtonBounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5));
@@ -295,19 +392,32 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	}
 	else if(focus == ON_FILE_MENU)
 	{
-		if(menuFile.bounds.contains(x, y))
+		if(fileMenu.bounds.contains(x, y))
 		{
 			sndCursorMove->play();
-			menuFile.setSelectedIndexByLocation(x, y);
+			fileMenu.setSelectedIndexByLocation(x, y);
 		}
 
-		if(boundsFileDialogButtonSelect.contains(x, y))
+		if(loadDialogButtonSelectBounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(menuFile.getSelectedEntry().label));
+			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(fileMenu.getSelectedEntry().label));
 		}
 
-		if(boundsFileDialogButtonCancel.contains(x, y))
+		if(loadDialogButtonCancelBounds.contains(x, y))
+		{
+			sndCursorIn->play();
+			focus = ON_EDITOR;
+		}
+	}
+	else if(focus == ON_SAVE_DIALOG)
+	{
+		if(saveDialogSaveButtonBounds.contains(x, y))
+		{
+//			sndCursorIn->play();
+		}
+
+		if(saveDialogCancelButtonBounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_EDITOR;
@@ -318,14 +428,14 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 void CourseEditorState::reloadFileList()
 {
 	// clear menu
-	while(not menuFile.getEntries().empty())
-		menuFile.removeEntry(0);
+	while(not fileMenu.getEntries().empty())
+		fileMenu.removeEntry(0);
 
 	// populate menu
 	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::COURSES_FOLDER);
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 		if(ends_with(courseFiles[i], ".properties"))
-			menuFile.addEntry(courseFiles[i]);
+			fileMenu.addEntry(courseFiles[i]);
 }
 
 void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
@@ -333,9 +443,80 @@ void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 	course.clearDynamicData();
 	course = c;
 	course.setupDynamicData();
-	course.drawAreaWidth = boundsCourseView.w;
-	course.drawAreaHeight = boundsCourseView.h;
+	course.drawAreaWidth = courseViewBounds.w;
+	course.drawAreaHeight = courseViewBounds.h;
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
 	focus = ON_EDITOR;
+}
+
+// fixme this should be in fgeal package
+static char parseKeyStroke(fgeal::Keyboard::Key key)
+{
+	char typed;
+	switch(key)
+	{
+		default: typed = '\n'; break;
+		case Keyboard::KEY_A: typed = 'a'; break;
+		case Keyboard::KEY_B: typed = 'b'; break;
+		case Keyboard::KEY_C: typed = 'c'; break;
+		case Keyboard::KEY_D: typed = 'd'; break;
+		case Keyboard::KEY_E: typed = 'e'; break;
+		case Keyboard::KEY_F: typed = 'f'; break;
+		case Keyboard::KEY_G: typed = 'g'; break;
+		case Keyboard::KEY_H: typed = 'h'; break;
+		case Keyboard::KEY_I: typed = 'i'; break;
+		case Keyboard::KEY_J: typed = 'j'; break;
+		case Keyboard::KEY_K: typed = 'k'; break;
+		case Keyboard::KEY_L: typed = 'l'; break;
+		case Keyboard::KEY_M: typed = 'm'; break;
+		case Keyboard::KEY_N: typed = 'n'; break;
+		case Keyboard::KEY_O: typed = 'o'; break;
+		case Keyboard::KEY_P: typed = 'p'; break;
+		case Keyboard::KEY_Q: typed = 'q'; break;
+		case Keyboard::KEY_R: typed = 'r'; break;
+		case Keyboard::KEY_S: typed = 's'; break;
+		case Keyboard::KEY_T: typed = 't'; break;
+		case Keyboard::KEY_U: typed = 'u'; break;
+		case Keyboard::KEY_V: typed = 'v'; break;
+		case Keyboard::KEY_W: typed = 'w'; break;
+		case Keyboard::KEY_X: typed = 'x'; break;
+		case Keyboard::KEY_Y: typed = 'y'; break;
+		case Keyboard::KEY_Z: typed = 'z'; break;
+		case Keyboard::KEY_NUMPAD_0:
+		case Keyboard::KEY_0:       typed = '0'; break;
+		case Keyboard::KEY_NUMPAD_1:
+		case Keyboard::KEY_1:       typed = '1'; break;
+		case Keyboard::KEY_NUMPAD_2:
+		case Keyboard::KEY_2:       typed = '2'; break;
+		case Keyboard::KEY_NUMPAD_3:
+		case Keyboard::KEY_3:       typed = '3'; break;
+		case Keyboard::KEY_NUMPAD_4:
+		case Keyboard::KEY_4:       typed = '4'; break;
+		case Keyboard::KEY_NUMPAD_5:
+		case Keyboard::KEY_5:       typed = '5'; break;
+		case Keyboard::KEY_NUMPAD_6:
+		case Keyboard::KEY_6:       typed = '6'; break;
+		case Keyboard::KEY_NUMPAD_7:
+		case Keyboard::KEY_7:       typed = '7'; break;
+		case Keyboard::KEY_NUMPAD_8:
+		case Keyboard::KEY_8:       typed = '8'; break;
+		case Keyboard::KEY_NUMPAD_9:
+		case Keyboard::KEY_9:       typed = '9'; break;
+		case Keyboard::KEY_SPACE:   typed = ' '; break;
+		case Keyboard::KEY_PERIOD:  typed = '.'; break;
+		case Keyboard::KEY_MINUS:   typed = '-'; break;
+	}
+
+	if(typed >= 'a' and typed <= 'z')
+	if(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)
+	or Keyboard::isKeyPressed(Keyboard::KEY_RIGHT_SHIFT))
+		typed -= 32;
+
+	if(typed == '-')
+	if(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)
+	or Keyboard::isKeyPressed(Keyboard::KEY_RIGHT_SHIFT))
+		typed = '_';
+
+	return typed;
 }

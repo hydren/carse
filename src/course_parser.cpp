@@ -32,9 +32,14 @@ using futil::starts_with;
 
 namespace // static
 {
-	Color parseColor(const char* cstr)
+	inline Color parseColor(const char* cstr)
 	{
 		return Color::parseCStr(cstr);
+	}
+
+	inline string to_string(Color c)
+	{
+		return to_string(c.r)+","+to_string(c.g)+","+to_string(c.b);
 	}
 }
 
@@ -153,4 +158,27 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 
 	stream.close();
 	return course;
+}
+
+void Pseudo3DCourse::Spec::saveToFile(const string& filename)
+{
+	using futil::to_string;
+	Properties prop;
+	prop.put("name", name);
+	prop.put("author", author);
+	prop.put("credits", credits);
+	prop.put("comments", comments);
+
+	prop.put("segment_file", filename+".csv");
+	prop.put("segment_length", to_string(roadSegmentLength));
+	prop.put("road_width", to_string(roadWidth));
+	prop.put("course_length", to_string(lines.size()*roadSegmentLength));
+
+	if(not landscapeFilename.empty())
+		prop.put("landscape_image", landscapeFilename);
+	prop.put("landscape_color", ::to_string(colorLandscape));
+
+	prop.put("horizon_color", ::to_string(colorHorizon));
+	//... todo add remaining fields
+	//... todo write segment file
 }

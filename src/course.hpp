@@ -35,6 +35,9 @@ struct Pseudo3DCourse
 
 		inline std::string toString() const { return not name.empty()? name : not filename.empty()? filename : "<unnamed>"; }
 		inline operator std::string() const { return this->toString(); }
+
+		/* Saves a course spec. to the given filename. */
+		void saveToFile(const std::string& filename);
 	};
 
 	Spec spec;

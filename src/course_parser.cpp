@@ -30,6 +30,8 @@ using futil::split;
 using futil::trim;
 using futil::starts_with;
 
+static const unsigned DEFAULT_SPRITE_COUNT = 32;
+
 namespace // static
 {
 	inline Color parseColor(const char* cstr)
@@ -86,7 +88,7 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 	course.colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
 	course.colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", course.colorOffRoadPrimary);
 
-	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", 32);
+	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", DEFAULT_SPRITE_COUNT);
 	for(unsigned id = 0; id < spriteIdCount; id++)
 	{
 		const string specifiedSpriteFilename = prop.get("sprite" + futil::to_string(id));
@@ -163,13 +165,15 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 {
 	using futil::to_string;
+	const string specFile = filename + ".properties", segmentFile = filename + ".csv";
+
 	Properties prop;
 	prop.put("name", name);
 	prop.put("author", author);
 	prop.put("credits", credits);
 	prop.put("comments", comments);
 
-	prop.put("segment_file", filename+".csv");
+	prop.put("segment_file", segmentFile);
 	prop.put("segment_length", to_string(roadSegmentLength));
 	prop.put("road_width", to_string(roadWidth));
 	prop.put("course_length", to_string(lines.size()*roadSegmentLength));
@@ -177,8 +181,23 @@ void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 	if(not landscapeFilename.empty())
 		prop.put("landscape_image", landscapeFilename);
 	prop.put("landscape_color", ::to_string(colorLandscape));
-
 	prop.put("horizon_color", ::to_string(colorHorizon));
-	//... todo add remaining fields
+	prop.put("road_color_primary", ::to_string(colorRoadPrimary));
+	prop.put("road_color_secondary", ::to_string(colorRoadSecondary));
+	prop.put("offroad_color_primary", ::to_string(colorOffRoadPrimary));
+	prop.put("offroad_color_secondary", ::to_string(colorOffRoadSecondary));
+	prop.put("humble_color_primary", ::to_string(colorHumblePrimary));
+	prop.put("humble_color_secondary", ::to_string(colorHumbleSecondary));
+
+	if(not musicFilename.empty())
+		prop.put("music", musicFilename);
+
+	if(spritesFilenames.size() != DEFAULT_SPRITE_COUNT)
+		prop.put("sprite_max_id", to_string(spritesFilenames.size()-1));
+
+	for(unsigned i = 0; i < spritesFilenames.size(); i++)
+		prop.put("sprite"+to_string(i), spritesFilenames[i]);
+
+	std::ifstream stream(segmentFile.c_str());
 	//... todo write segment file
 }

@@ -38,6 +38,10 @@ struct Pseudo3DCourse
 
 		/* Saves a course spec. to the given filename. */
 		void saveToFile(const std::string& filename);
+
+		private:
+		void saveProperties(const std::string& specFile, const std::string& segmentsFile);
+		void saveSegments(const std::string& filename);
 	};
 
 	Spec spec;

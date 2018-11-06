@@ -30,6 +30,8 @@ using futil::split;
 using futil::trim;
 using futil::starts_with;
 
+using std::to_string;
+
 static const unsigned DEFAULT_SPRITE_COUNT = 32;
 
 namespace // static
@@ -41,7 +43,7 @@ namespace // static
 
 	inline string to_string(Color c)
 	{
-		return to_string(c.r)+","+to_string(c.g)+","+to_string(c.b);
+		return ::to_string(c.r)+","+::to_string(c.g)+","+::to_string(c.b);
 	}
 }
 
@@ -91,7 +93,7 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", DEFAULT_SPRITE_COUNT);
 	for(unsigned id = 0; id < spriteIdCount; id++)
 	{
-		const string specifiedSpriteFilename = prop.get("sprite" + futil::to_string(id));
+		const string specifiedSpriteFilename = prop.get("sprite" + to_string(id));
 		if(not specifiedSpriteFilename.empty())
 		{
 			const string spriteFilename = getContextualizedFilename(specifiedSpriteFilename, prop.get("base_dir"), "assets/");
@@ -165,40 +167,64 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 
 void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 {
-	using futil::to_string;
-	const string specFile = filename + ".properties", segmentFile = filename + ".csv";
+	const string specFilename = filename + ".properties", segmentsFilename = filename + ".csv";
+	this->saveProperties(specFilename, segmentsFilename);
+	this->saveSegments(segmentsFilename);
+}
 
+void Pseudo3DCourse::Spec::saveProperties(const string& filename, const string& segmentsFilename)
+{
 	Properties prop;
 	prop.put("name", name);
 	prop.put("author", author);
 	prop.put("credits", credits);
 	prop.put("comments", comments);
 
-	prop.put("segment_file", segmentFile);
+	prop.put("segment_file", segmentsFilename);
 	prop.put("segment_length", to_string(roadSegmentLength));
 	prop.put("road_width", to_string(roadWidth));
-	prop.put("course_length", to_string(lines.size()*roadSegmentLength));
+	prop.put("course_length", to_string(lines.size()));
 
 	if(not landscapeFilename.empty())
 		prop.put("landscape_image", landscapeFilename);
-	prop.put("landscape_color", ::to_string(colorLandscape));
-	prop.put("horizon_color", ::to_string(colorHorizon));
-	prop.put("road_color_primary", ::to_string(colorRoadPrimary));
-	prop.put("road_color_secondary", ::to_string(colorRoadSecondary));
-	prop.put("offroad_color_primary", ::to_string(colorOffRoadPrimary));
-	prop.put("offroad_color_secondary", ::to_string(colorOffRoadSecondary));
-	prop.put("humble_color_primary", ::to_string(colorHumblePrimary));
-	prop.put("humble_color_secondary", ::to_string(colorHumbleSecondary));
+	prop.put("landscape_color", to_string(colorLandscape));
+	prop.put("horizon_color", to_string(colorHorizon));
+	prop.put("road_color_primary", to_string(colorRoadPrimary));
+	prop.put("road_color_secondary", to_string(colorRoadSecondary));
+	prop.put("offroad_color_primary", to_string(colorOffRoadPrimary));
+	prop.put("offroad_color_secondary", to_string(colorOffRoadSecondary));
+	prop.put("humble_color_primary", to_string(colorHumblePrimary));
+	prop.put("humble_color_secondary", to_string(colorHumbleSecondary));
 
 	if(not musicFilename.empty())
 		prop.put("music", musicFilename);
 
-	if(spritesFilenames.size() != DEFAULT_SPRITE_COUNT)
+	if(spritesFilenames.size() < DEFAULT_SPRITE_COUNT)
 		prop.put("sprite_max_id", to_string(spritesFilenames.size()-1));
 
 	for(unsigned i = 0; i < spritesFilenames.size(); i++)
 		prop.put("sprite"+to_string(i), spritesFilenames[i]);
 
-	std::ifstream stream(segmentFile.c_str());
-	//... todo write segment file
+	prop.store(filename);
+}
+
+void Pseudo3DCourse::Spec::saveSegments(const string& filename)
+{
+	std::ofstream stream(filename.c_str());
+
+	if(not stream.is_open())
+		throw std::runtime_error("Course description file could not be saved: \"" + filename + "\"");
+
+	stream << "#segment file created by carse editor\n";
+
+	for(unsigned i = 0; i < lines.size() and stream.good(); i++)
+	{
+		const Segment& line = lines[i];
+		stream << line.x << ',' << line.y << ',' << line.curve << ',' << line.slope;
+		if(line.spriteID != -1)
+			stream << ',' << line.spriteID << ',' << line.spriteX;
+		stream << endl;
+	}
+
+	stream.close();
 }

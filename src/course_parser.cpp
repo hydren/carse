@@ -192,7 +192,7 @@ void Pseudo3DCourse::Spec::saveProperties(const string& filename, const string& 
 	if(not musicFilename.empty())
 		prop.put("music", musicFilename);
 
-	if(spritesFilenames.size() < DEFAULT_SPRITE_COUNT)
+	if(spritesFilenames.size() > DEFAULT_SPRITE_COUNT)
 		prop.put("sprite_max_id", to_string(spritesFilenames.size()-1));
 
 	for(unsigned i = 0; i < spritesFilenames.size(); i++)

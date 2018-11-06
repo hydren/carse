@@ -326,6 +326,11 @@ void Pseudo3DRaceState::onEnter()
 		hudTachometer.backgroundImage = null;
 	}
 
+	posHudMap.x = hudTimerCurrentLap.bounds.x * 5000;
+	posHudMap.y = 0.4*display.getHeight() * 5000;
+	posHudMap.w = 0.1*display.getWidth();
+	posHudMap.h = 0.1*display.getWidth();
+
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{
 		onSceneIntro = true;
@@ -387,6 +392,11 @@ void Pseudo3DRaceState::render()
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
 	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
+
+	fgeal::Vector2D minimapScale;
+	minimapScale.x = minimapScale.y = 0.0002;
+
+	course.drawMap(Color::RED, Point::NULL_VECTOR, minimapScale, posHudMap, 0.005f*game.getDisplay().getWidth(), playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord

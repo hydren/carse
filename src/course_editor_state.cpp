@@ -417,7 +417,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			sndCursorIn->play();
 			if(course.spec.name.empty())
 				course.spec.name = saveDialogFilename;
-			try { course.spec.saveToFile(saveDialogFilename); }
+			try { course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogFilename); }
 			catch(const std::exception& e) { /* TODO show error dialog */ }
 			focus = ON_EDITOR;
 		}

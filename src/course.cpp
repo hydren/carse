@@ -148,7 +148,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	}
 }
 
-void Pseudo3DCourse::drawMap(const Color& color, const Point& offset, const Vector2D& scale, const Rectangle& bounds)
+void Pseudo3DCourse::drawMap(const Color& color, const Point& offset, const Vector2D& scale, const Rectangle& bounds, float highlightSize, unsigned highlightedSegment)
 {
 	const Color color2(255-color.r, 255-color.g, 255-color.b);
 	Point p1 = { offset.x + bounds.x, offset.y + bounds.y };
@@ -162,6 +162,8 @@ void Pseudo3DCourse::drawMap(const Color& color, const Point& offset, const Vect
 		rotatePoint(p2, p1, angle);
 
 		Graphics::drawLine(p1.x * scale.x, p1.y * scale.y, p2.x * scale.x, p2.y * scale.y, (i % 2? color : color2));
+		if(i == highlightedSegment and highlightSize != 0)
+			Graphics::drawFilledCircle(0.5f*(p1.x + p2.x) * scale.x, 0.5f*(p1.y + p2.y) * scale.y, highlightSize, (i % 2? color : color2));
 
 		p1 = p2;
 	}

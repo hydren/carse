@@ -56,7 +56,7 @@ struct Pseudo3DCourse
 
 	void draw(int positionZ, int positionX);
 
-	void drawMap(const fgeal::Color& color, const fgeal::Point& offset, const fgeal::Vector2D& scale, const fgeal::Rectangle& bounds);
+	void drawMap(const fgeal::Color& color, const fgeal::Point& offset, const fgeal::Vector2D& scale, const fgeal::Rectangle& bounds, float highlightSize=0, unsigned highlightedSegment=0);
 
 	void clearDynamicData();
 

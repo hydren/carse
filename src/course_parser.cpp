@@ -90,8 +90,8 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 	course.colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
 	course.colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", course.colorOffRoadPrimary);
 
-	unsigned spriteIdCount = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", DEFAULT_SPRITE_COUNT);
-	for(unsigned id = 0; id < spriteIdCount; id++)
+	int spriteMaxId = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", DEFAULT_SPRITE_COUNT);
+	for(int id = 0; id <= spriteMaxId; id++)
 	{
 		const string specifiedSpriteFilename = prop.get("sprite" + to_string(id));
 		if(not specifiedSpriteFilename.empty())

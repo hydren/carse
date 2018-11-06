@@ -220,6 +220,15 @@ void Pseudo3DCourse::setupDynamicData()
 			sprites.push_back(null);
 }
 
+// #################### Pseudo3D Course Spec. methods #####################################################
+
+void Pseudo3DCourse::Spec::saveToFile(const string& filename)
+{
+	const string specFilename = filename + ".properties", segmentsFilename = filename + ".csv";
+	this->saveProperties(specFilename, segmentsFilename);
+	this->saveSegments(segmentsFilename);
+}
+
 // ========================================================================================================================
 // ====================== built-in generators =============================================================================
 

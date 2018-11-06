@@ -134,25 +134,26 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 
 		line.x = atof(tokens[0].c_str());
 
-		if(tokens.size() > 1)
+		if(tokens.size() >= 2)
 			line.y = atof(tokens[1].c_str());
 
-		if(tokens.size() > 2)
+		if(tokens.size() >= 3)
 			line.curve = atof(tokens[2].c_str());
 
-		if(tokens.size() >= 3)
+		if(tokens.size() >= 4)
 			line.slope = atof(tokens[3].c_str());
 
-		if(tokens.size() >= 5)
+		if(tokens.size() >= 6)
 		{
 			line.spriteID = atoi(tokens[4].c_str());
 			line.spriteX = atof(tokens[5].c_str());
 
 			if(line.spriteID != -1 and
 			  (line.spriteID + 1 > (int) course.spritesFilenames.size() or course.spritesFilenames[line.spriteID].empty()))
-				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + futil::to_string(line.spriteID) + "), specified by \"" + course.filename);
+				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + to_string(line.spriteID) + "), specified by \"" + course.filename);
 		}
-		else if(tokens.size() == 4)
+
+		if(tokens.size() == 5 or tokens.size() > 6)
 			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;
 
 		course.lines.push_back(line);

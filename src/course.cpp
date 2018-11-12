@@ -161,46 +161,19 @@ void Pseudo3DCourse::drawMap(const Color& color, const Point& mapOffset, const V
 		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
 		rotatePoint(p2, p1, angle);
 
-		Graphics::drawLine(bounds.x + p1.x * scale.x, bounds.y + p1.y * scale.y, bounds.x + p2.x * scale.x, bounds.y + p2.y * scale.y, (i % 2? color : color2));
-		if(i == highlightedSegment and highlightSize != 0)
-			Graphics::drawFilledCircle(bounds.x + 0.5f*(p1.x + p2.x) * scale.x, bounds.y + 0.5f*(p1.y + p2.y) * scale.y, highlightSize, (i % 2? color : color2));
+		const float l1x = p1.x * scale.x, l1y = p1.y * scale.y,
+					l2x = p2.x * scale.x, l2y = p2.y * scale.y;
+
+		if(l1x > 0 and l1x < bounds.w and l1y > 0 and l1y < bounds.h and l2x > 0 and l2x < bounds.w and l2y > 0 and l2y < bounds.h)
+		{
+			Graphics::drawLine(bounds.x + l1x, bounds.y + l1y, bounds.x + l2x, bounds.y + l2y, (i % 2? color : color2));
+			if(i == highlightedSegment and highlightSize != 0)
+				Graphics::drawFilledCircle(bounds.x + (l1x + l2x)/2, bounds.y + (l1y + l2y)/2, highlightSize, (i % 2? color : color2));
+		}
 
 		p1 = p2;
 	}
 }
-
-/*
-
-void Pseudo3DCourse::drawMap(const fgeal::Rectangle& bounds, fgeal::Color color)
-{
-	if(bounds.w == 0 or bounds.h == 0)
-		return;
-
-	float xmin = 0, xmax = 0, xval = 0;
-	for(unsigned i = 0; i < spec.lines.size()-1; i++)
-	{
-		xval += spec.lines[i].curve;
-		if(xval < xmin)
-			xmin = xval;
-		if(xval > xmax)
-			xmax = xval;
-	}
-
-	const float courseWidth = xmax-xmin, courseHeight = spec.roadSegmentLength*spec.lines.size();
-
-	const Vector2D scale = { 0.95f*bounds.w/(courseWidth!=0? courseWidth : bounds.w), 0.95f*bounds.h/courseHeight };
-	Point pt = { 0.025f*bounds.w-xmin*scale.x, 0.975f*bounds.h };
-	for(unsigned i = 0; i < spec.lines.size(); i++)
-	{
-		Point pt2 = pt;
-		pt2.x += spec.lines[i].curve*scale.x;
-		pt2.y -= spec.roadSegmentLength*scale.y;
-		Graphics::drawLine(bounds.x + pt.x, bounds.y + pt.y, bounds.x + pt2.x, bounds.y + pt2.y, color);
-		pt = pt2;
-	}
-}
-
- */
 
 void Pseudo3DCourse::clearDynamicData()
 {

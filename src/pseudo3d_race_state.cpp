@@ -326,8 +326,8 @@ void Pseudo3DRaceState::onEnter()
 		hudTachometer.backgroundImage = null;
 	}
 
-	posHudMap.x = hudTimerCurrentLap.bounds.x * 5000;
-	posHudMap.y = 0.4*display.getHeight() * 5000;
+	posHudMap.x = hudTimerCurrentLap.bounds.x;
+	posHudMap.y = 0.4*display.getHeight();
 	posHudMap.w = 0.1*display.getWidth();
 	posHudMap.h = 0.1*display.getWidth();
 

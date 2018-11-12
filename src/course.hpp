@@ -47,6 +47,12 @@ struct Pseudo3DCourse
 		/* Creates a course spec. by loading and parsing the data in the given filename. */
 		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
 
+		/* Generates a debug course spec. */
+		static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
+
+		/* Generates a random course spec, with given length and curveness factor. */
+		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
+
 		private:
 		void parseProperties(const std::string& filename);
 		void loadSegments(const std::string& filename);
@@ -71,12 +77,6 @@ struct Pseudo3DCourse
 	void clearDynamicData();
 
 	void setupDynamicData();
-
-	/* Generates a debug course spec. */
-	static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
-
-	/* Generates a random course spec, with given length and curveness factor. */
-	static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

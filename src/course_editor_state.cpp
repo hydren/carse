@@ -387,7 +387,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(generateButtonBounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5));
+			this->loadCourse(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
 		}
 	}
 	else if(focus == ON_FILE_MENU)

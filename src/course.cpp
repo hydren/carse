@@ -241,7 +241,7 @@ void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 // ====================== built-in generators =============================================================================
 
 //static
-Pseudo3DCourse::Spec Pseudo3DCourse::generateDebugCourseSpec(float segmentLength, float roadWidth)
+Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segmentLength, float roadWidth)
 {
 	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
 	for(unsigned i = 0; i < 1600; i++)  // generating hardcoded course
@@ -274,7 +274,7 @@ Pseudo3DCourse::Spec Pseudo3DCourse::generateDebugCourseSpec(float segmentLength
 }
 
 //static
-Pseudo3DCourse::Spec Pseudo3DCourse::generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness)
+Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness)
 {
 	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
 

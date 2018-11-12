@@ -89,12 +89,12 @@ void CarseGame::Logic::setNextCourse(const Pseudo3DCourse::Spec& c)
 
 void CarseGame::Logic::setNextCourseRandom()
 {
-	nextMatchCourseSpec = Pseudo3DCourse::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
 }
 
 void CarseGame::Logic::setNextCourseDebug()
 {
-	nextMatchCourseSpec = Pseudo3DCourse::generateDebugCourseSpec(200, 3000);
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateDebugCourseSpec(200, 3000);
 	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 

@@ -224,6 +224,12 @@ void Pseudo3DCourse::setupDynamicData()
 
 // #################### Pseudo3D Course Spec. methods #####################################################
 
+void Pseudo3DCourse::Spec::loadFromFile(const string& filename)
+{
+	this->parseProperties(filename);
+	this->loadSegments(segmentFilename);
+}
+
 void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 {
 	const string specFilename = filename + ".properties", segmentsFilename = filename + ".csv";

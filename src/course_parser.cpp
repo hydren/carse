@@ -47,48 +47,48 @@ namespace // static
 	}
 }
 
-//static
-Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filename)
+void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 {
+	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
+
+	*this = Spec(0, 0);  // resets all data in this object
+
 	Properties prop;
 	prop.load(filename);
-	prop.put("filename", filename);  // done so we can later get properties filename
-	prop.put("base_dir", filename.substr(0, filename.find_last_of("/\\")+1));  // done so we can later get properties base dir
 
-	float segmentLength = prop.getParsedCStrAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
-	float roadWidth = prop.getParsedCStrAllowDefault<double, atof>("road_width", 3000);
+	roadSegmentLength = prop.getParsedCStrAllowDefault<double, atof>("segment_length", 200);  // this may become non-customizable
+	roadWidth = prop.getParsedCStrAllowDefault<double, atof>("road_width", 3000);
 
-	Pseudo3DCourse::Spec course(segmentLength, roadWidth);
-	course.name = prop.get("name");
-	course.author = prop.get("author");
-	course.credits = prop.get("credits");
-	course.comments = prop.get("comments");
-	course.filename = prop.get("filename");  // property provided by course loader
+	name = prop.get("name");
+	author = prop.get("author");
+	credits = prop.get("credits");
+	comments = prop.get("comments");
+	this->filename = filename;
 
-	course.landscapeFilename = futil::trim(prop.get("landscape_image"));
+	landscapeFilename = futil::trim(prop.get("landscape_image"));
 
-	if(not course.landscapeFilename.empty() and course.landscapeFilename != "default")
-		course.landscapeFilename = getContextualizedFilename(course.landscapeFilename, prop.get("base_dir"), "assets/");
+	if(not landscapeFilename.empty() and landscapeFilename != "default")
+		landscapeFilename = getContextualizedFilename(landscapeFilename, baseDir, "assets/");
 
-	if(course.landscapeFilename.empty() or course.landscapeFilename == "default")
+	if(landscapeFilename.empty() or landscapeFilename == "default")
 	{
-		if(course.landscapeFilename.empty())
+		if(landscapeFilename.empty())
 			cout << "warning: image file specified in \"landscape_image\" entry could not be found"
-			<< ", specified by \"" << course.filename << "\". using default instead..." << endl;
-		course.landscapeFilename = "assets/bg.png";
+			<< ", specified by \"" << filename << "\". using default instead..." << endl;
+		landscapeFilename = "assets/bg.png";
 	}
 
-	course.musicFilename = futil::trim(prop.get("music"));
-	if(course.musicFilename.empty()) course.musicFilename = "assets/music_sample.ogg";  // todo remove this line
+	musicFilename = futil::trim(prop.get("music"));
+	if(musicFilename.empty()) musicFilename = "assets/music_sample.ogg";  // todo remove this line
 
-	course.colorRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_primary", Color( 64, 80, 80));
-	course.colorRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_secondary", Color( 40, 64, 64));
-	course.colorOffRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_primary", Color(  0,112,  0));
-	course.colorOffRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_secondary", Color(  0, 88, 80));
-	course.colorHumblePrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_primary", Color(200,200,200));
-	course.colorHumbleSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_secondary", Color(152,  0,  0));
-	course.colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
-	course.colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", course.colorOffRoadPrimary);
+	colorRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_primary", Color( 64, 80, 80));
+	colorRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("road_color_secondary", Color( 40, 64, 64));
+	colorOffRoadPrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_primary", Color(  0,112,  0));
+	colorOffRoadSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("offroad_color_secondary", Color(  0, 88, 80));
+	colorHumblePrimary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_primary", Color(200,200,200));
+	colorHumbleSecondary = prop.getParsedCStrAllowDefault<Color, parseColor>("humble_color_secondary", Color(152,  0,  0));
+	colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
+	colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", colorOffRoadPrimary);
 
 	int spriteMaxId = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", DEFAULT_SPRITE_COUNT);
 	for(int id = 0; id <= spriteMaxId; id++)
@@ -96,26 +96,35 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 		const string specifiedSpriteFilename = prop.get("sprite" + to_string(id));
 		if(not specifiedSpriteFilename.empty())
 		{
-			const string spriteFilename = getContextualizedFilename(specifiedSpriteFilename, prop.get("base_dir"), "assets/");
+			const string spriteFilename = getContextualizedFilename(specifiedSpriteFilename, baseDir, "assets/");
 			if(spriteFilename.empty())
 				cout << "warning: could not load sprite for ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". ID will be treated as unspecified!" << endl;
-			course.spritesFilenames.push_back(spriteFilename);
+			spritesFilenames.push_back(spriteFilename);
 		}
-		else course.spritesFilenames.push_back(string());
+		else spritesFilenames.push_back(string());
 	}
 
+	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
+	lines.resize(length);
+
 	const string specifiedSegmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
-	const string segmentFilename = getContextualizedFilename(specifiedSegmentFilename, prop.get("base_dir"));
+	segmentFilename = getContextualizedFilename(specifiedSegmentFilename, baseDir);
 
 	std::ifstream stream(segmentFilename.c_str());
 	if(not stream.is_open())
-		throw std::runtime_error("Course description file could not be opened: \"" + specifiedSegmentFilename + "\", specified by \"" + course.filename + "\"");
+		throw std::runtime_error("Course description file could not be opened: \"" + specifiedSegmentFilename + "\", specified by \"" + filename + "\"");
+}
 
-	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
-	for(unsigned i = 0; i < length; i++)
+void Pseudo3DCourse::Spec::loadSegments(const string& segmentFilename)
+{
+	std::ifstream stream(segmentFilename.c_str());
+	if(not stream.is_open())
+		throw std::runtime_error("Course description file could not be opened: \"" + segmentFilename + "\", specified by \"" + filename + "\"");
+
+	for(unsigned i = 0; i < lines.size(); i++)
 	{
-		CourseSpec::Segment line;
-		line.z = i*course.roadSegmentLength;
+		CourseSpec::Segment& line = lines[i];
+		line.z = i*roadSegmentLength;
 
 		string str;
 		do{
@@ -151,18 +160,15 @@ Pseudo3DCourse::Spec Pseudo3DCourse::parseCourseSpecFromFile(const string& filen
 			line.spriteX = atof(tokens[5].c_str());
 
 			if(line.spriteID != -1 and
-			  (line.spriteID + 1 > (int) course.spritesFilenames.size() or course.spritesFilenames[line.spriteID].empty()))
-				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + to_string(line.spriteID) + "), specified by \"" + course.filename);
+			  (line.spriteID + 1 > (int) spritesFilenames.size() or spritesFilenames[line.spriteID].empty()))
+				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + to_string(line.spriteID) + "), specified by \"" + segmentFilename+"\"");
 		}
 
 		if(tokens.size() == 5 or tokens.size() > 6)
-			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored." << std::endl;
-
-		course.lines.push_back(line);
+			std::cout << "warning: line " << i << " had an unexpected number of parameters (" << tokens.size() << ") - some of them we'll be ignored (specified by \"" << segmentFilename << "\")" << std::endl;
 	}
 
 	stream.close();
-	return course;
 }
 
 void Pseudo3DCourse::Spec::saveProperties(const string& filename, const string& segmentsFilename)

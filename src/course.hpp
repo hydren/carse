@@ -17,7 +17,9 @@ struct Pseudo3DCourse
 {
 	struct Spec extends CourseSpec
 	{
-		std::string name, filename, author, credits, comments;
+		std::string filename, segmentFilename;
+
+		std::string name, author, credits, comments;
 		std::string previewFilename;
 
 		std::string landscapeFilename;
@@ -36,10 +38,18 @@ struct Pseudo3DCourse
 		inline std::string toString() const { return not name.empty()? name : not filename.empty()? filename : "<unnamed>"; }
 		inline operator std::string() const { return this->toString(); }
 
-		/* Saves a course spec. to the given filename. */
+		/* Loads data from the given filename, parse its course spec data and store in this object. */
+		void loadFromFile(const std::string& filename);
+
+		/* Saves this course spec. to the given filename. */
 		void saveToFile(const std::string& filename);
 
+		/* Creates a course spec. by loading and parsing the data in the given filename. */
+		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
+
 		private:
+		void parseProperties(const std::string& filename);
+		void loadSegments(const std::string& filename);
 		void saveProperties(const std::string& specFile, const std::string& segmentsFile);
 		void saveSegments(const std::string& filename);
 	};
@@ -67,9 +77,6 @@ struct Pseudo3DCourse
 
 	/* Generates a random course spec, with given length and curveness factor. */
 	static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
-
-	/* Reads a course spec. from the given filename. */
-	static Spec parseCourseSpecFromFile(const std::string& filename);
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

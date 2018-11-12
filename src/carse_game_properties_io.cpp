@@ -119,7 +119,7 @@ void CarseGame::Logic::loadCourses()
 	{
 		if(ends_with(courseFiles[i], ".properties"))
 		{
-			try { courses.push_back(Pseudo3DCourse::parseCourseSpecFromFile(courseFiles[i])); }
+			try { courses.push_back(Pseudo3DCourse::Spec::createFromFile(courseFiles[i])); }
 			catch(const std::exception& e) { cout << "error while reading course: " << e.what() << endl; continue; }
 			cout << "read course: " << courseFiles[i] << endl;
 		}

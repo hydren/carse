@@ -320,7 +320,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		if(key == Keyboard::KEY_ENTER)
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(fileMenu.getSelectedEntry().label));
+			this->loadCourse(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 		}
 	}
 	else if(focus == ON_SAVE_DIALOG)
@@ -401,7 +401,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(loadDialogButtonSelectBounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::parseCourseSpecFromFile(fileMenu.getSelectedEntry().label));
+			this->loadCourse(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 		}
 
 		if(loadDialogButtonCancelBounds.contains(x, y))

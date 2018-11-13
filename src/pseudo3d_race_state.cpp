@@ -184,6 +184,9 @@ void Pseudo3DRaceState::initialize()
 	hudTimerBestLap.displayColor = Color::WHITE;
 	hudTimerBestLap.valueScale = 1000;
 
+	hudMiniMapBgColor = Color::BLACK;
+	hudMiniMapBgColor.a = 128;
+
 	// loan some shared resources
 	fontDev = &game.sharedResources->fontDev;
 }
@@ -326,10 +329,14 @@ void Pseudo3DRaceState::onEnter()
 		hudTachometer.backgroundImage = null;
 	}
 
-	posHudMap.x = hudTimerCurrentLap.bounds.x;
-	posHudMap.y = 0.4*display.getHeight();
-	posHudMap.w = 0.1*display.getWidth();
-	posHudMap.h = 0.1*display.getWidth();
+	course.miniMapRoadColor = Color::DARK_GREY;
+	course.miniMapBounds.x = hudTimerCurrentLap.bounds.x;
+	course.miniMapBounds.y = 0.4*display.getHeight();
+	course.miniMapBounds.w = 0.1*display.getWidth();
+	course.miniMapBounds.h = 0.1*display.getWidth();
+	course.miniMapScale.x = course.miniMapScale.y = 0.0002;
+	course.miniMapSegmentHighlightColor = Color::YELLOW;
+	course.miniMapSegmentHightlightSize = 0.005f*display.getWidth();
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{
@@ -393,10 +400,9 @@ void Pseudo3DRaceState::render()
 
 	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
-	fgeal::Vector2D minimapScale;
-	minimapScale.x = minimapScale.y = 0.0002;
+	fgeal::Graphics::drawFilledRoundedRectangle(course.miniMapBounds, 5, hudMiniMapBgColor);
 
-	course.drawMap(Color::RED, Point::NULL_VECTOR, minimapScale, posHudMap, 0.005f*game.getDisplay().getWidth(), playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
+	course.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord

@@ -137,9 +137,13 @@ void CourseEditorState::onEnter()
 	focus = ON_EDITOR;
 	saveDialogFilenameTextFieldCaretPosition = 0;
 
-	offset.x = 0.5*mapBounds.w;
-	offset.y = 0.5*mapBounds.h;
-	scale.x = scale.y = 1.f;
+	course.miniMapRoadColor = Color::RED;
+	course.miniMapRoadContrastColorEnabled = true;
+	course.miniMapSegmentHighlightColor = Color::YELLOW;
+	course.miniMapOffset.x = 0.5*mapBounds.w;
+	course.miniMapOffset.y = 0.5*mapBounds.h;
+	course.miniMapScale.x = course.miniMapScale.y = 1.f;
+	course.miniMapBounds = mapBounds;
 
 	this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
 }
@@ -190,7 +194,7 @@ void CourseEditorState::render()
 	Graphics::drawFilledRectangle(statusBarBounds, Color::GREY);
 
 
-	course.drawMap(Color::RED, offset, scale, mapBounds);
+	course.drawMap();
 
 	if(focus == ON_FILE_MENU)
 	{
@@ -247,42 +251,42 @@ void CourseEditorState::update(float delta)
 	if(focus == ON_EDITOR)
 	{
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-			offset.y -= 100*delta/scale.y;
+			course.miniMapOffset.y -= 100*delta/course.miniMapScale.y;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
-			offset.y += 100*delta/scale.y;
+			course.miniMapOffset.y += 100*delta/course.miniMapScale.y;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
-			offset.x -= 100*delta/scale.x;
+			course.miniMapOffset.x -= 100*delta/course.miniMapScale.x;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
-			offset.x += 100*delta/scale.x;
+			course.miniMapOffset.x += 100*delta/course.miniMapScale.x;
 
-		const fgeal::Vector2D oldScale = scale;
+		const fgeal::Vector2D oldScale = course.miniMapScale;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
-			scale.y *= 1+delta;
+			course.miniMapScale.y *= 1+delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_A))
-			scale.y *= 1-delta;
+			course.miniMapScale.y *= 1-delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_X))
-			scale.x *= 1+delta;
+			course.miniMapScale.x *= 1+delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_Z))
-			scale.x *= 1-delta;
+			course.miniMapScale.x *= 1-delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_E))
-			scale *= 1+delta;
+			course.miniMapScale *= 1+delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_S))
-			scale *= 1-delta;
+			course.miniMapScale *= 1-delta;
 
-		if(scale.x != oldScale.x)
-			offset.x *= oldScale.x/scale.x;
+		if(course.miniMapScale.x != oldScale.x)
+			course.miniMapOffset.x *= oldScale.x/course.miniMapScale.x;
 
-		if(scale.y != oldScale.y)
-			offset.y *= oldScale.y/scale.y;
+		if(course.miniMapScale.y != oldScale.y)
+			course.miniMapOffset.y *= oldScale.y/course.miniMapScale.y;
 	}
 }
 
@@ -452,6 +456,15 @@ void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 	course.drawAreaHeight = courseViewBounds.h;
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
+
+	course.miniMapRoadColor = Color::RED;
+	course.miniMapRoadContrastColorEnabled = true;
+	course.miniMapSegmentHighlightColor = Color::YELLOW;
+	course.miniMapOffset.x = 0.5*mapBounds.w;
+	course.miniMapOffset.y = 0.5*mapBounds.h;
+	course.miniMapScale.x = course.miniMapScale.y = 1.f;
+	course.miniMapBounds = mapBounds;
+
 	focus = ON_EDITOR;
 }
 

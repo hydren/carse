@@ -37,10 +37,6 @@ class CourseEditorState extends public fgeal::Game::State
 
 	Pseudo3DCourse course;
 
-	fgeal::Point offset;
-
-	fgeal::Vector2D scale;
-
 	std::string saveDialogFilename;
 
 	enum StateFocus

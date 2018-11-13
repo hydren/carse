@@ -24,12 +24,14 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
+  miniMapSegmentHightlightSize(0), miniMapRoadContrastColorEnabled()
 {}
 
 Pseudo3DCourse::Pseudo3DCourse(Spec spec)
 : spec(spec), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
+  miniMapSegmentHightlightSize(0), miniMapRoadContrastColorEnabled()
 {}
 
 //custom call to draw quad
@@ -148,10 +150,10 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	}
 }
 
-void Pseudo3DCourse::drawMap(const Color& color, const Point& mapOffset, const Vector2D& scale, const Rectangle& bounds, float highlightSize, unsigned highlightedSegment)
+void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 {
-	const Color color2(255-color.r, 255-color.g, 255-color.b);
-	Point p1 = mapOffset;
+	const Color miniMapRoadColor2(255-miniMapRoadColor.r, 255-miniMapRoadColor.g, 255-miniMapRoadColor.b);
+	Point p1 = miniMapOffset, hightlightPoint = {-1, -1};
 	float angle = 0;
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{
@@ -161,18 +163,25 @@ void Pseudo3DCourse::drawMap(const Color& color, const Point& mapOffset, const V
 		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
 		rotatePoint(p2, p1, angle);
 
-		const float l1x = p1.x * scale.x, l1y = p1.y * scale.y,
-					l2x = p2.x * scale.x, l2y = p2.y * scale.y;
+		const float l1x = p1.x * miniMapScale.x, l1y = p1.y * miniMapScale.y,
+					l2x = p2.x * miniMapScale.x, l2y = p2.y * miniMapScale.y;
 
-		if(l1x > 0 and l1x < bounds.w and l1y > 0 and l1y < bounds.h and l2x > 0 and l2x < bounds.w and l2y > 0 and l2y < bounds.h)
+		if(l1x > 0 and l1x < miniMapBounds.w and l1y > 0 and l1y < miniMapBounds.h and l2x > 0 and l2x < miniMapBounds.w and l2y > 0 and l2y < miniMapBounds.h)
 		{
-			Graphics::drawLine(bounds.x + l1x, bounds.y + l1y, bounds.x + l2x, bounds.y + l2y, (i % 2? color : color2));
-			if(i == highlightedSegment and highlightSize != 0)
-				Graphics::drawFilledCircle(bounds.x + (l1x + l2x)/2, bounds.y + (l1y + l2y)/2, highlightSize, (i % 2? color : color2));
+			Graphics::drawLine(miniMapBounds.x + l1x, miniMapBounds.y + l1y, miniMapBounds.x + l2x, miniMapBounds.y + l2y, (miniMapRoadContrastColorEnabled and (i % 2)? miniMapRoadColor : miniMapRoadColor2));
+
+			if(miniMapSegmentHightlightSize != 0 and i == highlightedSegment)
+			{
+				hightlightPoint.x = (l1x + l2x)/2;
+				hightlightPoint.y = (l1y + l2y)/2;
+			}
 		}
 
 		p1 = p2;
 	}
+
+	if(miniMapSegmentHightlightSize != 0 and hightlightPoint.x >= 0 and hightlightPoint.y >= 0)
+		Graphics::drawFilledCircle(miniMapBounds.x + hightlightPoint.x, miniMapBounds.y + hightlightPoint.y, miniMapSegmentHightlightSize, miniMapSegmentHighlightColor);
 }
 
 void Pseudo3DCourse::clearDynamicData()

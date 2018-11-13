@@ -109,10 +109,10 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	Hud::TimerDisplay<float> hudTimerCurrentLap, hudTimerBestLap;
 	Hud::NumericalDisplay<unsigned> hudCurrentLap, hudLapCountGoal;
 
+	fgeal::Color hudMiniMapBgColor;
+
 	float rightHudMargin, offsetHudLapGoal;
 	fgeal::Point posHudCountdown, posHudFinishedCaption;
-
-	fgeal::Rectangle posHudMap;
 
 	// keybindings
 	fgeal::Keyboard::Key controlKeyAccelerate,

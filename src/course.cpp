@@ -155,6 +155,37 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 	const Color miniMapRoadColor2(255-miniMapRoadColor.r, 255-miniMapRoadColor.g, 255-miniMapRoadColor.b);
 	Point p1 = miniMapOffset, hightlightPoint = {-1, -1};
 	float angle = 0;
+
+	if(miniMapScale.isZero())
+	{
+		float xmin = 0, xmax = 0, ymin = 0, ymax = 0;
+		for(unsigned i = 0; i < spec.lines.size(); i++)
+		{
+			Point p2 = p1;
+			p2.x += spec.lines[i].curve;
+			p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
+			angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
+			rotatePoint(p2, p1, angle);
+			if(p2.x < xmin)
+				xmin = p2.x;
+			else if(p2.x > xmax)
+				xmax = p2.x;
+
+			if(p2.y < ymin)
+				ymin = p2.y;
+			else if(p2.y > ymax)
+				ymax = p2.y;
+
+			p1 = p2;
+		}
+
+		miniMapScale.x = xmax-xmin == 0? 1 : 0.90*miniMapBounds.w / (xmax - xmin);
+		miniMapScale.y = ymax-ymin == 0? 1 : 0.90*miniMapBounds.h / (ymax - ymin);
+
+		miniMapOffset.x = -1.05*xmin;
+		miniMapOffset.y = -1.05*ymin;
+	}
+
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{
 		Point p2 = p1;

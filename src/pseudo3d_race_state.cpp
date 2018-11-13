@@ -334,9 +334,7 @@ void Pseudo3DRaceState::onEnter()
 	course.miniMapBounds.y = 0.4*display.getHeight();
 	course.miniMapBounds.w = 0.1*display.getWidth();
 	course.miniMapBounds.h = 0.1*display.getWidth();
-	course.miniMapScale.x = course.miniMapScale.y = 0.0002;
-	course.miniMapOffset.x = 0.5*course.miniMapBounds.w/course.miniMapScale.x;
-	course.miniMapOffset.y = 0.5*course.miniMapBounds.h/course.miniMapScale.y;
+	course.miniMapScale = fgeal::Vector2D();
 	course.miniMapSegmentHighlightColor = Color::YELLOW;
 	course.miniMapSegmentHightlightSize = 0.005f*display.getWidth();
 

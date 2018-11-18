@@ -25,14 +25,12 @@ using std::string;
 using futil::ends_with;
 using futil::Properties;
 
-static char parseKeyStroke(fgeal::Keyboard::Key key);
-
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game),
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
-  focus(), saveDialogFilenameTextFieldCaretPosition()
+  focus()
 {}
 
 CourseEditorState::~CourseEditorState()
@@ -46,6 +44,12 @@ void CourseEditorState::initialize()
 	fileMenu.setFont(&game.sharedResources->fontDev);
 	fileMenu.setColor(Color::GREEN);
 	font = new Font(game.sharedResources->font1Path, dip(15));
+
+	saveDialogTextField.font = font;
+	saveDialogTextField.bgColor = Color::BLACK;
+	saveDialogTextField.bgColor.a = 127;
+	saveDialogTextField.textColor = Color::WHITE;
+	saveDialogTextField.borderColor = Color::_TRANSPARENT;
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -121,10 +125,12 @@ void CourseEditorState::onEnter()
 	saveDialogBounds.x = 0.5*(dw - saveDialogBounds.w);
 	saveDialogBounds.y = 0.5*(dh - saveDialogBounds.h);
 
-	saveDialogFilenameTextFieldBounds.x = saveDialogBounds.x + widgetSpacing;
-	saveDialogFilenameTextFieldBounds.y = saveDialogBounds.y + widgetSpacing + font->getHeight();
-	saveDialogFilenameTextFieldBounds.w = saveDialogBounds.w - 2*widgetSpacing;
-	saveDialogFilenameTextFieldBounds.h = 1.1*font->getHeight();
+	saveDialogTextField.bounds.x = saveDialogBounds.x + widgetSpacing;
+	saveDialogTextField.bounds.y = saveDialogBounds.y + widgetSpacing + font->getHeight();
+	saveDialogTextField.bounds.w = saveDialogBounds.w - 2*widgetSpacing;
+	saveDialogTextField.bounds.h = 1.1*font->getHeight();
+	saveDialogTextField.content.clear();
+	saveDialogTextField.caretPosition = 0;
 
 	saveDialogSaveButtonBounds = loadDialogButtonSelectBounds;
 	saveDialogSaveButtonBounds.y = saveDialogBounds.y + saveDialogBounds.h - saveDialogSaveButtonBounds.h - widgetSpacing;
@@ -135,7 +141,6 @@ void CourseEditorState::onEnter()
 	// initial values
 
 	focus = ON_EDITOR;
-	saveDialogFilenameTextFieldCaretPosition = 0;
 
 	course.miniMapRoadColor = Color::RED;
 	course.miniMapRoadContrastColorEnabled = true;
@@ -225,8 +230,7 @@ void CourseEditorState::render()
 
 		font->drawText("Enter a filename for the course:", saveDialogBounds.x + widgetSpacing, saveDialogBounds.y + widgetSpacing, Color::BLACK);
 
-		Graphics::drawFilledRectangle(saveDialogFilenameTextFieldBounds, Color(0, 0, 0, 128));
-		font->drawText(saveDialogFilename, saveDialogFilenameTextFieldBounds.x, saveDialogFilenameTextFieldBounds.y, Color::WHITE);
+		saveDialogTextField.draw();
 
 		Graphics::drawFilledRectangle(saveDialogSaveButtonBounds, Color::LIGHT_GREY);
 		font->drawText("Save", saveDialogSaveButtonBounds.x, saveDialogSaveButtonBounds.y, Color::BLACK);
@@ -236,8 +240,6 @@ void CourseEditorState::render()
 
 		if(cos(20*fgeal::uptime()) > 0)
 		{
-			Graphics::drawFilledRectangle(saveDialogFilenameTextFieldBounds.x+font->getTextWidth(saveDialogFilename), saveDialogFilenameTextFieldBounds.y, 4, font->getHeight(), Color::WHITE);
-
 			if(saveDialogSaveButtonBounds.contains(Mouse::getPosition()))
 				Graphics::drawRectangle(getSpacedOutline(saveDialogSaveButtonBounds, widgetSpacing), Color::RED);
 			else if(saveDialogCancelButtonBounds.contains(Mouse::getPosition()))
@@ -295,11 +297,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	if(focus == ON_EDITOR)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
-		{
 			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
-			saveDialogFilename.clear();
-			saveDialogFilenameTextFieldCaretPosition = 0;
-		}
 	}
 	else if(focus == ON_FILE_MENU)
 	{
@@ -331,38 +329,8 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	{
 		if(key== Keyboard::KEY_ESCAPE)
 			focus = ON_EDITOR;
-
-		else if(key == Keyboard::KEY_ENTER)
-		{
-
-		}
-		else if(key == Keyboard::KEY_BACKSPACE)
-		{
-			if(not saveDialogFilename.empty() and saveDialogFilenameTextFieldCaretPosition > 0)
-			{
-				saveDialogFilename.erase(saveDialogFilename.begin() + saveDialogFilenameTextFieldCaretPosition-1);
-				saveDialogFilenameTextFieldCaretPosition--;
-			}
-		}
-		else if(key == Keyboard::KEY_ARROW_LEFT)
-		{
-			if(saveDialogFilenameTextFieldCaretPosition > 0)
-				saveDialogFilenameTextFieldCaretPosition--;
-		}
-		else if(key == Keyboard::KEY_ARROW_RIGHT)
-		{
-			if(saveDialogFilenameTextFieldCaretPosition < (int) saveDialogFilename.size())
-				saveDialogFilenameTextFieldCaretPosition++;
-		}
 		else
-		{
-			const char typed = parseKeyStroke(key);
-			if(typed != '\n')
-			{
-				saveDialogFilename.insert(saveDialogFilename.begin() + saveDialogFilenameTextFieldCaretPosition, 1, typed);
-				saveDialogFilenameTextFieldCaretPosition++;
-			}
-		}
+			saveDialogTextField.onKeyPressed(key);
 	}
 }
 
@@ -420,8 +388,8 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			if(course.spec.name.empty())
-				course.spec.name = saveDialogFilename;
-			try { course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogFilename); }
+				course.spec.name = saveDialogTextField.content;
+			try { course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogTextField.content); }
 			catch(const std::exception& e) { /* TODO show error dialog */ }
 			focus = ON_EDITOR;
 		}
@@ -466,75 +434,4 @@ void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 	course.miniMapBounds = mapBounds;
 
 	focus = ON_EDITOR;
-}
-
-// fixme this should be in fgeal package
-static char parseKeyStroke(fgeal::Keyboard::Key key)
-{
-	char typed;
-	switch(key)
-	{
-		default: typed = '\n'; break;
-		case Keyboard::KEY_A: typed = 'a'; break;
-		case Keyboard::KEY_B: typed = 'b'; break;
-		case Keyboard::KEY_C: typed = 'c'; break;
-		case Keyboard::KEY_D: typed = 'd'; break;
-		case Keyboard::KEY_E: typed = 'e'; break;
-		case Keyboard::KEY_F: typed = 'f'; break;
-		case Keyboard::KEY_G: typed = 'g'; break;
-		case Keyboard::KEY_H: typed = 'h'; break;
-		case Keyboard::KEY_I: typed = 'i'; break;
-		case Keyboard::KEY_J: typed = 'j'; break;
-		case Keyboard::KEY_K: typed = 'k'; break;
-		case Keyboard::KEY_L: typed = 'l'; break;
-		case Keyboard::KEY_M: typed = 'm'; break;
-		case Keyboard::KEY_N: typed = 'n'; break;
-		case Keyboard::KEY_O: typed = 'o'; break;
-		case Keyboard::KEY_P: typed = 'p'; break;
-		case Keyboard::KEY_Q: typed = 'q'; break;
-		case Keyboard::KEY_R: typed = 'r'; break;
-		case Keyboard::KEY_S: typed = 's'; break;
-		case Keyboard::KEY_T: typed = 't'; break;
-		case Keyboard::KEY_U: typed = 'u'; break;
-		case Keyboard::KEY_V: typed = 'v'; break;
-		case Keyboard::KEY_W: typed = 'w'; break;
-		case Keyboard::KEY_X: typed = 'x'; break;
-		case Keyboard::KEY_Y: typed = 'y'; break;
-		case Keyboard::KEY_Z: typed = 'z'; break;
-		case Keyboard::KEY_NUMPAD_0:
-		case Keyboard::KEY_0:       typed = '0'; break;
-		case Keyboard::KEY_NUMPAD_1:
-		case Keyboard::KEY_1:       typed = '1'; break;
-		case Keyboard::KEY_NUMPAD_2:
-		case Keyboard::KEY_2:       typed = '2'; break;
-		case Keyboard::KEY_NUMPAD_3:
-		case Keyboard::KEY_3:       typed = '3'; break;
-		case Keyboard::KEY_NUMPAD_4:
-		case Keyboard::KEY_4:       typed = '4'; break;
-		case Keyboard::KEY_NUMPAD_5:
-		case Keyboard::KEY_5:       typed = '5'; break;
-		case Keyboard::KEY_NUMPAD_6:
-		case Keyboard::KEY_6:       typed = '6'; break;
-		case Keyboard::KEY_NUMPAD_7:
-		case Keyboard::KEY_7:       typed = '7'; break;
-		case Keyboard::KEY_NUMPAD_8:
-		case Keyboard::KEY_8:       typed = '8'; break;
-		case Keyboard::KEY_NUMPAD_9:
-		case Keyboard::KEY_9:       typed = '9'; break;
-		case Keyboard::KEY_SPACE:   typed = ' '; break;
-		case Keyboard::KEY_PERIOD:  typed = '.'; break;
-		case Keyboard::KEY_MINUS:   typed = '-'; break;
-	}
-
-	if(typed >= 'a' and typed <= 'z')
-	if(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)
-	or Keyboard::isKeyPressed(Keyboard::KEY_RIGHT_SHIFT))
-		typed -= 32;
-
-	if(typed == '-')
-	if(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)
-	or Keyboard::isKeyPressed(Keyboard::KEY_RIGHT_SHIFT))
-		typed = '_';
-
-	return typed;
 }

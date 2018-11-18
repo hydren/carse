@@ -14,6 +14,7 @@
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
+#include "fgeal/extra/gui.hpp"
 
 #include "futil/language.hpp"
 
@@ -33,11 +34,11 @@ class CourseEditorState extends public fgeal::Game::State
 		newButtonBounds, loadButtonBounds, saveButtonBounds,
 		generateButtonBounds,
 		loadDialogBounds, loadDialogButtonSelectBounds, loadDialogButtonCancelBounds,
-		saveDialogBounds, saveDialogFilenameTextFieldBounds, saveDialogSaveButtonBounds, saveDialogCancelButtonBounds;
+		saveDialogBounds, saveDialogSaveButtonBounds, saveDialogCancelButtonBounds;
+
+	fgeal::TextField saveDialogTextField;
 
 	Pseudo3DCourse course;
-
-	std::string saveDialogFilename;
 
 	enum StateFocus
 	{
@@ -46,8 +47,6 @@ class CourseEditorState extends public fgeal::Game::State
 		ON_SAVE_DIALOG,
 	}
 	focus;
-
-	int saveDialogFilenameTextFieldCaretPosition;
 
 	public:
 	virtual int getId();

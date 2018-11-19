@@ -34,16 +34,11 @@ using std::to_string;
 
 static const unsigned DEFAULT_SPRITE_COUNT = 32;
 
-namespace // static
+namespace  // static
 {
 	inline Color parseColor(const char* cstr)
 	{
 		return Color::parseCStr(cstr);
-	}
-
-	inline string to_string(Color c)
-	{
-		return ::to_string(c.r)+","+::to_string(c.g)+","+::to_string(c.b);
 	}
 }
 
@@ -186,14 +181,14 @@ void Pseudo3DCourse::Spec::saveProperties(const string& filename, const string& 
 
 	if(not landscapeFilename.empty())
 		prop.put("landscape_image", landscapeFilename);
-	prop.put("landscape_color", to_string(colorLandscape));
-	prop.put("horizon_color", to_string(colorHorizon));
-	prop.put("road_color_primary", to_string(colorRoadPrimary));
-	prop.put("road_color_secondary", to_string(colorRoadSecondary));
-	prop.put("offroad_color_primary", to_string(colorOffRoadPrimary));
-	prop.put("offroad_color_secondary", to_string(colorOffRoadSecondary));
-	prop.put("humble_color_primary", to_string(colorHumblePrimary));
-	prop.put("humble_color_secondary", to_string(colorHumbleSecondary));
+	prop.put("landscape_color", colorLandscape.toRgbString());
+	prop.put("horizon_color", colorHorizon.toRgbString());
+	prop.put("road_color_primary", colorRoadPrimary.toRgbString());
+	prop.put("road_color_secondary", colorRoadSecondary.toRgbString());
+	prop.put("offroad_color_primary", colorOffRoadPrimary.toRgbString());
+	prop.put("offroad_color_secondary", colorOffRoadSecondary.toRgbString());
+	prop.put("humble_color_primary", colorHumblePrimary.toRgbString());
+	prop.put("humble_color_secondary", colorHumbleSecondary.toRgbString());
 
 	if(not musicFilename.empty())
 		prop.put("music", musicFilename);

@@ -158,7 +158,7 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 
 	if(miniMapScale.isZero())
 	{
-		float xmin = 0, xmax = 0, ymin = 0, ymax = 0;
+		Point pmin = Point(), pmax = Point();
 		for(unsigned i = 0; i < spec.lines.size(); i++)
 		{
 			Point p2 = p1;
@@ -166,24 +166,23 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 			p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
 			angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
 			rotatePoint(p2, p1, angle);
-			if(p2.x < xmin)
-				xmin = p2.x;
-			else if(p2.x > xmax)
-				xmax = p2.x;
+			if(p2.x < pmin.x)
+				pmin.x = p2.x;
+			else if(p2.x > pmax.x)
+				pmax.x = p2.x;
 
-			if(p2.y < ymin)
-				ymin = p2.y;
-			else if(p2.y > ymax)
-				ymax = p2.y;
+			if(p2.y < pmin.y)
+				pmin.y = p2.y;
+			else if(p2.y > pmax.y)
+				pmax.y = p2.y;
 
 			p1 = p2;
 		}
 
-		miniMapScale.x = xmax-xmin == 0? 1 : 0.90*miniMapBounds.w / (xmax - xmin);
-		miniMapScale.y = ymax-ymin == 0? 1 : 0.90*miniMapBounds.h / (ymax - ymin);
+		miniMapScale.x = pmax.x-pmin.x == 0? 1 : 0.90*miniMapBounds.w / (pmax.x - pmin.x);
+		miniMapScale.y = pmax.y-pmin.y == 0? 1 : 0.90*miniMapBounds.h / (pmax.y - pmin.y);
 
-		miniMapOffset.x = -1.05*xmin;
-		miniMapOffset.y = -1.05*ymin;
+		miniMapOffset = pmin*(-1.05);
 	}
 
 	for(unsigned i = 0; i < spec.lines.size(); i++)
@@ -194,17 +193,16 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
 		rotatePoint(p2, p1, angle);
 
-		const float l1x = p1.x * miniMapScale.x, l1y = p1.y * miniMapScale.y,
-					l2x = p2.x * miniMapScale.x, l2y = p2.y * miniMapScale.y;
+		const Point sp1 = p1.entrywiseProduct(miniMapScale), sp2 = p2.entrywiseProduct(miniMapScale);
 
-		if(l1x > 0 and l1x < miniMapBounds.w and l1y > 0 and l1y < miniMapBounds.h and l2x > 0 and l2x < miniMapBounds.w and l2y > 0 and l2y < miniMapBounds.h)
+		if(sp1.x > 0 and sp1.x < miniMapBounds.w and sp1.y > 0 and sp1.y < miniMapBounds.h and sp2.x > 0 and sp2.x < miniMapBounds.w and sp2.y > 0 and sp2.y < miniMapBounds.h)
 		{
-			Graphics::drawLine(miniMapBounds.x + l1x, miniMapBounds.y + l1y, miniMapBounds.x + l2x, miniMapBounds.y + l2y, (miniMapRoadContrastColorEnabled and (i % 2)? miniMapRoadColor : miniMapRoadColor2));
+			Graphics::drawLine(miniMapBounds.x + sp1.x, miniMapBounds.y + sp1.y, miniMapBounds.x + sp2.x, miniMapBounds.y + sp2.y, (miniMapRoadContrastColorEnabled and (i % 2)? miniMapRoadColor : miniMapRoadColor2));
 
 			if(miniMapSegmentHightlightSize != 0 and i == highlightedSegment)
 			{
-				hightlightPoint.x = (l1x + l2x)/2;
-				hightlightPoint.y = (l1y + l2y)/2;
+				hightlightPoint.x = (sp1.x + sp2.x)/2;
+				hightlightPoint.y = (sp1.y + sp2.y)/2;
 			}
 		}
 

@@ -152,10 +152,10 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 {
-	const Color miniMapRoadColor2(255-miniMapRoadColor.r, 255-miniMapRoadColor.g, 255-miniMapRoadColor.b);
-	Point p1 = miniMapOffset, hightlightPoint = {-1, -1};
+	Point p1 = miniMapOffset;
 	float angle = 0;
 
+	// if no scale set, set one automatically to fit minimap bounds
 	if(miniMapScale.isZero())
 	{
 		Point pmin = Point(), pmax = Point();
@@ -185,6 +185,9 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 		miniMapOffset = pmin*(-1.05);
 	}
 
+	const Color miniMapRoadColor2(255-miniMapRoadColor.r, 255-miniMapRoadColor.g, 255-miniMapRoadColor.b);
+	Point hightlightPoint = {-1, -1};
+	p1 = miniMapOffset; angle = 0;
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{
 		Point p2 = p1;

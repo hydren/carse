@@ -36,3 +36,4 @@ spec.i
 
 # Test vehicles
 data/vehicles/test_*
+data/courses/test_*

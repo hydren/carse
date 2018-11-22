@@ -72,6 +72,12 @@ EngineSoundProfile& CarseGame::Logic::getPresetEngineSoundProfile(const std::str
 		return presetEngineSoundProfiles["default"];
 }
 
+void CarseGame::Logic::updateCourseList()
+{
+	courses.clear();
+	this->loadCourses();
+}
+
 const vector<Pseudo3DCourse::Spec>& CarseGame::Logic::getCourseList()
 {
 	return courses;

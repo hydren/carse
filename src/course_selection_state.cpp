@@ -77,12 +77,6 @@ void CourseSelectionState::initialize()
 	menuCourse.borderColor = Color(0, 0, 0, 192);
 	menuCourse.focusedEntryFontColor = Color::WHITE;
 
-	menuCourse.addEntry("<Random course>");
-	menuCourse.addEntry("<Debug course>");
-	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
-	for(unsigned i = 0; i < courses.size(); i++)
-		menuCourse.addEntry((string) courses[i]);
-
 	menuSettings.setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
 	menuSettings.setColor(Color::RED);
 	menuSettings.bgColor = menuCourse.bgColor;
@@ -131,6 +125,30 @@ void CourseSelectionState::onEnter()
 	menuCourse.bounds.y = portraitBounds.y + portraitBounds.h + (1/32.f)*paneBounds.h;
 	menuCourse.bounds.w = paneBounds.w - menuCourse.bounds.x;
 	menuCourse.bounds.h = (paneBounds.w - portraitBounds.h)/4;
+
+	string previouslySelectedEntryLabel;
+	if(not menuCourse.getEntries().empty())
+	{
+		previouslySelectedEntryLabel = menuCourse.getSelectedEntry().label;
+
+		// clear course list
+		while(not menuCourse.getEntries().empty())
+			menuCourse.removeEntry(0);
+	}
+
+	menuCourse.addEntry("<Random course>");
+	menuCourse.addEntry("<Debug course>");
+	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
+	for(unsigned i = 0; i < courses.size(); i++)
+		menuCourse.addEntry((string) courses[i]);
+
+	if(not previouslySelectedEntryLabel.empty())
+		for(unsigned i = 0; i < menuCourse.getEntries().size(); i++)
+			if(menuCourse.getEntryAt(i).label == previouslySelectedEntryLabel)
+			{
+				menuCourse.setSelectedIndex(i);
+				break;
+			}
 
 	menuSettings.bounds.x = menuCourse.bounds.x;
 	menuSettings.bounds.y = menuCourse.bounds.y + menuCourse.bounds.h + 4*focusSpacing;

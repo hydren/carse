@@ -389,7 +389,12 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			sndCursorIn->play();
 			if(course.spec.name.empty())
 				course.spec.name = saveDialogTextField.content;
-			try { course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogTextField.content); }
+			try
+			{
+				course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogTextField.content);
+				game.logic.updateCourseList();
+				reloadFileList();
+			}
 			catch(const std::exception& e) { /* TODO show error dialog */ }
 			focus = ON_EDITOR;
 		}
@@ -408,11 +413,9 @@ void CourseEditorState::reloadFileList()
 	while(not fileMenu.getEntries().empty())
 		fileMenu.removeEntry(0);
 
-	// populate menu
-	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::COURSES_FOLDER);
-	for(unsigned i = 0; i < courseFiles.size(); i++)
-		if(ends_with(courseFiles[i], ".properties"))
-			fileMenu.addEntry(courseFiles[i]);
+	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
+	for(unsigned i = 0; i < courses.size(); i++)
+		fileMenu.addEntry(courses[i].filename);
 }
 
 void CourseEditorState::loadCourse(const Pseudo3DCourse& c)

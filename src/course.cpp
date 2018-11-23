@@ -158,6 +158,7 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 	// if no scale set, set one automatically to fit minimap bounds
 	if(miniMapScale.isZero())
 	{
+		miniMapScale.x = miniMapScale.y = 1.f;
 		Point pmin = Point(), pmax = Point();
 		for(unsigned i = 0; i < spec.lines.size(); i++)
 		{
@@ -179,10 +180,13 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 			p1 = p2;
 		}
 
-		miniMapScale.x = pmax.x-pmin.x == 0? 1 : 0.90*miniMapBounds.w / (pmax.x - pmin.x);
-		miniMapScale.y = pmax.y-pmin.y == 0? 1 : 0.90*miniMapBounds.h / (pmax.y - pmin.y);
+		const float deltaX = pmax.x - pmin.x, deltaY = pmax.y - pmin.y,
+					scale = (deltaX > deltaY? 0.9f*miniMapBounds.w/deltaX :
+							 deltaY > deltaX? 0.9f*miniMapBounds.h/deltaY : 1.f);
 
-		miniMapOffset = pmin*(-1.05);
+		miniMapScale.x = miniMapScale.y = scale;
+		miniMapOffset.x = -pmin.x + 0.5f*(miniMapBounds.w/scale - deltaX);
+		miniMapOffset.y = -pmin.y + 0.5f*(miniMapBounds.h/scale - deltaY);
 	}
 
 	const Color miniMapRoadColor2(255-miniMapRoadColor.r, 255-miniMapRoadColor.g, 255-miniMapRoadColor.b);

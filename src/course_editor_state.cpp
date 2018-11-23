@@ -433,7 +433,7 @@ void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 	course.miniMapSegmentHighlightColor = Color::YELLOW;
 	course.miniMapOffset.x = 0.5*mapBounds.w;
 	course.miniMapOffset.y = 0.5*mapBounds.h;
-	course.miniMapScale.x = course.miniMapScale.y = 1.f;
+	course.miniMapScale = Point();
 	course.miniMapBounds = mapBounds;
 
 	focus = ON_EDITOR;

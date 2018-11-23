@@ -158,7 +158,6 @@ void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
 	// if no scale set, set one automatically to fit minimap bounds
 	if(miniMapScale.isZero())
 	{
-		miniMapScale.x = miniMapScale.y = 1.f;
 		Point pmin = Point(), pmax = Point();
 		for(unsigned i = 0; i < spec.lines.size(); i++)
 		{

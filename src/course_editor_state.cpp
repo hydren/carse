@@ -11,6 +11,8 @@
 
 #include "util.hpp"
 
+#include "futil/string_actions.hpp"
+
 using fgeal::Display;
 using fgeal::Color;
 using fgeal::Graphics;
@@ -28,9 +30,8 @@ using futil::Properties;
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
-: State(*game), game(*game),
-  font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
-  focus()
+: State(*game), game(*game), focus(),
+  font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
 
 CourseEditorState::~CourseEditorState()
@@ -65,6 +66,8 @@ void CourseEditorState::onEnter()
 
 	reloadFileList();
 
+	// reset geometry
+
 	mapBounds.x = 0.25*dw;
 	mapBounds.y = 0;
 	mapBounds.w = 0.75*dw;
@@ -78,11 +81,6 @@ void CourseEditorState::onEnter()
 	toolsPanelBounds.y = 0.20*dh;
 	toolsPanelBounds.w = 0.25*dw;
 	toolsPanelBounds.h = 0.75*dh;
-
-	statusBarBounds.x = 0;
-	statusBarBounds.y = 0.95*dh;
-	statusBarBounds.w = dw;
-	statusBarBounds.h = 0.05*dh;
 
 	newButtonBounds.x = toolsPanelBounds.x + widgetSpacing;
 	newButtonBounds.y = toolsPanelBounds.y + widgetSpacing + font->getHeight();
@@ -118,8 +116,6 @@ void CourseEditorState::onEnter()
 	loadDialogButtonSelectBounds.w = 1.1*font->getTextWidth("Cancel");
 	loadDialogButtonCancelBounds.x += loadDialogButtonSelectBounds.w + widgetSpacing;
 
-	// save dialog
-
 	saveDialogBounds.w = 0.6*dw;
 	saveDialogBounds.h = 0.2*dh;
 	saveDialogBounds.x = 0.5*(dw - saveDialogBounds.w);
@@ -137,6 +133,15 @@ void CourseEditorState::onEnter()
 
 	saveDialogCancelButtonBounds = loadDialogButtonCancelBounds;
 	saveDialogCancelButtonBounds.y = saveDialogSaveButtonBounds.y;
+
+	statusBarBounds.x = 0;
+	statusBarBounds.y = 0.95*dh;
+	statusBarBounds.w = dw;
+	statusBarBounds.h = 0.05*dh;
+
+	scaleIndicatorPosition.x = dw - game.sharedResources->fontDev.getTextWidth("zoom: x=00000000000, y=00000000000");
+	scaleIndicatorPosition.y = statusBarBounds.y;
+	scaleIndicatorText.clear();
 
 	// initial values
 
@@ -166,6 +171,7 @@ void CourseEditorState::render()
 
 
 	Graphics::drawFilledRectangle(mapBounds, Color::DARK_GREEN);
+	course.drawMap();
 
 
 	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
@@ -196,11 +202,6 @@ void CourseEditorState::render()
 	}
 
 
-	Graphics::drawFilledRectangle(statusBarBounds, Color::GREY);
-
-
-	course.drawMap();
-
 	if(focus == ON_FILE_MENU)
 	{
 		Graphics::drawFilledRoundedRectangle(loadDialogBounds, 10, Color::GREY);
@@ -222,6 +223,7 @@ void CourseEditorState::render()
 				Graphics::drawRectangle(getSpacedOutline(loadDialogButtonCancelBounds, widgetSpacing), Color::RED);
 		}
 	}
+
 
 	if(focus == ON_SAVE_DIALOG)
 	{
@@ -246,6 +248,10 @@ void CourseEditorState::render()
 				Graphics::drawRectangle(getSpacedOutline(saveDialogCancelButtonBounds, widgetSpacing), Color::RED);
 		}
 	}
+
+
+	Graphics::drawFilledRectangle(statusBarBounds, Color::GREY);
+	game.sharedResources->fontDev.drawText(scaleIndicatorText, scaleIndicatorPosition, Color::WHITE);
 }
 
 void CourseEditorState::update(float delta)
@@ -289,6 +295,14 @@ void CourseEditorState::update(float delta)
 
 		if(course.miniMapScale.y != oldScale.y)
 			course.miniMapOffset.y *= oldScale.y/course.miniMapScale.y;
+
+		if(course.miniMapScale != oldScale or scaleIndicatorText.empty())
+		{
+			scaleIndicatorText = "Zoom: x=";
+			scaleIndicatorText.append(futil::to_string(course.miniMapScale.x));
+			scaleIndicatorText.append(", y=");
+			scaleIndicatorText.append(futil::to_string(course.miniMapScale.y));
+		}
 	}
 }
 
@@ -435,6 +449,7 @@ void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 	course.miniMapOffset.y = 0.5*mapBounds.h;
 	course.miniMapScale = Point();
 	course.miniMapBounds = mapBounds;
+	scaleIndicatorText.clear();
 
 	focus = ON_EDITOR;
 }

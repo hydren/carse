@@ -24,22 +24,7 @@ class CourseEditorState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
-	fgeal::Menu fileMenu;
-
-	fgeal::Font* font;
-
-	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
-
-	fgeal::Rectangle mapBounds, courseViewBounds, statusBarBounds, toolsPanelBounds,
-		newButtonBounds, loadButtonBounds, saveButtonBounds,
-		generateButtonBounds,
-		loadDialogBounds, loadDialogButtonSelectBounds, loadDialogButtonCancelBounds,
-		saveDialogBounds, saveDialogSaveButtonBounds, saveDialogCancelButtonBounds;
-
-	fgeal::TextField saveDialogTextField;
-
-	Pseudo3DCourse course;
-
+	// used to store where is the current focus
 	enum StateFocus
 	{
 		ON_EDITOR,
@@ -47,6 +32,39 @@ class CourseEditorState extends public fgeal::Game::State
 		ON_SAVE_DIALOG,
 	}
 	focus;
+
+	// resources
+	fgeal::Font* font;
+	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
+
+	/// the course being edited
+	Pseudo3DCourse course;
+
+	/// the area being used to draw the course map
+	fgeal::Rectangle mapBounds;
+
+	/// the area being used to draw a course preview
+	fgeal::Rectangle courseViewBounds;
+
+	// tools panel stuff
+	fgeal::Rectangle toolsPanelBounds,
+		newButtonBounds, loadButtonBounds, saveButtonBounds,
+		generateButtonBounds;
+
+	// load dialog
+	fgeal::Menu fileMenu;
+	fgeal::Rectangle loadDialogBounds,
+		loadDialogButtonSelectBounds, loadDialogButtonCancelBounds;
+
+	// save dialog
+	fgeal::Rectangle saveDialogBounds,
+		saveDialogSaveButtonBounds, saveDialogCancelButtonBounds;
+	fgeal::TextField saveDialogTextField;
+
+	// status bar
+	fgeal::Rectangle statusBarBounds;
+	fgeal::Point scaleIndicatorPosition;
+	std::string scaleIndicatorText;
 
 	public:
 	virtual int getId();

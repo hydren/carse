@@ -73,6 +73,9 @@ void CourseEditorState::onEnter()
 	mapBounds.w = 0.75*dw;
 	mapBounds.h = 0.95*dh;
 
+	courseEditorTitlePosition.x = 0.5f*(dw - font->getTextWidth("Course Editor"));
+	courseEditorTitlePosition.y = 0;
+
 	courseViewBounds.x = courseViewBounds.y = 0;
 	courseViewBounds.w = 0.25*dw;
 	courseViewBounds.h = 0.20*dh;
@@ -83,7 +86,7 @@ void CourseEditorState::onEnter()
 	toolsPanelBounds.h = 0.75*dh;
 
 	newButtonBounds.x = toolsPanelBounds.x + widgetSpacing;
-	newButtonBounds.y = toolsPanelBounds.y + widgetSpacing + font->getHeight();
+	newButtonBounds.y = toolsPanelBounds.y + widgetSpacing;
 	newButtonBounds.w = 0.08*dh;
 	newButtonBounds.h = 0.05*dh;
 
@@ -165,17 +168,19 @@ void CourseEditorState::render()
 {
 	const float widgetSpacing = 0.007*game.getDisplay().getHeight();
 
+	// Course preview
 	Graphics::drawFilledRectangle(courseViewBounds, Color::CYAN);
 	course.draw(0, 0.5*course.drawAreaWidth);
 	Graphics::drawRectangle(courseViewBounds, Color::AZURE);
+	game.sharedResources->fontDev.drawText("Preview", courseViewBounds.x, courseViewBounds.y, Color::RED);
 
-
+	// Map
 	Graphics::drawFilledRectangle(mapBounds, Color::DARK_GREEN);
 	course.drawMap();
+	font->drawText("Course editor", courseEditorTitlePosition, Color::WHITE);
 
-
+	// Tools panel
 	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
-	font->drawText("Course editor", toolsPanelBounds.x, toolsPanelBounds.y, Color::WHITE);
 
 	Graphics::drawFilledRectangle(newButtonBounds, Color::GREY);
 	font->drawText("New", newButtonBounds.x, newButtonBounds.y, Color::BLACK);
@@ -201,7 +206,7 @@ void CourseEditorState::render()
 			Graphics::drawRectangle(getSpacedOutline(generateButtonBounds, widgetSpacing), Color::RED);
 	}
 
-
+	// load file dialog
 	if(focus == ON_FILE_MENU)
 	{
 		Graphics::drawFilledRoundedRectangle(loadDialogBounds, 10, Color::GREY);
@@ -224,7 +229,7 @@ void CourseEditorState::render()
 		}
 	}
 
-
+	// save file dialog
 	if(focus == ON_SAVE_DIALOG)
 	{
 		Graphics::drawFilledRoundedRectangle(saveDialogBounds, 10, Color::GREY);
@@ -249,7 +254,7 @@ void CourseEditorState::render()
 		}
 	}
 
-
+	// status bar
 	Graphics::drawFilledRectangle(statusBarBounds, Color::GREY);
 	game.sharedResources->fontDev.drawText(scaleIndicatorText, scaleIndicatorPosition, Color::WHITE);
 }

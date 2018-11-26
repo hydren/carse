@@ -42,6 +42,7 @@ class CourseEditorState extends public fgeal::Game::State
 
 	/// the area being used to draw the course map
 	fgeal::Rectangle mapBounds;
+	fgeal::Point courseEditorTitlePosition;
 
 	/// the area being used to draw a course preview
 	fgeal::Rectangle courseViewBounds;

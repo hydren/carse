@@ -73,7 +73,7 @@ void CourseEditorState::onEnter()
 	mapBounds.w = 0.75*dw;
 	mapBounds.h = 0.95*dh;
 
-	courseEditorTitlePosition.x = 0.5f*(dw - font->getTextWidth("Course Editor"));
+	courseEditorTitlePosition.x = 0.5*(dw - font->getTextWidth("Course Editor"));
 	courseEditorTitlePosition.y = 0;
 
 	courseViewBounds.x = courseViewBounds.y = 0;
@@ -85,8 +85,14 @@ void CourseEditorState::onEnter()
 	toolsPanelBounds.w = 0.25*dw;
 	toolsPanelBounds.h = 0.75*dh;
 
-	newButtonBounds.x = toolsPanelBounds.x + widgetSpacing;
-	newButtonBounds.y = toolsPanelBounds.y + widgetSpacing;
+	presetsPanelBounds = toolsPanelBounds;
+	presetsPanelBounds.x += widgetSpacing;
+	presetsPanelBounds.y += widgetSpacing;
+	presetsPanelBounds.w -= 2*widgetSpacing;
+	presetsPanelBounds.h -= 4*widgetSpacing + 0.1*dh;
+
+	newButtonBounds.x = presetsPanelBounds.x;
+	newButtonBounds.y = presetsPanelBounds.y + presetsPanelBounds.h + widgetSpacing;
 	newButtonBounds.w = 0.08*dh;
 	newButtonBounds.h = 0.05*dh;
 
@@ -99,6 +105,7 @@ void CourseEditorState::onEnter()
 	generateButtonBounds = newButtonBounds;
 	generateButtonBounds.w *= 2;
 	generateButtonBounds.y += newButtonBounds.h + widgetSpacing;
+
 
 	loadDialogBounds.x = 0.15*dw;
 	loadDialogBounds.y = 0.20*dh;
@@ -181,6 +188,7 @@ void CourseEditorState::render()
 
 	// Tools panel
 	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
+	Graphics::drawFilledRectangle(presetsPanelBounds, Color::BLACK);
 
 	Graphics::drawFilledRectangle(newButtonBounds, Color::GREY);
 	font->drawText("New", newButtonBounds.x, newButtonBounds.y, Color::BLACK);

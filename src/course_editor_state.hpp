@@ -48,7 +48,7 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Rectangle courseViewBounds;
 
 	// tools panel stuff
-	fgeal::Rectangle toolsPanelBounds,
+	fgeal::Rectangle toolsPanelBounds, presetsPanelBounds,
 		newButtonBounds, loadButtonBounds, saveButtonBounds,
 		generateButtonBounds;
 

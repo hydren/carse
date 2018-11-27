@@ -38,6 +38,7 @@ struct Pseudo3DVehicleAnimationSpec
 	/** The scaling factor of this animation. Applies to all frames. */
 	fgeal::Vector2D scale;
 
+	//todo make it possible to specify frame duration for each state (maybe even for each frame)
 	/** The time duration of each frame. Applies to all frames. */
 	float frameDuration;
 

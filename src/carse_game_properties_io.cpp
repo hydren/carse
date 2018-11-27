@@ -719,9 +719,6 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 	spec.maxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
 
-	key = "sprite_frame_duration";
-	spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : -1.0;
-
 	key = "sprite_frame_count";
 	const float globalFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 
@@ -731,6 +728,9 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 		const unsigned frameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : globalFrameCount;
 		spec.stateFrameCount.push_back(frameCount);
 	}
+
+	key = "sprite_frame_duration";
+	spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.25;
 
 	key = "brakelights_sprite_filename";
 	spec.brakelightsSheetFilename = prop.get(key);

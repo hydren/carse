@@ -165,6 +165,14 @@ void Mechanics::shiftGear(int gear)
 		// add a portion of the discrepancy between the driveshaft RPM and the engine RPM (simulate losses due to shift time)
 		engine.rpm += 0.25*(driveshaftRpm - engine.rpm);
 	}
+	else if(engine.gear == 0)
+	{
+		const float engineAngularSpeed = engine.rpm
+										/(engine.gearRatio[gear-1]
+										* engine.differentialRatio * RAD_TO_RPM);
+
+		wheelAngularSpeed += (engineAngularSpeed - wheelAngularSpeed);
+	}
 
 	engine.gear = gear;
 }

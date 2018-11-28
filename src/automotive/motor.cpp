@@ -27,8 +27,6 @@ static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
 		           TORQUE_POWER_CONVERSION_FACTOR = 5252.0 * 1.355818,
                    RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
-#define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
-
 /* todo revise TorqueCurveProfile to be able to specify specific RPMs for max. power or/and max. torque.
  * The calculation of the torque curves could be more specific to the point that one could specify a torque
  * curve from a data set, but a proper interface to do this needs to be done; nevertheless, the current
@@ -213,17 +211,23 @@ float Engine::getAngularSpeed()
 
 void Engine::update(float delta, float wheelAngularSpeed)
 {
-	if(gear == 0)
-	{
-		const float rpmRatio = rpm/maxRpm;
-		rpm += (getCurrentTorque()*RAD_TO_RPM - (1-throttlePosition)*rpmRatio*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT)*(displacement != 0? 10000.0/displacement : 1)*delta;
-	}
-	else
+	if(gear != 0)  // engaged gear
 	{
 		//synchronize both rotations  (acts like a synchromesh)
-		const float rpmDiff = (wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * RAD_TO_RPM) - rpm, synchonizationFactor = 50.0;
+		const float drivetrainRpm = (wheelAngularSpeed * gearRatio[gear-1] * differentialRatio * RAD_TO_RPM),
+					rpmDiff = drivetrainRpm - rpm, synchonizationFactor = 50.0;
+
 		rpm += delta * synchonizationFactor * rpmDiff;
 		// fixme the wheel angular speed should change as well when syncing, but previous attempts got strange behavior
+	}
+	else  // disengaged gear
+	{
+		const float rpmRatio = rpm/maxRpm,
+					engineFedTorqueRpm = getCurrentTorque()*RAD_TO_RPM,
+					engineFrictionTorqueRpm = (1-throttlePosition)*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT,
+					displacementFactor = 1 + (displacement != 0? 10000.0/displacement : 0);
+
+		rpm += delta * (engineFedTorqueRpm - engineFrictionTorqueRpm)*displacementFactor;
 	}
 
 	if(rpm < minRpm)

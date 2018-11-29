@@ -18,7 +18,7 @@ using std::string;
 Pseudo3DVehicle::Pseudo3DVehicle()
 : body(Engine(), Mechanics::TYPE_OTHER),
   position(), horizontalPosition(), verticalPosition(),
-  pseudoAngle(), strafeSpeed(), curvePull(), corneringForceLeechFactor(), corneringStiffness(),
+  pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isBurningRubber(false),
   engineSoundProfile(), engineSound(),
@@ -28,7 +28,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
 : body(Engine(spec.engineMaximumRpm, spec.engineMaximumPower, spec.enginePowerBand, spec.engineGearCount), spec.type, spec.dragArea, spec.liftArea),
   position(), horizontalPosition(), verticalPosition(),
-  pseudoAngle(), strafeSpeed(), curvePull(), corneringForceLeechFactor(), corneringStiffness(),
+  pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isBurningRubber(false),
   engineSoundProfile(spec.soundProfile), engineSound(),

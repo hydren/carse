@@ -28,20 +28,21 @@
  *
  * */
 
-static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85;
-static const float TIRE_FRICTION_COEFFICIENT_GRASS = 0.42;
-static const float ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013;
-static const float ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100;
+static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
+				   TIRE_FRICTION_COEFFICIENT_GRASS = 0.42,
+				   ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013,
+				   ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100,
 
-static const float PSEUDO_ANGLE_MAX = 1.0;
-static const float CURVE_PULL_FACTOR = 0.2; // @suppress("Unused variable declaration in file scope")
-static const float STEERING_SPEED = 2.0;
-static const float MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
+				   PSEUDO_ANGLE_MAX = 1.0,
+				   CURVE_PULL_FACTOR = 0.2,  // @suppress("Unused variable declaration in file scope")
+				   STEERING_SPEED = 2.0,
+				   MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const CourseSpec::Segment& segment = course.spec.lines[((int)(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength))%course.spec.lines.size()];
-	const float wheelAngleFactor = 1 - playerVehicle.corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
+	const float corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5),
+				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
 
 	playerVehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
 	playerVehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();

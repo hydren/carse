@@ -351,7 +351,6 @@ void Pseudo3DRaceState::onEnter()
 		debugMode = true;
 	}
 
-	playerVehicle.corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5);
 	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	parallax.x = parallax.y = 0;

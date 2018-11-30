@@ -39,8 +39,8 @@ using fgeal::Rectangle;
 
 #define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
 
-static const float MINIMUM_SPEED_BURN_RUBBER_ON_TURN = 5.5556;  // == 20kph
-const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED = 15000;  // undefined unit
+static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556;  // == 20kph
+const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED_FACTOR = 30;  // undefined unit
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
@@ -59,7 +59,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   fontSmall(null), fontCountdown(null), font3(null), fontDev(null),
   imgBackground(null), imgCacheTachometer(null),
   music(null),
-  sndTireBurnoutStandIntro(null), sndTireBurnoutStandLoop(null), sndTireBurnoutIntro(null), sndTireBurnoutLoop(null), sndOnDirtLoop(null), sndJumpImpact(null),
+  sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null), sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null), sndRunningOnDirtLoop(null), sndJumpImpact(null),
 
   bgColor(), bgColorHorizon(),
   spriteSmokeLeft(null), spriteSmokeRight(null),
@@ -109,11 +109,11 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(imgCacheTachometer != null) delete imgCacheTachometer;
 	if(music != null) delete music;
 
-	if(sndTireBurnoutStandIntro != null) delete sndTireBurnoutStandIntro;
-	if(sndTireBurnoutStandLoop != null) delete sndTireBurnoutStandLoop;
-	if(sndTireBurnoutIntro != null) delete sndTireBurnoutIntro;
-	if(sndTireBurnoutLoop != null) delete sndTireBurnoutLoop;
-	if(sndOnDirtLoop != null) delete sndOnDirtLoop;
+	if(sndWheelspinBurnoutIntro != null) delete sndWheelspinBurnoutIntro;
+	if(sndWheelspinBurnoutLoop != null) delete sndWheelspinBurnoutLoop;
+	if(sndSideslipBurnoutIntro != null) delete sndSideslipBurnoutIntro;
+	if(sndSideslipBurnoutLoop != null) delete sndSideslipBurnoutLoop;
+	if(sndRunningOnDirtLoop != null) delete sndRunningOnDirtLoop;
 	if(sndJumpImpact != null) delete sndJumpImpact;
 
 	if(spriteSmokeLeft != null) delete spriteSmokeLeft;
@@ -127,11 +127,11 @@ void Pseudo3DRaceState::initialize()
 	fontCountdown = new Font(game.sharedResources->font2Path, dip(36));
 	font3 = new Font(game.sharedResources->font1Path, dip(24));
 
-	sndTireBurnoutStandIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
-	sndTireBurnoutStandLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
-	sndTireBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");
-	sndTireBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
-	sndOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");
+	sndWheelspinBurnoutIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
+	sndWheelspinBurnoutLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
+	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");
+	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
+	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");
 	sndJumpImpact = new Sound("assets/sound/landing.ogg");
 
 	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
@@ -365,7 +365,7 @@ void Pseudo3DRaceState::onEnter()
 	lapCurrent = 1;
 	acc0to60time = acc0to60clock = 0;
 
-	playerVehicle.isBurningRubber = /*onAir = onLongAir =*/ false;
+	playerVehicle.isTireBurnoutOccurring = /*onAir = onLongAir =*/ false;
 
 	if(music != null) music->loop();
 	playerVehicle.engineSound.playIdle();
@@ -375,11 +375,11 @@ void Pseudo3DRaceState::onLeave()
 {
 	playerVehicle.engineSound.haltSound();
 	if(music != null) music->stop();
-	sndTireBurnoutIntro->stop();
-	sndTireBurnoutLoop->stop();
-	sndTireBurnoutStandIntro->stop();
-	sndTireBurnoutStandLoop->stop();
-	sndOnDirtLoop->stop();
+	sndSideslipBurnoutIntro->stop();
+	sndSideslipBurnoutLoop->stop();
+	sndWheelspinBurnoutIntro->stop();
+	sndWheelspinBurnoutLoop->stop();
+	sndRunningOnDirtLoop->stop();
 }
 
 void Pseudo3DRaceState::render()
@@ -661,7 +661,7 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 
-	if(vehicle.isBurningRubber)
+	if(vehicle.isTireBurnoutOccurring)
 	{
 		const Point smokeSpritePosition = {
 				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteSpec.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
@@ -796,8 +796,7 @@ void Pseudo3DRaceState::update(float delta)
 
 	playerVehicle.engineSound.updateSound(playerVehicle.body.engine.rpm);
 
-	// lets decide if there is burnout animation
-	const bool tireBurnoutAnimRequired = (
+	const bool isPlayerWheelspinOccurring = (
 		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS
 			and
 			(
@@ -827,48 +826,51 @@ void Pseudo3DRaceState::update(float delta)
 		)
 	);
 
-	if(tireBurnoutAnimRequired and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
+	const bool isPlayerSideslipOccurring = (
+			fabs(playerVehicle.body.speed) > MINIMUM_SPEED_TO_SIDESLIP
+		and MAXIMUM_STRAFE_SPEED_FACTOR * coursePositionFactor * playerVehicle.corneringStiffness - fabs(playerVehicle.strafeSpeed) < 1
+	);
+
+	if(isPlayerWheelspinOccurring and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
-		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
-		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
+		if(sndSideslipBurnoutIntro->isPlaying()) sndSideslipBurnoutIntro->stop();
+		if(sndSideslipBurnoutLoop->isPlaying()) sndSideslipBurnoutLoop->stop();
 
-		if(not playerVehicle.isBurningRubber)
-			sndTireBurnoutStandIntro->play();
-		else if(not sndTireBurnoutStandIntro->isPlaying() and not sndTireBurnoutStandLoop->isPlaying())
-			sndTireBurnoutStandLoop->loop();
+		if(not playerVehicle.isTireBurnoutOccurring)
+			sndWheelspinBurnoutIntro->play();
+		else if(not sndWheelspinBurnoutIntro->isPlaying() and not sndWheelspinBurnoutLoop->isPlaying())
+			sndWheelspinBurnoutLoop->loop();
 
-		playerVehicle.isBurningRubber = true;
+		playerVehicle.isTireBurnoutOccurring = true;
 	}
-	else if(fabs(playerVehicle.body.speed) > MINIMUM_SPEED_BURN_RUBBER_ON_TURN
-	   and (MAXIMUM_STRAFE_SPEED*playerVehicle.corneringStiffness - fabs(playerVehicle.strafeSpeed) < 1)
-	 	 	 and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
+	else if(isPlayerSideslipOccurring and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)
 	{
-		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
-		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
+		if(sndWheelspinBurnoutIntro->isPlaying()) sndWheelspinBurnoutIntro->stop();
+		if(sndWheelspinBurnoutLoop->isPlaying()) sndWheelspinBurnoutLoop->stop();
 
-		if(not playerVehicle.isBurningRubber)
-			sndTireBurnoutIntro->play();
-		else if(not sndTireBurnoutIntro->isPlaying() and not sndTireBurnoutLoop->isPlaying())
-			sndTireBurnoutLoop->loop();
+		if(not playerVehicle.isTireBurnoutOccurring)
+			sndSideslipBurnoutIntro->play();
+		else if(not sndSideslipBurnoutIntro->isPlaying() and not sndSideslipBurnoutLoop->isPlaying())
+			sndSideslipBurnoutLoop->loop();
 
-		playerVehicle.isBurningRubber = true;
+		playerVehicle.isTireBurnoutOccurring = true;
 	}
 	else
 	{
-		if(sndTireBurnoutStandIntro->isPlaying()) sndTireBurnoutStandIntro->stop();
-		if(sndTireBurnoutStandLoop->isPlaying()) sndTireBurnoutStandLoop->stop();
-		if(sndTireBurnoutIntro->isPlaying()) sndTireBurnoutIntro->stop();
-		if(sndTireBurnoutLoop->isPlaying()) sndTireBurnoutLoop->stop();
-		playerVehicle.isBurningRubber = false;
+		if(sndWheelspinBurnoutIntro->isPlaying()) sndWheelspinBurnoutIntro->stop();
+		if(sndWheelspinBurnoutLoop->isPlaying()) sndWheelspinBurnoutLoop->stop();
+		if(sndSideslipBurnoutIntro->isPlaying()) sndSideslipBurnoutIntro->stop();
+		if(sndSideslipBurnoutLoop->isPlaying()) sndSideslipBurnoutLoop->stop();
+		playerVehicle.isTireBurnoutOccurring = false;
 	}
 
 	if(getCurrentSurfaceType() != SURFACE_TYPE_DRY_ASPHALT and fabs(playerVehicle.body.speed) > 1)
 	{
-		if(not sndOnDirtLoop->isPlaying())
-			sndOnDirtLoop->loop();
+		if(not sndRunningOnDirtLoop->isPlaying())
+			sndRunningOnDirtLoop->loop();
 	}
-	else if(sndOnDirtLoop->isPlaying())
-		sndOnDirtLoop->stop();
+	else if(sndRunningOnDirtLoop->isPlaying())
+		sndRunningOnDirtLoop->stop();
 }
 
 void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)

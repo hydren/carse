@@ -9,6 +9,10 @@
 
 #include "carse_game.hpp"
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
 /* Tire coefficients
  *
  *          Rolling resist. | Peak static frict. | Kinetic frict.
@@ -42,7 +46,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const CourseSpec::Segment& segment = course.spec.lines[((int)(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength))%course.spec.lines.size()];
 	const float corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5),
-				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX;
+				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
+				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * coursePositionFactor * playerVehicle.corneringStiffness;
 
 	playerVehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
 	playerVehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
@@ -76,12 +81,13 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(playerVehicle.pseudoAngle <-PSEUDO_ANGLE_MAX) playerVehicle.pseudoAngle =-PSEUDO_ANGLE_MAX;
 
 	// update strafing
-	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * playerVehicle.corneringStiffness * coursePositionFactor;
-//	vehicle.strafeSpeed = onAir? 0 : vehicle.pseudoAngle * vehicle.body.speed * coursePositionFactor;
+	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * coursePositionFactor;
+
+//	if(onAir) playerVehicle.strafeSpeed = 0;
 
 	// limit strafing speed by magic constant
-	if(playerVehicle.strafeSpeed >  MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness) playerVehicle.strafeSpeed = MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness;
-	if(playerVehicle.strafeSpeed < -MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness) playerVehicle.strafeSpeed =-MAXIMUM_STRAFE_SPEED * playerVehicle.corneringStiffness;
+	if(fabs(playerVehicle.strafeSpeed) > maxStrafeSpeed)
+		playerVehicle.strafeSpeed = maxStrafeSpeed * sgn(playerVehicle.strafeSpeed);
 
 	// update curve pull
 	//curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;

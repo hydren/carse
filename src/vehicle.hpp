@@ -36,7 +36,7 @@ struct Pseudo3DVehicle
 	float pseudoAngle, strafeSpeed, curvePull, corneringStiffness;
 //	float verticalSpeed;
 //	bool onAir, onLongAir;
-	bool isBurningRubber;
+	bool isTireBurnoutOccurring;
 
 	// sound data
 	EngineSoundProfile engineSoundProfile;

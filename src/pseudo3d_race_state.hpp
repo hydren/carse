@@ -35,8 +35,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Image* imgBackground, *imgCacheTachometer;
 	fgeal::Music* music;
 
-	fgeal::Sound* sndTireBurnoutStandIntro, *sndTireBurnoutStandLoop,
-				 *sndTireBurnoutIntro, *sndTireBurnoutLoop, *sndOnDirtLoop,
+	fgeal::Sound* sndWheelspinBurnoutIntro, *sndWheelspinBurnoutLoop,
+				 *sndSideslipBurnoutIntro, *sndSideslipBurnoutLoop, *sndRunningOnDirtLoop,
 				 *sndJumpImpact;
 
 	fgeal::Color bgColor, bgColorHorizon;
@@ -51,7 +51,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	bool onSceneIntro, onSceneFinish;
 	float timerSceneIntro, timerSceneFinish;
 
-	static const float MAXIMUM_STRAFE_SPEED;
+	static const float MAXIMUM_STRAFE_SPEED_FACTOR;
 
 	public:
 	enum RaceType

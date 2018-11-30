@@ -62,6 +62,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
   sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
   sndRunningOnDirtLoop(null), sndJumpImpact(null),
+  sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
   spriteSmokeLeft(null), spriteSmokeRight(null),
@@ -69,7 +70,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   parallax(), backgroundScale(),
 
   coursePositionFactor(500), simulationType(),
-  onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), settings(),
+  onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
   course(), playerVehicle(),
@@ -118,6 +119,8 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(sndSideslipBurnoutLoop != null) delete sndSideslipBurnoutLoop;
 	if(sndRunningOnDirtLoop != null) delete sndRunningOnDirtLoop;
 	if(sndJumpImpact != null) delete sndJumpImpact;
+	if(sndCountdownBuzzer != null) delete sndCountdownBuzzer;
+	if(sndCountdownBuzzerFinal != null) delete sndCountdownBuzzerFinal;
 
 	if(spriteSmokeLeft != null) delete spriteSmokeLeft;
 	if(spriteSmokeRight != null) delete spriteSmokeRight;
@@ -138,6 +141,11 @@ void Pseudo3DRaceState::initialize()
 	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
 	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");
 	sndJumpImpact = new Sound("assets/sound/landing.ogg");
+	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg");
+	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg");
+
+	sndCountdownBuzzer->setVolume(0.8);
+	sndCountdownBuzzerFinal->setVolume(0.8);
 
 	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
 	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
@@ -353,6 +361,7 @@ void Pseudo3DRaceState::onEnter()
 		onSceneIntro = true;
 		onSceneFinish = false;
 		timerSceneIntro = 4.5;
+		countdownBuzzerCounter = 5;
 		debugMode = false;
 	}
 	else
@@ -390,6 +399,8 @@ void Pseudo3DRaceState::onLeave()
 	sndWheelspinBurnoutIntro->stop();
 	sndWheelspinBurnoutLoop->stop();
 	sndRunningOnDirtLoop->stop();
+	sndCountdownBuzzer->stop();
+	sndCountdownBuzzerFinal->stop();
 }
 
 void Pseudo3DRaceState::render()
@@ -733,10 +744,21 @@ void Pseudo3DRaceState::update(float delta)
 	if(onSceneIntro)
 	{
 		timerSceneIntro -= delta;
+
+		if(countdownBuzzerCounter - timerSceneIntro > 1)
+		{
+			sndCountdownBuzzer->play();
+			countdownBuzzerCounter--;
+
+			if(countdownBuzzerCounter == 2)  // dont play at last call
+				countdownBuzzerCounter = 0;
+		}
+
 		if(timerSceneIntro < 1)
 		{
 			onSceneIntro = false;
 			playerVehicle.body.engine.gear = 1;
+			sndCountdownBuzzerFinal->play();
 		}
 	}
 	else
@@ -910,6 +932,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			lapCurrent = 1;
 			onSceneIntro = true;
 			timerSceneIntro = 4.5;
+			countdownBuzzerCounter = 5;
 //					isBurningRubber = onAir = onLongAir = false;
 			acc0to60time = acc0to60clock = 0;
 			break;

@@ -37,7 +37,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	fgeal::Sound* sndWheelspinBurnoutIntro, *sndWheelspinBurnoutLoop,
 				 *sndSideslipBurnoutIntro, *sndSideslipBurnoutLoop, *sndRunningOnDirtLoop,
-				 *sndJumpImpact;
+				 *sndJumpImpact, *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
 
 	fgeal::Color bgColor, bgColorHorizon;
 	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
@@ -50,6 +50,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	bool onSceneIntro, onSceneFinish;
 	float timerSceneIntro, timerSceneFinish;
+
+	unsigned countdownBuzzerCounter;
 
 	static const float MAXIMUM_STRAFE_SPEED_FACTOR;
 

@@ -32,7 +32,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	CarseGame& game;
 
 	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDev;
-	fgeal::Image* imgBackground, *imgCacheTachometer;
+	fgeal::Image* imgBackground, *imgCacheTachometer, *imgStopwatch;
 	fgeal::Music* music;
 
 	fgeal::Sound* sndWheelspinBurnoutIntro, *sndWheelspinBurnoutLoop,
@@ -113,6 +113,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	float rightHudMargin, offsetHudLapGoal;
 	fgeal::Point posHudCountdown, posHudFinishedCaption;
+
+	fgeal::Rectangle stopwatchIconBounds;
 
 	// keybindings
 	fgeal::Keyboard::Key controlKeyAccelerate,

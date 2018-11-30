@@ -57,9 +57,11 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), game(*game),
   fontSmall(null), fontCountdown(null), font3(null), fontDev(null),
-  imgBackground(null), imgCacheTachometer(null),
+  imgBackground(null), imgCacheTachometer(null), imgStopwatch(null),
   music(null),
-  sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null), sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null), sndRunningOnDirtLoop(null), sndJumpImpact(null),
+  sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
+  sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
+  sndRunningOnDirtLoop(null), sndJumpImpact(null),
 
   bgColor(), bgColorHorizon(),
   spriteSmokeLeft(null), spriteSmokeRight(null),
@@ -107,6 +109,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 
 	if(imgBackground != null) delete imgBackground;
 	if(imgCacheTachometer != null) delete imgCacheTachometer;
+	if(imgStopwatch != null) delete imgStopwatch;
 	if(music != null) delete music;
 
 	if(sndWheelspinBurnoutIntro != null) delete sndWheelspinBurnoutIntro;
@@ -126,6 +129,8 @@ void Pseudo3DRaceState::initialize()
 	fontSmall = new Font(game.sharedResources->font1Path);
 	fontCountdown = new Font(game.sharedResources->font2Path, dip(36));
 	font3 = new Font(game.sharedResources->font1Path, dip(24));
+
+	imgStopwatch = new Image("assets/stopwatch.png");
 
 	sndWheelspinBurnoutIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
 	sndWheelspinBurnoutLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
@@ -295,6 +300,11 @@ void Pseudo3DRaceState::onEnter()
 	rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("999/999");
 	offsetHudLapGoal = font3->getTextWidth("Laps: 999");
 
+	stopwatchIconBounds.w = 0.032*display.getWidth();
+	stopwatchIconBounds.h = imgStopwatch->getHeight()*(stopwatchIconBounds.w/imgStopwatch->getWidth());
+	stopwatchIconBounds.x = rightHudMargin - 1.2*stopwatchIconBounds.w;
+	stopwatchIconBounds.y = hudTimerCurrentLap.bounds.y;
+
 	posHudCountdown.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("0"));
 	posHudCountdown.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
 	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
@@ -410,6 +420,7 @@ void Pseudo3DRaceState::render()
 
 	drawVehicle(playerVehicle, vehicleSpritePosition);
 
+	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));
 	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
 	hudTimerCurrentLap.draw();
 

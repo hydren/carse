@@ -45,7 +45,7 @@ struct Mechanics
 
 	float speed, acceleration;
 	float centerOfGravityHeight, wheelbase;
-	float weightDistribuition;  // the weight distribuition of the rear wheels; the front wheels dist. are, implicitly, 1 minus this value.
+	float weightDistribution;  // the weight distribution of the rear wheels; the front wheels dist. are, implicitly, 1 minus this value.
 	float slopeAngle;  // the angle of the current slope which the vehicle is above.
 
 	float wheelAngularSpeed;

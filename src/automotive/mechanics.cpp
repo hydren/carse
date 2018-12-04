@@ -37,7 +37,7 @@ Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float 
   automaticShiftingEnabled(), automaticShiftingLastTime(0),
   mass(1250), tireRadius(650), wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
   speed(), acceleration(),
-  centerOfGravityHeight(500), wheelbase(1000), weightDistribuition(0.5),
+  centerOfGravityHeight(500), wheelbase(1000), weightDistribution(0.5),
   slopeAngle(), wheelAngularSpeed(), brakePedalPosition(),
   tireFrictionFactor(1.0),
   rollingResistanceFactor(0.2),
@@ -199,10 +199,10 @@ float Mechanics::getDrivenWheelsWeightLoad()
 		return weightLoad;
 
 	if(drivenWheelsType == DRIVEN_WHEELS_ON_REAR)
-		return weightDistribuition*weightLoad + transferedWeightLoad;
+		return weightDistribution*weightLoad + transferedWeightLoad;
 
 	if(drivenWheelsType == DRIVEN_WHEELS_ON_FRONT)
-		return (1-weightDistribuition)*weightDistribuition - transferedWeightLoad;
+		return (1-weightDistribution)*weightDistribution - transferedWeightLoad;
 
 	// the execution should not get to this point
 	return weightLoad;

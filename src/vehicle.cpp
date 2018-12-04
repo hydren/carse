@@ -55,7 +55,7 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
 	body.tireRadius = spec.tireRadius;
 	body.engineLocation = spec.engineLocation;
 	body.drivenWheelsType = spec.drivenWheelsType;
-	body.weightDistribuition = spec.weightDistribuition;
+	body.weightDistribution = spec.weightDistribution;
 	body.centerOfGravityHeight = spec.centerOfGravityHeight;
 	body.wheelbase = spec.wheelbase;
 }

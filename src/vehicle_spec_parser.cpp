@@ -51,10 +51,10 @@ static const float
 	DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a 300ZX Z32
 	DEFAULT_FRONTAL_AREA_BIKE = 0.70,  // estimated frontal area (in square-meters) of a common sporty bike
 
-	DEFAULT_FR_WEIGHT_DISTRIBUITION = 0.45,
-	DEFAULT_MR_WEIGHT_DISTRIBUITION = 0.55,
-	DEFAULT_RR_WEIGHT_DISTRIBUITION = 0.65,
-	DEFAULT_FF_WEIGHT_DISTRIBUITION = 0.40,
+	DEFAULT_FR_WEIGHT_DISTRIBUTION = 0.45,
+	DEFAULT_MR_WEIGHT_DISTRIBUTION = 0.55,
+	DEFAULT_RR_WEIGHT_DISTRIBUTION = 0.65,
+	DEFAULT_FF_WEIGHT_DISTRIBUTION = 0.40,
 
 	DEFAULT_MAXIMUM_RPM = 7000,
 	DEFAULT_MAXIMUM_POWER = 320,  // bhp
@@ -367,20 +367,20 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 	if(spec.engineLocation == Mechanics::ENGINE_LOCATION_ON_FRONT)
 	{
 		if(spec.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_FRONT)
-			spec.weightDistribuition = DEFAULT_FF_WEIGHT_DISTRIBUITION;
+			spec.weightDistribution = DEFAULT_FF_WEIGHT_DISTRIBUTION;
 
 		else /* spec.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR or Mechanics::DRIVEN_WHEELS_ALL */
-			spec.weightDistribuition = DEFAULT_FR_WEIGHT_DISTRIBUITION;
+			spec.weightDistribution = DEFAULT_FR_WEIGHT_DISTRIBUTION;
 	}
 	else if(spec.engineLocation == Mechanics::ENGINE_LOCATION_ON_REAR)
-		spec.weightDistribuition = DEFAULT_RR_WEIGHT_DISTRIBUITION;
+		spec.weightDistribution = DEFAULT_RR_WEIGHT_DISTRIBUTION;
 
 	else /* Mechanics::ENGINE_LOCATION_ON_MIDDLE */
-		spec.weightDistribuition = DEFAULT_MR_WEIGHT_DISTRIBUITION;
+		spec.weightDistribution = DEFAULT_MR_WEIGHT_DISTRIBUTION;
 
-	key = "weight_distribuition";
+	key = "weight_distribution";
 	if(isValueSpecified(prop, key))
-		spec.weightDistribuition = prop.getParsedCStrAllowDefault<double, atof>(key, spec.weightDistribuition);
+		spec.weightDistribution = prop.getParsedCStrAllowDefault<double, atof>(key, spec.weightDistribution);
 }
 
 // ========================================================================================================================

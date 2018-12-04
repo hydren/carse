@@ -30,8 +30,8 @@ struct VehicleSpec
 	// the distance between the centers of the front and rear wheels.
 	float wheelbase;
 
-	// the weight distribuition of the rear wheels; the front wheels distribuition are, implicitly, 1 minus this value.
-	float weightDistribuition;
+	// the weight distribution of the rear wheels; the front wheels distribution are, implicitly, 1 minus this value.
+	float weightDistribution;
 
 	// the height of the vehicle's center of gravity. its aproximated as half the height (if it's available; otherwise it's hardcoded)
 	float centerOfGravityHeight;

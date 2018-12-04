@@ -187,13 +187,13 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 	else
 		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
 
-	key = "vehicle_center_of_gravity_height";
+	key = "center_of_gravity_height";
 	if(isValueSpecified(prop, key))
 		centerOfGravityHeight = prop.getParsedCStrAllowDefault<double, atof>(key, centerOfGravityHeight);
 
 	// attempt to estimate wheelbase
 	{
-		key = "vehicle_wheelbase";
+		key = "wheelbase";
 		if(isValueSpecified(prop, key))
 			wheelbase = atof(prop.get(key).c_str());
 		else
@@ -348,18 +348,18 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 	key = "vehicle_frontal_area";
 	const float referenceArea = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_FRONTAL_AREA_BIKE : DEFAULT_FRONTAL_AREA_CAR));
 
-	key = "vehicle_drag_coefficient";
+	key = "drag_coefficient";
 	const float dragCoefficient = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_CD_BIKE : DEFAULT_CD_CAR));
 
-	key = "vehicle_drag_area";
+	key = "drag_area";
 	spec.dragArea = referenceArea * dragCoefficient;
 	if(isValueSpecified(prop, key))
 		spec.dragArea = prop.getParsedCStrAllowDefault<double, atof>(key, spec.dragArea);
 
-	key = "vehicle_lift_coefficient";
+	key = "lift_coefficient";
 	const float liftCoefficient = prop.getParsedCStrAllowDefault<double, atof>(key, (spec.type == Mechanics::TYPE_BIKE? DEFAULT_CL_BIKE : DEFAULT_CL_CAR));
 
-	key = "vehicle_lift_area";
+	key = "lift_area";
 	spec.liftArea = referenceArea * liftCoefficient;
 	if(isValueSpecified(prop, key))
 		spec.liftArea = prop.getParsedCStrAllowDefault<double, atof>(key, spec.liftArea);
@@ -378,7 +378,7 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 	else /* Mechanics::ENGINE_LOCATION_ON_MIDDLE */
 		spec.weightDistribuition = DEFAULT_MR_WEIGHT_DISTRIBUITION;
 
-	key = "vehicle_weight_distribuition";
+	key = "weight_distribuition";
 	if(isValueSpecified(prop, key))
 		spec.weightDistribuition = prop.getParsedCStrAllowDefault<double, atof>(key, spec.weightDistribuition);
 }

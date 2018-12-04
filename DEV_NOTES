@@ -20,11 +20,8 @@
 - Add digital display
 - Add menu music
 - Howl engine when selecting car (either a default engine howl or one using the car engine profile).
-- Set resolution/fullscreen mode from options
 - Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
-- Use a comma-separated list of gear ratio to specify frame count for each state on vehicle properties.
-- Rename driven wheels property to include "vehicle_" prefix. (look for other similar cases)
 
 # bugs
 

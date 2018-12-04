@@ -43,12 +43,12 @@ static const float
 	DEFAULT_VEHICLE_MASS = 1250,  // kg
 	DEFAULT_TIRE_DIAMETER = 678,  // mm
 
-	DEFAULT_CD_CAR  = 0.31,  // drag coefficient (Cd) of a Nissan 300ZX (Z32)
+	DEFAULT_CD_CAR  = 0.31,  // drag coefficient (Cd) of a 300ZX Z32
 	DEFAULT_CD_BIKE = 0.60,  // estimated drag coefficient (Cd) of a common sporty bike
-	DEFAULT_CL_CAR  = 0.20,  // estimated lift coefficient (Cl) of a Nissan 300ZX (Z32)
+	DEFAULT_CL_CAR  = 0.20,  // estimated lift coefficient (Cl) of a 300ZX Z32
 	DEFAULT_CL_BIKE = 0.10,  // estimated lift coefficient (Cl) of a common sporty bike
 
-	DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a Nissan 300ZX (Z32)
+	DEFAULT_FRONTAL_AREA_CAR  = 1.81,  // frontal area (in square-meters) of a 300ZX Z32
 	DEFAULT_FRONTAL_AREA_BIKE = 0.70,  // estimated frontal area (in square-meters) of a common sporty bike
 
 	DEFAULT_FR_WEIGHT_DISTRIBUITION = 0.45,
@@ -185,7 +185,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 	if(isValueSpecified(prop, key))
 		centerOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
 	else
-		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a 300ZX Z32
 
 	key = "center_of_gravity_height";
 	if(isValueSpecified(prop, key))
@@ -201,19 +201,19 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 
 		key = "vehicle_length";
 		if(wheelbase == -1 and isValueSpecified(prop, key))
-			wheelbase = atof(prop.get(key).c_str());
+			wheelbase = 0.5682f * atof(prop.get(key).c_str());  // proportion aprox. of a 300ZX Z32
 
 		key = "vehicle_width";
 		if(wheelbase == -1 and isValueSpecified(prop, key))
-			wheelbase = 2.5251f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+			wheelbase = 2.5251f * atof(prop.get(key).c_str());  // proportion aprox. of a 300ZX Z32
 
 		key = "vehicle_height";
 		if(wheelbase == -1 and isValueSpecified(prop, key))
-			wheelbase = 3.6016f * atof(prop.get(key).c_str());  // proportion aprox. of a fairlady z32
+			wheelbase = 3.6016f * atof(prop.get(key).c_str());  // proportion aprox. of a 300ZX Z32
 
 		if(wheelbase == -1)
 		{
-			wheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a fairlady z32
+			wheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a 300ZX Z32
 		}
 	}
 }

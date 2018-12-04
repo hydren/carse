@@ -11,7 +11,6 @@
 
 #include "pseudo3d/vehicle_gfx.hpp"
 #include "automotive/vehicle_spec.hpp"
-#include "futil/properties.hpp"
 #include "fgeal/extra/sprite.hpp"
 
 #include <string>
@@ -26,6 +25,15 @@ struct Pseudo3DVehicle
 
 		// additional alternate graphics data (optional)
 		std::vector<Pseudo3DVehicleAnimationSpec> alternateSprites;
+
+		/* Loads data from the given filename, parse its vehicle spec data and store in this object. */
+		void loadFromFile(const std::string& filename);
+
+		/* Creates a vehicle spec. by loading and parsing the data in the given filename. */
+		inline static Spec createFromFile(const std::string& filename) { Spec spec; spec.loadFromFile(filename); return spec; }
+
+		/* Creates a engine sound profile by loading and parsing the data in the given filename. */
+		static EngineSoundProfile createEngineSoundProfileFromFile(const std::string& filename);
 	};
 
 	// physics simulation

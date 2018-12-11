@@ -364,6 +364,7 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 		{ Color( 31, 85,  0), Color( 31, 68,  0), Color(173,201,152), "bg_forest.jpg", "bush.png", "tree.png", "talltree.png" },  // forest landscape
 		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 35, 31, 32), "bg_nightcity.jpg", "bush.png", "streetlight_double.png", "buildings.png" },  // night city landscape
 		{ Color(220,170,139), Color(188,137,106), Color(248,156, 31), "bg_desert.jpg", "rock.png", "cactus.png", "cliff.png" },  // desert landscape
+		{ Color(190,229,246), Color(159,198,213), Color(123,138,155), "bg_montains.jpg", "bush_snow.png", "talltree.png", "cliff_alpine.png" },  // snow landscape
 	};
 
 	const unsigned

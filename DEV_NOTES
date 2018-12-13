@@ -1,27 +1,32 @@
 # to do
 
-- Add mouse input on menus
-- Add gear shifting sounds
-- Add optional gear shifting sounds derived from forced induction
-- Re-attempt to create jumping physics. Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite.
-- Add option to specify custom vehicle portrait.
-- Add option to specify custom vehicle rotating sprite. (???)
-- Add option to specify custom vehicle side profile sprite. (maybe a side drag mode)
-- Add option for vehicle to specify custom smoke
-- Add option for vehicle to specify custom gear shifting sound
-- Add transition effects to each state.
-- Add different terrains.
-- Add traffic cars.
-- Add opponent cars. 
-- Create more props to decorate the road.
-- Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation.
-- Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation.
-- Add vehicle shaking animation (when off-roading or in rough terrain)
-- Add digital display
-- Add menu music
-- Howl engine when selecting car (either a default engine howl or one using the car engine profile).
-- Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts)
-- Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties.
+- Add mouse input on menus;
+- Add joystick/gamepad input on menus;
+- Add inline-6 engine sound profile;
+- Add inline-5 engine sound profile;
+- Add traffic cars;
+- Add opponent cars;
+- Add option to specify custom vehicle portrait;
+- Add option to specify custom vehicle rotating sprite (for showroom);
+- Add option to specify custom vehicle side profile sprite (for showroom or a side drag race mode);
+- Add different terrains (in progress);
+- Create more props to decorate the road (in progress);
+- Add dynamic terrain variation;
+- Add optional forced induction sounds;
+- Add option for vehicle to specify custom smoke;
+- Add gear shifting sounds;
+- Add option for vehicle to specify custom gear shifting sound;
+- Re-attempt to create jumping physics. Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite;
+- Add transition effects to each game state (fade in / fade out);
+- Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation;
+- Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation;
+- Add vehicle shaking animation (when off-roading or in rough terrain);
+- Add music for main menu and optionally for other states;
+- Howl engine when selecting car (either a default engine howl or one using the car engine profile);
+- Introduce a more human-readable course file format, or create a usable course editor (inspirations: Stunts);
+- Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties;
+- Add option to select music for next race, maybe with a music selection state;
+- Add digital display (???);
 
 # bugs
 

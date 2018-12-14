@@ -75,7 +75,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   course(), playerVehicle(),
 
-  hudTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
+  hudDialTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
   hudGearDisplay(playerVehicle.body.engine.gear, Rectangle(), null),
@@ -152,12 +152,12 @@ void Pseudo3DRaceState::initialize()
 	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
 	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
 
-	hudTachometer.borderThickness = 6;
-	hudTachometer.graduationLevel = 2;
-	hudTachometer.graduationPrimarySize = 1000;
-	hudTachometer.graduationSecondarySize = 100;
-	hudTachometer.graduationValueScale = 0.001;
-	hudTachometer.graduationFont = fontSmall;
+	hudDialTachometer.borderThickness = 6;
+	hudDialTachometer.graduationLevel = 2;
+	hudDialTachometer.graduationPrimarySize = 1000;
+	hudDialTachometer.graduationSecondarySize = 100;
+	hudDialTachometer.graduationValueScale = 0.001;
+	hudDialTachometer.graduationFont = fontSmall;
 
 	hudBarTachometer.borderThickness = 6;
 	hudBarTachometer.fillColor = Color::RED;
@@ -261,13 +261,18 @@ void Pseudo3DRaceState::onEnter()
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
 
-	hudTachometer.min = playerVehicle.body.engine.minRpm;
+	hudDialTachometer.min = playerVehicle.body.engine.minRpm;
 //	hudTachometer.max = playerVehicle.body.engine.maxRpm;
-	hudTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
-	hudTachometer.bounds = gaugeSize;
-	hudTachometer.graduationLevel = 2;
-	hudTachometer.backgroundImage = null;
-	hudTachometer.compile();
+	hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
+	hudDialTachometer.bounds = gaugeSize;
+	hudDialTachometer.graduationLevel = 2;
+	hudDialTachometer.backgroundImage = null;
+	if(not settings.hudTachometerPointerImage.empty())
+	{
+		hudDialTachometer.pointerImage = new Image(settings.hudTachometerPointerImage);
+		hudDialTachometer.pointerOffset = 64;
+	}
+	hudDialTachometer.compile();
 
 	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
 	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
@@ -283,7 +288,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.h = 1.5 * fontSmall->getHeight();
 	hudGearDisplay.bounds = gaugeSize;
 
-	gaugeSize.x = hudTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
+	gaugeSize.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
 	hudSpeedometer.bounds = gaugeSize;
@@ -326,25 +331,25 @@ void Pseudo3DRaceState::onEnter()
 			imgCacheTachometer = null;
 		}
 
-		imgCacheTachometer = new Image(hudTachometer.bounds.w, hudTachometer.bounds.h);
+		imgCacheTachometer = new Image(hudDialTachometer.bounds.w, hudDialTachometer.bounds.h);
 		fgeal::Graphics::setDrawTarget(imgCacheTachometer);
 		fgeal::Graphics::drawFilledRectangle(0, 0, imgCacheTachometer->getWidth(), imgCacheTachometer->getHeight(), Color::_TRANSPARENT);
-		float oldx = hudTachometer.bounds.x, oldy = hudTachometer.bounds.y;
-		hudTachometer.bounds.x = 0;
-		hudTachometer.bounds.y = 0;
-		hudTachometer.compile();
-		hudTachometer.drawBackground();
+		float oldx = hudDialTachometer.bounds.x, oldy = hudDialTachometer.bounds.y;
+		hudDialTachometer.bounds.x = 0;
+		hudDialTachometer.bounds.y = 0;
+		hudDialTachometer.compile();
+		hudDialTachometer.drawBackground();
 		fgeal::Graphics::setDefaultDrawTarget();
-		hudTachometer.backgroundImage = imgCacheTachometer;
-		hudTachometer.imagesAreShared = true;
-		hudTachometer.graduationLevel = 0;
-		hudTachometer.bounds.x = oldx;
-		hudTachometer.bounds.y = oldy;
-		hudTachometer.compile();
+		hudDialTachometer.backgroundImage = imgCacheTachometer;
+		hudDialTachometer.imagesAreShared = true;
+		hudDialTachometer.graduationLevel = 0;
+		hudDialTachometer.bounds.x = oldx;
+		hudDialTachometer.bounds.y = oldy;
+		hudDialTachometer.compile();
 	}
 	else
 	{
-		hudTachometer.backgroundImage = null;
+		hudDialTachometer.backgroundImage = null;
 	}
 
 	course.miniMapRoadColor = Color::DARK_GREY;
@@ -460,12 +465,12 @@ void Pseudo3DRaceState::render()
 	}
 
 	hudSpeedometer.draw();
-	fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
+	fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudDialTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
 
 	if(settings.useBarTachometer)
 		hudBarTachometer.draw();
 	else
-		hudTachometer.draw();
+		hudDialTachometer.draw();
 
 	hudGearDisplay.draw();
 

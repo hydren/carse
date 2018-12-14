@@ -33,6 +33,7 @@ void CarseGame::Logic::onStatesListInitFinished()
 	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
 	nextMatchRaceSettings.lapCountGoal = 2;    // set default lap count
 	nextMatchRaceSettings.isImperialUnit = false;
+	nextMatchRaceSettings.hudTachometerPointerImage = "assets/needle1.png";
 	nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
 
 	if(raceOnlyMode)

@@ -55,16 +55,16 @@ namespace Hud
 		/** The border's color. If set as transparent, no border is drawn. */
 		fgeal::Color borderColor;
 
-		/** The thickness of the pointing needle. */
+		/** The thickness of the pointing needle (built-in pointer). */
 		float needleThickness;
 
-		/** The needle's color. */
+		/** The needle's color (built-in pointer). */
 		fgeal::Color needleColor;
 
-		/** The radius the needle's "bolt". */
+		/** The radius the needle's "bolt" (built-in pointer). */
 		float boltRadius;
 
-		/** The bolt's color. */
+		/** The bolt's color (built-in pointer). */
 		fgeal::Color boltColor;
 
 		/** The graduation's color. */

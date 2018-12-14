@@ -27,6 +27,8 @@
 - Use a comma-separated list of gear ratio to specify gear ratios on vehicle properties;
 - Add option to select music for next race, maybe with a music selection state;
 - Add digital display (???);
+- Add road ride sound, for cockpit or high speed/wind scenarios;
+- Add more bike engine sound profiles;
 
 # bugs
 

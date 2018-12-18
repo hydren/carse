@@ -13,6 +13,8 @@
 /linux-gcc-sfml2.0-release/
 /linux-gcc-sfml1.6-debug/
 /linux-gcc-sfml1.6-release/
+/win32-mingw-allegro4.4-debug/
+/win32-mingw-allegro4.4-release/
 /win32-mingw-allegro5.0-debug/
 /win32-mingw-allegro5.0-release/
 /win32-mingw-sdl1.2-debug/

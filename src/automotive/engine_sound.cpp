@@ -59,7 +59,7 @@ vector<Sound*>& EngineSoundSimulator::getSoundData()
 void EngineSoundSimulator::playIdle()
 {
 	if(not profile.ranges.empty())
-		updateSound(profile.ranges[0].startRpm+1);  //xxx this +1 may be unneccessary
+		updateSound(profile.ranges[0].startRpm+1);  //XXX this +1 may be unneccessary
 }
 
 void EngineSoundSimulator::updateSound(float currentRpm)

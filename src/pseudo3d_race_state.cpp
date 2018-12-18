@@ -19,7 +19,7 @@
 using std::string;
 using std::map;
 
-// xxx debug
+// XXX debug
 #include <iostream>
 using std::cout; using std::endl;
 

@@ -269,7 +269,7 @@ void Mechanics::updateByPacejkaScheme(float delta)
 	const float totalTorque = engine.getDriveTorque() - tractionTorque - brakingTorque - rollingResistanceTorque;
 
 	const float arbitraryAdjustmentFactor = 0.002;
-	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // xxx we're assuming no inertia from the engine components.
+	const float wheelAngularAcceleration = arbitraryAdjustmentFactor * (totalTorque / drivenWheelsInertia);  // XXX we're assuming no inertia from the engine components.
 
 	wheelAngularSpeed += delta * wheelAngularAcceleration;  // update wheel angular speed
 	engine.update(delta, wheelAngularSpeed);  // updated engine RPM based on the wheel angular speed

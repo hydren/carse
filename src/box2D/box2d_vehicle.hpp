@@ -16,7 +16,7 @@
 	#define RADTODEG 57.295779513082320876f
 #endif
 
-//xxx currently works only as 4-wheeled vehicles
+//XXX currently works only as 4-wheeled vehicles
 struct Box2DVehicleBody
 {
 	struct Tire

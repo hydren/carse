@@ -99,13 +99,20 @@ namespace Hud
 
 		struct Line { float x1, y1, x2, y2; Line(float x1, float y1, float x2, float y2) : x1(x1), y1(y1), x2(x2), y2(y2) {}  };
 
-		/** A vector of cached coordinates to be drawn. It's necessary to call compile() to update this cache.  */
-		std::vector<Line> graduationPrimaryCache, graduationSecondaryCache, graduationTertiaryCache;
-
 		struct NumericGraduation { std::string str; float x, y; NumericGraduation(std::string str, float x, float y) : str(str), x(x), y(y) {} };
 
-		/** A vector of cached numbers and its coordinates to be drawn. It's necessary to call compile() to update this cache. */
+		private:
+
+		/* A vector of cached coordinates to be drawn. It's necessary to call compile() to update this cache.  */
+		std::vector<Line> graduationPrimaryCache, graduationSecondaryCache, graduationTertiaryCache;
+
+		/* A vector of cached numbers and its coordinates to be drawn. It's necessary to call compile() to update this cache. */
 		std::vector<NumericGraduation> graduationPrimaryNumericCache;
+
+		/* The scales of the background, foreground and pointer images */
+		fgeal::Vector2D backgroundImageScale, foregroundImageScale, pointerImageScale;
+
+		public:
 
 		DialGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
 		: value(var), min(min), max(max),
@@ -180,6 +187,21 @@ namespace Hud
 				graduationTertiaryCache.push_back(Line(center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
 								                       center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
 			}
+
+			if(backgroundImage != null)
+			{
+				backgroundImageScale.x = bounds.w/backgroundImage->getWidth();
+				backgroundImageScale.y = bounds.h/backgroundImage->getHeight();
+			}
+
+			if(foregroundImage != null)
+			{
+				foregroundImageScale.x = bounds.w/foregroundImage->getWidth();
+				foregroundImageScale.y = bounds.h/foregroundImage->getHeight();
+			}
+
+			if(pointerImage != null)
+				pointerImageScale.x = pointerImageScale.y = 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight();
 		}
 
 		void drawBackground()
@@ -187,7 +209,7 @@ namespace Hud
 			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
 
 			if(backgroundImage != null)
-				backgroundImage->drawScaled(bounds.x, bounds.y, bounds.w/backgroundImage->getWidth(), bounds.h/backgroundImage->getHeight());
+				backgroundImage->drawScaled(bounds.x, bounds.y, backgroundImageScale.x, backgroundImageScale.y);
 			else
 			{
 				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*bounds.w, 0.5*bounds.h, borderColor);
@@ -230,12 +252,9 @@ namespace Hud
 			const float angle = -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
 
 			if(pointerImage != null)
-			{
-				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset,
-						0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(), 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight(),
-						angle, 0.5*pointerImage->getWidth(), pointerOffset);
-			}
-			else
+				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset, pointerImageScale.x, pointerImageScale.y, angle, 0.5*pointerImage->getWidth(), pointerOffset);
+
+			else  // draw built-in, gfx-primitives-based needle as pointer
 			{
 				fgeal::Graphics::drawLine(
 						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
@@ -244,7 +263,7 @@ namespace Hud
 			}
 
 			if(foregroundImage != null)
-				foregroundImage->drawScaled(bounds.x, bounds.y, bounds.w/foregroundImage->getWidth(), bounds.h/foregroundImage->getHeight());
+				foregroundImage->drawScaled(bounds.x, bounds.y, foregroundImageScale.x, foregroundImageScale.y);
 		}
 	};
 

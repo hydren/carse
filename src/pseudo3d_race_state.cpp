@@ -345,12 +345,12 @@ void Pseudo3DRaceState::onEnter()
 		hudDialTachometer.graduationLevel = 0;
 		hudDialTachometer.bounds.x = oldx;
 		hudDialTachometer.bounds.y = oldy;
-		hudDialTachometer.compile();
 	}
 	else
 	{
 		hudDialTachometer.backgroundImage = null;
 	}
+	hudDialTachometer.compile();
 
 	course.miniMapRoadColor = Color::DARK_GREY;
 	course.miniMapBounds.x = hudTimerCurrentLap.bounds.x;

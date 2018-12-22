@@ -202,7 +202,7 @@ float Mechanics::getDrivenWheelsWeightLoad()
 		return weightDistribution*weightLoad + transferedWeightLoad;
 
 	if(drivenWheelsType == DRIVEN_WHEELS_ON_FRONT)
-		return (1-weightDistribution)*weightDistribution - transferedWeightLoad;
+		return (1-weightDistribution)*weightLoad - transferedWeightLoad;
 
 	// the execution should not get to this point
 	return weightLoad;

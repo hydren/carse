@@ -4,6 +4,7 @@
 - Add joystick/gamepad input on menus;
 - Add inline-6 engine sound profile;
 - Add inline-5 engine sound profile;
+- Fix behavior when changing height: horizon should move, not just back ground.
 - Add traffic cars;
 - Add opponent cars;
 - Add option to specify custom vehicle portrait;

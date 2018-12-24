@@ -267,10 +267,16 @@ void Pseudo3DRaceState::onEnter()
 	hudDialTachometer.bounds = gaugeSize;
 	hudDialTachometer.graduationLevel = 2;
 	hudDialTachometer.backgroundImage = null;
-	if(not settings.hudTachometerPointerImage.empty())
+	if(hudDialTachometer.pointerImage != null)
 	{
-		hudDialTachometer.pointerImage = new Image(settings.hudTachometerPointerImage);
-		hudDialTachometer.pointerOffset = 64;
+		delete hudDialTachometer.pointerImage;
+		hudDialTachometer.pointerImage = null;
+		hudDialTachometer.pointerOffset = 0;
+	}
+	if(not settings.hudTachometerPointerImageFilename.empty())
+	{
+		hudDialTachometer.pointerImage = new Image(settings.hudTachometerPointerImageFilename);
+		hudDialTachometer.pointerOffset = 45;
 	}
 	hudDialTachometer.compile();
 

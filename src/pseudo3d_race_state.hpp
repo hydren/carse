@@ -89,7 +89,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		bool isImperialUnit;
 		bool useBarTachometer;
 		bool useCachedTachometer;
-		std::string hudTachometerPointerImage;
+		std::string hudTachometerPointerImageFilename;
 	};
 
 	private:

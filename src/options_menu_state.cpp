@@ -60,6 +60,7 @@ void OptionsMenuState::initialize()
 	menu->addEntry("Unit: ");
 	menu->addEntry("Simulation mode: ");
 	menu->addEntry("Tachometer type: ");
+	menu->addEntry("Tachometer pointer type: ");
 	menu->addEntry("Use cached tachometer (if possible): ");
 	menu->addEntry("Back to main menu");
 
@@ -198,6 +199,14 @@ void OptionsMenuState::onMenuSelect()
 	if(menu->getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
 		game.logic.getNextRaceSettings().useBarTachometer = !game.logic.getNextRaceSettings().useBarTachometer;
 
+	if(menu->getSelectedIndex() == MENU_ITEM_TACHOMETER_POINTER_TYPE)
+	{
+		if(game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty())
+			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename = "assets/pointer.png";
+		else
+			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.clear();
+	}
+
 	if(menu->getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
 		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
 
@@ -224,6 +233,7 @@ void OptionsMenuState::updateLabels()
 	}
 	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
 	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
+	setMenuItemValueText(MENU_ITEM_TACHOMETER_POINTER_TYPE, game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty()? "built-in" : "custom");
 	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
 }
 

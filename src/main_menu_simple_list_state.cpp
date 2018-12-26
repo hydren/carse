@@ -16,6 +16,7 @@ using fgeal::Menu;
 using fgeal::Font;
 using fgeal::Color;
 using fgeal::Keyboard;
+using fgeal::Mouse;
 
 int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 
@@ -123,5 +124,25 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		default:break;
+	}
+}
+
+void MainMenuSimpleListState::onMouseButtonPressed(Mouse::Button button, int x, int y)
+{
+	if(button == fgeal::Mouse::BUTTON_LEFT)
+	{
+		if(menu->bounds.contains(x, y))
+		{
+			if(menu->getIndexAtLocation(x, y) == menu->getSelectedIndex())
+			{
+				sndCursorIn->play();
+				this->onKeyPressed(Keyboard::KEY_ENTER);
+			}
+			else
+			{
+				sndCursorMove->play();
+				menu->setSelectedIndexByLocation(x, y);
+			}
+		}
 	}
 }

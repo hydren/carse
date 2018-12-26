@@ -31,6 +31,8 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 	fgeal::Font* fontMain, *fontInfo, *fontSub;
 	fgeal::Menu* menu;
 
+	fgeal::Rectangle selectButtonBounds, backButtonBounds, nextVehicleButtonBounds, previousVehicleButtonBounds, nextAppearanceButtonBounds, previousApperanceButtonBounds;
+
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
@@ -44,7 +46,7 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 
 	std::vector<VehiclePreview> previews;
 
-	fgeal::Image* imgBackground;
+	fgeal::Image* imgBackground, *imgArrow1, *imgArrow2;
 	bool isSelectionTransitioning;
 	int previousIndex;
 	float selectionTransitionProgress;
@@ -63,6 +65,7 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 	virtual void update(float delta);
 
 	virtual void onKeyPressed(fgeal::Keyboard::Key);
+	virtual void onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y);
 
 	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
 	void drawVehicleSpec(float x, float y, float index=-1);

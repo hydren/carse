@@ -17,11 +17,14 @@ using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
 using fgeal::Keyboard;
+using fgeal::Mouse;
 using fgeal::Font;
 using fgeal::Sound;
 using fgeal::Color;
 using fgeal::Image;
 using fgeal::Rectangle;
+using fgeal::Point;
+using fgeal::Graphics;
 using fgeal::Menu;
 using futil::Properties;
 using futil::ends_with;
@@ -43,7 +46,8 @@ VehicleSelectionShowroomLayoutState::VehicleSelectionShowroomLayoutState(CarseGa
   fontMain(null), fontInfo(null), fontSub(null), menu(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
-  imgBackground(null), isSelectionTransitioning(false), previousIndex(-1), selectionTransitionProgress(0)
+  imgBackground(null), imgArrow1(null), imgArrow2(null),
+  isSelectionTransitioning(false), previousIndex(-1), selectionTransitionProgress(0)
 {}
 
 VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
@@ -62,6 +66,12 @@ VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
 
 	if(imgBackground != null)
 		delete imgBackground;
+
+	if(imgArrow1 != null)
+		delete imgArrow1;
+
+	if(imgArrow2 != null)
+		delete imgArrow2;
 }
 
 void VehicleSelectionShowroomLayoutState::initialize()
@@ -98,12 +108,50 @@ void VehicleSelectionShowroomLayoutState::initialize()
 	}
 
 	imgBackground = new Image("assets/showroom-bg.jpg");
+	imgArrow1 = new Image("assets/arrow-red.png");
+	imgArrow2 = new Image("assets/arrow-blue.png");
 }
 
 void VehicleSelectionShowroomLayoutState::onEnter()
 {
+	const unsigned dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
 	lastEnterSelectedVehicleIndex = menu->getSelectedIndex();
 	lastEnterSelectedVehicleAltIndex = previews[menu->getSelectedIndex()].altIndex;
+
+	previousVehicleButtonBounds.h = 0.05*dh;
+	previousVehicleButtonBounds.x = 0.01*dw;
+	previousVehicleButtonBounds.y = 0.5*dh - previousVehicleButtonBounds.h/2;
+	previousVehicleButtonBounds.w = 0.04*dw;
+
+	nextVehicleButtonBounds = previousVehicleButtonBounds;
+	nextVehicleButtonBounds.x = 0.99*dw - nextVehicleButtonBounds.w;
+
+	/*
+	 * 	const fgeal::Point skinArrowUp1 = { 0.5f*dw, 0.295f*dh - arrowOffset },
+					   skinArrowUp2 = { 0.485f*dw, 0.305f*dh - arrowOffset },
+					   skinArrowUp3 = { 0.515f*dw, 0.305f*dh - arrowOffset},
+					   skinArrowDown1 = { 0.5f*dw, 0.590f*dh + arrowOffset },
+					   skinArrowDown2 = { 0.485f*dw, 0.580f*dh + arrowOffset },
+					   skinArrowDown3 = { 0.515f*dw, 0.580f*dh + arrowOffset};
+	 */
+
+	previousApperanceButtonBounds.x = 0.485*dw;
+	previousApperanceButtonBounds.y = 0.295*dh;
+	previousApperanceButtonBounds.w = 0.030*dw;
+	previousApperanceButtonBounds.h = 0.010*dw;
+
+	nextAppearanceButtonBounds = previousApperanceButtonBounds;
+	nextAppearanceButtonBounds.y = 0.580*dh;
+
+	backButtonBounds.x = 0.01*dw;
+	backButtonBounds.y = 0.95*dh - menu->getFont().getHeight();
+	backButtonBounds.w = menu->getFont().getTextWidth(" Cancel ");
+	backButtonBounds.h = menu->getFont().getHeight();
+
+	selectButtonBounds.x = 0.85*dw;
+	selectButtonBounds.y = 0.95*dh - menu->getFont().getHeight();
+	selectButtonBounds.w = menu->getFont().getTextWidth(" Select ");
+	selectButtonBounds.h = menu->getFont().getHeight();
 }
 
 void VehicleSelectionShowroomLayoutState::onLeave()
@@ -114,6 +162,8 @@ void VehicleSelectionShowroomLayoutState::render()
 	Display& display = game.getDisplay();
 	display.clear();
 	const float dw = display.getWidth(), dh = display.getHeight();
+	const Point mousePos = Mouse::getPosition();
+	const bool blinkCycle = (cos(20*fgeal::uptime()) > 0);
 	const vector<Pseudo3DVehicle::Spec>& vehicles = game.logic.getVehicleList();
 	const unsigned index = isSelectionTransitioning? previousIndex : menu->getSelectedIndex();
 	const Pseudo3DVehicle::Spec& vehicle = vehicles[index];
@@ -173,8 +223,8 @@ void VehicleSelectionShowroomLayoutState::render()
 
 	if(not preview.altSprites.empty())
 	{
-		fgeal::Graphics::drawFilledTriangle(skinArrowDown1, skinArrowDown2, skinArrowDown3, Color(0  , 127, 255, 192));
-		fgeal::Graphics::drawFilledTriangle(skinArrowUp1, skinArrowUp2, skinArrowUp3, Color(0  , 127, 255, 192));
+		fgeal::Graphics::drawFilledTriangle(skinArrowDown1, skinArrowDown2, skinArrowDown3, nextAppearanceButtonBounds.contains(mousePos)? Color(128  , 192, 255, 192) : Color(64  , 127, 255, 128));
+		fgeal::Graphics::drawFilledTriangle(skinArrowUp1, skinArrowUp2, skinArrowUp3, previousApperanceButtonBounds.contains(mousePos)? Color(128  , 192, 255, 192) : Color(64  , 127, 255, 128));
 
 		if(preview.altIndex != -1)
 		{
@@ -182,6 +232,20 @@ void VehicleSelectionShowroomLayoutState::render()
 			fontInfo->drawText(txt, 0.5*(dw - fontInfo->getTextWidth(txt)), 0.610*dh, Color::AZURE);
 		}
 	}
+
+	imgArrow1->drawScaled(previousVehicleButtonBounds.x - (blinkCycle and previousVehicleButtonBounds.contains(mousePos)? 2 : 0),
+		previousVehicleButtonBounds.y, scaledToRect(imgArrow1, previousVehicleButtonBounds), Image::FLIP_HORIZONTAL);
+	imgArrow1->drawScaled(nextVehicleButtonBounds.x + (blinkCycle and nextVehicleButtonBounds.contains(mousePos)? 2 : 0),
+		nextVehicleButtonBounds.y, scaledToRect(imgArrow1, nextVehicleButtonBounds));
+
+	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu->bgColor);
+	menu->getFont().drawText(" Cancel ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
+	if(blinkCycle and backButtonBounds.contains(mousePos))
+		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu->bgColor);
+	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu->bgColor);
+	menu->getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
+	if(blinkCycle and selectButtonBounds.contains(mousePos))
+		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu->bgColor);
 }
 
 void VehicleSelectionShowroomLayoutState::update(float delta)
@@ -254,6 +318,30 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 
 		default:
 			break;
+	}
+}
+
+void VehicleSelectionShowroomLayoutState::onMouseButtonPressed(Mouse::Button button, int x, int y)
+{
+	if(button == fgeal::Mouse::BUTTON_LEFT)
+	{
+		if(previousVehicleButtonBounds.contains(x, y))
+			this->onKeyPressed(Keyboard::KEY_ARROW_LEFT);
+
+		else if(nextVehicleButtonBounds.contains(x, y))
+			this->onKeyPressed(Keyboard::KEY_ARROW_RIGHT);
+
+		else if(previousApperanceButtonBounds.contains(x, y))
+			this->onKeyPressed(Keyboard::KEY_ARROW_UP);
+
+		else if(nextAppearanceButtonBounds.contains(x, y))
+			this->onKeyPressed(Keyboard::KEY_ARROW_DOWN);
+
+		else if(selectButtonBounds.contains(x, y))
+			this->onKeyPressed(Keyboard::KEY_ENTER);
+
+		else if(backButtonBounds.contains(x, y))
+			this->onKeyPressed(Keyboard::KEY_ESCAPE);
 	}
 }
 

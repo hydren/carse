@@ -29,11 +29,15 @@ class VehicleSelectionSimpleListState extends public fgeal::Game::State
 	CarseGame& game;
 
 	fgeal::Font* fontMain, *fontInfo, *fontSub;
-	fgeal::Menu* menu;
-
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
+	fgeal::Menu* menu;
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
+	fgeal::Rectangle menuUpButtonBounds;
+	fgeal::Point menuUpButtonArrow1, menuUpButtonArrow2, menuUpButtonArrow3;
+	fgeal::Rectangle menuDownButtonBounds;
+	fgeal::Point menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3;
+	fgeal::Rectangle selectButtonBounds, backButtonBounds, appearanceLeftButtonBounds, appearanceRightButtonBounds;
 
 	struct VehiclePreview
 	{
@@ -58,6 +62,7 @@ class VehicleSelectionSimpleListState extends public fgeal::Game::State
 	virtual void update(float delta);
 
 	virtual void onKeyPressed(fgeal::Keyboard::Key);
+	virtual void onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y);
 
 	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
 	void drawVehicleSpec(float x, float y, float index=-1);

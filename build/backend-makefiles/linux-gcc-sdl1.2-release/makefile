@@ -12,7 +12,6 @@ RM := rm -rf
 -include src_libs/fgeal/extra/subdir.mk
 -include src_libs/fgeal/adapters/sdl1.2/subdir.mk
 -include src_libs/fgeal/subdir.mk
--include src/states/subdir.mk
 -include src/automotive/subdir.mk
 -include src/subdir.mk
 -include subdir.mk

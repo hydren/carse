@@ -25,7 +25,6 @@ C_DEPS :=
 SUBDIRS := \
 src/automotive \
 src \
-src/states \
 src_libs/fgeal/adapters/sdl2.0 \
 src_libs/fgeal \
 src_libs/fgeal/extra \

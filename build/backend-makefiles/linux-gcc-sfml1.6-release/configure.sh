@@ -56,7 +56,7 @@ find $DPATH -name '*.mk' -type f -exec sed -i "s,$OLD,$INCLUDE_PATH,g" {} \;
 if [ "$SFML_PRE_1_6" -eq 1 ]
 then
 	echo -n "Uncommenting FGEAL_SFML1_6_ENABLE_COMPATIBILITY_PRE_1_6 macro in adapters/sfml1.6/implementation.hpp ...";
-	sed -i "s,//#define FGEAL_SFML1_6_ENABLE_COMPATIBILITY_PRE_1_6,#define FGEAL_SFML1_6_ENABLE_COMPATIBILITY_PRE_1_6,g" ../adapters/sfml1.6/implementation.hpp;
+	sed -i "s,//#define FGEAL_SFML1_6_ENABLE_COMPATIBILITY_PRE_1_6,#define FGEAL_SFML1_6_ENABLE_COMPATIBILITY_PRE_1_6,g" ../src_libs/fgeal/adapters/sfml1.6/implementation.hpp;
 	echo "done";
 fi
 

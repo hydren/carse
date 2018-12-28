@@ -2,6 +2,7 @@
 echo "### Preparing linux makefiles for prime time ###"
 
 # These need to be in par with the current build configuration names. Be sure that these are updated.
+BUILD_CONFIG_ALLEGRO_4_4=linux-gcc-allegro4.4-release
 BUILD_CONFIG_ALLEGRO_5_0=linux-gcc-allegro5.0-release
 BUILD_CONFIG_SDL_1_2=linux-gcc-sdl1.2-release
 BUILD_CONFIG_SDL_2_0=linux-gcc-sdl2.0-release
@@ -46,7 +47,7 @@ mv build/objects.mk build/backend-makefiles/$BUILD_CONFIG_AGNOSTIC/
 mv build/sources.mk build/backend-makefiles/$BUILD_CONFIG_AGNOSTIC/
 
 echo "- Dealing with remaining makefiles that are specific to other build configurations..."
-for BUILD_CONFIG in $BUILD_CONFIG_ALLEGRO_5_0 $BUILD_CONFIG_SDL_2_0 $BUILD_CONFIG_SFML_1_6 $BUILD_CONFIG_SFML_2_0
+for BUILD_CONFIG in $BUILD_CONFIG_ALLEGRO_4_4 $BUILD_CONFIG_ALLEGRO_5_0 $BUILD_CONFIG_SDL_2_0 $BUILD_CONFIG_SFML_1_6 $BUILD_CONFIG_SFML_2_0
 do
 	echo "- Erasing contents of build/backend-makefiles/$BUILD_CONFIG folder (except configure.sh)..."
 	mv build/backend-makefiles/$BUILD_CONFIG/configure.sh .

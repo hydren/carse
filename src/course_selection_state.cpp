@@ -19,9 +19,11 @@ using fgeal::Display;
 using fgeal::Event;
 using fgeal::EventQueue;
 using fgeal::Keyboard;
+using fgeal::Mouse;
 using fgeal::Font;
 using fgeal::Color;
 using fgeal::Image;
+using fgeal::Graphics;
 using fgeal::Sound;
 using fgeal::Rectangle;
 using fgeal::Point;
@@ -43,10 +45,10 @@ int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID;
 CourseSelectionState::CourseSelectionState(CarseGame* game)
 : State(*game), game(*game),
   background(null), imgRandom(null), imgCircuit(null), imgCourseEditor(null),
-  fontMain(null), fontInfo(null),
+  fontMain(null), fontInfo(null), fontSmall(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   isLoadedCourseSelected(false), isDebugCourseSelected(false),
-  status(STATUS_HOVERING_COURSE_LIST)
+  focus(FOCUS_ON_COURSE_LIST_SELECTION)
 {}
 
 CourseSelectionState::~CourseSelectionState()
@@ -57,6 +59,7 @@ CourseSelectionState::~CourseSelectionState()
 	if(imgCourseEditor != null) delete imgCourseEditor;
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
+	if(fontSmall != null) delete fontSmall;
 }
 
 void CourseSelectionState::initialize()
@@ -68,8 +71,9 @@ void CourseSelectionState::initialize()
 	imgCircuit = new Image("assets/portrait-circuit.png");
 	imgCourseEditor = new Image("assets/portrait-course-editor.png");
 
-	fontMain = new Font(game.sharedResources->font2Path, dip(32));
+	fontMain = new Font(game.sharedResources->font2Path, dip(28));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(14));
+	fontSmall = new Font(game.sharedResources->font1Path, dip(10));
 
 	menuCourse.setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
 	menuCourse.setColor(Color::RED);
@@ -94,22 +98,15 @@ void CourseSelectionState::initialize()
 
 void CourseSelectionState::onEnter()
 {
-	const float displayWidth = game.getDisplay().getWidth(),
-				displayHeight = game.getDisplay().getHeight(),
-				focusSpacing = displayHeight*0.01;
+	const float dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
 
-	titleBounds.x = 0.5f*(displayWidth - fontMain->getTextWidth(TITLE_TEXT));
-	titleBounds.y = (1/32.f)*displayHeight;
-	titleBounds.w = fontMain->getTextWidth(TITLE_TEXT);
-	titleBounds.h = fontMain->getHeight();
+	paneBounds.x = (1/64.f)*dw;
+	paneBounds.y = (3/64.f)*dh + fontMain->getHeight();
+	paneBounds.w = (62/64.f)*dw;
+	paneBounds.h = dh - fontMain->getHeight() - (1/16.f)*dh;
 
-	paneBounds.x = (1/64.f)*displayWidth;
-	paneBounds.y = titleBounds.y + titleBounds.h + (1/64.f)*displayHeight;
-	paneBounds.w = (62/64.f)*displayWidth;
-	paneBounds.h = displayHeight - titleBounds.h - titleBounds.y - (2/64.f)*displayHeight;
-
-	portraitBounds.x = paneBounds.x + (1/32.f)*paneBounds.w;
-	portraitBounds.y = paneBounds.y + (1/32.f)*paneBounds.h;
+	portraitBounds.x = paneBounds.x + (1/64.f)*paneBounds.w;
+	portraitBounds.y = paneBounds.y + (1/64.f)*paneBounds.h;
 	portraitBounds.w = (1/4.f)*paneBounds.h;
 	portraitBounds.h = (1/4.f)*paneBounds.h;
 
@@ -118,13 +115,18 @@ void CourseSelectionState::onEnter()
 	portraitImgBounds.w = portraitBounds.w * 0.96f;
 	portraitImgBounds.h = portraitBounds.h * 0.96f;
 
-	courseEditorPortraitBounds = portraitImgBounds;
-	courseEditorPortraitBounds.x = paneBounds.x + paneBounds.w - portraitImgBounds.w - 2*focusSpacing;
+	courseMapBounds.w = courseMapBounds.h = 0.42*paneBounds.h;
+	courseMapBounds.x = paneBounds.x + paneBounds.w - courseMapBounds.w - (1/64.f)*paneBounds.w;
+	courseMapBounds.y = portraitBounds.y;
+
+	courseEditorPortraitBounds.x = portraitBounds.x;
+	courseEditorPortraitBounds.y = portraitBounds.y + portraitBounds.h + 0.03*dh;
+	courseEditorPortraitBounds.w = courseEditorPortraitBounds.h = (1/8.f)*paneBounds.h;
 
 	menuCourse.bounds.x = portraitBounds.x;
-	menuCourse.bounds.y = portraitBounds.y + portraitBounds.h + (1/32.f)*paneBounds.h;
-	menuCourse.bounds.w = paneBounds.w - menuCourse.bounds.x;
-	menuCourse.bounds.h = (paneBounds.w - portraitBounds.h)/4;
+	menuCourse.bounds.y = 0.5*dh;
+	menuCourse.bounds.w = 0.5*paneBounds.w;
+	menuCourse.bounds.h = (paneBounds.w - portraitBounds.h)/3;
 
 	string previouslySelectedEntryLabel;
 	if(not menuCourse.getEntries().empty())
@@ -150,12 +152,22 @@ void CourseSelectionState::onEnter()
 				break;
 			}
 
-	menuSettings.bounds.x = menuCourse.bounds.x;
-	menuSettings.bounds.y = menuCourse.bounds.y + menuCourse.bounds.h + 4*focusSpacing;
-	menuSettings.bounds.w = menuCourse.bounds.w;
-	menuSettings.bounds.h = (paneBounds.w - portraitBounds.h)/4;
+	menuSettings.bounds.x = menuCourse.bounds.x + menuCourse.bounds.w + dw*0.02;
+	menuSettings.bounds.y = menuCourse.bounds.y;
+	menuSettings.bounds.w = 0.45*paneBounds.w;
+	menuSettings.bounds.h = menuCourse.bounds.h;
 
-	status = STATUS_HOVERING_COURSE_LIST;
+	backButtonBounds.x = 0.03*dw;
+	backButtonBounds.y = 0.95*dh - fontInfo->getHeight();
+	backButtonBounds.w = fontInfo->getTextWidth(" Back ");
+	backButtonBounds.h = fontInfo->getHeight();
+
+	selectButtonBounds.x = 0.85*dw;
+	selectButtonBounds.y = 0.95*dh - fontInfo->getHeight();
+	selectButtonBounds.w = fontInfo->getTextWidth(" Select ");
+	selectButtonBounds.h = fontInfo->getHeight();
+
+	focus = FOCUS_ON_COURSE_LIST_SELECTION;
 }
 
 void CourseSelectionState::onLeave()
@@ -171,16 +183,21 @@ void CourseSelectionState::onLeave()
 void CourseSelectionState::render()
 {
 	Display& display = game.getDisplay();
+	const unsigned dw = display.getWidth(), dh = display.getHeight();
+	const float focusSpacing = dh*0.01;
+	const bool blinkCycle = cos(20*fgeal::uptime()) > 0;
+
 	display.clear();
 
-	const float focusSpacing = display.getHeight()*0.01;
-
+	// draw bg
 	background->drawScaled(0, 0, scaledToSize(background, display));
-
-	fontMain->drawText(TITLE_TEXT, titleBounds.x, titleBounds.y, Color::WHITE);
 
 	// draw panel bg
 	fgeal::Graphics::drawFilledRectangle(paneBounds, Color(0,0,0, 96));
+
+	// draw title
+	fontMain->drawText(TITLE_TEXT, (1/32.f)*dw, (1/32.f)*dh, Color::WHITE);
+	Graphics::drawLine(paneBounds.x, fontMain->getHeight()+(1/32.f)*dh, paneBounds.x + paneBounds.w, fontMain->getHeight()+(1/32.f)*dh, Color::WHITE);
 
 	// portrait frame
 	fgeal::Graphics::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
@@ -192,18 +209,8 @@ void CourseSelectionState::render()
 		// todo choose correct portrait based on course specification
 		imgCircuit->drawScaled(portraitImgBounds.x, portraitImgBounds.y, scaledToRect(imgCircuit, portraitImgBounds));
 
-	// draw course editor portrait
-	imgCourseEditor->drawScaled(courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, scaledToRect(imgCourseEditor, courseEditorPortraitBounds));
-	fontInfo->drawText("Course editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, Color::WHITE);
-	if(status == STATUS_HOVERING_COURSE_EDITOR_PORTRAIT and cos(20*fgeal::uptime()) > 0)
-		fgeal::Graphics::drawRectangle(getSpacedOutline(courseEditorPortraitBounds, focusSpacing), Color::RED);
-
-	// draw course list
-	menuCourse.draw();
-	if(status == STATUS_ON_COURSE_LIST_SELECTION or (status == STATUS_HOVERING_COURSE_LIST and cos(20*fgeal::uptime()) > 0))
-		fgeal::Graphics::drawRectangle(getSpacedOutline(menuCourse.bounds, focusSpacing), Color::RED);
-
 	// draw info
+	Graphics::drawFilledRectangle(courseMapBounds, Color::BLACK);
 	fontInfo->drawText(menuCourse.getSelectedEntry().label, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y, Color::WHITE);
 	if(menuCourse.getSelectedIndex() > 1)
 	{
@@ -211,12 +218,39 @@ void CourseSelectionState::render()
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
 		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getHeight(), Color::WHITE);
+
+		// draw course map
+		Pseudo3DCourse::Map map(course);  //FIXME creating this at each cycle is costly, we need to cache this
+		map.roadColor = Color::WHITE;
+		map.segmentHighlightColor = Color::YELLOW;
+		map.segmentHighlightSize = 0.005*dh;
+		map.bounds = courseMapBounds;
+		map.drawMap(0);
 	}
 
+	// draw course editor portrait
+	imgCourseEditor->drawScaled(courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, scaledToRect(imgCourseEditor, courseEditorPortraitBounds));
+	fontSmall->drawText("Course", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, Color::WHITE);
+	fontSmall->drawText("  editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y+fontSmall->getHeight(), Color::WHITE);
+	if(focus == FOCUS_ON_COURSE_EDITOR_PORTRAIT and blinkCycle)
+		fgeal::Graphics::drawRectangle(getSpacedOutline(courseEditorPortraitBounds, focusSpacing), Color::RED);
+
+	// draw course list
+	menuCourse.draw();
+	if(focus == FOCUS_ON_COURSE_LIST_SELECTION and blinkCycle)
+		fgeal::Graphics::drawRectangle(getSpacedOutline(menuCourse.bounds, focusSpacing), Color::RED);
+
 	// draw race settings
+	menuSettings.focusedEntryBgColor = (focus == FOCUS_ON_SETTINGS_LIST_SELECTION? Color::RED : Color::_TRANSPARENT);
+	menuSettings.focusedEntryFontColor = (focus == FOCUS_ON_SETTINGS_LIST_SELECTION? Color::WHITE : Color::RED);
 	menuSettings.draw();
-	if(status == STATUS_HOVERING_SETTINGS_LIST and cos(20*fgeal::uptime()) > 0)
+	if(focus == FOCUS_ON_SETTINGS_LIST_SELECTION or (focus == FOCUS_ON_SETTINGS_LIST_HOVER and blinkCycle))
 		fgeal::Graphics::drawRectangle(getSpacedOutline(menuSettings.bounds, focusSpacing), Color::RED);
+
+	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menuSettings.bgColor);
+	fontInfo->drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
+	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menuSettings.bgColor);
+	fontInfo->drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
 }
 
 void CourseSelectionState::update(float delta) {}
@@ -231,32 +265,60 @@ void CourseSelectionState::updateLapCount()
 
 void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 {
-	if(key == Keyboard::KEY_ESCAPE and status != STATUS_ON_COURSE_LIST_SELECTION)
+	if(key == Keyboard::KEY_ESCAPE and focus != FOCUS_ON_SETTINGS_LIST_SELECTION)
 	{
+		//XXX should we ensure no changes are done to course selection this way?
 		sndCursorOut->play();
 		game.enterState(game.logic.currentMainMenuStateId);
 	}
-	else switch(status)
+	else switch(focus)
 	{
-		case STATUS_HOVERING_COURSE_LIST:
+		case FOCUS_ON_COURSE_LIST_SELECTION:
 			if(key == Keyboard::KEY_ENTER)
 			{
 				sndCursorIn->play();
-				status = STATUS_ON_COURSE_LIST_SELECTION;
+				game.enterState(game.logic.currentMainMenuStateId);
 			}
-			else if(key == Keyboard::KEY_ARROW_DOWN)
+			else if(key == Keyboard::KEY_ARROW_RIGHT)
 			{
 				sndCursorMove->play();
-				status = STATUS_HOVERING_SETTINGS_LIST;
+				focus = FOCUS_ON_SETTINGS_LIST_HOVER;
 			}
 			else if(key == Keyboard::KEY_ARROW_UP)
 			{
 				sndCursorMove->play();
-				status = STATUS_HOVERING_COURSE_EDITOR_PORTRAIT;
+				if(menuCourse.getSelectedIndex() == 0)
+					focus = FOCUS_ON_COURSE_EDITOR_PORTRAIT;
+				else
+					menuCourse.moveCursorUp();
+			}
+			else if(key == Keyboard::KEY_ARROW_DOWN)
+			{
+				sndCursorMove->play();
+				menuCourse.moveCursorDown();
+			}
+			isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+			isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
+			break;
+
+		case FOCUS_ON_SETTINGS_LIST_HOVER:
+			if(key == Keyboard::KEY_ENTER)
+			{
+				sndCursorIn->play();
+				focus = FOCUS_ON_SETTINGS_LIST_SELECTION;
+			}
+			else if(key == Keyboard::KEY_ARROW_LEFT)
+			{
+				sndCursorMove->play();
+				focus = FOCUS_ON_COURSE_LIST_SELECTION;
 			}
 			break;
 
-		case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT:
+		case FOCUS_ON_SETTINGS_LIST_SELECTION:
+			handleInputOnSettings(key);
+			break;
+
+		case FOCUS_ON_COURSE_EDITOR_PORTRAIT:
 			if(key == Keyboard::KEY_ENTER)
 			{
 				sndCursorIn->play();
@@ -265,46 +327,20 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 			else if(key == Keyboard::KEY_ARROW_DOWN)
 			{
 				sndCursorMove->play();
-				status = STATUS_HOVERING_COURSE_LIST;
+				focus = FOCUS_ON_COURSE_LIST_SELECTION;
 			}
 			break;
-
-		case STATUS_HOVERING_SETTINGS_LIST: handleInputOnSettings(key); break;
-		case STATUS_ON_COURSE_LIST_SELECTION: handleInputOnCourseList(key); break;
+		default: break;
 	}
 }
 
-void CourseSelectionState::handleInputOnCourseList(fgeal::Keyboard::Key key)
-{
-	switch(key)
-	{
-		case Keyboard::KEY_ARROW_UP:
-			sndCursorMove->play();
-			menuCourse.moveCursorUp();
-			break;
-		case Keyboard::KEY_ARROW_DOWN:
-			sndCursorMove->play();
-			menuCourse.moveCursorDown();
-			break;
-		case Keyboard::KEY_ENTER:
-		case Keyboard::KEY_ESCAPE:
-			sndCursorOut->play();
-			status = STATUS_HOVERING_COURSE_LIST;
-			break;
-		default:
-			break;
-	}
-
-	isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
-	isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
-}
-
-void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
+void CourseSelectionState::handleInputOnSettings(Keyboard::Key key)
 {
 	switch(key)
 	{
 		case Keyboard::KEY_ARROW_LEFT:
 		case Keyboard::KEY_ARROW_RIGHT:
+		case Keyboard::KEY_ENTER:
 		{
 			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
 			sndCursorMove->play();
@@ -349,81 +385,83 @@ void CourseSelectionState::handleInputOnSettings(fgeal::Keyboard::Key key)
 				}
 				default: break;
 			}
-			break;
 		}
+		break;
+
+		case Keyboard::KEY_ESCAPE:
+			sndCursorOut->play();
+			focus = FOCUS_ON_SETTINGS_LIST_HOVER;
+			break;
+
 		case Keyboard::KEY_ARROW_UP:
 			sndCursorMove->play();
-			if(menuSettings.getSelectedIndex() == 0)
-				status = STATUS_HOVERING_COURSE_LIST;
-			else
-				menuSettings.moveCursorUp();
+			menuSettings.moveCursorUp();
 			break;
+
 		case Keyboard::KEY_ARROW_DOWN:
 			sndCursorMove->play();
 			menuSettings.moveCursorDown();
 			break;
-		default:
-			break;
+
+		default: break;
 	}
 }
 
-void CourseSelectionState::onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y)
+void CourseSelectionState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
-	if(button == fgeal::Mouse::BUTTON_LEFT)
+	if(button == Mouse::BUTTON_LEFT)
 	{
-		switch(status)
+		if(backButtonBounds.contains(x, y) or selectButtonBounds.contains(x, y))
+			onKeyPressed(Keyboard::KEY_ESCAPE);
+
+		else switch(focus)
 		{
-			case STATUS_HOVERING_COURSE_LIST:
-			{
-				sndCursorIn->play();
-				status = STATUS_ON_COURSE_LIST_SELECTION;
+			case FOCUS_ON_COURSE_LIST_SELECTION:
+				sndCursorMove->play();
+				menuCourse.setSelectedIndexByLocation(x, y);
 				break;
-			}
-			case STATUS_ON_COURSE_LIST_SELECTION:
-			{
-				if(menuCourse.bounds.contains(x, y))
+
+			case FOCUS_ON_SETTINGS_LIST_HOVER:
+				sndCursorIn->play();
+				focus = FOCUS_ON_SETTINGS_LIST_SELECTION;
+				break;
+
+			case FOCUS_ON_SETTINGS_LIST_SELECTION:
+				if(menuSettings.bounds.contains(x, y))
 				{
 					sndCursorMove->play();
-					menuCourse.setSelectedIndexByLocation(x, y);
+					menuSettings.setSelectedIndexByLocation(x, y);
 				}
 				else
 				{
 					sndCursorOut->play();
-					status = STATUS_HOVERING_COURSE_LIST;
+					focus = FOCUS_ON_SETTINGS_LIST_HOVER;
 				}
 				break;
-			}
-			case STATUS_HOVERING_SETTINGS_LIST:
-			{
-				sndCursorMove->play();
-				menuSettings.setSelectedIndexByLocation(x, y);
-				break;
-			}
-			case STATUS_HOVERING_COURSE_EDITOR_PORTRAIT:
-			{
+
+			case FOCUS_ON_COURSE_EDITOR_PORTRAIT:
 				sndCursorIn->play();
 				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);
 				break;
-			}
 		}
 	}
 }
 
 void CourseSelectionState::onMouseMoved(int oldx, int oldy, int x, int y)
 {
-	if(status != STATUS_ON_COURSE_LIST_SELECTION)
+	if(focus != FOCUS_ON_SETTINGS_LIST_SELECTION)
 	{
-		const MenuStatus oldStatus = status;
+		const ScreenFocus oldStatus = focus;
 		if(menuCourse.bounds.contains(x, y))
-			status = STATUS_HOVERING_COURSE_LIST;
+			focus = FOCUS_ON_COURSE_LIST_SELECTION;
 
 		if(menuSettings.bounds.contains(x, y))
-			status = STATUS_HOVERING_SETTINGS_LIST;
+			focus = FOCUS_ON_SETTINGS_LIST_HOVER;
 
 		if(courseEditorPortraitBounds.contains(x, y))
-			status = STATUS_HOVERING_COURSE_EDITOR_PORTRAIT;
+			focus = FOCUS_ON_COURSE_EDITOR_PORTRAIT;
 
-		if(status != oldStatus)
+		if(focus != oldStatus)
 			sndCursorMove->play();
 	}
 }

@@ -25,22 +25,23 @@ class CourseSelectionState extends public fgeal::Game::State
 {
 	CarseGame& game;
 	fgeal::Menu menuCourse, menuSettings;
-	fgeal::Rectangle titleBounds, paneBounds, portraitBounds, portraitImgBounds, courseEditorPortraitBounds;
+	fgeal::Rectangle paneBounds, portraitBounds, portraitImgBounds, courseMapBounds,
+		courseEditorPortraitBounds, backButtonBounds, selectButtonBounds;
 
 	fgeal::Image* background, *imgRandom, *imgCircuit, *imgCourseEditor;
-	fgeal::Font* fontMain, *fontInfo;
+	fgeal::Font* fontMain, *fontInfo, *fontSmall;
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	bool isLoadedCourseSelected, isDebugCourseSelected;
 
-	enum MenuStatus
+	enum ScreenFocus
 	{
-		STATUS_ON_COURSE_LIST_SELECTION,
-		STATUS_HOVERING_COURSE_LIST,
-		STATUS_HOVERING_SETTINGS_LIST,
-		STATUS_HOVERING_COURSE_EDITOR_PORTRAIT
+		FOCUS_ON_COURSE_LIST_SELECTION,
+		FOCUS_ON_SETTINGS_LIST_HOVER,
+		FOCUS_ON_SETTINGS_LIST_SELECTION,
+		FOCUS_ON_COURSE_EDITOR_PORTRAIT
 	}
-	status;
+	focus;
 
 	public:
 	virtual int getId();
@@ -62,7 +63,6 @@ class CourseSelectionState extends public fgeal::Game::State
 	fgeal::Image* getSelectedCoursePreview();
 
 	private:
-	void handleInputOnCourseList(fgeal::Keyboard::Key k);
 	void handleInputOnSettings(fgeal::Keyboard::Key k);
 
 	void updateLapCount();

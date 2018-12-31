@@ -26,9 +26,9 @@ struct Mechanics
 
 	enum SimulationType
 	{
-		SIMULATION_TYPE_SLIPLESS,  // no slip ratio, no fake slip
-		SIMULATION_TYPE_FAKESLIP,  // no slip ratio, fake slip that limits power output to driven tires' load
-		SIMULATION_TYPE_PACEJKA_BASED  // slip ratio simulation, Pacejka friction, scheme based on suggestions from SAE950311 and Gregor Veble
+		SIMULATION_TYPE_SLIPLESS,  // no slip
+		SIMULATION_TYPE_WHEEL_LOAD_CAP,  // no slip but engine output is limited by the driven tires' weight load
+		SIMULATION_TYPE_PACEJKA_BASED  // longitudinal slip ratio simulation, Pacejka friction, scheme based on suggestions from SAE950311 and Gregor Veble
 	}
 	simulationType;
 

@@ -61,7 +61,7 @@ void OptionsMenuState::initialize()
 	menu->addEntry("Simulation mode: ");
 	menu->addEntry("Tachometer type: ");
 	menu->addEntry("Tachometer pointer type: ");
-	menu->addEntry("Use cached tachometer (if possible): ");
+	menu->addEntry("Use cached tachometer (experimental): ");
 	menu->addEntry("Back to main menu");
 
 	menuResolution = new Menu(Rectangle(), font, Color::GREY);
@@ -189,9 +189,9 @@ void OptionsMenuState::onMenuSelect()
 		switch(game.logic.getSimulationType())
 		{
 			default:
-			case Mechanics::SIMULATION_TYPE_SLIPLESS:	newType = Mechanics::SIMULATION_TYPE_FAKESLIP; break;
-			case Mechanics::SIMULATION_TYPE_FAKESLIP:	newType = Mechanics::SIMULATION_TYPE_PACEJKA_BASED; break;
-			case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	newType = Mechanics::SIMULATION_TYPE_SLIPLESS; break;
+			case Mechanics::SIMULATION_TYPE_SLIPLESS:       newType = Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP; break;
+			case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: newType = Mechanics::SIMULATION_TYPE_PACEJKA_BASED; break;
+			case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  newType = Mechanics::SIMULATION_TYPE_SLIPLESS; break;
 		}
 		game.logic.setSimulationType(newType);
 	}
@@ -227,12 +227,12 @@ void OptionsMenuState::updateLabels()
 	switch(game.logic.getSimulationType())
 	{
 		default:
-		case Mechanics::SIMULATION_TYPE_SLIPLESS:		strSimType = "Arcade (slipless)"; break;
-		case Mechanics::SIMULATION_TYPE_FAKESLIP:		strSimType = "Intermediate (wheel load-capped power)"; break;
-		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:	strSimType = "Advanced (slip ratio simulation)"; break;
+		case Mechanics::SIMULATION_TYPE_SLIPLESS:       strSimType = "slipless"; break;
+		case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: strSimType = "slipless with wheel-load-capped power"; break;
+		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  strSimType = "longitudinal-only slip (Pacejka)"; break;
 	}
 	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
-	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "gauge");
+	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "dial gauge");
 	setMenuItemValueText(MENU_ITEM_TACHOMETER_POINTER_TYPE, game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty()? "built-in" : "custom");
 	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
 }

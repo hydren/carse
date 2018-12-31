@@ -33,7 +33,7 @@ static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68
                    RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
-: simulationType(SIMULATION_TYPE_FAKESLIP), vehicleType(type), engine(eng),
+: simulationType(SIMULATION_TYPE_WHEEL_LOAD_CAP), vehicleType(type), engine(eng),
   automaticShiftingEnabled(), automaticShiftingLastTime(0),
   mass(1250), tireRadius(650), wheelCount(type == TYPE_CAR? 4 : type == TYPE_BIKE? 2 : 1),
   speed(), acceleration(),
@@ -183,7 +183,7 @@ float Mechanics::getDriveForce()
 	{
 		default:
 		case SIMULATION_TYPE_SLIPLESS:  	return getDriveForceBySimplifiedSchemeSlipless();
-		case SIMULATION_TYPE_FAKESLIP:		return getDriveForceBySimplifiedSchemeFakeSlip();
+		case SIMULATION_TYPE_WHEEL_LOAD_CAP:		return getDriveForceBySimplifiedSchemeFakeSlip();
 		case SIMULATION_TYPE_PACEJKA_BASED: return getDriveForceByPacejkaScheme();
 	}
 }

@@ -851,7 +851,7 @@ void Pseudo3DRaceState::update(float delta)
 			)
 		)
 		or
-		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_FAKESLIP
+		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP
 			and
 			(
 				// burnout based on capped drive force

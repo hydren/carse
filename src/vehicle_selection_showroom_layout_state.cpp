@@ -145,7 +145,7 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 
 	backButtonBounds.x = 0.01*dw;
 	backButtonBounds.y = 0.95*dh - menu->getFont().getHeight();
-	backButtonBounds.w = menu->getFont().getTextWidth(" Cancel ");
+	backButtonBounds.w = menu->getFont().getTextWidth(" Back ");
 	backButtonBounds.h = menu->getFont().getHeight();
 
 	selectButtonBounds.x = 0.85*dw;
@@ -239,7 +239,7 @@ void VehicleSelectionShowroomLayoutState::render()
 		nextVehicleButtonBounds.y, scaledToRect(imgArrow1, nextVehicleButtonBounds));
 
 	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu->bgColor);
-	menu->getFont().drawText(" Cancel ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
+	menu->getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
 	if(blinkCycle and backButtonBounds.contains(mousePos))
 		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu->bgColor);
 	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu->bgColor);

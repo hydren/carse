@@ -67,19 +67,27 @@ struct Pseudo3DCourse
 	unsigned drawDistance;
 	float cameraDepth;
 
+	struct Map
+	{
+		Spec spec;
+		fgeal::Rectangle bounds;
+		fgeal::Vector2D offset, scale;
+		fgeal::Color roadColor, segmentHighlightColor;
+		float segmentHighlightSize;
+		bool roadContrastColorEnabled;
+
+		Map(const Spec& spec);
+
+		void drawMap(unsigned highlightedSegment=0);
+	};
+
 	// mini map drawing parameters
-	fgeal::Color miniMapRoadColor, miniMapSegmentHighlightColor;
-	fgeal::Rectangle miniMapBounds;
-	fgeal::Vector2D miniMapOffset, miniMapScale;
-	float miniMapSegmentHightlightSize;
-	bool miniMapRoadContrastColorEnabled;
+	Map minimap;
 
 	Pseudo3DCourse();
 	Pseudo3DCourse(Spec spec);
 
 	void draw(int positionZ, int positionX);
-
-	void drawMap(unsigned highlightedSegment=0);
 
 	void clearDynamicData();
 

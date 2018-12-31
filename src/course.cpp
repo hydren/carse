@@ -24,14 +24,12 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
-  miniMapSegmentHightlightSize(0), miniMapRoadContrastColorEnabled()
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100), minimap(spec)
 {}
 
 Pseudo3DCourse::Pseudo3DCourse(Spec spec)
 : spec(spec), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
-  miniMapSegmentHightlightSize(0), miniMapRoadContrastColorEnabled()
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100), minimap(spec)
 {}
 
 //custom call to draw quad
@@ -150,75 +148,6 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	}
 }
 
-void Pseudo3DCourse::drawMap(unsigned highlightedSegment)
-{
-	Point p1 = miniMapOffset;
-	float angle = 0;
-
-	// if no scale set, set one automatically to fit minimap bounds
-	if(miniMapScale.isZero())
-	{
-		Point pmin = Point(), pmax = Point();
-		for(unsigned i = 0; i < spec.lines.size(); i++)
-		{
-			Point p2 = p1;
-			p2.x += spec.lines[i].curve;
-			p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
-			angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
-			rotatePoint(p2, p1, angle);
-			if(p2.x < pmin.x)
-				pmin.x = p2.x;
-			else if(p2.x > pmax.x)
-				pmax.x = p2.x;
-
-			if(p2.y < pmin.y)
-				pmin.y = p2.y;
-			else if(p2.y > pmax.y)
-				pmax.y = p2.y;
-
-			p1 = p2;
-		}
-
-		const float deltaX = pmax.x - pmin.x, deltaY = pmax.y - pmin.y,
-					scale = (deltaX > deltaY? 0.9f*miniMapBounds.w/deltaX :
-							 deltaY > deltaX? 0.9f*miniMapBounds.h/deltaY : 1.f);
-
-		miniMapScale.x = miniMapScale.y = scale;
-		miniMapOffset.x = -pmin.x + 0.5f*(miniMapBounds.w/scale - deltaX);
-		miniMapOffset.y = -pmin.y + 0.5f*(miniMapBounds.h/scale - deltaY);
-	}
-
-	const Color miniMapRoadColor2(255-miniMapRoadColor.r, 255-miniMapRoadColor.g, 255-miniMapRoadColor.b);
-	Point hightlightPoint = {-1, -1};
-	p1 = miniMapOffset; angle = 0;
-	for(unsigned i = 0; i < spec.lines.size(); i++)
-	{
-		Point p2 = p1;
-		p2.x += spec.lines[i].curve;
-		p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
-		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
-		rotatePoint(p2, p1, angle);
-
-		const Point sp1 = p1.entrywiseProduct(miniMapScale), sp2 = p2.entrywiseProduct(miniMapScale);
-
-		if(sp1.x > 0 and sp1.x < miniMapBounds.w and sp1.y > 0 and sp1.y < miniMapBounds.h and sp2.x > 0 and sp2.x < miniMapBounds.w and sp2.y > 0 and sp2.y < miniMapBounds.h)
-		{
-			Graphics::drawLine(miniMapBounds.x + sp1.x, miniMapBounds.y + sp1.y, miniMapBounds.x + sp2.x, miniMapBounds.y + sp2.y, (miniMapRoadContrastColorEnabled and (i % 2)? miniMapRoadColor : miniMapRoadColor2));
-
-			if(miniMapSegmentHightlightSize != 0 and i == highlightedSegment)
-			{
-				hightlightPoint.x = (sp1.x + sp2.x)/2;
-				hightlightPoint.y = (sp1.y + sp2.y)/2;
-			}
-		}
-
-		p1 = p2;
-	}
-
-	if(miniMapSegmentHightlightSize != 0 and hightlightPoint.x >= 0 and hightlightPoint.y >= 0)
-		Graphics::drawFilledCircle(miniMapBounds.x + hightlightPoint.x, miniMapBounds.y + hightlightPoint.y, miniMapSegmentHightlightSize, miniMapSegmentHighlightColor);
-}
-
 void Pseudo3DCourse::clearDynamicData()
 {
 	if(not sprites.empty())
@@ -252,6 +181,83 @@ void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 	const string specFilename = filename + ".properties", segmentsFilename = filename + ".csv";
 	this->saveProperties(specFilename, segmentsFilename);
 	this->saveSegments(segmentsFilename);
+}
+
+// #################### Pseudo3D Course Map methods #####################################################
+
+Pseudo3DCourse::Map::Map(const Spec& s)
+: spec(s), bounds(), offset(), scale(),
+  roadColor(), segmentHighlightColor(),
+  segmentHighlightSize(0), roadContrastColorEnabled()
+{}
+
+void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
+{
+	Point p1 = offset;
+	float angle = 0;
+
+	// if no scale set, set one automatically to fit minimap bounds
+	if(scale.isZero())
+	{
+		Point pmin = Point(), pmax = Point();
+		for(unsigned i = 0; i < spec.lines.size(); i++)
+		{
+			Point p2 = p1;
+			p2.x += spec.lines[i].curve;
+			p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
+			angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
+			rotatePoint(p2, p1, angle);
+			if(p2.x < pmin.x)
+				pmin.x = p2.x;
+			else if(p2.x > pmax.x)
+				pmax.x = p2.x;
+
+			if(p2.y < pmin.y)
+				pmin.y = p2.y;
+			else if(p2.y > pmax.y)
+				pmax.y = p2.y;
+
+			p1 = p2;
+		}
+
+		const float deltaX = pmax.x - pmin.x, deltaY = pmax.y - pmin.y,
+					newscale = (deltaX > deltaY? 0.9f*bounds.w/deltaX :
+							 deltaY > deltaX? 0.9f*bounds.h/deltaY : 1.f);
+
+		scale.x = scale.y = newscale;
+		offset.x = -pmin.x + 0.5f*(bounds.w/newscale - deltaX);
+		offset.y = -pmin.y + 0.5f*(bounds.h/newscale - deltaY);
+	}
+
+	const Color roadColor2(255-roadColor.r, 255-roadColor.g, 255-roadColor.b);
+	Point hightlightPoint = {-1, -1};
+	p1 = offset; angle = 0;
+	for(unsigned i = 0; i < spec.lines.size(); i++)
+	{
+		Point p2 = p1;
+		p2.x += spec.lines[i].curve;
+		p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
+		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
+		rotatePoint(p2, p1, angle);
+
+		const Point sp1 = p1.entrywiseProduct(scale), sp2 = p2.entrywiseProduct(scale);
+
+		if(sp1.x > 0 and sp1.x < bounds.w and sp1.y > 0 and sp1.y < bounds.h and sp2.x > 0 and sp2.x < bounds.w and sp2.y > 0 and sp2.y < bounds.h)
+		{
+			Graphics::drawLine(bounds.x + sp1.x, bounds.y + sp1.y, bounds.x + sp2.x, bounds.y + sp2.y, (roadContrastColorEnabled and (i % 2)? roadColor2 : roadColor));
+
+			if(segmentHighlightSize != 0 and i == highlightedSegment)
+			{
+				hightlightPoint.x = (sp1.x + sp2.x)/2;
+				hightlightPoint.y = (sp1.y + sp2.y)/2;
+			}
+		}
+
+		p1 = p2;
+	}
+
+	if(segmentHighlightSize != 0 and hightlightPoint.x >= 0 and hightlightPoint.y >= 0)
+		Graphics::drawFilledCircle(bounds.x + hightlightPoint.x, bounds.y + hightlightPoint.y, segmentHighlightSize, segmentHighlightColor);
 }
 
 // ========================================================================================================================

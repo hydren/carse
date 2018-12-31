@@ -358,14 +358,14 @@ void Pseudo3DRaceState::onEnter()
 	}
 	hudDialTachometer.compile();
 
-	course.miniMapRoadColor = Color::DARK_GREY;
-	course.miniMapBounds.x = hudTimerCurrentLap.bounds.x;
-	course.miniMapBounds.y = 0.4*display.getHeight();
-	course.miniMapBounds.w = 0.1*display.getWidth();
-	course.miniMapBounds.h = 0.1*display.getWidth();
-	course.miniMapScale = fgeal::Vector2D();
-	course.miniMapSegmentHighlightColor = Color::YELLOW;
-	course.miniMapSegmentHightlightSize = 0.005f*display.getWidth();
+	course.minimap.roadColor = Color::DARK_GREY;
+	course.minimap.bounds.x = hudTimerCurrentLap.bounds.x;
+	course.minimap.bounds.y = 0.4*display.getHeight();
+	course.minimap.bounds.w = 0.1*display.getWidth();
+	course.minimap.bounds.h = 0.1*display.getWidth();
+	course.minimap.scale = fgeal::Vector2D();
+	course.minimap.segmentHighlightColor = Color::YELLOW;
+	course.minimap.segmentHighlightSize = 0.005f*display.getWidth();
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{
@@ -431,9 +431,9 @@ void Pseudo3DRaceState::render()
 
 	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
-	fgeal::Graphics::drawFilledRoundedRectangle(course.miniMapBounds, 5, hudMiniMapBgColor);
+	fgeal::Graphics::drawFilledRoundedRectangle(course.minimap.bounds, 5, hudMiniMapBgColor);
 
-	course.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
+	course.minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord

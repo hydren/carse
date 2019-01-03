@@ -191,7 +191,7 @@ Pseudo3DCourse::Map::Map(const Spec& s)
   segmentHighlightSize(0), roadContrastColorEnabled()
 {}
 
-void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
+void Pseudo3DCourse::Map::compile()
 {
 	Point p1 = offset;
 	float angle = 0;
@@ -228,9 +228,8 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 		offset.x = -pmin.x + 0.5f*(bounds.w/newscale - deltaX);
 		offset.y = -pmin.y + 0.5f*(bounds.h/newscale - deltaY);
 	}
-
-	const Color roadColor2(255-roadColor.r, 255-roadColor.g, 255-roadColor.b);
-	Point hightlightPoint = {-1, -1};
+	cache.clear();
+	cache.resize(spec.lines.size()+1);
 	p1 = offset; angle = 0;
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{
@@ -239,25 +238,29 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 		p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
 		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
 		rotatePoint(p2, p1, angle);
-
-		const Point sp1 = p1.entrywiseProduct(scale), sp2 = p2.entrywiseProduct(scale);
-
-		if(sp1.x > 0 and sp1.x < bounds.w and sp1.y > 0 and sp1.y < bounds.h and sp2.x > 0 and sp2.x < bounds.w and sp2.y > 0 and sp2.y < bounds.h)
-		{
-			Graphics::drawLine(bounds.x + sp1.x, bounds.y + sp1.y, bounds.x + sp2.x, bounds.y + sp2.y, (roadContrastColorEnabled and (i % 2)? roadColor2 : roadColor));
-
-			if(segmentHighlightSize != 0 and i == highlightedSegment)
-			{
-				hightlightPoint.x = (sp1.x + sp2.x)/2;
-				hightlightPoint.y = (sp1.y + sp2.y)/2;
-			}
-		}
-
+		if(i == 0) cache[i] = p1.entrywiseProduct(scale);
+		cache[i+1] = p2.entrywiseProduct(scale);
 		p1 = p2;
 	}
+}
 
-	if(segmentHighlightSize != 0 and hightlightPoint.x >= 0 and hightlightPoint.y >= 0)
-		Graphics::drawFilledCircle(bounds.x + hightlightPoint.x, bounds.y + hightlightPoint.y, segmentHighlightSize, segmentHighlightColor);
+void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
+{
+	if(spec.lines.empty())
+		return;
+	else if(cache.empty())
+		this->compile();
+
+	const Color roadColor2(255-roadColor.r, 255-roadColor.g, 255-roadColor.b);
+	for(unsigned i = 1; i < cache.size(); i++)
+	{
+		const Point& p1 = cache[i-1], &p2 = cache[i];
+		if(p1.x > 0 and p1.x < bounds.w and p1.y > 0 and p1.y < bounds.h and p2.x > 0 and p2.x < bounds.w and p2.y > 0 and p2.y < bounds.h)
+			Graphics::drawLine(bounds.x + p1.x, bounds.y + p1.y, bounds.x + p2.x, bounds.y + p2.y, (roadContrastColorEnabled and (i % 2)? roadColor2 : roadColor));
+	}
+
+	if(segmentHighlightSize != 0 and highlightedSegment < cache.size())
+		Graphics::drawFilledCircle(bounds.x + cache[highlightedSegment].x, bounds.y + cache[highlightedSegment].y, segmentHighlightSize, segmentHighlightColor);
 }
 
 // ========================================================================================================================

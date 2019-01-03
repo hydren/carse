@@ -78,7 +78,12 @@ struct Pseudo3DCourse
 
 		Map(const Spec& spec);
 
+		void compile();
+
 		void drawMap(unsigned highlightedSegment=0);
+
+		private:
+		std::vector<fgeal::Point> cache;
 	};
 
 	// mini map drawing parameters

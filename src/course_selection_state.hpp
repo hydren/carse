@@ -24,13 +24,15 @@
 class CourseSelectionState extends public fgeal::Game::State
 {
 	CarseGame& game;
+
+	fgeal::Image* backgroundImage, *imgRandom, *imgCircuit, *imgCourseEditor;
+	fgeal::Font* fontMain, *fontInfo, *fontSmall;
+	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
+
+	Pseudo3DCourse::Map courseMapViewer;
 	fgeal::Menu menuCourse, menuSettings;
 	fgeal::Rectangle paneBounds, portraitBounds, portraitImgBounds, courseMapBounds,
 		courseEditorPortraitBounds, backButtonBounds, selectButtonBounds;
-
-	fgeal::Image* background, *imgRandom, *imgCircuit, *imgCourseEditor;
-	fgeal::Font* fontMain, *fontInfo, *fontSmall;
-	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	bool isLoadedCourseSelected, isDebugCourseSelected;
 

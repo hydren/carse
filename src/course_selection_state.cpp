@@ -27,6 +27,7 @@ using fgeal::Graphics;
 using fgeal::Sound;
 using fgeal::Rectangle;
 using fgeal::Point;
+using fgeal::Vector2D;
 using fgeal::Menu;
 using std::vector;
 using std::string;
@@ -44,16 +45,17 @@ int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID;
 
 CourseSelectionState::CourseSelectionState(CarseGame* game)
 : State(*game), game(*game),
-  background(null), imgRandom(null), imgCircuit(null), imgCourseEditor(null),
+  backgroundImage(null), imgRandom(null), imgCircuit(null), imgCourseEditor(null),
   fontMain(null), fontInfo(null), fontSmall(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  courseMapViewer(Pseudo3DCourse::Spec(0,0)),
   isLoadedCourseSelected(false), isDebugCourseSelected(false),
   focus(FOCUS_ON_COURSE_LIST_SELECTION)
 {}
 
 CourseSelectionState::~CourseSelectionState()
 {
-	if(background != null) delete background;
+	if(backgroundImage != null) delete backgroundImage;
 	if(imgRandom != null) delete imgRandom;
 	if(imgCircuit != null) delete imgCircuit;
 	if(imgCourseEditor != null) delete imgCourseEditor;
@@ -66,7 +68,7 @@ void CourseSelectionState::initialize()
 {
 	Display& display = game.getDisplay();
 
-	background = new Image("assets/course-menu-bg.jpg");
+	backgroundImage = new Image("assets/course-menu-bg.jpg");
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
 	imgCourseEditor = new Image("assets/portrait-course-editor.png");
@@ -89,6 +91,9 @@ void CourseSelectionState::initialize()
 	menuSettings.addEntry("Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType));
 	menuSettings.addEntry("Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal));
 	menuSettings.cursorWrapAroundEnabled = false;
+
+	courseMapViewer.roadColor = Color::WHITE;
+	courseMapViewer.segmentHighlightColor = Color::YELLOW;
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -157,6 +162,9 @@ void CourseSelectionState::onEnter()
 	menuSettings.bounds.w = 0.45*paneBounds.w;
 	menuSettings.bounds.h = menuCourse.bounds.h;
 
+	courseMapViewer.segmentHighlightSize = 0.005*dh;
+	courseMapViewer.bounds = courseMapBounds;
+
 	backButtonBounds.x = 0.03*dw;
 	backButtonBounds.y = 0.95*dh - fontInfo->getHeight();
 	backButtonBounds.w = fontInfo->getTextWidth(" Back ");
@@ -190,7 +198,7 @@ void CourseSelectionState::render()
 	display.clear();
 
 	// draw bg
-	background->drawScaled(0, 0, scaledToSize(background, display));
+	backgroundImage->drawScaled(0, 0, scaledToSize(backgroundImage, display));
 
 	// draw panel bg
 	fgeal::Graphics::drawFilledRectangle(paneBounds, Color(0,0,0, 96));
@@ -218,14 +226,7 @@ void CourseSelectionState::render()
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
 		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getHeight(), Color::WHITE);
-
-		// draw course map
-		Pseudo3DCourse::Map map(course);  //FIXME creating this at each cycle is costly, we need to cache this
-		map.roadColor = Color::WHITE;
-		map.segmentHighlightColor = Color::YELLOW;
-		map.segmentHighlightSize = 0.005*dh;
-		map.bounds = courseMapBounds;
-		map.drawMap(0);
+		courseMapViewer.drawMap(0);
 	}
 
 	// draw course editor portrait
@@ -253,7 +254,24 @@ void CourseSelectionState::render()
 	fontInfo->drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
 }
 
-void CourseSelectionState::update(float delta) {}
+void CourseSelectionState::update(float delta)
+{
+	if(menuCourse.getSelectedIndex() > 1)
+	{
+		if(courseMapViewer.spec.filename != game.logic.getCourseList()[menuCourse.getSelectedIndex() - 2].filename)
+		{
+			courseMapViewer.spec = game.logic.getCourseList()[menuCourse.getSelectedIndex() - 2];
+			courseMapViewer.scale.scale(0);
+			courseMapViewer.offset.scale(0);
+			courseMapViewer.compile();
+		}
+	}
+	else if(not courseMapViewer.spec.filename.empty())
+	{
+		courseMapViewer.spec = Pseudo3DCourse::Spec(0,0);
+		courseMapViewer.compile();
+	}
+}
 
 void CourseSelectionState::updateLapCount()
 {

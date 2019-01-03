@@ -22,6 +22,7 @@ using fgeal::Keyboard;
 using fgeal::Mouse;
 using fgeal::Rectangle;
 using fgeal::Point;
+using fgeal::Vector2D;
 using std::vector;
 using std::string;
 using futil::ends_with;
@@ -271,6 +272,8 @@ void CourseEditorState::update(float delta)
 {
 	if(focus == ON_EDITOR)
 	{
+		const Point oldOffset = course.minimap.offset;
+
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
 			course.minimap.offset.y -= 100*delta/course.minimap.scale.y;
 
@@ -283,7 +286,7 @@ void CourseEditorState::update(float delta)
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
 			course.minimap.offset.x += 100*delta/course.minimap.scale.x;
 
-		const fgeal::Vector2D oldScale = course.minimap.scale;
+		const Vector2D oldScale = course.minimap.scale;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
 			course.minimap.scale.y *= 1+delta;
@@ -309,12 +312,13 @@ void CourseEditorState::update(float delta)
 		if(course.minimap.scale.y != oldScale.y)
 			course.minimap.offset.y *= oldScale.y/course.minimap.scale.y;
 
-		if(course.minimap.scale != oldScale or scaleIndicatorText.empty())
+		if(course.minimap.scale != oldScale or scaleIndicatorText.empty() or course.minimap.offset != oldOffset)
 		{
 			scaleIndicatorText = "Zoom: x=";
 			scaleIndicatorText.append(futil::to_string(course.minimap.scale.x));
 			scaleIndicatorText.append(", y=");
 			scaleIndicatorText.append(futil::to_string(course.minimap.scale.y));
+			course.minimap.compile();
 		}
 	}
 }

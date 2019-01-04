@@ -358,7 +358,7 @@ void Pseudo3DRaceState::onEnter()
 	}
 	hudDialTachometer.compile();
 
-	course.minimap.roadColor = Color::DARK_GREY;
+	course.minimap.roadColor = Color::GREY;
 	course.minimap.bounds.x = hudTimerCurrentLap.bounds.x;
 	course.minimap.bounds.y = 0.4*display.getHeight();
 	course.minimap.bounds.w = 0.1*display.getWidth();
@@ -366,6 +366,7 @@ void Pseudo3DRaceState::onEnter()
 	course.minimap.scale = fgeal::Vector2D();
 	course.minimap.segmentHighlightColor = Color::YELLOW;
 	course.minimap.segmentHighlightSize = 0.005f*display.getWidth();
+	course.minimap.geometryOtimizationEnabled = true;
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{

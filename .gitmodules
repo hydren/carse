@@ -4,3 +4,6 @@
 [submodule "src_libs/fgeal"]
 	path = src_libs/fgeal
 	url = https://gitlab.com/hydren/fgeal.git
+[submodule "src_libs/psimpl"]
+	path = src_libs/psimpl
+	url = https://github.com/hydren/psimpl.git

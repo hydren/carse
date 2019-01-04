@@ -94,6 +94,7 @@ void CourseSelectionState::initialize()
 
 	courseMapViewer.roadColor = Color::WHITE;
 	courseMapViewer.segmentHighlightColor = Color::YELLOW;
+	courseMapViewer.geometryOtimizationEnabled = true;
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;

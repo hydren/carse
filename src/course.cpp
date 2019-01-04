@@ -9,6 +9,8 @@
 
 #include "futil/random.h"
 
+#include "psimpl/psimpl.h"
+
 #include <cstdlib>
 #include <cmath>
 
@@ -188,7 +190,8 @@ void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 Pseudo3DCourse::Map::Map(const Spec& s)
 : spec(s), bounds(), offset(), scale(),
   roadColor(), segmentHighlightColor(),
-  segmentHighlightSize(0), roadContrastColorEnabled()
+  segmentHighlightSize(0), roadContrastColorEnabled(),
+  geometryOtimizationEnabled()
 {}
 
 void Pseudo3DCourse::Map::compile()
@@ -228,8 +231,10 @@ void Pseudo3DCourse::Map::compile()
 		offset.x = -pmin.x + 0.5f*(bounds.w/newscale - deltaX);
 		offset.y = -pmin.y + 0.5f*(bounds.h/newscale - deltaY);
 	}
-	cache.clear();
-	cache.resize(spec.lines.size()+1);
+
+	vector<float> points;
+	points.resize(2*(spec.lines.size()+1));
+
 	p1 = offset; angle = 0;
 	for(unsigned i = 0; i < spec.lines.size(); i++)
 	{
@@ -238,10 +243,41 @@ void Pseudo3DCourse::Map::compile()
 		p2.y += sqrt(pow(spec.roadSegmentLength, 2) - pow(spec.lines[i].curve, 2));
 		angle += asin(spec.lines[i].curve/spec.roadSegmentLength);
 		rotatePoint(p2, p1, angle);
-		if(i == 0) cache[i] = p1.entrywiseProduct(scale);
-		cache[i+1] = p2.entrywiseProduct(scale);
+		if(i == 0)
+		{
+			points[0] = p1.x*scale.x;
+			points[1] = p1.y*scale.y;
+		}
+		points[2*(i+1)] =   p2.x*scale.x;
+		points[2*(i+1)+1] = p2.y*scale.y;
+
 		p1 = p2;
 	}
+
+	if(geometryOtimizationEnabled)
+	{
+		vector<float> simplifiedPoints;
+		psimpl::simplify_douglas_peucker <2> (points.begin (), points.end (), 1.5f, std::back_inserter(simplifiedPoints));
+
+		cache.clear();
+		cache.resize(simplifiedPoints.size()/2);
+		for(unsigned i = 0; i < cache.size(); i++)
+		{
+			cache[i].x = simplifiedPoints[2*i];
+			cache[i].y = simplifiedPoints[2*i+1];
+		}
+	}
+	else
+	{
+		cache.clear();
+		cache.resize(points.size()/2);
+		for(unsigned i = 0; i < cache.size(); i++)
+		{
+			cache[i].x = points[2*i];
+			cache[i].y = points[2*i+1];
+		}
+	}
+
 }
 
 void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
@@ -259,8 +295,8 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 			Graphics::drawLine(bounds.x + p1.x, bounds.y + p1.y, bounds.x + p2.x, bounds.y + p2.y, (roadContrastColorEnabled and (i % 2)? roadColor2 : roadColor));
 	}
 
-	if(segmentHighlightSize != 0 and highlightedSegment < cache.size())
-		Graphics::drawFilledCircle(bounds.x + cache[highlightedSegment].x, bounds.y + cache[highlightedSegment].y, segmentHighlightSize, segmentHighlightColor);
+//	if(segmentHighlightSize != 0 and highlightedSegment < cache.size())
+//		Graphics::drawFilledCircle(bounds.x + cache[highlightedSegment].x, bounds.y + cache[highlightedSegment].y, segmentHighlightSize, segmentHighlightColor);
 }
 
 // ========================================================================================================================

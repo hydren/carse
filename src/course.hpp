@@ -74,7 +74,7 @@ struct Pseudo3DCourse
 		fgeal::Vector2D offset, scale;
 		fgeal::Color roadColor, segmentHighlightColor;
 		float segmentHighlightSize;
-		bool roadContrastColorEnabled;
+		bool roadContrastColorEnabled, geometryOtimizationEnabled;
 
 		Map(const Spec& spec);
 

@@ -84,6 +84,7 @@ struct Pseudo3DCourse
 
 		private:
 		std::vector<fgeal::Point> cache;
+		std::vector<float> cacheLenght;
 	};
 
 	// mini map drawing parameters

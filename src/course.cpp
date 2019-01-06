@@ -254,22 +254,38 @@ void Pseudo3DCourse::Map::compile()
 		p1 = p2;
 	}
 
+	cache.clear();
+	cacheLenght.clear();
 	if(geometryOtimizationEnabled)
 	{
 		vector<float> simplifiedPoints;
 		psimpl::simplify_douglas_peucker <2> (points.begin (), points.end (), 1.5f, std::back_inserter(simplifiedPoints));
 
-		cache.clear();
 		cache.resize(simplifiedPoints.size()/2);
 		for(unsigned i = 0; i < cache.size(); i++)
 		{
 			cache[i].x = simplifiedPoints[2*i];
 			cache[i].y = simplifiedPoints[2*i+1];
 		}
+
+		cacheLenght.resize(cache.size());
+		cacheLenght[0] = 0;
+		for(unsigned i = 1, j = 1; i < cache.size(); i++)
+		{
+			cacheLenght[i] = cacheLenght[i-1];
+			for(unsigned k = j; k < spec.lines.size(); k++)
+			{
+				cacheLenght[i] += spec.roadSegmentLength;
+				if(points[2*k] == cache[i].x and points[2*k+1] == cache[i].y)
+				{
+					j = k+1;
+					break;
+				}
+			}
+		}
 	}
 	else
 	{
-		cache.clear();
 		cache.resize(points.size()/2);
 		for(unsigned i = 0; i < cache.size(); i++)
 		{
@@ -295,8 +311,19 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 			Graphics::drawLine(bounds.x + p1.x, bounds.y + p1.y, bounds.x + p2.x, bounds.y + p2.y, (roadContrastColorEnabled and (i % 2)? roadColor2 : roadColor));
 	}
 
-//	if(segmentHighlightSize != 0 and highlightedSegment < cache.size())
-//		Graphics::drawFilledCircle(bounds.x + cache[highlightedSegment].x, bounds.y + cache[highlightedSegment].y, segmentHighlightSize, segmentHighlightColor);
+	if(segmentHighlightSize != 0 and highlightedSegment < spec.lines.size())
+	{
+		const float overallPosition = highlightedSegment*spec.roadSegmentLength;
+		for(unsigned i = 0; i < cacheLenght.size(); i++)
+		{
+			if(cacheLenght[i] > overallPosition)
+			{
+				const float segDiff = (overallPosition - cacheLenght[i-1])/(cacheLenght[i] - cacheLenght[i-1]);
+				Graphics::drawFilledCircle(bounds.x + cache[i].x*segDiff + cache[i-1].x*(1-segDiff), bounds.y + cache[i].y*segDiff + cache[i-1].y*(1-segDiff), segmentHighlightSize, segmentHighlightColor);
+				break;
+			}
+		}
+	}
 }
 
 // ========================================================================================================================

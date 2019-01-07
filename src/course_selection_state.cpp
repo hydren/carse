@@ -45,10 +45,12 @@ int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID;
 
 CourseSelectionState::CourseSelectionState(CarseGame* game)
 : State(*game), game(*game),
-  backgroundImage(null), imgRandom(null), imgCircuit(null), imgCourseEditor(null),
-  fontMain(null), fontInfo(null), fontSmall(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  backgroundImage(null), fontMain(null),
+  imgRandom(null), imgCircuit(null), fontInfo(null),
   courseMapViewer(Pseudo3DCourse::Spec(0,0)),
+  imgCourseEditor(null), fontSmall(null),
+  imgMenuCourseArrow(null),
   isLoadedCourseSelected(false), isDebugCourseSelected(false),
   focus(FOCUS_ON_COURSE_LIST_SELECTION)
 {}
@@ -59,6 +61,7 @@ CourseSelectionState::~CourseSelectionState()
 	if(imgRandom != null) delete imgRandom;
 	if(imgCircuit != null) delete imgCircuit;
 	if(imgCourseEditor != null) delete imgCourseEditor;
+	if(imgMenuCourseArrow != null) delete imgMenuCourseArrow;
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(fontSmall != null) delete fontSmall;
@@ -72,6 +75,7 @@ void CourseSelectionState::initialize()
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
 	imgCourseEditor = new Image("assets/portrait-course-editor.png");
+	imgMenuCourseArrow = new Image("assets/arrow-blue.png");
 
 	fontMain = new Font(game.sharedResources->font2Path, dip(28));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(14));
@@ -158,6 +162,13 @@ void CourseSelectionState::onEnter()
 				break;
 			}
 
+	imgMenuCourseArrowUpBounds.w = imgMenuCourseArrowUpBounds.h = dh*0.04;
+	imgMenuCourseArrowUpBounds.x = menuCourse.bounds.x + menuCourse.bounds.w - imgMenuCourseArrowUpBounds.w;
+	imgMenuCourseArrowUpBounds.y = menuCourse.bounds.y;
+
+	imgMenuCourseArrowDownBounds = imgMenuCourseArrowUpBounds;
+	imgMenuCourseArrowDownBounds.y = menuCourse.bounds.y + menuCourse.bounds.h - imgMenuCourseArrowDownBounds.h;
+
 	menuSettings.bounds.x = menuCourse.bounds.x + menuCourse.bounds.w + dw*0.02;
 	menuSettings.bounds.y = menuCourse.bounds.y;
 	menuSettings.bounds.w = 0.45*paneBounds.w;
@@ -241,6 +252,15 @@ void CourseSelectionState::render()
 	menuCourse.draw();
 	if(focus == FOCUS_ON_COURSE_LIST_SELECTION and blinkCycle)
 		fgeal::Graphics::drawRectangle(getSpacedOutline(menuCourse.bounds, focusSpacing), Color::RED);
+
+	{
+		const Rectangle& bounds = imgMenuCourseArrowUpBounds;
+		imgMenuCourseArrow->drawScaledRotated(bounds.x+bounds.w/4, bounds.y+bounds.h*0.8, scaledToRect(imgMenuCourseArrow, bounds), M_PI/2, bounds.w/2, bounds.h/2);
+	}
+	{
+		const Rectangle& bounds = imgMenuCourseArrowDownBounds;
+		imgMenuCourseArrow->drawScaledRotated(bounds.x+bounds.w/4, bounds.y+bounds.h*0.8, scaledToRect(imgMenuCourseArrow, bounds), M_PI/2, bounds.w/2, bounds.h/2, Image::FLIP_HORIZONTAL);
+	}
 
 	// draw race settings
 	menuSettings.focusedEntryBgColor = (focus == FOCUS_ON_SETTINGS_LIST_SELECTION? Color::RED : Color::_TRANSPARENT);
@@ -432,6 +452,18 @@ void CourseSelectionState::onMouseButtonPressed(Mouse::Button button, int x, int
 	{
 		if(backButtonBounds.contains(x, y) or selectButtonBounds.contains(x, y))
 			onKeyPressed(Keyboard::KEY_ESCAPE);
+
+		else if(imgMenuCourseArrowUpBounds.contains(x, y))
+		{
+			sndCursorMove->play();
+			menuCourse.moveCursorUp();
+		}
+
+		else if(imgMenuCourseArrowDownBounds.contains(x, y))
+		{
+			sndCursorMove->play();
+			menuCourse.moveCursorDown();
+		}
 
 		else switch(focus)
 		{

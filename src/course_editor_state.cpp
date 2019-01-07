@@ -107,6 +107,9 @@ void CourseEditorState::onEnter()
 	generateButtonBounds.w *= 2;
 	generateButtonBounds.y += newButtonBounds.h + widgetSpacing;
 
+	exitButtonBounds = newButtonBounds;
+	exitButtonBounds.y = generateButtonBounds.y;
+	exitButtonBounds.x = generateButtonBounds.x + generateButtonBounds.w + widgetSpacing;
 
 	loadDialogBounds.x = 0.15*dw;
 	loadDialogBounds.y = 0.20*dh;
@@ -203,6 +206,9 @@ void CourseEditorState::render()
 	Graphics::drawFilledRectangle(generateButtonBounds, Color::GREY);
 	font->drawText("Generate", generateButtonBounds.x, generateButtonBounds.y, Color::BLACK);
 
+	Graphics::drawFilledRectangle(exitButtonBounds, Color::GREY);
+	font->drawText("Exit", exitButtonBounds.x, exitButtonBounds.y, Color::BLACK);
+
 	if(focus == ON_EDITOR and cos(20*fgeal::uptime()) > 0)
 	{
 		if(newButtonBounds.contains(Mouse::getPosition()))
@@ -213,6 +219,8 @@ void CourseEditorState::render()
 			Graphics::drawRectangle(getSpacedOutline(saveButtonBounds, widgetSpacing), Color::RED);
 		else if(generateButtonBounds.contains(Mouse::getPosition()))
 			Graphics::drawRectangle(getSpacedOutline(generateButtonBounds, widgetSpacing), Color::RED);
+		else if(exitButtonBounds.contains(Mouse::getPosition()))
+			Graphics::drawRectangle(getSpacedOutline(exitButtonBounds, widgetSpacing), Color::RED);
 	}
 
 	// load file dialog
@@ -391,6 +399,12 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
+		}
+
+		if(exitButtonBounds.contains(x, y))
+		{
+			sndCursorOut->play();
+			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
 		}
 	}
 	else if(focus == ON_FILE_MENU)

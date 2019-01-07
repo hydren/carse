@@ -180,7 +180,7 @@ void CourseEditorState::render()
 	const float widgetSpacing = 0.007*game.getDisplay().getHeight();
 
 	// Course preview
-	Graphics::drawFilledRectangle(courseViewBounds, Color::CYAN);
+	Graphics::drawFilledRectangle(courseViewBounds, course.spec.colorLandscape);
 	course.draw(0, 0.5*course.drawAreaWidth);
 	Graphics::drawRectangle(courseViewBounds, Color::AZURE);
 	game.sharedResources->fontDev.drawText("Preview", courseViewBounds.x, courseViewBounds.y, Color::RED);

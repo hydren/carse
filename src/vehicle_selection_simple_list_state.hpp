@@ -31,7 +31,7 @@ class VehicleSelectionSimpleListState extends public fgeal::Game::State
 	fgeal::Font* fontMain, *fontInfo, *fontSub;
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
-	fgeal::Menu* menu;
+	fgeal::Menu menu;
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
 	fgeal::Rectangle menuUpButtonBounds;
 	fgeal::Point menuUpButtonArrow1, menuUpButtonArrow2, menuUpButtonArrow3;

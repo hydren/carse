@@ -27,7 +27,7 @@ class MainMenuSimpleListState extends public fgeal::Game::State
 	std::string strVersion;
 
 	// the menu
-	fgeal::Menu* menu;
+	fgeal::Menu menu;
 	std::string strTitle;
 
 	// the background image

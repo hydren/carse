@@ -23,7 +23,7 @@ class OptionsMenuState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
-	fgeal::Menu* menu, *menuResolution;
+	fgeal::Menu menu, menuResolution;
 	fgeal::Font* fontTitle, *font;
 	fgeal::Image* background;
 

@@ -26,7 +26,7 @@ using std::string;
 int OptionsMenuState::getId() { return CarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(CarseGame* game)
-: State(*game), game(*game), menu(null), menuResolution(null),
+: State(*game), game(*game),
   fontTitle(null), font(null), background(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   isResolutionMenuActive(false)
@@ -36,8 +36,6 @@ OptionsMenuState::~OptionsMenuState()
 {
 	if(fontTitle != null) delete fontTitle;
 	if(font != null) delete font;
-	if(menu != null) delete menu;
-	if(menuResolution != null) delete menuResolution;
 	if(background != null) delete background;
 }
 
@@ -48,29 +46,34 @@ void OptionsMenuState::initialize()
 	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
 	font = new Font(game.sharedResources->font1Path, dip(16));
 
-	menu = new Menu(Rectangle(), font, Color(16, 24, 192));
-	menu->bgColor = Color(0, 0, 0, 128);
-	menu->entryColor = Color::WHITE;
-	menu->focusedEntryFontColor = Color::WHITE;
-	menu->borderColor = Color::_TRANSPARENT;
+	menu.setFont(font);
+	menu.titleColor = Color(16, 24, 192);
+	menu.bgColor = Color(0, 0, 0, 128);
+	menu.entryColor = Color::WHITE;
+	menu.focusedEntryBgColor = Color(16, 24, 192);
+	menu.focusedEntryFontColor = Color::WHITE;
+	menu.borderColor = Color::_TRANSPARENT;
 
 	// DO NOT USE ':' CHARACTER FOR OTHER MEANS OTHER THAN TO SEPARATE MENU ITEM AND ITEM VALUE
-	menu->addEntry("Resolution: ");
-	menu->addEntry("Fullscreen: ");
-	menu->addEntry("Unit: ");
-	menu->addEntry("Simulation mode: ");
-	menu->addEntry("Tachometer type: ");
-	menu->addEntry("Tachometer pointer type: ");
-	menu->addEntry("Use cached tachometer (experimental): ");
-	menu->addEntry("Back to main menu");
+	menu.addEntry("Resolution: ");
+	menu.addEntry("Fullscreen: ");
+	menu.addEntry("Unit: ");
+	menu.addEntry("Simulation mode: ");
+	menu.addEntry("Tachometer type: ");
+	menu.addEntry("Tachometer pointer type: ");
+	menu.addEntry("Use cached tachometer (experimental): ");
+	menu.addEntry("Back to main menu");
 
-	menuResolution = new Menu(Rectangle(), font, Color::GREY);
-	menuResolution->bgColor = Color(0, 0, 0, 96);
-	menuResolution->borderColor = Color::_TRANSPARENT;
+	menuResolution.setFont(font);
+	menuResolution.entryColor = Color::GREY;
+	menuResolution.focusedEntryBgColor = Color::GREY;
+	menuResolution.titleColor = Color::GREY;
+	menuResolution.bgColor = Color(0, 0, 0, 96);
+	menuResolution.borderColor = Color::_TRANSPARENT;
 	for(unsigned i = 0; i < Display::Mode::getList().size(); i++)
 	{
 		Display::Mode resolution = Display::Mode::getList()[i];
-		menuResolution->addEntry(futil::to_string(resolution.width)+"x"+futil::to_string(resolution.height)
+		menuResolution.addEntry(futil::to_string(resolution.width)+"x"+futil::to_string(resolution.height)
 			+ " ("+futil::to_string(resolution.aspectRatio.first)+":"+futil::to_string(resolution.aspectRatio.second)+")"
 			+ (resolution.description.empty()? "" : " ("+resolution.description+")"));
 	}
@@ -98,23 +101,23 @@ void OptionsMenuState::render()
 	display.clear();
 
 	// update menu bounds
-	menu->bounds.x = 0.0625f*display.getWidth();
-	menu->bounds.y = 0.25f*display.getHeight();
-	menu->bounds.w = display.getWidth() - 2*menu->bounds.x;
-	menu->bounds.h = 0.5f*display.getHeight();
+	menu.bounds.x = 0.0625f*display.getWidth();
+	menu.bounds.y = 0.25f*display.getHeight();
+	menu.bounds.w = display.getWidth() - 2*menu.bounds.x;
+	menu.bounds.h = 0.5f*display.getHeight();
 
-	menuResolution->bounds.x = 0.0625f*display.getWidth();
-	menuResolution->bounds.y = 0.25f*display.getHeight();
-	menuResolution->bounds.w = display.getWidth() - 2*menuResolution->bounds.x;
-	menuResolution->bounds.h = 0.5f*display.getHeight();
+	menuResolution.bounds.x = 0.0625f*display.getWidth();
+	menuResolution.bounds.y = 0.25f*display.getHeight();
+	menuResolution.bounds.w = display.getWidth() - 2*menuResolution.bounds.x;
+	menuResolution.bounds.h = 0.5f*display.getHeight();
 
 	background->drawScaled(0, 0, scaledToSize(background, display));
 	updateLabels();
 
 	if(isResolutionMenuActive)
-		menuResolution->draw();
+		menuResolution.draw();
 	else
-		menu->draw();
+		menu.draw();
 
 	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getHeight(), Color::WHITE);
 }
@@ -135,11 +138,11 @@ void OptionsMenuState::onKeyPressed(Keyboard::Key key)
 			break;
 		case Keyboard::KEY_ARROW_UP:
 			sndCursorMove->play();
-			menu->moveCursorUp();
+			menu.moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
 			sndCursorMove->play();
-			menu->moveCursorDown();
+			menu.moveCursorDown();
 			break;
 		default:
 			break;
@@ -150,13 +153,13 @@ void OptionsMenuState::onMouseButtonPressed(fgeal::Mouse::Button button, int x, 
 {
 	if(button == fgeal::Mouse::BUTTON_LEFT)
 	{
-		if(isResolutionMenuActive and menuResolution->bounds.contains(x, y))
+		if(isResolutionMenuActive and menuResolution.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			menuResolution->setSelectedIndexByLocation(x, y);
+			menuResolution.setSelectedIndexByLocation(x, y);
 			this->setResolution();
 		}
-		else if(menu->bounds.contains(x, y))
+		else if(menu.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->onMenuSelect();
@@ -167,23 +170,23 @@ void OptionsMenuState::onMouseButtonPressed(fgeal::Mouse::Button button, int x, 
 void OptionsMenuState::onMouseMoved(int oldx, int oldy, int x, int y)
 {
 	if(isResolutionMenuActive)
-		menuResolution->setSelectedIndexByLocation(x, y);
+		menuResolution.setSelectedIndexByLocation(x, y);
 	else
-		menu->setSelectedIndexByLocation(x, y);
+		menu.setSelectedIndexByLocation(x, y);
 }
 
 void OptionsMenuState::onMenuSelect()
 {
-	if(menu->getSelectedIndex() == MENU_ITEM_RESOLUTION)
+	if(menu.getSelectedIndex() == MENU_ITEM_RESOLUTION)
 		isResolutionMenuActive = true;
 
-	if(menu->getSelectedIndex() == MENU_ITEM_FULLSCREEN)
+	if(menu.getSelectedIndex() == MENU_ITEM_FULLSCREEN)
 		game.getDisplay().setFullscreen(!game.getDisplay().isFullscreen());
 
-	if(menu->getSelectedIndex() == MENU_ITEM_UNIT)
+	if(menu.getSelectedIndex() == MENU_ITEM_UNIT)
 		game.logic.getNextRaceSettings().isImperialUnit = !game.logic.getNextRaceSettings().isImperialUnit;
 
-	if(menu->getSelectedIndex() == MENU_ITEM_SIMULATION_TYPE)
+	if(menu.getSelectedIndex() == MENU_ITEM_SIMULATION_TYPE)
 	{
 		Mechanics::SimulationType newType;
 		switch(game.logic.getSimulationType())
@@ -196,10 +199,10 @@ void OptionsMenuState::onMenuSelect()
 		game.logic.setSimulationType(newType);
 	}
 
-	if(menu->getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
+	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
 		game.logic.getNextRaceSettings().useBarTachometer = !game.logic.getNextRaceSettings().useBarTachometer;
 
-	if(menu->getSelectedIndex() == MENU_ITEM_TACHOMETER_POINTER_TYPE)
+	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_POINTER_TYPE)
 	{
 		if(game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty())
 			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename = "assets/pointer.png";
@@ -207,14 +210,14 @@ void OptionsMenuState::onMenuSelect()
 			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.clear();
 	}
 
-	if(menu->getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
+	if(menu.getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
 		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
 
-	if(menu->getSelectedIndex() == menu->getEntries().size()-1)
+	if(menu.getSelectedIndex() == menu.getEntries().size()-1)
 		game.enterState(game.logic.currentMainMenuStateId);
 }
 
-#define setMenuItemValueText(item, valueTxt) menu->getEntryAt(item).label.erase(menu->getEntryAt(item).label.find(':')).append(": ").append(valueTxt)
+#define setMenuItemValueText(item, valueTxt) menu.getEntryAt(item).label.erase(menu.getEntryAt(item).label.find(':')).append(": ").append(valueTxt)
 
 void OptionsMenuState::updateLabels()
 {
@@ -251,10 +254,10 @@ void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 			break;
 		}
 		case Keyboard::KEY_ARROW_UP:
-			menuResolution->moveCursorUp();
+			menuResolution.moveCursorUp();
 			break;
 		case Keyboard::KEY_ARROW_DOWN:
-			menuResolution->moveCursorDown();
+			menuResolution.moveCursorDown();
 			break;
 		default:
 			break;
@@ -263,7 +266,7 @@ void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 
 void OptionsMenuState::setResolution()
 {
-	Display::Mode resolution = Display::Mode::getList()[menuResolution->getSelectedIndex()];
+	Display::Mode resolution = Display::Mode::getList()[menuResolution.getSelectedIndex()];
 	game.getDisplay().setSize(resolution.width, resolution.height);
 	updateFonts();
 	isResolutionMenuActive = false;
@@ -279,9 +282,6 @@ void OptionsMenuState::updateFonts()
 	if(fontTitle != null) delete fontTitle;
 	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
 
-	if(menuResolution != null)
-	{
-		menu->setFont(font);
-		menuResolution->setFont(font);
-	}
+	menu.setFont(font);
+	menuResolution.setFont(font);
 }

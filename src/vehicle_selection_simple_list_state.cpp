@@ -48,7 +48,7 @@ VehicleSelectionSimpleListState::VehicleSelectionSimpleListState(CarseGame* game
 : State(*game), game(*game),
   fontMain(null), fontInfo(null), fontSub(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
-  menu(null), lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0)
+  lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0)
 {}
 
 VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
@@ -56,7 +56,6 @@ VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(fontSub != null) delete fontSub;
-	if(menu != null) delete menu;
 
 	for(unsigned i = 0; i < previews.size(); i++)
 	{
@@ -69,7 +68,6 @@ VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
 void VehicleSelectionSimpleListState::initialize()
 {
 	Display& display = game.getDisplay();
-	Rectangle menuBounds = {(1/64.f)*display.getWidth(), (1/5.f)*display.getHeight(), (2/5.f)*display.getWidth(), (3/4.f)*display.getHeight()};
 	fontMain = new Font(game.sharedResources->font2Path, dip(28));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
 	fontSub = new Font(game.sharedResources->font3Path, dip(36));
@@ -79,17 +77,16 @@ void VehicleSelectionSimpleListState::initialize()
 	sndCursorIn   = &game.sharedResources->sndCursorIn;
 	sndCursorOut  = &game.sharedResources->sndCursorOut;
 
-	menu = new Menu(menuBounds);
-	menu->setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
-	menu->setColor(Color::WHITE);
-	menu->cursorWrapAroundEnabled = true;
-	menu->bgColor = Color::AZURE;
-	menu->focusedEntryFontColor = Color::NAVY;
+	menu.setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
+	menu.setColor(Color::WHITE);
+	menu.cursorWrapAroundEnabled = true;
+	menu.bgColor = Color::AZURE;
+	menu.focusedEntryFontColor = Color::NAVY;
 
 	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = game.logic.getVehicleList();
 	const_foreach(const Pseudo3DVehicle::Spec&, vspec, vector<Pseudo3DVehicle::Spec>, vehiclesSpecs)
 	{
-		menu->addEntry(vspec.name);
+		menu.addEntry(vspec.name);
 		previews.push_back(VehiclePreview());
 		previews.back().sprite = new Image(vspec.sprite.sheetFilename);
 		previews.back().altIndex = -1;
@@ -103,11 +100,16 @@ void VehicleSelectionSimpleListState::initialize()
 void VehicleSelectionSimpleListState::onEnter()
 {
 	const unsigned dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
-	lastEnterSelectedVehicleIndex = menu->getSelectedIndex();
-	lastEnterSelectedVehicleAltIndex = previews[menu->getSelectedIndex()].altIndex;
+	lastEnterSelectedVehicleIndex = menu.getSelectedIndex();
+	lastEnterSelectedVehicleAltIndex = previews[menu.getSelectedIndex()].altIndex;
 
-	menuUpButtonBounds.x = menu->bounds.x + menu->bounds.w + 0.005*dw;
-	menuUpButtonBounds.y = menu->bounds.y;
+	menu.bounds.x = (1/64.f)*dw;
+	menu.bounds.y = (1/5.f)*dh;
+	menu.bounds.w = (2/5.f)*dw;
+	menu.bounds.h = (3/4.f)*dh;
+
+	menuUpButtonBounds.x = menu.bounds.x + menu.bounds.w + 0.005*dw;
+	menuUpButtonBounds.y = menu.bounds.y;
 	menuUpButtonBounds.w = 0.025*dw;
 	menuUpButtonBounds.h = 0.025*dh;
 
@@ -119,7 +121,7 @@ void VehicleSelectionSimpleListState::onEnter()
 	menuUpButtonArrow3.y = menuUpButtonBounds.y + 0.0200*dh;
 
 	menuDownButtonBounds = menuUpButtonBounds;
-	menuDownButtonBounds.y = menu->bounds.y + menu->bounds.h - menuDownButtonBounds.h;
+	menuDownButtonBounds.y = menu.bounds.y + menu.bounds.h - menuDownButtonBounds.h;
 
 	menuDownButtonArrow1.x = menuDownButtonBounds.x + 0.0050*dw;
 	menuDownButtonArrow1.y = menuDownButtonBounds.y + 0.0050*dh;
@@ -140,13 +142,13 @@ void VehicleSelectionSimpleListState::onEnter()
 
 	backButtonBounds.x = 0.875*dw;
 	backButtonBounds.y = 0.025*dh;
-	backButtonBounds.w = menu->getFont().getTextWidth(" Back ");
-	backButtonBounds.h = menu->getFont().getHeight();
+	backButtonBounds.w = menu.getFont().getTextWidth(" Back ");
+	backButtonBounds.h = menu.getFont().getHeight();
 
-	selectButtonBounds.w = menu->getFont().getTextWidth(" Select ");
+	selectButtonBounds.w = menu.getFont().getTextWidth(" Select ");
 	selectButtonBounds.x = 0.70*dw - selectButtonBounds.w/2;
 	selectButtonBounds.y = 0.90*dh;
-	selectButtonBounds.h = menu->getFont().getHeight();
+	selectButtonBounds.h = menu.getFont().getHeight();
 }
 
 void VehicleSelectionSimpleListState::onLeave()
@@ -160,33 +162,33 @@ void VehicleSelectionSimpleListState::render()
 	const Point mousePos = Mouse::getPosition();
 	const bool blinkCycle = (cos(20*fgeal::uptime()) > 0);
 	fontSub->drawText("Choose your vehicle", 32, 25, Color::WHITE);
-	menu->draw();
+	menu.draw();
 
 	fgeal::Graphics::drawFilledRoundedRectangle(menuUpButtonBounds, 2, Color::AZURE);
-	fgeal::Graphics::drawFilledTriangle(menuUpButtonArrow1, menuUpButtonArrow2, menuUpButtonArrow3, menu->focusedEntryFontColor);
+	fgeal::Graphics::drawFilledTriangle(menuUpButtonArrow1, menuUpButtonArrow2, menuUpButtonArrow3, menu.focusedEntryFontColor);
 	if(blinkCycle and menuUpButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(menuUpButtonBounds, 2), 4, menu->bgColor);
+		Graphics::drawRoundedRectangle(getSpacedOutline(menuUpButtonBounds, 2), 4, menu.bgColor);
 	fgeal::Graphics::drawFilledRoundedRectangle(menuDownButtonBounds, 2, Color::AZURE);
-	fgeal::Graphics::drawFilledTriangle(menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3, menu->focusedEntryFontColor);
+	fgeal::Graphics::drawFilledTriangle(menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3, menu.focusedEntryFontColor);
 	if(blinkCycle and menuDownButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(menuDownButtonBounds, 2), 4, menu->bgColor);
+		Graphics::drawRoundedRectangle(getSpacedOutline(menuDownButtonBounds, 2), 4, menu.bgColor);
 
 	drawVehiclePreview(0.7*dw, 0.35*dh);
 	drawVehicleSpec((4/9.f)*dw, 0.6*dh);
 
 	const fgeal::Point skinArrowLeft1 =  { 0.52f*dw, 0.45f*dh }, skinArrowLeft2  = { 0.53f*dw, 0.44f*dh }, skinArrowLeft3 =  { 0.53f*dw, 0.46f*dh};
 	const fgeal::Point skinArrowRight1 = { 0.88f*dw, 0.45f*dh }, skinArrowRight2 = { 0.87f*dw, 0.44f*dh }, skinArrowRight3 = { 0.87f*dw, 0.46f*dh};
-	VehiclePreview& preview = previews[menu->getSelectedIndex()];
+	VehiclePreview& preview = previews[menu.getSelectedIndex()];
 	if(not preview.altSprites.empty())
 	{
-		fgeal::Graphics::drawFilledRoundedRectangle(appearanceLeftButtonBounds, 4, menu->bgColor);
-		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, menu->focusedEntryFontColor);
+		fgeal::Graphics::drawFilledRoundedRectangle(appearanceLeftButtonBounds, 4, menu.bgColor);
+		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, menu.focusedEntryFontColor);
 		if(blinkCycle and appearanceLeftButtonBounds.contains(mousePos))
-			Graphics::drawRoundedRectangle(getSpacedOutline(appearanceLeftButtonBounds, 4), 4, menu->bgColor);
-		fgeal::Graphics::drawFilledRoundedRectangle(appearanceRightButtonBounds, 4, menu->bgColor);
-		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, menu->focusedEntryFontColor);
+			Graphics::drawRoundedRectangle(getSpacedOutline(appearanceLeftButtonBounds, 4), 4, menu.bgColor);
+		fgeal::Graphics::drawFilledRoundedRectangle(appearanceRightButtonBounds, 4, menu.bgColor);
+		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, menu.focusedEntryFontColor);
 		if(blinkCycle and appearanceRightButtonBounds.contains(mousePos))
-			Graphics::drawRoundedRectangle(getSpacedOutline(appearanceRightButtonBounds, 4), 4, menu->bgColor);
+			Graphics::drawRoundedRectangle(getSpacedOutline(appearanceRightButtonBounds, 4), 4, menu.bgColor);
 		if(preview.altIndex != -1)
 		{
 			const string txt = "Alternate appearance" + (preview.altSprites.size() == 1? " " : " " + futil::to_string(preview.altIndex+1) + " ");
@@ -201,14 +203,14 @@ void VehicleSelectionSimpleListState::render()
 		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::DARK_GREY);
 	}
 
-	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu->bgColor);
-	menu->getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
+	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu.bgColor);
+	menu.getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
 	if(blinkCycle and backButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu->bgColor);
-	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu->bgColor);
-	menu->getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
+		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu.bgColor);
+	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu.bgColor);
+	menu.getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
 	if(blinkCycle and selectButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu->bgColor);
+		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu.bgColor);
 }
 
 void VehicleSelectionSimpleListState::update(float delta)
@@ -218,12 +220,12 @@ void VehicleSelectionSimpleListState::onMouseButtonPressed(Mouse::Button button,
 {
 	if(button == fgeal::Mouse::BUTTON_LEFT)
 	{
-		if(menu->bounds.contains(x, y))
+		if(menu.bounds.contains(x, y))
 		{
-			if(menu->getIndexAtLocation(x, y) != menu->getSelectedIndex())
+			if(menu.getIndexAtLocation(x, y) != menu.getSelectedIndex())
 			{
 				sndCursorMove->play();
-				menu->setSelectedIndexByLocation(x, y);
+				menu.setSelectedIndexByLocation(x, y);
 			}
 		}
 		else if(menuUpButtonBounds.contains(x, y))
@@ -252,8 +254,8 @@ void VehicleSelectionSimpleListState::onKeyPressed(Keyboard::Key key)
 	{
 		case Keyboard::KEY_ESCAPE:
 			sndCursorOut->play();
-			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
-			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
+			menu.setSelectedIndex(lastEnterSelectedVehicleIndex);
+			previews[menu.getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
 			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
@@ -262,12 +264,12 @@ void VehicleSelectionSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ARROW_UP:
-			menu->moveCursorUp();
+			menu.moveCursorUp();
 			game.sharedResources->sndCursorMove.play();
 			break;
 
 		case Keyboard::KEY_ARROW_DOWN:
-			menu->moveCursorDown();
+			menu.moveCursorDown();
 			game.sharedResources->sndCursorMove.play();
 			break;
 
@@ -291,7 +293,7 @@ void VehicleSelectionSimpleListState::onKeyPressed(Keyboard::Key key)
 
 void VehicleSelectionSimpleListState::menuSelectionAction()
 {
-	game.logic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
+	game.logic.setPickedVehicle(menu.getSelectedIndex(), previews[menu.getSelectedIndex()].altIndex);
 	game.enterState(game.logic.currentMainMenuStateId);
 }
 
@@ -299,7 +301,7 @@ void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float
 {
 	Display& display = game.getDisplay();
 	if(index < 0)
-		index = menu->getSelectedIndex();
+		index = menu.getSelectedIndex();
 
 	VehiclePreview& preview = previews[index];
 	const bool isNotAlternateSprite = (preview.altIndex == -1 or preview.altSprites.empty());
@@ -321,7 +323,7 @@ void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float
 void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, float index)
 {
 	// info sheet
-	const Pseudo3DVehicle::Spec& vehicle = game.logic.getVehicleList()[index != -1? index : menu->getSelectedIndex()];
+	const Pseudo3DVehicle::Spec& vehicle = game.logic.getVehicleList()[index != -1? index : menu.getSelectedIndex()];
 
 	const string txtVehicleType = string("Type: ") + (vehicle.type == Mechanics::TYPE_CAR? "Car" : vehicle.type == Mechanics::TYPE_BIKE? "Bike" : "Other");
 	fontInfo->drawText(txtVehicleType, infoX, infoY, Color::WHITE);
@@ -354,7 +356,7 @@ void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, 
 
 void VehicleSelectionSimpleListState::changeSprite(bool forward)
 {
-	VehiclePreview& preview = previews[menu->getSelectedIndex()];
+	VehiclePreview& preview = previews[menu.getSelectedIndex()];
 	if(not preview.altSprites.empty())
 	{
 		sndCursorMove->play();

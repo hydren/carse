@@ -43,7 +43,7 @@ int VehicleSelectionShowroomLayoutState::getId() { return CarseGame::VEHICLE_SEL
 
 VehicleSelectionShowroomLayoutState::VehicleSelectionShowroomLayoutState(CarseGame* game)
 : State(*game), game(*game),
-  fontMain(null), fontInfo(null), fontSub(null), menu(null),
+  fontMain(null), fontInfo(null), fontSub(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   imgBackground(null), imgArrow1(null), imgArrow2(null),
@@ -55,7 +55,6 @@ VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
 	if(fontMain != null) delete fontMain;
 	if(fontInfo != null) delete fontInfo;
 	if(fontSub != null) delete fontSub;
-	if(menu != null) delete menu;
 
 	for(unsigned i = 0; i < previews.size(); i++)
 	{
@@ -77,7 +76,6 @@ VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
 void VehicleSelectionShowroomLayoutState::initialize()
 {
 	Display& display = game.getDisplay();
-	Rectangle menuBounds = {0.0625f*display.getWidth(), 0.25f*display.getHeight(), 0.4f*display.getWidth(), 0.5f*display.getHeight()};
 	fontMain = new Font(game.sharedResources->font2Path, dip(28));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
 	fontSub = new Font(game.sharedResources->font3Path, dip(36));
@@ -87,17 +85,16 @@ void VehicleSelectionShowroomLayoutState::initialize()
 	sndCursorIn   = &game.sharedResources->sndCursorIn;
 	sndCursorOut  = &game.sharedResources->sndCursorOut;
 
-	menu = new Menu(menuBounds);
-	menu->setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
-	menu->setColor(Color::WHITE);
-	menu->cursorWrapAroundEnabled = true;
-	menu->bgColor = Color::AZURE;
-	menu->focusedEntryFontColor = Color::NAVY;
+	menu.setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
+	menu.setColor(Color::WHITE);
+	menu.cursorWrapAroundEnabled = true;
+	menu.bgColor = Color::AZURE;
+	menu.focusedEntryFontColor = Color::NAVY;
 
 	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = game.logic.getVehicleList();
 	const_foreach(const Pseudo3DVehicle::Spec&, vspec, vector<Pseudo3DVehicle::Spec>, vehiclesSpecs)
 	{
-		menu->addEntry(vspec.name);
+		menu.addEntry(vspec.name);
 		previews.push_back(VehiclePreview());
 		previews.back().sprite = new Image(vspec.sprite.sheetFilename);
 		previews.back().altIndex = -1;
@@ -115,8 +112,13 @@ void VehicleSelectionShowroomLayoutState::initialize()
 void VehicleSelectionShowroomLayoutState::onEnter()
 {
 	const unsigned dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
-	lastEnterSelectedVehicleIndex = menu->getSelectedIndex();
-	lastEnterSelectedVehicleAltIndex = previews[menu->getSelectedIndex()].altIndex;
+	lastEnterSelectedVehicleIndex = menu.getSelectedIndex();
+	lastEnterSelectedVehicleAltIndex = previews[menu.getSelectedIndex()].altIndex;
+
+	menu.bounds.x = 0.0625f*dw;
+	menu.bounds.y = 0.25f*dh;
+	menu.bounds.w = 0.4f*dw;
+	menu.bounds.h = 0.5f*dh;
 
 	previousVehicleButtonBounds.h = 0.05*dh;
 	previousVehicleButtonBounds.x = 0.01*dw;
@@ -144,14 +146,14 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	nextAppearanceButtonBounds.y = 0.580*dh;
 
 	backButtonBounds.x = 0.01*dw;
-	backButtonBounds.y = 0.95*dh - menu->getFont().getHeight();
-	backButtonBounds.w = menu->getFont().getTextWidth(" Back ");
-	backButtonBounds.h = menu->getFont().getHeight();
+	backButtonBounds.y = 0.95*dh - menu.getFont().getHeight();
+	backButtonBounds.w = menu.getFont().getTextWidth(" Back ");
+	backButtonBounds.h = menu.getFont().getHeight();
 
 	selectButtonBounds.x = 0.85*dw;
-	selectButtonBounds.y = 0.95*dh - menu->getFont().getHeight();
-	selectButtonBounds.w = menu->getFont().getTextWidth(" Select ");
-	selectButtonBounds.h = menu->getFont().getHeight();
+	selectButtonBounds.y = 0.95*dh - menu.getFont().getHeight();
+	selectButtonBounds.w = menu.getFont().getTextWidth(" Select ");
+	selectButtonBounds.h = menu.getFont().getHeight();
 }
 
 void VehicleSelectionShowroomLayoutState::onLeave()
@@ -165,7 +167,7 @@ void VehicleSelectionShowroomLayoutState::render()
 	const Point mousePos = Mouse::getPosition();
 	const bool blinkCycle = (cos(20*fgeal::uptime()) > 0);
 	const vector<Pseudo3DVehicle::Spec>& vehicles = game.logic.getVehicleList();
-	const unsigned index = isSelectionTransitioning? previousIndex : menu->getSelectedIndex();
+	const unsigned index = isSelectionTransitioning? previousIndex : menu.getSelectedIndex();
 	const Pseudo3DVehicle::Spec& vehicle = vehicles[index];
 
 	// transition effects
@@ -180,14 +182,14 @@ void VehicleSelectionShowroomLayoutState::render()
 	// draw previous vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 1))
 	{
-		const unsigned i = index == 0? menu->getEntries().size()-1 : index-1;
+		const unsigned i = index == 0? menu.getEntries().size()-1 : index-1;
 		drawVehiclePreview((0.2-doff)*dw, (0.5-doffp)*dh, 1.05-0.05*fabs(trans), i, trans < -0.5? 0 : -1);
 	}
 
 	// draw next vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 0))
 	{
-		const unsigned i = index == menu->getEntries().size()-1? 0 : index+1;
+		const unsigned i = index == menu.getEntries().size()-1? 0 : index+1;
 		drawVehiclePreview((0.8-doff)*dw, (0.5-doffn)*dh, 1.05-0.05*fabs(trans), i, trans > 0.5? 0 : +1);
 	}
 
@@ -212,7 +214,7 @@ void VehicleSelectionShowroomLayoutState::render()
 	fgeal::Graphics::drawFilledRectangle(0, infoY - 0.1*fontSub->getHeight(), dw, 0.25*dh, Color::NAVY);
 	drawVehicleSpec(infoX,  infoY);
 
-	VehiclePreview& preview = previews[menu->getSelectedIndex()];
+	VehiclePreview& preview = previews[menu.getSelectedIndex()];
 	const float arrowOffset = cos(10*fgeal::uptime()) > 0? 0 : std::max(0.005f*dh, 1.0f);
 	const fgeal::Point skinArrowUp1 = { 0.5f*dw, 0.295f*dh - arrowOffset },
 					   skinArrowUp2 = { 0.485f*dw, 0.305f*dh - arrowOffset },
@@ -238,21 +240,21 @@ void VehicleSelectionShowroomLayoutState::render()
 	imgArrow1->drawScaled(nextVehicleButtonBounds.x + (blinkCycle and nextVehicleButtonBounds.contains(mousePos)? 2 : 0),
 		nextVehicleButtonBounds.y, scaledToRect(imgArrow1, nextVehicleButtonBounds));
 
-	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu->bgColor);
-	menu->getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
+	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu.bgColor);
+	menu.getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
 	if(blinkCycle and backButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu->bgColor);
-	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu->bgColor);
-	menu->getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
+		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu.bgColor);
+	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu.bgColor);
+	menu.getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
 	if(blinkCycle and selectButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu->bgColor);
+		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu.bgColor);
 }
 
 void VehicleSelectionShowroomLayoutState::update(float delta)
 {
 	if(isSelectionTransitioning)
 	{
-		selectionTransitionProgress += 6*(((int) menu->getSelectedIndex()) - previousIndex) * delta;
+		selectionTransitionProgress += 6*(((int) menu.getSelectedIndex()) - previousIndex) * delta;
 
 		if(fabs(selectionTransitionProgress) > 0.99)
 		{
@@ -268,8 +270,8 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 	{
 		case Keyboard::KEY_ESCAPE:
 			sndCursorOut->play();
-			menu->setSelectedIndex(lastEnterSelectedVehicleIndex);
-			previews[menu->getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
+			menu.setSelectedIndex(lastEnterSelectedVehicleIndex);
+			previews[menu.getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
 			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
@@ -291,10 +293,10 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 			if(not isSelectionTransitioning)
 			{
 				isSelectionTransitioning = true;
-				previousIndex = menu->getSelectedIndex();
+				previousIndex = menu.getSelectedIndex();
 				selectionTransitionProgress = 0;
 
-				menu->moveCursorUp();
+				menu.moveCursorUp();
 				game.sharedResources->sndCursorMove.play();
 			}
 			break;
@@ -303,10 +305,10 @@ void VehicleSelectionShowroomLayoutState::onKeyPressed(Keyboard::Key key)
 			if(not isSelectionTransitioning)
 			{
 				isSelectionTransitioning = true;
-				previousIndex = menu->getSelectedIndex();
+				previousIndex = menu.getSelectedIndex();
 				selectionTransitionProgress = 0;
 
-				menu->moveCursorDown();
+				menu.moveCursorDown();
 				game.sharedResources->sndCursorMove.play();
 			}
 			break;
@@ -347,7 +349,7 @@ void VehicleSelectionShowroomLayoutState::onMouseButtonPressed(Mouse::Button but
 
 void VehicleSelectionShowroomLayoutState::menuSelectionAction()
 {
-	game.logic.setPickedVehicle(menu->getSelectedIndex(), previews[menu->getSelectedIndex()].altIndex);
+	game.logic.setPickedVehicle(menu.getSelectedIndex(), previews[menu.getSelectedIndex()].altIndex);
 	game.enterState(game.logic.currentMainMenuStateId);
 }
 
@@ -355,7 +357,7 @@ void VehicleSelectionShowroomLayoutState::drawVehiclePreview(float x, float y, f
 {
 	Display& display = game.getDisplay();
 	if(index < 0)
-		index = menu->getSelectedIndex();
+		index = menu.getSelectedIndex();
 
 	VehiclePreview& preview = previews[index];
 	const bool isNotAlternateSprite = (preview.altIndex == -1 or preview.altSprites.empty());
@@ -377,7 +379,7 @@ void VehicleSelectionShowroomLayoutState::drawVehiclePreview(float x, float y, f
 void VehicleSelectionShowroomLayoutState::drawVehicleSpec(float infoX, float infoY, float index)
 {
 	// info sheet
-	const Pseudo3DVehicle::Spec& vehicle = game.logic.getVehicleList()[index != -1? index : menu->getSelectedIndex()];
+	const Pseudo3DVehicle::Spec& vehicle = game.logic.getVehicleList()[index != -1? index : menu.getSelectedIndex()];
 
 	const string txtVehicleType = string("Type: ") + (vehicle.type == Mechanics::TYPE_CAR? "Car" : vehicle.type == Mechanics::TYPE_BIKE? "Bike" : "Other");
 	fontInfo->drawText(txtVehicleType, infoX, infoY, Color::WHITE);
@@ -410,7 +412,7 @@ void VehicleSelectionShowroomLayoutState::drawVehicleSpec(float infoX, float inf
 
 void VehicleSelectionShowroomLayoutState::changeSprite(bool forward)
 {
-	VehiclePreview& preview = previews[menu->getSelectedIndex()];
+	VehiclePreview& preview = previews[menu.getSelectedIndex()];
 	if(not preview.altSprites.empty())
 	{
 		sndCursorMove->play();

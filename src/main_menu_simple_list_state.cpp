@@ -21,14 +21,13 @@ using fgeal::Mouse;
 int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 
 MainMenuSimpleListState::MainMenuSimpleListState(CarseGame* game)
-: State(*game), game(*game), menu(null),
+: State(*game), game(*game),
   imgBackground(null), fntTitle(null), fntDev(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
 
 MainMenuSimpleListState::~MainMenuSimpleListState()
 {
-	if(menu != null) delete menu;
 	if(imgBackground != null) delete imgBackground;
 	if(fntTitle != null) delete fntTitle;
 }
@@ -36,16 +35,15 @@ MainMenuSimpleListState::~MainMenuSimpleListState()
 void MainMenuSimpleListState::initialize()
 {
 	Display& display = game.getDisplay();
-	menu = new Menu();
-	menu->setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
-	menu->setColor(Color::WHITE);
-	menu->bgColor = Color::AZURE;
-	menu->focusedEntryFontColor = Color::NAVY;
-	menu->addEntry("Start race");
-	menu->addEntry("Vehicle selection");
-	menu->addEntry("Course selection");
-	menu->addEntry("Options");
-	menu->addEntry("Exit");
+	menu.setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
+	menu.setColor(Color::WHITE);
+	menu.bgColor = Color::AZURE;
+	menu.focusedEntryFontColor = Color::NAVY;
+	menu.addEntry("Start race");
+	menu.addEntry("Vehicle selection");
+	menu.addEntry("Course selection");
+	menu.addEntry("Options");
+	menu.addEntry("Exit");
 
 	imgBackground = new Image("assets/options-bg.jpg");
 
@@ -64,11 +62,11 @@ void MainMenuSimpleListState::initialize()
 void MainMenuSimpleListState::onEnter()
 {
 	Display& display = game.getDisplay();
-	menu->setSelectedIndex(0);
-	menu->bounds.x = 0.25f * display.getWidth();
-	menu->bounds.y = 0.25f * display.getHeight();
-	menu->bounds.w = 0.50f * display.getWidth();
-	menu->bounds.h = 0.50f * display.getHeight();
+	menu.setSelectedIndex(0);
+	menu.bounds.x = 0.25f * display.getWidth();
+	menu.bounds.y = 0.25f * display.getHeight();
+	menu.bounds.w = 0.50f * display.getWidth();
+	menu.bounds.h = 0.50f * display.getHeight();
 }
 
 void MainMenuSimpleListState::onLeave()
@@ -80,7 +78,7 @@ void MainMenuSimpleListState::render()
 	display.clear();
 	imgBackground->drawScaled(0, 0, scaledToSize(imgBackground, display));
 	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.05*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
-	menu->draw();
+	menu.draw();
 	fntDev->drawText(strVersion, 4, 4, Color::CREAM);
 }
 
@@ -97,7 +95,7 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 
 		case Keyboard::KEY_ENTER:
 			sndCursorIn->play();
-			switch(menu->getSelectedIndex())
+			switch(menu.getSelectedIndex())
 			{
 				case MENU_ITEM_RACE:     game.enterState(CarseGame::RACE_STATE_ID); break;
 				case MENU_ITEM_VEHICLE:  game.enterState(game.logic.currentVehicleSelectionStateId); break;
@@ -109,12 +107,12 @@ void MainMenuSimpleListState::onKeyPressed(Keyboard::Key key)
 			break;
 
 		case Keyboard::KEY_ARROW_UP:
-			menu->moveCursorUp();
+			menu.moveCursorUp();
 			sndCursorMove->play();
 			break;
 
 		case Keyboard::KEY_ARROW_DOWN:
-			menu->moveCursorDown();
+			menu.moveCursorDown();
 			sndCursorMove->play();
 			break;
 
@@ -131,9 +129,9 @@ void MainMenuSimpleListState::onMouseButtonPressed(Mouse::Button button, int x, 
 {
 	if(button == fgeal::Mouse::BUTTON_LEFT)
 	{
-		if(menu->bounds.contains(x, y))
+		if(menu.bounds.contains(x, y))
 		{
-			if(menu->getIndexAtLocation(x, y) == menu->getSelectedIndex())
+			if(menu.getIndexAtLocation(x, y) == menu.getSelectedIndex())
 			{
 				sndCursorIn->play();
 				this->onKeyPressed(Keyboard::KEY_ENTER);
@@ -141,7 +139,7 @@ void MainMenuSimpleListState::onMouseButtonPressed(Mouse::Button button, int x, 
 			else
 			{
 				sndCursorMove->play();
-				menu->setSelectedIndexByLocation(x, y);
+				menu.setSelectedIndexByLocation(x, y);
 			}
 		}
 	}

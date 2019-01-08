@@ -43,7 +43,7 @@ int VehicleSelectionShowroomLayoutState::getId() { return CarseGame::VEHICLE_SEL
 
 VehicleSelectionShowroomLayoutState::VehicleSelectionShowroomLayoutState(CarseGame* game)
 : State(*game), game(*game),
-  fontMain(null), fontInfo(null), fontSub(null),
+  fontTitle(null), fontSubtitle(null), fontInfo(null), fontGui(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   imgBackground(null), imgArrow1(null), imgArrow2(null),
@@ -52,9 +52,10 @@ VehicleSelectionShowroomLayoutState::VehicleSelectionShowroomLayoutState(CarseGa
 
 VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
 {
-	if(fontMain != null) delete fontMain;
+	if(fontTitle != null) delete fontTitle;
+	if(fontSubtitle != null) delete fontSubtitle;
 	if(fontInfo != null) delete fontInfo;
-	if(fontSub != null) delete fontSub;
+	if(fontGui != null) delete fontGui;
 
 	for(unsigned i = 0; i < previews.size(); i++)
 	{
@@ -76,20 +77,17 @@ VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
 void VehicleSelectionShowroomLayoutState::initialize()
 {
 	Display& display = game.getDisplay();
-	fontMain = new Font(game.sharedResources->font2Path, dip(28));
+	fontTitle = new Font(game.sharedResources->font2Path, dip(28));
+	fontSubtitle = new Font(game.sharedResources->font3Path, dip(36));
 	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
-	fontSub = new Font(game.sharedResources->font3Path, dip(36));
+	fontGui = new Font(game.sharedResources->font1Path, dip(18));
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
 	sndCursorIn   = &game.sharedResources->sndCursorIn;
 	sndCursorOut  = &game.sharedResources->sndCursorOut;
 
-	menu.setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
-	menu.setColor(Color::WHITE);
 	menu.cursorWrapAroundEnabled = true;
-	menu.bgColor = Color::AZURE;
-	menu.focusedEntryFontColor = Color::NAVY;
 
 	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = game.logic.getVehicleList();
 	const_foreach(const Pseudo3DVehicle::Spec&, vspec, vector<Pseudo3DVehicle::Spec>, vehiclesSpecs)
@@ -115,11 +113,6 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	lastEnterSelectedVehicleIndex = menu.getSelectedIndex();
 	lastEnterSelectedVehicleAltIndex = previews[menu.getSelectedIndex()].altIndex;
 
-	menu.bounds.x = 0.0625f*dw;
-	menu.bounds.y = 0.25f*dh;
-	menu.bounds.w = 0.4f*dw;
-	menu.bounds.h = 0.5f*dh;
-
 	previousVehicleButtonBounds.h = 0.05*dh;
 	previousVehicleButtonBounds.x = 0.01*dw;
 	previousVehicleButtonBounds.y = 0.5*dh - previousVehicleButtonBounds.h/2;
@@ -127,15 +120,6 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 
 	nextVehicleButtonBounds = previousVehicleButtonBounds;
 	nextVehicleButtonBounds.x = 0.99*dw - nextVehicleButtonBounds.w;
-
-	/*
-	 * 	const fgeal::Point skinArrowUp1 = { 0.5f*dw, 0.295f*dh - arrowOffset },
-					   skinArrowUp2 = { 0.485f*dw, 0.305f*dh - arrowOffset },
-					   skinArrowUp3 = { 0.515f*dw, 0.305f*dh - arrowOffset},
-					   skinArrowDown1 = { 0.5f*dw, 0.590f*dh + arrowOffset },
-					   skinArrowDown2 = { 0.485f*dw, 0.580f*dh + arrowOffset },
-					   skinArrowDown3 = { 0.515f*dw, 0.580f*dh + arrowOffset};
-	 */
 
 	previousApperanceButtonBounds.x = 0.485*dw;
 	previousApperanceButtonBounds.y = 0.295*dh;
@@ -146,14 +130,14 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	nextAppearanceButtonBounds.y = 0.580*dh;
 
 	backButtonBounds.x = 0.01*dw;
-	backButtonBounds.y = 0.95*dh - menu.getFont().getHeight();
-	backButtonBounds.w = menu.getFont().getTextWidth(" Back ");
-	backButtonBounds.h = menu.getFont().getHeight();
+	backButtonBounds.y = 0.95*dh - fontGui->getHeight();
+	backButtonBounds.w = fontGui->getTextWidth(" Back ");
+	backButtonBounds.h = fontGui->getHeight();
 
 	selectButtonBounds.x = 0.85*dw;
-	selectButtonBounds.y = 0.95*dh - menu.getFont().getHeight();
-	selectButtonBounds.w = menu.getFont().getTextWidth(" Select ");
-	selectButtonBounds.h = menu.getFont().getHeight();
+	selectButtonBounds.y = 0.95*dh - fontGui->getHeight();
+	selectButtonBounds.w = fontGui->getTextWidth(" Select ");
+	selectButtonBounds.h = fontGui->getHeight();
 }
 
 void VehicleSelectionShowroomLayoutState::onLeave()
@@ -201,17 +185,17 @@ void VehicleSelectionShowroomLayoutState::render()
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
-	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontMain->getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontMain->getHeight(), Color::MAROON);
-	fontMain->drawText(lblChooseVehicle, 0.95*dw - fontMain->getTextWidth(lblChooseVehicle), 0.03*fontMain->getHeight(), Color::WHITE);
+	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontTitle->getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontTitle->getHeight(), Color::MAROON);
+	fontTitle->drawText(lblChooseVehicle, 0.95*dw - fontTitle->getTextWidth(lblChooseVehicle), 0.03*fontTitle->getHeight(), Color::WHITE);
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;
-	const unsigned nameWidth = fontSub->getTextWidth(name);
+	const unsigned nameWidth = fontSubtitle->getTextWidth(name);
 	const int nameOffset = nameWidth > dw? 0.6*sin(fgeal::uptime())*(nameWidth - dw) : 0;
 	const int infoX = 0.25*dw; int infoY = 0.75*dh;
 
-	fgeal::Graphics::drawFilledRectangle(0, infoY - 1.1*fontSub->getHeight(), dw, fontSub->getHeight(), Color::AZURE);
-	fontSub->drawText(name, 0.5*(dw-fontSub->getTextWidth(name)) + nameOffset, infoY - 1.1*fontSub->getHeight(), Color::WHITE);
-	fgeal::Graphics::drawFilledRectangle(0, infoY - 0.1*fontSub->getHeight(), dw, 0.25*dh, Color::NAVY);
+	fgeal::Graphics::drawFilledRectangle(0, infoY - 1.1*fontSubtitle->getHeight(), dw, fontSubtitle->getHeight(), Color::AZURE);
+	fontSubtitle->drawText(name, 0.5*(dw-fontSubtitle->getTextWidth(name)) + nameOffset, infoY - 1.1*fontSubtitle->getHeight(), Color::WHITE);
+	fgeal::Graphics::drawFilledRectangle(0, infoY - 0.1*fontSubtitle->getHeight(), dw, 0.25*dh, Color::NAVY);
 	drawVehicleSpec(infoX,  infoY);
 
 	VehiclePreview& preview = previews[menu.getSelectedIndex()];
@@ -240,14 +224,14 @@ void VehicleSelectionShowroomLayoutState::render()
 	imgArrow1->drawScaled(nextVehicleButtonBounds.x + (blinkCycle and nextVehicleButtonBounds.contains(mousePos)? 2 : 0),
 		nextVehicleButtonBounds.y, scaledToRect(imgArrow1, nextVehicleButtonBounds));
 
-	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu.bgColor);
-	menu.getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
+	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, Color::AZURE);
+	fontGui->drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
 	if(blinkCycle and backButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu.bgColor);
-	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu.bgColor);
-	menu.getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
+		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, Color::AZURE);
+	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, Color::AZURE);
+	fontGui->drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
 	if(blinkCycle and selectButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu.bgColor);
+		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, Color::AZURE);
 }
 
 void VehicleSelectionShowroomLayoutState::update(float delta)

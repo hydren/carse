@@ -28,7 +28,7 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
-	fgeal::Font* fontMain, *fontInfo, *fontSub;
+	fgeal::Font* fontTitle, *fontSubtitle, *fontInfo, *fontGui;
 	fgeal::Menu menu;
 
 	fgeal::Rectangle selectButtonBounds, backButtonBounds, nextVehicleButtonBounds, previousVehicleButtonBounds, nextAppearanceButtonBounds, previousApperanceButtonBounds;

@@ -1005,13 +1005,13 @@ bool Pseudo3DRaceState::isPlayerBraking()
 bool Pseudo3DRaceState::isPlayerSteeringLeft()
 {
 	return Keyboard::isKeyPressed(controlKeyTurnLeft)
-			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) < 0);
+			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) < -0.2);
 }
 
 bool Pseudo3DRaceState::isPlayerSteeringRight()
 {
 	return Keyboard::isKeyPressed(controlKeyTurnRight)
-			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0);
+			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0.2);
 }
 
 bool Pseudo3DRaceState::isRaceTypeLoop(RaceType t)

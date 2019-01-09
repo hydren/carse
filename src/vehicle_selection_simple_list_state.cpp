@@ -291,6 +291,32 @@ void VehicleSelectionSimpleListState::onKeyPressed(Keyboard::Key key)
 	}
 }
 
+void VehicleSelectionSimpleListState::onJoystickAxisMoved(unsigned joystick, unsigned axis, float oldValue, float newValue)
+{
+	if(axis == 0)
+	{
+		if(newValue > 0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_RIGHT);
+		if(newValue < -0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_LEFT);
+	}
+	if(axis == 1)
+	{
+		if(newValue > 0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_DOWN);
+		if(newValue < -0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_UP);
+	}
+}
+
+void VehicleSelectionSimpleListState::onJoystickButtonPressed(unsigned joystick, unsigned button)
+{
+	if(button == 0)
+		this->onKeyPressed(Keyboard::KEY_ENTER);
+	if(button == 1)
+		this->onKeyPressed(Keyboard::KEY_ESCAPE);
+}
+
 void VehicleSelectionSimpleListState::menuSelectionAction()
 {
 	game.logic.setPickedVehicle(menu.getSelectedIndex(), previews[menu.getSelectedIndex()].altIndex);

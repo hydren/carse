@@ -66,6 +66,8 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 
 	virtual void onKeyPressed(fgeal::Keyboard::Key);
 	virtual void onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y);
+	virtual void onJoystickAxisMoved(unsigned, unsigned, float, float);
+	virtual void onJoystickButtonPressed(unsigned, unsigned);
 
 	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
 	void drawVehicleSpec(float x, float y, float index=-1);

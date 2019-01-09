@@ -144,3 +144,28 @@ void MainMenuSimpleListState::onMouseButtonPressed(Mouse::Button button, int x, 
 		}
 	}
 }
+
+
+void MainMenuSimpleListState::onJoystickAxisMoved(unsigned joystick, unsigned axis, float oldValue, float newValue)
+{
+	if(axis == 0)
+	{
+		if(newValue > 0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_RIGHT);
+		if(newValue < -0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_LEFT);
+	}
+	if(axis == 1)
+	{
+		if(newValue > 0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_DOWN);
+		if(newValue < -0.2)
+			this->onKeyPressed(Keyboard::KEY_ARROW_UP);
+	}
+}
+
+void MainMenuSimpleListState::onJoystickButtonPressed(unsigned joystick, unsigned button)
+{
+	if(button == 0)
+		this->onKeyPressed(Keyboard::KEY_ENTER);
+}

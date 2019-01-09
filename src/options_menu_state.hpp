@@ -60,6 +60,8 @@ class OptionsMenuState extends public fgeal::Game::State
 	virtual void onKeyPressed(fgeal::Keyboard::Key);
 	virtual void onMouseButtonPressed(fgeal::Mouse::Button button, int x, int y);
 	virtual void onMouseMoved(int oldx, int oldy, int x, int y);
+	virtual void onJoystickAxisMoved(unsigned, unsigned, float, float);
+	virtual void onJoystickButtonPressed(unsigned, unsigned);
 
 	private:
 	void onMenuSelect();

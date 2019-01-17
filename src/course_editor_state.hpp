@@ -37,30 +37,29 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Font* font;
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
-	/// the course being edited
+	// the course being edited
 	Pseudo3DCourse course;
 
-	/// the area being used to draw the course map
+	// the area being used to draw the course map
 	fgeal::Rectangle mapBounds;
 	fgeal::Point courseEditorTitlePosition;
 
-	/// the area being used to draw a course preview
+	// the area being used to draw a course preview
 	fgeal::Rectangle courseViewBounds;
 
 	// tools panel stuff
-	fgeal::Rectangle toolsPanelBounds, presetsPanelBounds,
-		newButtonBounds, loadButtonBounds, saveButtonBounds,
-		generateButtonBounds, exitButtonBounds;
+	fgeal::Rectangle toolsPanelBounds, presetsPanelBounds;
+	fgeal::Button newButton, loadButton, saveButton, generateButton, exitButton;
 
 	// load dialog
 	fgeal::Menu fileMenu;
-	fgeal::Rectangle loadDialogBounds,
-		loadDialogButtonSelectBounds, loadDialogButtonCancelBounds;
+	fgeal::Rectangle loadDialogBounds;
+	fgeal::Button loadDialogSelectButton, loadDialogCancelButton;
 
 	// save dialog
-	fgeal::Rectangle saveDialogBounds,
-		saveDialogSaveButtonBounds, saveDialogCancelButtonBounds;
+	fgeal::Rectangle saveDialogBounds;
 	fgeal::TextField saveDialogTextField;
+	fgeal::Button saveDialogSaveButton, saveDialogCancelButton;
 
 	// status bar
 	fgeal::Rectangle statusBarBounds;

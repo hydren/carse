@@ -21,6 +21,7 @@ using fgeal::Font;
 using fgeal::Keyboard;
 using fgeal::Mouse;
 using fgeal::Rectangle;
+using fgeal::Button;
 using fgeal::Point;
 using fgeal::Vector2D;
 using std::vector;
@@ -52,6 +53,38 @@ void CourseEditorState::initialize()
 	saveDialogTextField.bgColor.a = 127;
 	saveDialogTextField.textColor = Color::WHITE;
 	saveDialogTextField.borderColor = Color::_TRANSPARENT;
+
+//	newButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
+	newButton.bgColor = Color::GREY;
+	newButton.borderColor = Color::_TRANSPARENT;
+	newButton.highlightColor = Color::RED;
+	newButton.font = font;
+	newButton.label = "New";
+	newButton.textColor = Color::BLACK;
+
+	loadButton = newButton;
+	loadButton.label = "Load";
+
+	saveButton = newButton;
+	saveButton.label = "Save";
+
+	generateButton = newButton;
+	generateButton.label = "Generate";
+
+	exitButton = newButton;
+	exitButton.label = "Exit";
+
+	loadDialogSelectButton = newButton;
+	loadDialogSelectButton.bgColor = Color::LIGHT_GREY;
+	loadDialogSelectButton.label = "Select";
+
+	loadDialogCancelButton = loadDialogSelectButton;
+	loadDialogCancelButton.label = "Cancel";
+
+	saveDialogSaveButton = loadDialogSelectButton;
+	saveDialogSaveButton.label = "Save";
+
+	saveDialogCancelButton = loadDialogCancelButton;
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -92,24 +125,29 @@ void CourseEditorState::onEnter()
 	presetsPanelBounds.w -= 2*widgetSpacing;
 	presetsPanelBounds.h -= 4*widgetSpacing + 0.1*dh;
 
-	newButtonBounds.x = presetsPanelBounds.x;
-	newButtonBounds.y = presetsPanelBounds.y + presetsPanelBounds.h + widgetSpacing;
-	newButtonBounds.w = 0.08*dh;
-	newButtonBounds.h = 0.05*dh;
+	newButton.bounds.x = presetsPanelBounds.x;
+	newButton.bounds.y = presetsPanelBounds.y + presetsPanelBounds.h + widgetSpacing;
+	newButton.bounds.w = 0.08*dh;
+	newButton.bounds.h = 0.05*dh;
+	newButton.highlightSpacing = 0.007*dh;
 
-	loadButtonBounds = newButtonBounds;
-	loadButtonBounds.x += newButtonBounds.w + widgetSpacing;
+	loadButton.bounds = newButton.bounds;
+	loadButton.bounds.x += newButton.bounds.w + widgetSpacing;
+	loadButton.highlightSpacing = newButton.highlightSpacing;
 
-	saveButtonBounds = loadButtonBounds;
-	saveButtonBounds.x += loadButtonBounds.w + widgetSpacing;
+	saveButton.bounds = loadButton.bounds;
+	saveButton.bounds.x += loadButton.bounds.w + widgetSpacing;
+	saveButton.highlightSpacing = newButton.highlightSpacing;
 
-	generateButtonBounds = newButtonBounds;
-	generateButtonBounds.w *= 2;
-	generateButtonBounds.y += newButtonBounds.h + widgetSpacing;
+	generateButton.bounds = newButton.bounds;
+	generateButton.bounds.w *= 2;
+	generateButton.bounds.y += newButton.bounds.h + widgetSpacing;
+	generateButton.highlightSpacing = newButton.highlightSpacing;
 
-	exitButtonBounds = newButtonBounds;
-	exitButtonBounds.y = generateButtonBounds.y;
-	exitButtonBounds.x = generateButtonBounds.x + generateButtonBounds.w + widgetSpacing;
+	exitButton.bounds = newButton.bounds;
+	exitButton.bounds.y = generateButton.bounds.y;
+	exitButton.bounds.x = generateButton.bounds.x + generateButton.bounds.w + widgetSpacing;
+	exitButton.highlightSpacing = newButton.highlightSpacing;
 
 	loadDialogBounds.x = 0.15*dw;
 	loadDialogBounds.y = 0.20*dh;
@@ -121,14 +159,16 @@ void CourseEditorState::onEnter()
 	fileMenu.bounds.w = loadDialogBounds.w - widgetSpacing*2;
 	fileMenu.bounds.h = loadDialogBounds.h - widgetSpacing*2 - font->getHeight();
 
-	loadDialogButtonSelectBounds.w = 1.1*font->getTextWidth("Select");
-	loadDialogButtonSelectBounds.h = 1.1*font->getHeight();
-	loadDialogButtonSelectBounds.x = 0.5*(loadDialogBounds.x + loadDialogBounds.w - loadDialogButtonSelectBounds.w);
-	loadDialogButtonSelectBounds.y = loadDialogBounds.y + loadDialogBounds.h - 1.2*loadDialogButtonSelectBounds.h;
+	loadDialogSelectButton.bounds.w = 1.1*font->getTextWidth("Select");
+	loadDialogSelectButton.bounds.h = 1.1*font->getHeight();
+	loadDialogSelectButton.bounds.x = 0.5*(loadDialogBounds.x + loadDialogBounds.w - loadDialogSelectButton.bounds.w);
+	loadDialogSelectButton.bounds.y = loadDialogBounds.y + loadDialogBounds.h - 1.2*loadDialogSelectButton.bounds.h;
+	loadDialogSelectButton.highlightSpacing = newButton.highlightSpacing;
 
-	loadDialogButtonCancelBounds = loadDialogButtonSelectBounds;
-	loadDialogButtonSelectBounds.w = 1.1*font->getTextWidth("Cancel");
-	loadDialogButtonCancelBounds.x += loadDialogButtonSelectBounds.w + widgetSpacing;
+	loadDialogCancelButton.bounds = loadDialogSelectButton.bounds;
+	loadDialogSelectButton.bounds.w = 1.1*font->getTextWidth("Cancel");
+	loadDialogCancelButton.bounds.x += loadDialogSelectButton.bounds.w + widgetSpacing;
+	loadDialogCancelButton.highlightSpacing = newButton.highlightSpacing;
 
 	saveDialogBounds.w = 0.6*dw;
 	saveDialogBounds.h = 0.2*dh;
@@ -142,11 +182,13 @@ void CourseEditorState::onEnter()
 	saveDialogTextField.content.clear();
 	saveDialogTextField.caretPosition = 0;
 
-	saveDialogSaveButtonBounds = loadDialogButtonSelectBounds;
-	saveDialogSaveButtonBounds.y = saveDialogBounds.y + saveDialogBounds.h - saveDialogSaveButtonBounds.h - widgetSpacing;
+	saveDialogSaveButton.bounds = loadDialogSelectButton.bounds;
+	saveDialogSaveButton.bounds.y = saveDialogBounds.y + saveDialogBounds.h - saveDialogSaveButton.bounds.h - widgetSpacing;
+	saveDialogSaveButton.highlightSpacing = newButton.highlightSpacing;
 
-	saveDialogCancelButtonBounds = loadDialogButtonCancelBounds;
-	saveDialogCancelButtonBounds.y = saveDialogSaveButtonBounds.y;
+	saveDialogCancelButton.bounds = loadDialogCancelButton.bounds;
+	saveDialogCancelButton.bounds.y = saveDialogSaveButton.bounds.y;
+	saveDialogCancelButton.highlightSpacing = newButton.highlightSpacing;
 
 	statusBarBounds.x = 0;
 	statusBarBounds.y = 0.95*dh;
@@ -178,6 +220,8 @@ void CourseEditorState::onLeave()
 void CourseEditorState::render()
 {
 	const float widgetSpacing = 0.007*game.getDisplay().getHeight();
+	const bool blinkCycle = (cos(20*fgeal::uptime()) > 0);
+	const Point mousePosition = Mouse::getPosition();
 
 	// Course preview
 	Graphics::drawFilledRectangle(courseViewBounds, course.spec.colorLandscape);
@@ -194,34 +238,20 @@ void CourseEditorState::render()
 	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
 	Graphics::drawFilledRectangle(presetsPanelBounds, Color::BLACK);
 
-	Graphics::drawFilledRectangle(newButtonBounds, Color::GREY);
-	font->drawText("New", newButtonBounds.x, newButtonBounds.y, Color::BLACK);
+	bool hightlightedOption = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
+	newButton.draw(hightlightedOption);
 
-	Graphics::drawFilledRectangle(loadButtonBounds, Color::GREY);
-	font->drawText("Load", loadButtonBounds.x, loadButtonBounds.y, Color::BLACK);
+	hightlightedOption = blinkCycle and focus == ON_EDITOR and loadButton.bounds.contains(mousePosition);
+	loadButton.draw(hightlightedOption);
 
-	Graphics::drawFilledRectangle(saveButtonBounds, Color::GREY);
-	font->drawText("Save", saveButtonBounds.x, saveButtonBounds.y, Color::BLACK);
+	hightlightedOption = blinkCycle and focus == ON_EDITOR and saveButton.bounds.contains(mousePosition);
+	saveButton.draw(hightlightedOption);
 
-	Graphics::drawFilledRectangle(generateButtonBounds, Color::GREY);
-	font->drawText("Generate", generateButtonBounds.x, generateButtonBounds.y, Color::BLACK);
+	hightlightedOption = blinkCycle and focus == ON_EDITOR and generateButton.bounds.contains(mousePosition);
+	generateButton.draw(hightlightedOption);
 
-	Graphics::drawFilledRectangle(exitButtonBounds, Color::GREY);
-	font->drawText("Exit", exitButtonBounds.x, exitButtonBounds.y, Color::BLACK);
-
-	if(focus == ON_EDITOR and cos(20*fgeal::uptime()) > 0)
-	{
-		if(newButtonBounds.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(newButtonBounds, widgetSpacing), Color::RED);
-		else if(loadButtonBounds.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(loadButtonBounds, widgetSpacing), Color::RED);
-		else if(saveButtonBounds.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(saveButtonBounds, widgetSpacing), Color::RED);
-		else if(generateButtonBounds.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(generateButtonBounds, widgetSpacing), Color::RED);
-		else if(exitButtonBounds.contains(Mouse::getPosition()))
-			Graphics::drawRectangle(getSpacedOutline(exitButtonBounds, widgetSpacing), Color::RED);
-	}
+	hightlightedOption = blinkCycle and focus == ON_EDITOR and exitButton.bounds.contains(mousePosition);
+	exitButton.draw(hightlightedOption);
 
 	// load file dialog
 	if(focus == ON_FILE_MENU)
@@ -231,19 +261,11 @@ void CourseEditorState::render()
 
 		fileMenu.draw();
 
-		Graphics::drawFilledRectangle(loadDialogButtonSelectBounds, Color::LIGHT_GREY);
-		font->drawText("Select", loadDialogButtonSelectBounds.x, loadDialogButtonSelectBounds.y, Color::BLACK);
+		hightlightedOption = blinkCycle and loadDialogSelectButton.bounds.contains(mousePosition);
+		loadDialogSelectButton.draw(hightlightedOption);
 
-		Graphics::drawFilledRectangle(loadDialogButtonCancelBounds, Color::LIGHT_GREY);
-		font->drawText("Cancel", loadDialogButtonCancelBounds.x, loadDialogButtonCancelBounds.y, Color::BLACK);
-
-		if(cos(20*fgeal::uptime()) > 0)
-		{
-			if(loadDialogButtonSelectBounds.contains(Mouse::getPosition()))
-				Graphics::drawRectangle(getSpacedOutline(loadDialogButtonSelectBounds, widgetSpacing), Color::RED);
-			else if(loadDialogButtonCancelBounds.contains(Mouse::getPosition()))
-				Graphics::drawRectangle(getSpacedOutline(loadDialogButtonCancelBounds, widgetSpacing), Color::RED);
-		}
+		hightlightedOption = blinkCycle and loadDialogCancelButton.bounds.contains(mousePosition);
+		loadDialogCancelButton.draw(hightlightedOption);
 	}
 
 	// save file dialog
@@ -256,19 +278,11 @@ void CourseEditorState::render()
 
 		saveDialogTextField.draw();
 
-		Graphics::drawFilledRectangle(saveDialogSaveButtonBounds, Color::LIGHT_GREY);
-		font->drawText("Save", saveDialogSaveButtonBounds.x, saveDialogSaveButtonBounds.y, Color::BLACK);
+		hightlightedOption = blinkCycle and saveDialogSaveButton.bounds.contains(mousePosition);
+		saveDialogSaveButton.draw(hightlightedOption);
 
-		Graphics::drawFilledRectangle(saveDialogCancelButtonBounds, Color::LIGHT_GREY);
-		font->drawText("Cancel", saveDialogCancelButtonBounds.x, saveDialogCancelButtonBounds.y, Color::BLACK);
-
-		if(cos(20*fgeal::uptime()) > 0)
-		{
-			if(saveDialogSaveButtonBounds.contains(Mouse::getPosition()))
-				Graphics::drawRectangle(getSpacedOutline(saveDialogSaveButtonBounds, widgetSpacing), Color::RED);
-			else if(saveDialogCancelButtonBounds.contains(Mouse::getPosition()))
-				Graphics::drawRectangle(getSpacedOutline(saveDialogCancelButtonBounds, widgetSpacing), Color::RED);
-		}
+		hightlightedOption = blinkCycle and saveDialogCancelButton.bounds.contains(mousePosition);
+		saveDialogCancelButton.draw(hightlightedOption);
 	}
 
 	// status bar
@@ -377,31 +391,31 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
 	if(focus == ON_EDITOR)
 	{
-		if(newButtonBounds.contains(x, y))
+		if(newButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
 		}
 
-		if(loadButtonBounds.contains(x, y))
+		if(loadButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_FILE_MENU;
 		}
 
-		if(saveButtonBounds.contains(x, y))
+		if(saveButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_SAVE_DIALOG;
 		}
 
-		if(generateButtonBounds.contains(x, y))
+		if(generateButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
 		}
 
-		if(exitButtonBounds.contains(x, y))
+		if(exitButton.bounds.contains(x, y))
 		{
 			sndCursorOut->play();
 			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
@@ -415,13 +429,13 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			fileMenu.setSelectedIndexByLocation(x, y);
 		}
 
-		if(loadDialogButtonSelectBounds.contains(x, y))
+		if(loadDialogSelectButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->loadCourse(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 		}
 
-		if(loadDialogButtonCancelBounds.contains(x, y))
+		if(loadDialogCancelButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_EDITOR;
@@ -429,7 +443,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	}
 	else if(focus == ON_SAVE_DIALOG)
 	{
-		if(saveDialogSaveButtonBounds.contains(x, y))
+		if(saveDialogSaveButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			if(course.spec.name.empty())
@@ -444,7 +458,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			focus = ON_EDITOR;
 		}
 
-		if(saveDialogCancelButtonBounds.contains(x, y))
+		if(saveDialogCancelButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_EDITOR;

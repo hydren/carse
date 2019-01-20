@@ -26,6 +26,7 @@ using fgeal::Color;
 using fgeal::Image;
 using fgeal::Rectangle;
 using fgeal::Menu;
+using fgeal::Button;
 using fgeal::Mouse;
 using fgeal::Graphics;
 using fgeal::Point;
@@ -48,7 +49,8 @@ VehicleSelectionSimpleListState::VehicleSelectionSimpleListState(CarseGame* game
 : State(*game), game(*game),
   fontMain(null), fontInfo(null), fontSub(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
-  lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0)
+  lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
+  menuUpButton(), menuDownButton(), selectButton(), backButton(), appearanceLeftButton(), appearanceRightButton()
 {}
 
 VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
@@ -95,6 +97,26 @@ void VehicleSelectionSimpleListState::initialize()
 			const_foreach(const Pseudo3DVehicleAnimationSpec&, alternateSprite, vector<Pseudo3DVehicleAnimationSpec>, vspec.alternateSprites)
 				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
 	}
+
+	menuUpButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
+	menuUpButton.bgColor = Color::AZURE;
+	menuUpButton.highlightColor = menu.bgColor;
+	menuUpButton.highlightSpacing = 0.003*display.getHeight();
+
+	menuDownButton = menuUpButton;
+
+	appearanceLeftButton = menuUpButton;
+	appearanceLeftButton.highlightSpacing = 0.007*display.getHeight();
+	appearanceRightButton = appearanceLeftButton;
+
+	backButton = appearanceLeftButton;
+	backButton.bgColor = menu.bgColor;
+	backButton.font = &menu.getFont();
+	backButton.textColor = Color::WHITE;
+	backButton.label = " Back ";
+
+	selectButton = backButton;
+	selectButton.label = " Select ";
 }
 
 void VehicleSelectionSimpleListState::onEnter()
@@ -108,47 +130,47 @@ void VehicleSelectionSimpleListState::onEnter()
 	menu.bounds.w = (2/5.f)*dw;
 	menu.bounds.h = (3/4.f)*dh;
 
-	menuUpButtonBounds.x = menu.bounds.x + menu.bounds.w + 0.005*dw;
-	menuUpButtonBounds.y = menu.bounds.y;
-	menuUpButtonBounds.w = 0.025*dw;
-	menuUpButtonBounds.h = 0.025*dh;
+	menuUpButton.bounds.x = menu.bounds.x + menu.bounds.w + 0.005*dw;
+	menuUpButton.bounds.y = menu.bounds.y;
+	menuUpButton.bounds.w = 0.025*dw;
+	menuUpButton.bounds.h = 0.025*dh;
 
-	menuUpButtonArrow1.x = menuUpButtonBounds.x + 0.0050*dw;
-	menuUpButtonArrow1.y = menuUpButtonBounds.y + 0.0200*dh;
-	menuUpButtonArrow2.x = menuUpButtonBounds.x + 0.0125*dw;
-	menuUpButtonArrow2.y = menuUpButtonBounds.y + 0.0050*dh;
-	menuUpButtonArrow3.x = menuUpButtonBounds.x + 0.0200*dw;
-	menuUpButtonArrow3.y = menuUpButtonBounds.y + 0.0200*dh;
+	menuUpButtonArrow1.x = menuUpButton.bounds.x + 0.0050*dw;
+	menuUpButtonArrow1.y = menuUpButton.bounds.y + 0.0200*dh;
+	menuUpButtonArrow2.x = menuUpButton.bounds.x + 0.0125*dw;
+	menuUpButtonArrow2.y = menuUpButton.bounds.y + 0.0050*dh;
+	menuUpButtonArrow3.x = menuUpButton.bounds.x + 0.0200*dw;
+	menuUpButtonArrow3.y = menuUpButton.bounds.y + 0.0200*dh;
 
-	menuDownButtonBounds = menuUpButtonBounds;
-	menuDownButtonBounds.y = menu.bounds.y + menu.bounds.h - menuDownButtonBounds.h;
+	menuDownButton.bounds = menuUpButton.bounds;
+	menuDownButton.bounds.y = menu.bounds.y + menu.bounds.h - menuDownButton.bounds.h;
 
-	menuDownButtonArrow1.x = menuDownButtonBounds.x + 0.0050*dw;
-	menuDownButtonArrow1.y = menuDownButtonBounds.y + 0.0050*dh;
-	menuDownButtonArrow2.x = menuDownButtonBounds.x + 0.0200*dw;
-	menuDownButtonArrow2.y = menuDownButtonBounds.y + 0.0050*dh;
-	menuDownButtonArrow3.x = menuDownButtonBounds.x + 0.0125*dw;
-	menuDownButtonArrow3.y = menuDownButtonBounds.y + 0.0200*dh;
+	menuDownButtonArrow1.x = menuDownButton.bounds.x + 0.0050*dw;
+	menuDownButtonArrow1.y = menuDownButton.bounds.y + 0.0050*dh;
+	menuDownButtonArrow2.x = menuDownButton.bounds.x + 0.0200*dw;
+	menuDownButtonArrow2.y = menuDownButton.bounds.y + 0.0050*dh;
+	menuDownButtonArrow3.x = menuDownButton.bounds.x + 0.0125*dw;
+	menuDownButtonArrow3.y = menuDownButton.bounds.y + 0.0200*dh;
 
-	appearanceLeftButtonBounds.x = 0.51*dw;
-	appearanceLeftButtonBounds.y = 0.435*dh;
-	appearanceLeftButtonBounds.w = 0.03*dw;
-	appearanceLeftButtonBounds.h = 0.03*dh;
+	appearanceLeftButton.bounds.x = 0.51*dw;
+	appearanceLeftButton.bounds.y = 0.435*dh;
+	appearanceLeftButton.bounds.w = 0.03*dw;
+	appearanceLeftButton.bounds.h = 0.03*dh;
 
-	appearanceRightButtonBounds.x = 0.86*dw;
-	appearanceRightButtonBounds.y = 0.435*dh;
-	appearanceRightButtonBounds.w = 0.03*dw;
-	appearanceRightButtonBounds.h = 0.03*dh;
+	appearanceRightButton.bounds.x = 0.86*dw;
+	appearanceRightButton.bounds.y = 0.435*dh;
+	appearanceRightButton.bounds.w = 0.03*dw;
+	appearanceRightButton.bounds.h = 0.03*dh;
 
-	backButtonBounds.x = 0.875*dw;
-	backButtonBounds.y = 0.025*dh;
-	backButtonBounds.w = menu.getFont().getTextWidth(" Back ");
-	backButtonBounds.h = menu.getFont().getHeight();
+	backButton.bounds.x = 0.875*dw;
+	backButton.bounds.y = 0.025*dh;
+	backButton.bounds.w = menu.getFont().getTextWidth(" Back ");
+	backButton.bounds.h = menu.getFont().getHeight();
 
-	selectButtonBounds.w = menu.getFont().getTextWidth(" Select ");
-	selectButtonBounds.x = 0.70*dw - selectButtonBounds.w/2;
-	selectButtonBounds.y = 0.90*dh;
-	selectButtonBounds.h = menu.getFont().getHeight();
+	selectButton.bounds.w = menu.getFont().getTextWidth(" Select ");
+	selectButton.bounds.x = 0.70*dw - selectButton.bounds.w/2;
+	selectButton.bounds.y = 0.90*dh;
+	selectButton.bounds.h = menu.getFont().getHeight();
 }
 
 void VehicleSelectionSimpleListState::onLeave()
@@ -164,14 +186,13 @@ void VehicleSelectionSimpleListState::render()
 	fontSub->drawText("Choose your vehicle", 32, 25, Color::WHITE);
 	menu.draw();
 
-	fgeal::Graphics::drawFilledRoundedRectangle(menuUpButtonBounds, 2, Color::AZURE);
+	menuUpButton.highlighted = blinkCycle and menuUpButton.bounds.contains(mousePos);
+	menuUpButton.draw();
 	fgeal::Graphics::drawFilledTriangle(menuUpButtonArrow1, menuUpButtonArrow2, menuUpButtonArrow3, menu.focusedEntryFontColor);
-	if(blinkCycle and menuUpButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(menuUpButtonBounds, 2), 4, menu.bgColor);
-	fgeal::Graphics::drawFilledRoundedRectangle(menuDownButtonBounds, 2, Color::AZURE);
+
+	menuDownButton.highlighted = blinkCycle and menuDownButton.bounds.contains(mousePos);
+	menuDownButton.draw();
 	fgeal::Graphics::drawFilledTriangle(menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3, menu.focusedEntryFontColor);
-	if(blinkCycle and menuDownButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(menuDownButtonBounds, 2), 4, menu.bgColor);
 
 	drawVehiclePreview(0.7*dw, 0.35*dh);
 	drawVehicleSpec((4/9.f)*dw, 0.6*dh);
@@ -181,14 +202,16 @@ void VehicleSelectionSimpleListState::render()
 	VehiclePreview& preview = previews[menu.getSelectedIndex()];
 	if(not preview.altSprites.empty())
 	{
-		fgeal::Graphics::drawFilledRoundedRectangle(appearanceLeftButtonBounds, 4, menu.bgColor);
+		appearanceLeftButton.bgColor = appearanceRightButton.bgColor = menu.bgColor;
+
+		appearanceLeftButton.highlighted = blinkCycle and appearanceLeftButton.bounds.contains(mousePos);
+		appearanceLeftButton.draw();
 		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, menu.focusedEntryFontColor);
-		if(blinkCycle and appearanceLeftButtonBounds.contains(mousePos))
-			Graphics::drawRoundedRectangle(getSpacedOutline(appearanceLeftButtonBounds, 4), 4, menu.bgColor);
-		fgeal::Graphics::drawFilledRoundedRectangle(appearanceRightButtonBounds, 4, menu.bgColor);
+
+		appearanceRightButton.highlighted = blinkCycle and appearanceRightButton.bounds.contains(mousePos);
+		appearanceRightButton.draw();
 		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, menu.focusedEntryFontColor);
-		if(blinkCycle and appearanceRightButtonBounds.contains(mousePos))
-			Graphics::drawRoundedRectangle(getSpacedOutline(appearanceRightButtonBounds, 4), 4, menu.bgColor);
+
 		if(preview.altIndex != -1)
 		{
 			const string txt = "Alternate appearance" + (preview.altSprites.size() == 1? " " : " " + futil::to_string(preview.altIndex+1) + " ");
@@ -197,20 +220,21 @@ void VehicleSelectionSimpleListState::render()
 	}
 	else
 	{
-		fgeal::Graphics::drawFilledRoundedRectangle(appearanceLeftButtonBounds, 4, Color::GREY);
+		appearanceLeftButton.highlighted = appearanceRightButton.highlighted = false;
+		appearanceLeftButton.bgColor = appearanceRightButton.bgColor = Color::GREY;
+
+		appearanceLeftButton.draw();
 		fgeal::Graphics::drawFilledTriangle(skinArrowLeft1, skinArrowLeft2, skinArrowLeft3, Color::DARK_GREY);
-		fgeal::Graphics::drawFilledRoundedRectangle(appearanceRightButtonBounds, 4, Color::GREY);
+
+		appearanceRightButton.draw();
 		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, Color::DARK_GREY);
 	}
 
-	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menu.bgColor);
-	menu.getFont().drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
-	if(blinkCycle and backButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, menu.bgColor);
-	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menu.bgColor);
-	menu.getFont().drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
-	if(blinkCycle and selectButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, menu.bgColor);
+	backButton.highlighted = blinkCycle and backButton.bounds.contains(mousePos);
+	backButton.draw();
+
+	selectButton.highlighted = blinkCycle and selectButton.bounds.contains(mousePos);
+	selectButton.draw();
 }
 
 void VehicleSelectionSimpleListState::update(float delta)
@@ -228,22 +252,22 @@ void VehicleSelectionSimpleListState::onMouseButtonPressed(Mouse::Button button,
 				menu.setSelectedIndexByLocation(x, y);
 			}
 		}
-		else if(menuUpButtonBounds.contains(x, y))
+		else if(menuUpButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ARROW_UP);
 
-		else if(menuDownButtonBounds.contains(x, y))
+		else if(menuDownButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ARROW_DOWN);
 
-		else if(appearanceLeftButtonBounds.contains(x, y))
+		else if(appearanceLeftButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ARROW_LEFT);
 
-		else if(appearanceRightButtonBounds.contains(x, y))
+		else if(appearanceRightButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ARROW_RIGHT);
 
-		else if(selectButtonBounds.contains(x, y))
+		else if(selectButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ENTER);
 
-		else if(backButtonBounds.contains(x, y))
+		else if(backButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ESCAPE);
 	}
 }

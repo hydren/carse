@@ -26,6 +26,7 @@ using fgeal::Rectangle;
 using fgeal::Point;
 using fgeal::Graphics;
 using fgeal::Menu;
+using fgeal::Button;
 using futil::Properties;
 using futil::ends_with;
 using futil::to_string;
@@ -45,6 +46,7 @@ VehicleSelectionShowroomLayoutState::VehicleSelectionShowroomLayoutState(CarseGa
 : State(*game), game(*game),
   fontTitle(null), fontSubtitle(null), fontInfo(null), fontGui(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  selectButton(), backButton(),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
   imgBackground(null), imgArrow1(null), imgArrow2(null),
   isSelectionTransitioning(false), previousIndex(-1), selectionTransitionProgress(0)
@@ -102,6 +104,15 @@ void VehicleSelectionShowroomLayoutState::initialize()
 				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
 	}
 
+	backButton.bgColor = backButton.highlightColor = Color::AZURE;
+	backButton.textColor = Color::WHITE;
+	backButton.font = fontGui;
+	backButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
+	backButton.label = " Back ";
+
+	selectButton = backButton;
+	selectButton.label = " Select ";
+
 	imgBackground = new Image("assets/showroom-bg.jpg");
 	imgArrow1 = new Image("assets/arrow-red.png");
 	imgArrow2 = new Image("assets/arrow-blue.png");
@@ -129,15 +140,17 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	nextAppearanceButtonBounds = previousApperanceButtonBounds;
 	nextAppearanceButtonBounds.y = 0.580*dh;
 
-	backButtonBounds.x = 0.01*dw;
-	backButtonBounds.y = 0.95*dh - fontGui->getHeight();
-	backButtonBounds.w = fontGui->getTextWidth(" Back ");
-	backButtonBounds.h = fontGui->getHeight();
+	backButton.bounds.x = 0.01*dw;
+	backButton.bounds.y = 0.95*dh - fontGui->getHeight();
+	backButton.bounds.w = fontGui->getTextWidth(" Back ");
+	backButton.bounds.h = fontGui->getHeight();
+	backButton.highlightSpacing = 0.007*dh;
 
-	selectButtonBounds.x = 0.85*dw;
-	selectButtonBounds.y = 0.95*dh - fontGui->getHeight();
-	selectButtonBounds.w = fontGui->getTextWidth(" Select ");
-	selectButtonBounds.h = fontGui->getHeight();
+	selectButton.bounds.x = 0.85*dw;
+	selectButton.bounds.y = 0.95*dh - fontGui->getHeight();
+	selectButton.bounds.w = fontGui->getTextWidth(" Select ");
+	selectButton.bounds.h = fontGui->getHeight();
+	selectButton.highlightSpacing = backButton.highlightSpacing;
 }
 
 void VehicleSelectionShowroomLayoutState::onLeave()
@@ -224,14 +237,11 @@ void VehicleSelectionShowroomLayoutState::render()
 	imgArrow1->drawScaled(nextVehicleButtonBounds.x + (blinkCycle and nextVehicleButtonBounds.contains(mousePos)? 2 : 0),
 		nextVehicleButtonBounds.y, scaledToRect(imgArrow1, nextVehicleButtonBounds));
 
-	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, Color::AZURE);
-	fontGui->drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
-	if(blinkCycle and backButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(backButtonBounds, 4), 4, Color::AZURE);
-	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, Color::AZURE);
-	fontGui->drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
-	if(blinkCycle and selectButtonBounds.contains(mousePos))
-		Graphics::drawRoundedRectangle(getSpacedOutline(selectButtonBounds, 4), 4, Color::AZURE);
+	backButton.highlighted = blinkCycle and backButton.bounds.contains(mousePos);
+	backButton.draw();
+
+	selectButton.highlighted = blinkCycle and selectButton.bounds.contains(mousePos);
+	selectButton.draw();
 }
 
 void VehicleSelectionShowroomLayoutState::update(float delta)
@@ -323,10 +333,10 @@ void VehicleSelectionShowroomLayoutState::onMouseButtonPressed(Mouse::Button but
 		else if(nextAppearanceButtonBounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ARROW_DOWN);
 
-		else if(selectButtonBounds.contains(x, y))
+		else if(selectButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ENTER);
 
-		else if(backButtonBounds.contains(x, y))
+		else if(backButton.bounds.contains(x, y))
 			this->onKeyPressed(Keyboard::KEY_ESCAPE);
 	}
 }

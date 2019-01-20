@@ -18,6 +18,7 @@
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
+#include "fgeal/extra/gui.hpp"
 
 #include "futil/language.hpp"
 
@@ -49,7 +50,7 @@ class CourseSelectionState extends public fgeal::Game::State
 	fgeal::Image* imgMenuCourseArrow;
 	fgeal::Rectangle imgMenuCourseArrowUpBounds, imgMenuCourseArrowDownBounds;
 
-	fgeal::Rectangle backButtonBounds, selectButtonBounds;
+	fgeal::Button backButton, selectButton;
 
 	bool isLoadedCourseSelected, isDebugCourseSelected;
 

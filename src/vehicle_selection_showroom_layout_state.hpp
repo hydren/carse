@@ -14,6 +14,7 @@
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
+#include "fgeal/extra/gui.hpp"
 
 #include "futil/language.hpp"
 
@@ -31,9 +32,11 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 	fgeal::Font* fontTitle, *fontSubtitle, *fontInfo, *fontGui;
 	fgeal::Menu menu;
 
-	fgeal::Rectangle selectButtonBounds, backButtonBounds, nextVehicleButtonBounds, previousVehicleButtonBounds, nextAppearanceButtonBounds, previousApperanceButtonBounds;
+	fgeal::Rectangle nextVehicleButtonBounds, previousVehicleButtonBounds, nextAppearanceButtonBounds, previousApperanceButtonBounds;
 
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
+
+	fgeal::Button selectButton, backButton;
 
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
 

@@ -14,6 +14,7 @@
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
+#include "fgeal/extra/gui.hpp"
 
 #include "futil/language.hpp"
 
@@ -33,11 +34,11 @@ class VehicleSelectionSimpleListState extends public fgeal::Game::State
 
 	fgeal::Menu menu;
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
-	fgeal::Rectangle menuUpButtonBounds;
+	fgeal::Button menuUpButton;
 	fgeal::Point menuUpButtonArrow1, menuUpButtonArrow2, menuUpButtonArrow3;
-	fgeal::Rectangle menuDownButtonBounds;
+	fgeal::Button menuDownButton;
 	fgeal::Point menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3;
-	fgeal::Rectangle selectButtonBounds, backButtonBounds, appearanceLeftButtonBounds, appearanceRightButtonBounds;
+	fgeal::Button selectButton, backButton, appearanceLeftButton, appearanceRightButton;
 
 	struct VehiclePreview
 	{

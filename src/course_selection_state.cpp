@@ -26,6 +26,7 @@ using fgeal::Image;
 using fgeal::Graphics;
 using fgeal::Sound;
 using fgeal::Rectangle;
+using fgeal::Button;
 using fgeal::Point;
 using fgeal::Vector2D;
 using fgeal::Menu;
@@ -51,6 +52,7 @@ CourseSelectionState::CourseSelectionState(CarseGame* game)
   courseMapViewer(Pseudo3DCourse::Spec(0,0)),
   imgCourseEditor(null), fontSmall(null),
   imgMenuCourseArrow(null),
+  backButton(), selectButton(),
   isLoadedCourseSelected(false), isDebugCourseSelected(false),
   focus(FOCUS_ON_COURSE_LIST_SELECTION)
 {}
@@ -99,6 +101,15 @@ void CourseSelectionState::initialize()
 	courseMapViewer.roadColor = Color::WHITE;
 	courseMapViewer.segmentHighlightColor = Color::YELLOW;
 	courseMapViewer.geometryOtimizationEnabled = true;
+
+	backButton.bgColor = menuSettings.bgColor;
+	backButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
+	backButton.textColor = Color::WHITE;
+	backButton.label = " Back ";
+	backButton.font = fontInfo;
+
+	selectButton = backButton;
+	selectButton.label = " Select ";
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -177,15 +188,15 @@ void CourseSelectionState::onEnter()
 	courseMapViewer.segmentHighlightSize = 0.005*dh;
 	courseMapViewer.bounds = courseMapBounds;
 
-	backButtonBounds.x = 0.03*dw;
-	backButtonBounds.y = 0.95*dh - fontInfo->getHeight();
-	backButtonBounds.w = fontInfo->getTextWidth(" Back ");
-	backButtonBounds.h = fontInfo->getHeight();
+	backButton.bounds.x = 0.03*dw;
+	backButton.bounds.y = 0.95*dh - fontInfo->getHeight();
+	backButton.bounds.w = fontInfo->getTextWidth(" Back ");
+	backButton.bounds.h = fontInfo->getHeight();
 
-	selectButtonBounds.x = 0.85*dw;
-	selectButtonBounds.y = 0.95*dh - fontInfo->getHeight();
-	selectButtonBounds.w = fontInfo->getTextWidth(" Select ");
-	selectButtonBounds.h = fontInfo->getHeight();
+	selectButton.bounds.x = 0.85*dw;
+	selectButton.bounds.y = 0.95*dh - fontInfo->getHeight();
+	selectButton.bounds.w = fontInfo->getTextWidth(" Select ");
+	selectButton.bounds.h = fontInfo->getHeight();
 
 	focus = FOCUS_ON_COURSE_LIST_SELECTION;
 }
@@ -269,10 +280,8 @@ void CourseSelectionState::render()
 	if(focus == FOCUS_ON_SETTINGS_LIST_SELECTION or (focus == FOCUS_ON_SETTINGS_LIST_HOVER and blinkCycle))
 		fgeal::Graphics::drawRectangle(getSpacedOutline(menuSettings.bounds, focusSpacing), Color::RED);
 
-	Graphics::drawFilledRoundedRectangle(backButtonBounds, 4, menuSettings.bgColor);
-	fontInfo->drawText(" Back ", backButtonBounds.x, backButtonBounds.y, Color::WHITE);
-	Graphics::drawFilledRoundedRectangle(selectButtonBounds, 4, menuSettings.bgColor);
-	fontInfo->drawText(" Select ", selectButtonBounds.x, selectButtonBounds.y, Color::WHITE);
+	backButton.draw();
+	selectButton.draw();
 }
 
 void CourseSelectionState::update(float delta)
@@ -450,7 +459,7 @@ void CourseSelectionState::onMouseButtonPressed(Mouse::Button button, int x, int
 {
 	if(button == Mouse::BUTTON_LEFT)
 	{
-		if(backButtonBounds.contains(x, y) or selectButtonBounds.contains(x, y))
+		if(backButton.bounds.contains(x, y) or selectButton.bounds.contains(x, y))
 			onKeyPressed(Keyboard::KEY_ESCAPE);
 
 		else if(imgMenuCourseArrowUpBounds.contains(x, y))

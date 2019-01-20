@@ -33,7 +33,10 @@ int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game), focus(),
-  font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
+  font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
+  newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
+  loadDialogSelectButton(), loadDialogCancelButton(),
+  saveDialogSaveButton(), saveDialogCancelButton()
 {}
 
 CourseEditorState::~CourseEditorState()
@@ -238,20 +241,20 @@ void CourseEditorState::render()
 	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
 	Graphics::drawFilledRectangle(presetsPanelBounds, Color::BLACK);
 
-	bool hightlightedOption = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
-	newButton.draw(hightlightedOption);
+	newButton.highlighted = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
+	newButton.draw();
 
-	hightlightedOption = blinkCycle and focus == ON_EDITOR and loadButton.bounds.contains(mousePosition);
-	loadButton.draw(hightlightedOption);
+	loadButton.highlighted = blinkCycle and focus == ON_EDITOR and loadButton.bounds.contains(mousePosition);
+	loadButton.draw();
 
-	hightlightedOption = blinkCycle and focus == ON_EDITOR and saveButton.bounds.contains(mousePosition);
-	saveButton.draw(hightlightedOption);
+	saveButton.highlighted = blinkCycle and focus == ON_EDITOR and saveButton.bounds.contains(mousePosition);
+	saveButton.draw();
 
-	hightlightedOption = blinkCycle and focus == ON_EDITOR and generateButton.bounds.contains(mousePosition);
-	generateButton.draw(hightlightedOption);
+	generateButton.highlighted = blinkCycle and focus == ON_EDITOR and generateButton.bounds.contains(mousePosition);
+	generateButton.draw();
 
-	hightlightedOption = blinkCycle and focus == ON_EDITOR and exitButton.bounds.contains(mousePosition);
-	exitButton.draw(hightlightedOption);
+	exitButton.highlighted = blinkCycle and focus == ON_EDITOR and exitButton.bounds.contains(mousePosition);
+	exitButton.draw();
 
 	// load file dialog
 	if(focus == ON_FILE_MENU)
@@ -261,11 +264,11 @@ void CourseEditorState::render()
 
 		fileMenu.draw();
 
-		hightlightedOption = blinkCycle and loadDialogSelectButton.bounds.contains(mousePosition);
-		loadDialogSelectButton.draw(hightlightedOption);
+		loadDialogSelectButton.highlighted = blinkCycle and loadDialogSelectButton.bounds.contains(mousePosition);
+		loadDialogSelectButton.draw();
 
-		hightlightedOption = blinkCycle and loadDialogCancelButton.bounds.contains(mousePosition);
-		loadDialogCancelButton.draw(hightlightedOption);
+		loadDialogCancelButton.highlighted = blinkCycle and loadDialogCancelButton.bounds.contains(mousePosition);
+		loadDialogCancelButton.draw();
 	}
 
 	// save file dialog
@@ -278,11 +281,11 @@ void CourseEditorState::render()
 
 		saveDialogTextField.draw();
 
-		hightlightedOption = blinkCycle and saveDialogSaveButton.bounds.contains(mousePosition);
-		saveDialogSaveButton.draw(hightlightedOption);
+		saveDialogSaveButton.highlighted = blinkCycle and saveDialogSaveButton.bounds.contains(mousePosition);
+		saveDialogSaveButton.draw();
 
-		hightlightedOption = blinkCycle and saveDialogCancelButton.bounds.contains(mousePosition);
-		saveDialogCancelButton.draw(hightlightedOption);
+		saveDialogCancelButton.highlighted = blinkCycle and saveDialogCancelButton.bounds.contains(mousePosition);
+		saveDialogCancelButton.draw();
 	}
 
 	// status bar

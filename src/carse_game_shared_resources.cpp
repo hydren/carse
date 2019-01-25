@@ -21,7 +21,7 @@ CarseGame::SharedResources::SharedResources()
 : sndCursorMove("assets/sound/cursor_move.ogg"),
   sndCursorIn("assets/sound/cursor_accept.ogg"),
   sndCursorOut("assets/sound/cursor_out.ogg"),
-  fontDev("assets/fonts/default.ttf", 12),
+  fontDev("assets/fonts/default.ttf", 11),
   font1Path(getFontFilename("font1")),
   font2Path(getFontFilename("font2")),
   font3Path(getFontFilename("font3"))

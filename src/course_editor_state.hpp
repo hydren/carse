@@ -24,6 +24,8 @@ class CourseEditorState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	// used to store where is the current focus
 	enum StateFocus
 	{

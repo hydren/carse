@@ -32,7 +32,7 @@ using futil::Properties;
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
-: State(*game), game(*game), focus(),
+: State(*game), game(*game), lastDisplaySize(), focus(),
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
   loadDialogSelectButton(), loadDialogCancelButton(),
@@ -47,9 +47,10 @@ CourseEditorState::~CourseEditorState()
 void CourseEditorState::initialize()
 {
 	Display& display = game.getDisplay();
-	fileMenu.setFont(&game.sharedResources->fontDev);
-	fileMenu.setColor(Color::GREEN);
 	font = new Font(game.sharedResources->font1Path, dip(15));
+
+	fileMenu.setFont(font);
+	fileMenu.setColor(Color::GREEN);
 
 	saveDialogTextField.font = font;
 	saveDialogTextField.bgColor = Color::BLACK;
@@ -100,6 +101,14 @@ void CourseEditorState::onEnter()
 	Display& display = game.getDisplay();
 	const unsigned dw = display.getWidth(), dh = display.getHeight();
 	const float widgetSpacing = 0.02*dh;
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
+	{
+		font->setFontSize(dip(15));
+		lastDisplaySize.x = dw;
+		lastDisplaySize.y = dh;
+	}
 
 	reloadFileList();
 

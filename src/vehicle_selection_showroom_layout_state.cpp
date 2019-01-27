@@ -125,7 +125,7 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		fontTitle->setFontSize(dip(28));
+		fontTitle->setFontSize(dip(22));
 		fontSubtitle->setFontSize(dip(36));
 		fontInfo->setFontSize(dip(12));
 		fontGui->setFontSize(dip(18));

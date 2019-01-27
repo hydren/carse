@@ -83,7 +83,7 @@ void MainMenuClassicPanelState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != w or lastDisplaySize.y != h)
 	{
-		fntTitle->setFontSize(dip(40));
+		fntTitle->setFontSize(dip(32));
 		fntMain->setFontSize(dip(18));
 		lastDisplaySize.x = w;
 		lastDisplaySize.y = h;

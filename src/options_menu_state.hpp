@@ -68,8 +68,6 @@ class OptionsMenuState extends public fgeal::Game::State
 	void updateOnResolutionMenu(fgeal::Keyboard::Key);
 	void updateLabels();
 	void setResolution();
-
-	void updateFonts();
 };
 
 #endif /* OPTIONS_MENU_STATE_HPP_ */

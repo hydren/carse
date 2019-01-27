@@ -293,21 +293,9 @@ void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
 void OptionsMenuState::setResolution()
 {
 	Display::Mode resolution = Display::Mode::getList()[menuResolution.getSelectedIndex()];
-	game.getDisplay().setSize(resolution.width, resolution.height);
-	updateFonts();
-	isResolutionMenuActive = false;
-}
-
-void OptionsMenuState::updateFonts()
-{
 	Display& display = game.getDisplay();
-
-	if(font != null) delete font;
-	font = new Font(game.sharedResources->font1Path, dip(16));
-
-	if(fontTitle != null) delete fontTitle;
-	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
-
-	menu.setFont(font);
-	menuResolution.setFont(font);
+	display.setSize(resolution.width, resolution.height);
+	font->setFontSize(dip(16));
+	fontTitle->setFontSize(dip(48));
+	isResolutionMenuActive = false;
 }

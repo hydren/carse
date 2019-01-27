@@ -22,6 +22,8 @@ class MainMenuClassicPanelState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	std::string strVersion, strTitle;
 
 	// the background image
@@ -31,7 +33,7 @@ class MainMenuClassicPanelState extends public fgeal::Game::State
 	fgeal::Image* imgRace, *imgExit, *imgSettings, *imgCourse, *imgVehicle;
 
 	// fonts
-	fgeal::Font* fntTitle, *fntMain, *fntDev;
+	fgeal::Font* fntTitle, *fntMain;
 
 	// a list of strings with the items to be shown
 	std::vector<std::string> vecStrItems;

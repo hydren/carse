@@ -29,6 +29,8 @@ class VehicleSelectionSimpleListState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	fgeal::Font* fontMain, *fontInfo, *fontSub;
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 

@@ -29,6 +29,8 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	fgeal::Font* fontTitle, *fontSubtitle, *fontInfo, *fontGui;
 	fgeal::Menu menu;
 

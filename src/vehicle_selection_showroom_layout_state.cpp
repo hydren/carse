@@ -43,7 +43,7 @@ static string toStrRounded(float value, unsigned placesCount=1)
 int VehicleSelectionShowroomLayoutState::getId() { return CarseGame::VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID; }
 
 VehicleSelectionShowroomLayoutState::VehicleSelectionShowroomLayoutState(CarseGame* game)
-: State(*game), game(*game),
+: State(*game), game(*game), lastDisplaySize(),
   fontTitle(null), fontSubtitle(null), fontInfo(null), fontGui(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   selectButton(), backButton(),
@@ -78,11 +78,10 @@ VehicleSelectionShowroomLayoutState::~VehicleSelectionShowroomLayoutState()
 
 void VehicleSelectionShowroomLayoutState::initialize()
 {
-	Display& display = game.getDisplay();
-	fontTitle = new Font(game.sharedResources->font2Path, dip(28));
-	fontSubtitle = new Font(game.sharedResources->font3Path, dip(36));
-	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
-	fontGui = new Font(game.sharedResources->font1Path, dip(18));
+	fontTitle = new Font(game.sharedResources->font2Path);
+	fontSubtitle = new Font(game.sharedResources->font3Path);
+	fontInfo = new Font(game.sharedResources->font1Path);
+	fontGui = new Font(game.sharedResources->font1Path);
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -120,7 +119,20 @@ void VehicleSelectionShowroomLayoutState::initialize()
 
 void VehicleSelectionShowroomLayoutState::onEnter()
 {
-	const unsigned dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
+	Display& display = game.getDisplay();
+	const unsigned dw = display.getWidth(), dh = display.getHeight();
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
+	{
+		fontTitle->setFontSize(dip(28));
+		fontSubtitle->setFontSize(dip(36));
+		fontInfo->setFontSize(dip(12));
+		fontGui->setFontSize(dip(18));
+		lastDisplaySize.x = dw;
+		lastDisplaySize.y = dh;
+	}
+
 	lastEnterSelectedVehicleIndex = menu.getSelectedIndex();
 	lastEnterSelectedVehicleAltIndex = previews[menu.getSelectedIndex()].altIndex;
 

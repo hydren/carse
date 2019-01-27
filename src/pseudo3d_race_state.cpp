@@ -55,7 +55,7 @@ static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
-: State(*game), game(*game),
+: State(*game), game(*game), lastDisplaySize(),
   fontSmall(null), fontCountdown(null), font3(null), fontDev(null),
   imgBackground(null), imgCacheTachometer(null), imgStopwatch(null),
   music(null),
@@ -128,10 +128,9 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 
 void Pseudo3DRaceState::initialize()
 {
-	Display& display = game.getDisplay();
 	fontSmall = new Font(game.sharedResources->font1Path);
-	fontCountdown = new Font(game.sharedResources->font2Path, dip(36));
-	font3 = new Font(game.sharedResources->font1Path, dip(24));
+	fontCountdown = new Font(game.sharedResources->font2Path);
+	font3 = new Font(game.sharedResources->font1Path);
 
 	imgStopwatch = new Image("assets/stopwatch.png");
 
@@ -170,7 +169,7 @@ void Pseudo3DRaceState::initialize()
 	hudGearDisplay.specialCases[0] = "N";
 	hudGearDisplay.specialCases[-1] = "R";
 
-	hudSpeedometer.font = new Font(game.sharedResources->font2Path, dip(24));
+	hudSpeedometer.font = new Font(game.sharedResources->font2Path);
 	hudSpeedometer.fontIsShared = false;
 	hudSpeedometer.disableBackground = true;
 	hudSpeedometer.displayColor = Color::WHITE;
@@ -207,6 +206,17 @@ void Pseudo3DRaceState::initialize()
 void Pseudo3DRaceState::onEnter()
 {
 	Display& display = game.getDisplay();
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
+	{
+		fontSmall->setFontSize(dip(12));
+		fontCountdown->setFontSize(dip(36));
+		font3->setFontSize(dip(24));
+		hudSpeedometer.font->setFontSize(dip(24));
+		lastDisplaySize.x = display.getWidth();
+		lastDisplaySize.y = display.getHeight();
+	}
 
 	settings = game.logic.getNextRaceSettings();
 	simulationType = game.logic.getSimulationType();

@@ -46,8 +46,7 @@ CourseEditorState::~CourseEditorState()
 
 void CourseEditorState::initialize()
 {
-	Display& display = game.getDisplay();
-	font = new Font(game.sharedResources->font1Path, dip(15));
+	font = new Font(game.sharedResources->font1Path);
 
 	fileMenu.setFont(font);
 	fileMenu.setColor(Color::GREEN);

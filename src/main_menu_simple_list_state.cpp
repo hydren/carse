@@ -21,8 +21,8 @@ using fgeal::Mouse;
 int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 
 MainMenuSimpleListState::MainMenuSimpleListState(CarseGame* game)
-: State(*game), game(*game),
-  imgBackground(null), fntTitle(null), fntDev(null),
+: State(*game), game(*game), lastDisplaySize(),
+  imgBackground(null), fntTitle(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
 
@@ -34,8 +34,7 @@ MainMenuSimpleListState::~MainMenuSimpleListState()
 
 void MainMenuSimpleListState::initialize()
 {
-	Display& display = game.getDisplay();
-	menu.setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
+	menu.setFont(new Font(game.sharedResources->font1Path), false);
 	menu.setColor(Color::WHITE);
 	menu.bgColor = Color::AZURE;
 	menu.focusedEntryFontColor = Color::NAVY;
@@ -51,9 +50,8 @@ void MainMenuSimpleListState::initialize()
 	sndCursorMove = &game.sharedResources->sndCursorMove;
 	sndCursorIn   = &game.sharedResources->sndCursorIn;
 	sndCursorOut  = &game.sharedResources->sndCursorOut;
-	fntDev        = &game.sharedResources->fontDev;
 
-	fntTitle = new Font(game.sharedResources->font2Path, dip(32));
+	fntTitle = new Font(game.sharedResources->font2Path);
 	strTitle = "Carse Project";
 
 	strVersion = string("v")+CARSE_VERSION+" (fgeal v"+fgeal::VERSION+"/"+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")";
@@ -62,6 +60,16 @@ void MainMenuSimpleListState::initialize()
 void MainMenuSimpleListState::onEnter()
 {
 	Display& display = game.getDisplay();
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
+	{
+		fntTitle->setFontSize(dip(32));
+		menu.getFont().setFontSize(dip(18));
+		lastDisplaySize.x = display.getWidth();
+		lastDisplaySize.y = display.getHeight();
+	}
+
 	menu.setSelectedIndex(0);
 	menu.bounds.x = 0.25f * display.getWidth();
 	menu.bounds.y = 0.25f * display.getHeight();
@@ -79,7 +87,7 @@ void MainMenuSimpleListState::render()
 	imgBackground->drawScaled(0, 0, scaledToSize(imgBackground, display));
 	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.05*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
 	menu.draw();
-	fntDev->drawText(strVersion, 4, 4, Color::CREAM);
+	game.sharedResources->fontDev.drawText(strVersion, 4, 4, Color::CREAM);
 }
 
 void MainMenuSimpleListState::update(float delta)

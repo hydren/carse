@@ -45,7 +45,7 @@ static const string TITLE_TEXT = "Choose a course";
 int CourseSelectionState::getId() { return CarseGame::COURSE_SELECTION_STATE_ID; }
 
 CourseSelectionState::CourseSelectionState(CarseGame* game)
-: State(*game), game(*game),
+: State(*game), game(*game), lastDisplaySize(),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   backgroundImage(null), fontMain(null),
   imgRandom(null), imgCircuit(null), fontInfo(null),
@@ -71,25 +71,23 @@ CourseSelectionState::~CourseSelectionState()
 
 void CourseSelectionState::initialize()
 {
-	Display& display = game.getDisplay();
-
 	backgroundImage = new Image("assets/course-menu-bg.jpg");
 	imgRandom = new Image("assets/portrait-random.png");
 	imgCircuit = new Image("assets/portrait-circuit.png");
 	imgCourseEditor = new Image("assets/portrait-course-editor.png");
 	imgMenuCourseArrow = new Image("assets/arrow-blue.png");
 
-	fontMain = new Font(game.sharedResources->font2Path, dip(28));
-	fontInfo = new Font(game.sharedResources->font1Path, dip(14));
-	fontSmall = new Font(game.sharedResources->font1Path, dip(10));
+	fontMain = new Font(game.sharedResources->font2Path);
+	fontInfo = new Font(game.sharedResources->font1Path);
+	fontSmall = new Font(game.sharedResources->font1Path);
 
-	menuCourse.setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
+	menuCourse.setFont(new Font(game.sharedResources->font1Path), false);
 	menuCourse.setColor(Color::RED);
 	menuCourse.bgColor = Color(0, 0, 0, 128);
 	menuCourse.borderColor = Color(0, 0, 0, 192);
 	menuCourse.focusedEntryFontColor = Color::WHITE;
 
-	menuSettings.setFont(new Font(game.sharedResources->font1Path, dip(12)), false);
+	menuSettings.setFont(&menuCourse.getFont());
 	menuSettings.setColor(Color::RED);
 	menuSettings.bgColor = menuCourse.bgColor;
 	menuSettings.borderColor = menuCourse.borderColor;
@@ -119,7 +117,19 @@ void CourseSelectionState::initialize()
 
 void CourseSelectionState::onEnter()
 {
+	Display& display = game.getDisplay();
 	const float dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
+	{
+		fontMain->setFontSize(dip(28));
+		fontInfo->setFontSize(dip(14));
+		fontSmall->setFontSize(dip(10));
+		menuCourse.getFont().setFontSize(dip(12));
+		lastDisplaySize.x = dw;
+		lastDisplaySize.y = dh;
+	}
 
 	paneBounds.x = (1/64.f)*dw;
 	paneBounds.y = (3/64.f)*dh + fontMain->getHeight();

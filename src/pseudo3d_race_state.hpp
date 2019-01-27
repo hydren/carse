@@ -31,6 +31,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDev;
 	fgeal::Image* imgBackground, *imgCacheTachometer, *imgStopwatch;
 	fgeal::Music* music;

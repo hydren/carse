@@ -24,9 +24,9 @@ using fgeal::Mouse;
 int MainMenuClassicPanelState::getId() { return CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
 
 MainMenuClassicPanelState::MainMenuClassicPanelState(CarseGame* game)
-: State(*game), game(*game),
+: State(*game), game(*game), lastDisplaySize(),
   imgBackground(null), imgRace(null), imgExit(null), imgSettings(null), imgCourse(null), imgVehicle(null),
-  fntTitle(null), fntMain(null), fntDev(null),
+  fntTitle(null), fntMain(null),
   selectedItemIndex(0),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
@@ -45,7 +45,6 @@ MainMenuClassicPanelState::~MainMenuClassicPanelState()
 
 void MainMenuClassicPanelState::initialize()
 {
-	Display& display = game.getDisplay();
 	vecStrItems.push_back("Race!");
 	vecStrItems.push_back("Vehicle");
 	vecStrItems.push_back("Course");
@@ -61,12 +60,11 @@ void MainMenuClassicPanelState::initialize()
 	sndCursorMove = &game.sharedResources->sndCursorMove;
 	sndCursorIn   = &game.sharedResources->sndCursorIn;
 	sndCursorOut  = &game.sharedResources->sndCursorOut;
-	fntDev = &game.sharedResources->fontDev;
 
 	strTitle = "Carse Project";
-	fntTitle = new Font(game.sharedResources->font2Path, dip(40));
+	fntTitle = new Font(game.sharedResources->font2Path);
 
-	fntMain = new Font(game.sharedResources->font1Path, dip(18));
+	fntMain = new Font(game.sharedResources->font1Path);
 
 	strVersion = string("v")+CARSE_VERSION+" (fgeal v"+fgeal::VERSION+"/"+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")";
 }
@@ -81,6 +79,15 @@ void MainMenuClassicPanelState::onEnter()
 				marginX = w * 0.01, marginY = h * 0.01;
 
 	const Rectangle slotSize = {0, 0, (w - 4*marginX)/3.0f, (h - titleHeaderHeight - 3*marginY)/2.0f};
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != w or lastDisplaySize.y != h)
+	{
+		fntTitle->setFontSize(dip(40));
+		fntMain->setFontSize(dip(18));
+		lastDisplaySize.x = w;
+		lastDisplaySize.y = h;
+	}
 
 	slotMenuItemRace.x = 0.5f*(w - slotSize.w);
 	slotMenuItemRace.y = titleHeaderHeight + 0.5f*(h - titleHeaderHeight - slotSize.h);
@@ -178,7 +185,7 @@ void MainMenuClassicPanelState::render()
 
 	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.1*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
 
-	fntDev->drawText(strVersion, 4, 4, Color::CREAM);
+	game.sharedResources->fontDev.drawText(strVersion, 4, 4, Color::CREAM);
 }
 
 void MainMenuClassicPanelState::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)

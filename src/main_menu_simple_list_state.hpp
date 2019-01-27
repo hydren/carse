@@ -23,6 +23,8 @@ class MainMenuSimpleListState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	// version string
 	std::string strVersion;
 
@@ -34,7 +36,7 @@ class MainMenuSimpleListState extends public fgeal::Game::State
 	fgeal::Image* imgBackground;
 
 	// title font
-	fgeal::Font* fntTitle, *fntDev;
+	fgeal::Font* fntTitle;
 
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 

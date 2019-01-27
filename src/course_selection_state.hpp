@@ -26,6 +26,8 @@ class CourseSelectionState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
+	fgeal::Vector2D lastDisplaySize;
+
 	fgeal::Sound* sndCursorMove, *sndCursorIn, *sndCursorOut;
 
 	fgeal::Image* backgroundImage;

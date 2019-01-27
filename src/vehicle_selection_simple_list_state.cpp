@@ -46,7 +46,7 @@ static string toStrRounded(float value, unsigned placesCount=1)
 int VehicleSelectionSimpleListState::getId() { return CarseGame::VEHICLE_SELECTION_SIMPLE_LIST_STATE_ID; }
 
 VehicleSelectionSimpleListState::VehicleSelectionSimpleListState(CarseGame* game)
-: State(*game), game(*game),
+: State(*game), game(*game), lastDisplaySize(),
   fontMain(null), fontInfo(null), fontSub(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
@@ -70,16 +70,17 @@ VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
 void VehicleSelectionSimpleListState::initialize()
 {
 	Display& display = game.getDisplay();
-	fontMain = new Font(game.sharedResources->font2Path, dip(28));
-	fontInfo = new Font(game.sharedResources->font1Path, dip(12));
-	fontSub = new Font(game.sharedResources->font3Path, dip(36));
+
+	fontMain = new Font(game.sharedResources->font2Path);
+	fontInfo = new Font(game.sharedResources->font1Path);
+	fontSub = new Font(game.sharedResources->font3Path);
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
 	sndCursorIn   = &game.sharedResources->sndCursorIn;
 	sndCursorOut  = &game.sharedResources->sndCursorOut;
 
-	menu.setFont(new Font(game.sharedResources->font1Path, dip(18)), false);
+	menu.setFont(new Font(game.sharedResources->font1Path), false);
 	menu.setColor(Color::WHITE);
 	menu.cursorWrapAroundEnabled = true;
 	menu.bgColor = Color::AZURE;
@@ -121,7 +122,20 @@ void VehicleSelectionSimpleListState::initialize()
 
 void VehicleSelectionSimpleListState::onEnter()
 {
-	const unsigned dw = game.getDisplay().getWidth(), dh = game.getDisplay().getHeight();
+	Display& display = game.getDisplay();
+	const unsigned dw = display.getWidth(), dh = display.getHeight();
+
+	// reload fonts if display size changed
+	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
+	{
+		fontMain->setFontSize(dip(28));
+		fontSub->setFontSize(dip(36));
+		fontInfo->setFontSize(dip(12));
+		menu.getFont().setFontSize(dip(18));
+		lastDisplaySize.x = dw;
+		lastDisplaySize.y = dh;
+	}
+
 	lastEnterSelectedVehicleIndex = menu.getSelectedIndex();
 	lastEnterSelectedVehicleAltIndex = previews[menu.getSelectedIndex()].altIndex;
 

@@ -210,7 +210,7 @@ void Pseudo3DRaceState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
 	{
-		fontSmall->setFontSize(dip(12));
+		fontSmall->setFontSize(dip(10));
 		fontCountdown->setFontSize(dip(36));
 		font3->setFontSize(dip(24));
 		hudSpeedometer.font->setFontSize(dip(24));

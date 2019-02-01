@@ -42,14 +42,9 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 
 	unsigned lastEnterSelectedVehicleIndex, lastEnterSelectedVehicleAltIndex;
 
-	struct VehiclePreview
-	{
-		fgeal::Image* sprite;
-		std::vector<fgeal::Image*> altSprites;
-		int altIndex;
-	};
-
-	std::vector<VehiclePreview> previews;
+	fgeal::Image* previewCurrentSprite, *previewPreviousSprite, *previewNextSprite;
+	std::string previewCurrentSpriteFilename, previewPreviousSpriteFilename, previewNextSpriteFilename;
+	std::vector<int> previewAltIndex;
 
 	fgeal::Image* imgBackground, *imgArrow1, *imgArrow2;
 	bool isSelectionTransitioning;
@@ -74,13 +69,14 @@ class VehicleSelectionShowroomLayoutState extends public fgeal::Game::State
 	virtual void onJoystickAxisMoved(unsigned, unsigned, float, float);
 	virtual void onJoystickButtonPressed(unsigned, unsigned);
 
-	void drawVehiclePreview(float x, float y, float scale=1.0f, int index=-1, int angleType=0);
+	void drawVehiclePreview(fgeal::Image* sprite, const Pseudo3DVehicleAnimationSpec& spriteSpec, float x, float y, float scale=1.0f, int angleType=0);
 	void drawVehicleSpec(float x, float y, float index=-1);
 	void changeSprite(bool forward=true);
 
 	private:
 	void handleInput();
 	void menuSelectionAction();
+	void reloadSpriteIfMiss(unsigned menuIndex, fgeal::Image*& previewSprite, std::string& previewSpriteFilename);
 };
 
 #endif /* VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_HPP_ */

@@ -42,14 +42,9 @@ class VehicleSelectionSimpleListState extends public fgeal::Game::State
 	fgeal::Point menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3;
 	fgeal::Button selectButton, backButton, appearanceLeftButton, appearanceRightButton;
 
-	struct VehiclePreview
-	{
-		fgeal::Image* sprite;
-		std::vector<fgeal::Image*> altSprites;
-		int altIndex;
-	};
-
-	std::vector<VehiclePreview> previews;
+	fgeal::Image* previewSprite;
+	std::string previewSpriteFilename;
+	std::vector<int> previewAltIndex;
 
 	public:
 	virtual int getId();

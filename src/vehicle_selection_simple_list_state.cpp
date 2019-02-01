@@ -50,7 +50,8 @@ VehicleSelectionSimpleListState::VehicleSelectionSimpleListState(CarseGame* game
   fontMain(null), fontInfo(null), fontSub(null),
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   lastEnterSelectedVehicleIndex(0), lastEnterSelectedVehicleAltIndex(0),
-  menuUpButton(), menuDownButton(), selectButton(), backButton(), appearanceLeftButton(), appearanceRightButton()
+  menuUpButton(), menuDownButton(), selectButton(), backButton(), appearanceLeftButton(), appearanceRightButton(),
+  previewSprite()
 {}
 
 VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
@@ -59,12 +60,8 @@ VehicleSelectionSimpleListState::~VehicleSelectionSimpleListState()
 	if(fontInfo != null) delete fontInfo;
 	if(fontSub != null) delete fontSub;
 
-	for(unsigned i = 0; i < previews.size(); i++)
-	{
-		delete previews[i].sprite;
-		for(unsigned j = 0; j < previews[i].altSprites.size(); j++)
-			delete previews[i].altSprites[j];
-	}
+	if(previewSprite != null)
+		delete previewSprite;
 }
 
 void VehicleSelectionSimpleListState::initialize()
@@ -88,16 +85,10 @@ void VehicleSelectionSimpleListState::initialize()
 
 	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = game.logic.getVehicleList();
 	const_foreach(const Pseudo3DVehicle::Spec&, vspec, vector<Pseudo3DVehicle::Spec>, vehiclesSpecs)
-	{
 		menu.addEntry(vspec.name);
-		previews.push_back(VehiclePreview());
-		previews.back().sprite = new Image(vspec.sprite.sheetFilename);
-		previews.back().altIndex = -1;
 
-		if(not vspec.alternateSprites.empty())
-			const_foreach(const Pseudo3DVehicleAnimationSpec&, alternateSprite, vector<Pseudo3DVehicleAnimationSpec>, vspec.alternateSprites)
-				previews.back().altSprites.push_back(new Image(alternateSprite.sheetFilename));
-	}
+	previewAltIndex.clear();
+	previewAltIndex.resize(vehiclesSpecs.size(), -1);
 
 	menuUpButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
 	menuUpButton.bgColor = Color::AZURE;
@@ -137,7 +128,7 @@ void VehicleSelectionSimpleListState::onEnter()
 	}
 
 	lastEnterSelectedVehicleIndex = menu.getSelectedIndex();
-	lastEnterSelectedVehicleAltIndex = previews[menu.getSelectedIndex()].altIndex;
+	lastEnterSelectedVehicleAltIndex = previewAltIndex[lastEnterSelectedVehicleIndex];
 
 	menu.bounds.x = (1/64.f)*dw;
 	menu.bounds.y = (1/5.f)*dh;
@@ -190,6 +181,27 @@ void VehicleSelectionSimpleListState::onEnter()
 void VehicleSelectionSimpleListState::onLeave()
 {}
 
+void VehicleSelectionSimpleListState::update(float delta)
+{
+	const vector<Pseudo3DVehicle::Spec>& vehiclesSpecs = game.logic.getVehicleList();
+	if(previewSprite == null
+		or (previewAltIndex[menu.getSelectedIndex()] == -1 and previewSpriteFilename != vehiclesSpecs[menu.getSelectedIndex()].sprite.sheetFilename)
+		or (previewAltIndex[menu.getSelectedIndex()] >=  0 and previewSpriteFilename != vehiclesSpecs[menu.getSelectedIndex()].alternateSprites[previewAltIndex[menu.getSelectedIndex()]].sheetFilename))
+	{
+		if(previewSprite != null)
+			delete previewSprite;
+
+		const Pseudo3DVehicle::Spec& spec = vehiclesSpecs[menu.getSelectedIndex()];
+
+		if(previewAltIndex[menu.getSelectedIndex()] == -1)
+			previewSpriteFilename = spec.sprite.sheetFilename;
+		else
+			previewSpriteFilename = spec.alternateSprites[previewAltIndex[menu.getSelectedIndex()]].sheetFilename;
+
+		previewSprite = new Image(previewSpriteFilename);
+	}
+}
+
 void VehicleSelectionSimpleListState::render()
 {
 	Display& display = game.getDisplay();
@@ -213,8 +225,8 @@ void VehicleSelectionSimpleListState::render()
 
 	const fgeal::Point skinArrowLeft1 =  { 0.52f*dw, 0.45f*dh }, skinArrowLeft2  = { 0.53f*dw, 0.44f*dh }, skinArrowLeft3 =  { 0.53f*dw, 0.46f*dh};
 	const fgeal::Point skinArrowRight1 = { 0.88f*dw, 0.45f*dh }, skinArrowRight2 = { 0.87f*dw, 0.44f*dh }, skinArrowRight3 = { 0.87f*dw, 0.46f*dh};
-	VehiclePreview& preview = previews[menu.getSelectedIndex()];
-	if(not preview.altSprites.empty())
+
+	if(not game.logic.getVehicleList()[menu.getSelectedIndex()].alternateSprites.empty())
 	{
 		appearanceLeftButton.bgColor = appearanceRightButton.bgColor = menu.bgColor;
 
@@ -226,9 +238,9 @@ void VehicleSelectionSimpleListState::render()
 		appearanceRightButton.draw();
 		fgeal::Graphics::drawFilledTriangle(skinArrowRight1, skinArrowRight2, skinArrowRight3, menu.focusedEntryFontColor);
 
-		if(preview.altIndex != -1)
+		if(previewAltIndex[menu.getSelectedIndex()] != -1)
 		{
-			const string txt = "Alternate appearance" + (preview.altSprites.size() == 1? " " : " " + futil::to_string(preview.altIndex+1) + " ");
+			const string txt = "Alternate appearance" + (previewAltIndex[menu.getSelectedIndex()] == 0? "" : " " + futil::to_string(previewAltIndex[menu.getSelectedIndex()]+1) + " ");
 			fontInfo->drawText(txt, dw - fontInfo->getTextWidth(txt), 0.5*dh, Color::AZURE);
 		}
 	}
@@ -250,9 +262,6 @@ void VehicleSelectionSimpleListState::render()
 	selectButton.highlighted = blinkCycle and selectButton.bounds.contains(mousePos);
 	selectButton.draw();
 }
-
-void VehicleSelectionSimpleListState::update(float delta)
-{}
 
 void VehicleSelectionSimpleListState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
@@ -293,7 +302,7 @@ void VehicleSelectionSimpleListState::onKeyPressed(Keyboard::Key key)
 		case Keyboard::KEY_ESCAPE:
 			sndCursorOut->play();
 			menu.setSelectedIndex(lastEnterSelectedVehicleIndex);
-			previews[menu.getSelectedIndex()].altIndex = lastEnterSelectedVehicleAltIndex;
+			previewAltIndex[menu.getSelectedIndex()] = lastEnterSelectedVehicleAltIndex;
 			game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_ENTER:
@@ -357,7 +366,7 @@ void VehicleSelectionSimpleListState::onJoystickButtonPressed(unsigned joystick,
 
 void VehicleSelectionSimpleListState::menuSelectionAction()
 {
-	game.logic.setPickedVehicle(menu.getSelectedIndex(), previews[menu.getSelectedIndex()].altIndex);
+	game.logic.setPickedVehicle(menu.getSelectedIndex(), previewAltIndex[menu.getSelectedIndex()]);
 	game.enterState(game.logic.currentMainMenuStateId);
 }
 
@@ -367,12 +376,10 @@ void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float
 	if(index < 0)
 		index = menu.getSelectedIndex();
 
-	VehiclePreview& preview = previews[index];
-	const bool isNotAlternateSprite = (preview.altIndex == -1 or preview.altSprites.empty());
+	const bool isNotAlternateSprite = (previewAltIndex[menu.getSelectedIndex()] == -1);
 
 	const Pseudo3DVehicle::Spec& vspec = game.logic.getVehicleList()[index];
-	const Pseudo3DVehicleAnimationSpec& spriteSpec = (isNotAlternateSprite? vspec.sprite : vspec.alternateSprites[preview.altIndex]);
-	Image& sprite = *(isNotAlternateSprite? preview.sprite : preview.altSprites[preview.altIndex]);
+	const Pseudo3DVehicleAnimationSpec& spriteSpec = (isNotAlternateSprite? vspec.sprite : vspec.alternateSprites[previewAltIndex[menu.getSelectedIndex()]]);
 
 	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);
 	const float scalex = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.x,
@@ -381,7 +388,7 @@ void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float
 				posY = y - 0.5*spriteSpec.frameHeight * scaley,
 				offsetY = (angleType == 0? 0 : spriteSpec.frameHeight * (spriteSpec.stateCount/2));
 
-	sprite.drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
+	previewSprite->drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
 }
 
 void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, float index)
@@ -420,24 +427,25 @@ void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, 
 
 void VehicleSelectionSimpleListState::changeSprite(bool forward)
 {
-	VehiclePreview& preview = previews[menu.getSelectedIndex()];
-	if(not preview.altSprites.empty())
+	const unsigned selected = menu.getSelectedIndex(),
+	               alternateSpritesCount = game.logic.getVehicleList()[selected].alternateSprites.size();
+	if(alternateSpritesCount > 0)
 	{
 		sndCursorMove->play();
 
 		if(forward)
 		{
-			if(preview.altIndex == (int) preview.altSprites.size() - 1)
-				preview.altIndex = -1;
+			if(previewAltIndex[selected] == (int) alternateSpritesCount - 1)
+				previewAltIndex[selected] = -1;
 			else
-				preview.altIndex++;
+				previewAltIndex[selected]++;
 		}
 		else
 		{
-			if(preview.altIndex == -1)
-				preview.altIndex = preview.altSprites.size() - 1;
+			if(previewAltIndex[selected] == -1)
+				previewAltIndex[selected] = alternateSpritesCount - 1;
 			else
-				preview.altIndex--;
+				previewAltIndex[selected]--;
 		}
 	}
 }

@@ -266,21 +266,24 @@ void VehicleSelectionShowroomLayoutState::render()
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 1))
 	{
 		const unsigned i = index == 0? menu.getEntries().size()-1 : index-1;
-		drawVehiclePreview(previewPreviousSprite, vehicles[i].sprite, (0.2-doff)*dw, (0.5-doffp)*dh, 1.05-0.05*fabs(trans), trans < -0.5? 0 : -1);
+		const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[i] == -1? vehicles[i].sprite : vehicles[i].alternateSprites[previewAltIndex[i]];
+		drawVehiclePreview(previewPreviousSprite, spriteSpec, (0.2-doff)*dw, (0.5-doffp)*dh, 1.05-0.05*fabs(trans), trans < -0.5? 0 : -1);
 	}
 
 	// draw next vehicle
 	if(vehicles.size() > 2 or (vehicles.size() == 2 and index == 0))
 	{
 		const unsigned i = index == menu.getEntries().size()-1? 0 : index+1;
-		drawVehiclePreview(previewNextSprite, vehicles[i].sprite, (0.8-doff)*dw, (0.5-doffn)*dh, 1.05-0.05*fabs(trans), trans > 0.5? 0 : +1);
+		const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[i] == -1? vehicles[i].sprite : vehicles[i].alternateSprites[previewAltIndex[i]];
+		drawVehiclePreview(previewNextSprite, spriteSpec, (0.8-doff)*dw, (0.5-doffn)*dh, 1.05-0.05*fabs(trans), trans > 0.5? 0 : +1);
 	}
 
 	// darkening other vehicles
-	fgeal::Graphics::drawFilledRectangle(0, 0, dw, dh,Color(0, 0, 0, 128));
+	fgeal::Graphics::drawFilledRectangle(0, 0, dw, dh, Color(0, 0, 0, 128));
 
 	// draw current vehicle
-	drawVehiclePreview(previewCurrentSprite, vehicles[index].sprite, (0.5-doff)*dw, (0.45-doffc)*dh, 1.0+0.05*fabs(trans), trans > 0.5? -1 : trans < -0.5? +1 : 0);
+	const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[index] == -1? vehicles[index].sprite : vehicles[index].alternateSprites[previewAltIndex[index]];
+	drawVehiclePreview(previewCurrentSprite, spriteSpec, (0.5-doff)*dw, (0.45-doffc)*dh, 1.0+0.05*fabs(trans), trans > 0.5? -1 : trans < -0.5? +1 : 0);
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";

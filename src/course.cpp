@@ -13,6 +13,7 @@
 
 #include <cstdlib>
 #include <cmath>
+#include <iterator>
 
 using std::string;
 using std::vector;

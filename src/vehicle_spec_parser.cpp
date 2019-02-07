@@ -19,6 +19,7 @@
 #include <exception>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 
 #include <iostream>
 using std::cout;
@@ -394,7 +395,9 @@ static const unsigned
 
 // default sprite float constants
 static const float
-	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
+	PSEUDO_ANGLE_THRESHOLD = 0.1,
+	SPRITE_IDEAL_MAX_DEPICTED_TURN_ANGLE = 45, // 45 degrees, pi/4 radians
+	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = SPRITE_IDEAL_MAX_DEPICTED_TURN_ANGLE,
 	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION = 0.857142857143;  // ~0,857
 
 static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properties& prop)
@@ -509,9 +512,111 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 			spec.asymmetrical = true;
 	}
 
-	key = "sprite_max_depicted_turn_angle";
-	const float absoluteTurnAngle = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
-	spec.maxDepictedTurnAngle = absoluteTurnAngle/DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE;
+	// with these fields, values for all states (except state 0) must be specified, or no values should be specified at all.
+	for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)
+	{
+		key = "sprite_state" + futil::to_string(stateNumber) + "_depicted_turn_angle";
+
+		if(isValueSpecified(prop, key))
+		{
+			if(spec.depictedTurnAngle.empty())
+			{
+				if(stateNumber == 1)
+					spec.depictedTurnAngle.push_back(0);
+
+				else if(stateNumber > 1)
+				{
+					cout << "warning: missing depicted turn angles for sprite states before state " << stateNumber
+						 << "; ignoring all values for safety..." << endl;
+					break;
+				}
+			}
+
+			spec.depictedTurnAngle.push_back(atof(prop.get(key).c_str())/SPRITE_IDEAL_MAX_DEPICTED_TURN_ANGLE);
+		}
+		else if(not spec.depictedTurnAngle.empty())
+		{
+			cout << "warning: missing depicted turn angle for sprite state " << stateNumber << "; ignoring all values for safety..." << endl;
+			spec.depictedTurnAngle.clear();
+			break;
+		}
+	}
+
+	// attempt to load turn angles from single property if they were not specified individually
+	if(spec.depictedTurnAngle.empty())
+	{
+		key = "sprite_depicted_turn_angles";
+		if(isValueSpecified(prop, key))
+		{
+			vector<string> tokens = futil::split(prop.get(key), ',');
+			if(tokens.size() == spec.stateCount)
+				for(unsigned i = 0; i < tokens.size(); i++)
+					spec.depictedTurnAngle.push_back(atof(tokens[i].c_str())/SPRITE_IDEAL_MAX_DEPICTED_TURN_ANGLE);
+			else
+				cout << "warning: incorrect number of values specified for turn angles; ignoring values for safety..." << endl;
+		}
+	}
+
+	// check depicted turn angles for consistency
+	if(not spec.depictedTurnAngle.empty())
+		for(unsigned i = 0; i < spec.depictedTurnAngle.size(); i++)
+			for(unsigned j = i+1; j < spec.depictedTurnAngle.size(); j++)
+			{
+				if(spec.depictedTurnAngle[j] == spec.depictedTurnAngle[i])
+				{
+					cout << "warning: depicted turn angle specified for state " << i << " and state " << j
+						 << " have the same value (" << spec.depictedTurnAngle[i] << ");"
+						 << " ignoring values for safety..." << endl;
+					spec.depictedTurnAngle.clear();
+					goto depictedTurnAngleCheckEnd;
+				}
+				else if(spec.depictedTurnAngle[j] < spec.depictedTurnAngle[i])
+				{
+					cout << "warning: depicted turn angle specified for state " << j << " (" << spec.depictedTurnAngle[j] << ")"
+					     << " is smaller than previous state " << i << " (" << spec.depictedTurnAngle[i] << ");"
+						 << " ignoring values for safety..." << endl;
+					spec.depictedTurnAngle.clear();
+					goto depictedTurnAngleCheckEnd;
+				}
+			}
+	depictedTurnAngleCheckEnd:
+
+	// attempt to load max depicted turn angle when no individual turn angles were specified. also, do this ONLY when there is more than one frame.
+	if(spec.depictedTurnAngle.empty() and spec.stateCount > 1)
+	{
+		spec.depictedTurnAngle.resize(spec.stateCount);
+
+		key = "sprite_max_depicted_turn_angle";
+		const float maxTurnAngle = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE)/SPRITE_IDEAL_MAX_DEPICTED_TURN_ANGLE;
+
+		key = "sprite_depicted_turn_angle_progression";
+		if(isValueSpecified(prop, key))
+		{
+			const string progression = futil::trim(prop.get(key));
+
+			if(progression == "linear-with-threshold" or progression == "linear with threshold")
+				goto linearWithThresholdProgression;
+
+			else if(progression == "linear")
+				for(unsigned s = 0; s < spec.stateCount; s++)
+					spec.depictedTurnAngle[s] = s*(maxTurnAngle/(spec.stateCount-1));  // linear sprite progression
+
+			else if(progression == "exponential")
+				for(unsigned s = 0; s < spec.stateCount; s++)
+					spec.depictedTurnAngle[s] = log(1+s*(exp(maxTurnAngle)-1)/(spec.stateCount-1));  // exponential sprite progression
+			else
+				cout << "warning: unknown turn angle progression type; using linear with threshold by default..." << endl;
+		}
+		else  // case for default progression (linear with threshold)
+		{
+			// linear sprite progression with 1-index advance at threshold angle
+			linearWithThresholdProgression:
+			spec.depictedTurnAngle[0] = 0;
+			spec.depictedTurnAngle[1] = PSEUDO_ANGLE_THRESHOLD;
+			for(unsigned s = 2; s < spec.stateCount; s++)
+				spec.depictedTurnAngle[s] = PSEUDO_ANGLE_THRESHOLD + (s-1)*(maxTurnAngle-PSEUDO_ANGLE_THRESHOLD)/(spec.stateCount-2);
+		}
+	}
 
 	key = "sprite_frame_count";
 	const float globalFrameCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;

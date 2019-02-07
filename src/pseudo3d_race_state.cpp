@@ -19,10 +19,6 @@
 using std::string;
 using std::map;
 
-// XXX debug
-#include <iostream>
-using std::cout; using std::endl;
-
 using fgeal::Display;
 using fgeal::Image;
 using fgeal::Font;
@@ -42,7 +38,6 @@ using fgeal::Rectangle;
 static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556;  // == 20kph
 const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED_FACTOR = 30;  // undefined unit
 static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
-static const float PSEUDO_ANGLE_THRESHOLD = 0.1;
 
 static const float BACKGROUND_POSITION_FACTOR = 0.509375;
 
@@ -652,26 +647,12 @@ void Pseudo3DRaceState::render()
 	}
 }
 
-void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal::Point& p)
+void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const Point& p)
 {
-	// the ammount of pseudo angle that will trigger the last sprite
-//	const float PSEUDO_ANGLE_LAST_STATE = PSEUDO_ANGLE_MAX;  // show last sprite when the pseudo angle is at its max
-	const float PSEUDO_ANGLE_LAST_STATE = vehicle.spriteSpec.maxDepictedTurnAngle;  // show last sprite when the pseudo angle is at the specified ammount in the .properties
-
-	// linear sprite progression
-//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*fabs(pseudoAngle)/PSEUDO_ANGLE_LAST_STATE;
-
-	// exponential sprite progression. may be slower.
-//	const unsigned animationIndex = (vehicle.gfx.spriteStateCount-1)*(exp(fabs(pseudoAngle))-1)/(exp(PSEUDO_ANGLE_LAST_STATE)-1);
-
-	// linear sprite progression with 1-index advance at threshold angle
 	unsigned animationIndex = 0;
-	if(vehicle.spriteSpec.stateCount > 1 and fabs(vehicle.pseudoAngle) > PSEUDO_ANGLE_THRESHOLD)
-		animationIndex = 1 + (vehicle.spriteSpec.stateCount-2)*(fabs(vehicle.pseudoAngle) - PSEUDO_ANGLE_THRESHOLD)/(PSEUDO_ANGLE_LAST_STATE - PSEUDO_ANGLE_THRESHOLD);
-
-	// cap index to max possible
-	if(animationIndex > vehicle.spriteSpec.stateCount - 1)
-		animationIndex = vehicle.spriteSpec.stateCount - 1;
+	for(unsigned i = 1; i < vehicle.spriteSpec.stateCount; i++)
+		if(fabs(vehicle.pseudoAngle) >= vehicle.spriteSpec.depictedTurnAngle[i])
+			animationIndex = i;
 
 	const bool isLeanRight = (vehicle.pseudoAngle > 0 and animationIndex != 0);
 
@@ -707,9 +688,11 @@ void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const fgeal:
 
 	if(vehicle.isTireBurnoutOccurring)
 	{
+		const float maxDepictedTurnAngle = vehicle.spriteSpec.depictedTurnAngle.size() < 2? 0 : vehicle.spriteSpec.depictedTurnAngle.back();
+
 		const Point smokeSpritePosition = {
 				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteSpec.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
-				+ ((vehicle.pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*vehicle.spriteSpec.maxDepictedTurnAngle),
+				+ ((vehicle.pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*maxDepictedTurnAngle),
 				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
 		};
 

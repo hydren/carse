@@ -49,9 +49,10 @@ struct Pseudo3DVehicleAnimationSpec
 	 *  versions of each state. */
 	bool asymmetrical;
 
-	/** The maximum turning angle depicted on the sprite. This is used to adjust how quickly the
-	 *  animation will switch states depending on the vehicle's pseudo angle. */
-	float maxDepictedTurnAngle;
+	/** A vector containing the turning angles depicted on the sprite in each frame. Each index
+	 *  corresponds to each state. This is used to adjust how quickly the animation will switch states
+	 *  depending on the vehicle's pseudo angle. */
+	std::vector<float> depictedTurnAngle;
 
 	/** The width of the vehicle as depicted in the sprite (in pixels). This is used to align animation
 	 *  effects, such as burning rubber's smoking animation, etc. */

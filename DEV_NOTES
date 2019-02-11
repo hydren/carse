@@ -1,7 +1,5 @@
 # to do
 
-- Add joystick/gamepad input on menus;
-- Add more inline-6 engine sound profiles;
 - Add inline-5 engine sound profile;
 - Fix behavior when changing height: horizon should move, not just back ground.
 - Add traffic cars;

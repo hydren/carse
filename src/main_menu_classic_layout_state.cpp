@@ -365,6 +365,6 @@ void MainMenuClassicPanelState::onJoystickAxisMoved(unsigned joystick, unsigned 
 
 void MainMenuClassicPanelState::onJoystickButtonPressed(unsigned joystick, unsigned button)
 {
-	if(button == 0)
+	if(button % 2 == 0)
 		this->onKeyPressed(Keyboard::KEY_ENTER);
 }

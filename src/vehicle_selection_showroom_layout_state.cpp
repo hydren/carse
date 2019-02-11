@@ -435,9 +435,9 @@ void VehicleSelectionShowroomLayoutState::onJoystickAxisMoved(unsigned joystick,
 
 void VehicleSelectionShowroomLayoutState::onJoystickButtonPressed(unsigned joystick, unsigned button)
 {
-	if(button == 0)
+	if(button % 2 == 0)
 		this->onKeyPressed(Keyboard::KEY_ENTER);
-	if(button == 1)
+	if(button % 2 == 1)
 		this->onKeyPressed(Keyboard::KEY_ESCAPE);
 }
 

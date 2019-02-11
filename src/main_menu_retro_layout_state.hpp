@@ -1,5 +1,5 @@
 /*
- * main_menu_classic_layout_state.hpp
+ * main_menu_retro_layout_state.hpp
  *
  *  Created on: 2 de ago de 2018
  *      Author: carlosfaruolo
@@ -18,7 +18,7 @@
 
 class CarseGame;
 
-class MainMenuClassicPanelState extends public fgeal::Game::State
+class MainMenuRetroLayoutState extends public fgeal::Game::State
 {
 	CarseGame& game;
 
@@ -67,8 +67,8 @@ class MainMenuClassicPanelState extends public fgeal::Game::State
 	void onMenuAccept();
 
 	public:
-	MainMenuClassicPanelState(CarseGame* game);
-	~MainMenuClassicPanelState();
+	MainMenuRetroLayoutState(CarseGame* game);
+	~MainMenuRetroLayoutState();
 
 	virtual int getId();
 

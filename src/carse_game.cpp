@@ -10,7 +10,7 @@
 // states
 #include "pseudo3d_race_state.hpp"
 #include "main_menu_simple_list_state.hpp"
-#include "main_menu_classic_layout_state.hpp"
+#include "main_menu_retro_layout_state.hpp"
 #include "vehicle_selection_simple_list_state.hpp"
 #include "vehicle_selection_showroom_layout_state.hpp"
 #include "course_selection_state.hpp"
@@ -39,7 +39,7 @@ void CarseGame::initialize()
 	if(not logic.raceOnlyMode)
 	{
 		this->addState(new MainMenuSimpleListState(this));
-		this->addState(new MainMenuClassicPanelState(this));
+		this->addState(new MainMenuRetroLayoutState(this));
 		this->addState(new VehicleSelectionSimpleListState(this));
 		this->addState(new VehicleSelectionShowroomLayoutState(this));
 		this->addState(new CourseSelectionState(this));

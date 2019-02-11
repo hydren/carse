@@ -1,11 +1,11 @@
 /*
- * main_menu_classic_layout_state.cpp
+ * main_menu_retro_layout_state.cpp
  *
  *  Created on: 2 de ago de 2018
  *      Author: carlosfaruolo
  */
 
-#include "main_menu_classic_layout_state.hpp"
+#include "main_menu_retro_layout_state.hpp"
 
 #include "carse_game.hpp"
 
@@ -21,9 +21,9 @@ using fgeal::Point;
 using fgeal::Keyboard;
 using fgeal::Mouse;
 
-int MainMenuClassicPanelState::getId() { return CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
+int MainMenuRetroLayoutState::getId() { return CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID; }
 
-MainMenuClassicPanelState::MainMenuClassicPanelState(CarseGame* game)
+MainMenuRetroLayoutState::MainMenuRetroLayoutState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(),
   imgBackground(null), imgRace(null), imgExit(null), imgSettings(null), imgCourse(null), imgVehicle(null),
   fntTitle(null), fntMain(null),
@@ -31,7 +31,7 @@ MainMenuClassicPanelState::MainMenuClassicPanelState(CarseGame* game)
   sndCursorMove(null), sndCursorIn(null), sndCursorOut(null)
 {}
 
-MainMenuClassicPanelState::~MainMenuClassicPanelState()
+MainMenuRetroLayoutState::~MainMenuRetroLayoutState()
 {
 	if(imgBackground != null) delete imgBackground;
 	if(imgRace != null) delete imgRace;
@@ -43,7 +43,7 @@ MainMenuClassicPanelState::~MainMenuClassicPanelState()
 	if(fntMain != null) delete fntMain;
 }
 
-void MainMenuClassicPanelState::initialize()
+void MainMenuRetroLayoutState::initialize()
 {
 	vecStrItems.push_back("Race!");
 	vecStrItems.push_back("Vehicle");
@@ -69,7 +69,7 @@ void MainMenuClassicPanelState::initialize()
 	strVersion = string("v")+CARSE_VERSION+" (fgeal v"+fgeal::VERSION+"/"+fgeal::ADAPTED_LIBRARY_NAME+" v"+fgeal::ADAPTED_LIBRARY_VERSION+")";
 }
 
-void MainMenuClassicPanelState::onEnter()
+void MainMenuRetroLayoutState::onEnter()
 {
 	Display& display = game.getDisplay();
 
@@ -139,10 +139,10 @@ void MainMenuClassicPanelState::onEnter()
 	ptVehiclePreview.y = slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h - 0.5*vspec.frameHeight * scaleVehiclePreview.y;
 }
 
-void MainMenuClassicPanelState::onLeave()
+void MainMenuRetroLayoutState::onLeave()
 {}
 
-void MainMenuClassicPanelState::render()
+void MainMenuRetroLayoutState::render()
 {
 	Display& display = game.getDisplay();
 	display.clear();
@@ -188,7 +188,7 @@ void MainMenuClassicPanelState::render()
 	game.sharedResources->fontDev.drawText(strVersion, 4, 4, Color::CREAM);
 }
 
-void MainMenuClassicPanelState::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
+void MainMenuRetroLayoutState::drawGridSlot(const fgeal::Rectangle& slot, const fgeal::Vector2D& margin, int index)
 {
 	const bool isSelected = (index == (int) selectedItemIndex);
 	fgeal::Graphics::drawFilledRectangle(slot.x, slot.y, slot.w, slot.h, Color::DARK_GREY);
@@ -197,7 +197,7 @@ void MainMenuClassicPanelState::drawGridSlot(const fgeal::Rectangle& slot, const
 	if(isSelected) fgeal::Graphics::drawRectangle(slot.x, slot.y, slot.w, slot.h, selectedSlotColor);
 }
 
-void MainMenuClassicPanelState::onMenuAccept()
+void MainMenuRetroLayoutState::onMenuAccept()
 {
 	switch(selectedItemIndex)
 	{
@@ -210,12 +210,12 @@ void MainMenuClassicPanelState::onMenuAccept()
 	}
 }
 
-void MainMenuClassicPanelState::update(float delta)
+void MainMenuRetroLayoutState::update(float delta)
 {
 	selectedSlotColor = cos(20*fgeal::uptime()) > 0? Color::RED : Color::MAROON;
 }
 
-void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
+void MainMenuRetroLayoutState::onKeyPressed(Keyboard::Key key)
 {
 	switch(key)
 	{
@@ -269,7 +269,7 @@ void MainMenuClassicPanelState::onKeyPressed(Keyboard::Key key)
 	}
 }
 
-void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x, int y)
+void MainMenuRetroLayoutState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
 	if(button != Mouse::BUTTON_LEFT)
 		return;
@@ -311,7 +311,7 @@ void MainMenuClassicPanelState::onMouseButtonPressed(Mouse::Button button, int x
 	}
 }
 
-void MainMenuClassicPanelState::onMouseMoved(int oldx, int oldy, int newx, int newy)
+void MainMenuRetroLayoutState::onMouseMoved(int oldx, int oldy, int newx, int newy)
 {
 	const Point pt = {(float) newx, (float) newy};
 	if(slotMenuItemRace.contains(pt) and selectedItemIndex != MENU_ITEM_RACE)
@@ -345,7 +345,7 @@ void MainMenuClassicPanelState::onMouseMoved(int oldx, int oldy, int newx, int n
 	}
 }
 
-void MainMenuClassicPanelState::onJoystickAxisMoved(unsigned joystick, unsigned axis, float oldValue, float newValue)
+void MainMenuRetroLayoutState::onJoystickAxisMoved(unsigned joystick, unsigned axis, float oldValue, float newValue)
 {
 	if(axis == 0)
 	{
@@ -363,7 +363,7 @@ void MainMenuClassicPanelState::onJoystickAxisMoved(unsigned joystick, unsigned 
 	}
 }
 
-void MainMenuClassicPanelState::onJoystickButtonPressed(unsigned joystick, unsigned button)
+void MainMenuRetroLayoutState::onJoystickButtonPressed(unsigned joystick, unsigned button)
 {
 	if(button % 2 == 0)
 		this->onKeyPressed(Keyboard::KEY_ENTER);

@@ -21,8 +21,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isTireBurnoutOccurring(false),
-  engineSoundProfile(), engineSound(),
-  spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null)
+  engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null)
 {}
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
@@ -31,10 +30,11 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isTireBurnoutOccurring(false),
-  engineSoundProfile(spec.soundProfile), engineSound(),
-  spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
+  engineSound(), spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
   sprites(), brakelightSprite(null), shadowSprite(null)
 {
+	engineSound.setProfile(spec.soundProfile, spec.engineMaximumRpm);
+
 	// update engine info data (optional)
 	body.engine.configuration = spec.engineConfiguration;
 	body.engine.aspiration = spec.engineAspiration;
@@ -62,19 +62,13 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
 
 Pseudo3DVehicle::~Pseudo3DVehicle()
 {
-	if(not engineSound.getSoundData().empty())
-	{
-		for(unsigned i = 0; i < engineSound.getSoundData().size(); i++)
-			delete engineSound.getSoundData()[i];
-
-		engineSound.getSoundData().clear();
-	}
-
 	clearDynamicData();
 }
 
 void Pseudo3DVehicle::clearDynamicData()
 {
+	engineSound.freeSoundData();
+
 	if(not sprites.empty())
 	{
 		delete sprites[0]->image;
@@ -94,7 +88,7 @@ void Pseudo3DVehicle::clearDynamicData()
 
 void Pseudo3DVehicle::setupDynamicData()
 {
-	engineSound.setProfile(engineSoundProfile, body.engine.maxRpm);
+	engineSound.loadSoundData();
 
 	fgeal::Image* sheet = new fgeal::Image(spriteSpec.sheetFilename);
 

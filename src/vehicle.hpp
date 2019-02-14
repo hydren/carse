@@ -47,7 +47,6 @@ struct Pseudo3DVehicle
 	bool isTireBurnoutOccurring;
 
 	// sound data
-	EngineSoundProfile engineSoundProfile;
 	EngineSoundSimulator engineSound;
 
 	// graphics data

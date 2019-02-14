@@ -48,8 +48,11 @@ class EngineSoundSimulator
 	// changes the current profile.
 	void setProfile(const EngineSoundProfile& profile, short simulatedMaximumRpm);
 
-	// changes the simulated maximum rpm (i.e. vehicle changed but profile is the same)
-	void setSimulatedMaximumRpm(short rpm);
+	// effectively loads sound data from files, as specified in the profile (any previously loaded data will be freed if it isn't shared)
+	void loadSoundData();
+
+	// free all sound data loaded by this simulator (if not shared by other objects)
+	void freeSoundData();
 
 	// gets the range index for the given RPM value
 	unsigned getRangeIndex(float currentRpm);
@@ -57,13 +60,14 @@ class EngineSoundSimulator
 	// use this for debug purposes
 	std::vector<fgeal::Sound*>& getSoundData();
 
-	// plays an idle engine sound
-	void playIdle();
+	// begins playing the simulated engine sound. initially, the idle engine sound is played.
+	void play();
 
-	// updates the current playing sound. if no sound is being played, it begins playing.
-	void updateSound(float currentRpm);
+	// updates the engine sound simulation to play the desired engine RPM. if no sound is being played, the simulator begins playing.
+	void update(float currentRpm);
 
-	void haltSound();
+	// stops all currently playing sounds from this simulator
+	void halt();
 
 	~EngineSoundSimulator();
 };

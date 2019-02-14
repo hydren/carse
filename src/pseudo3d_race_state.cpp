@@ -256,8 +256,6 @@ void Pseudo3DRaceState::onEnter()
 	if(playerVehicle.shadowSprite != null)
 		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
-	playerVehicle.engineSound.setProfile(playerVehicle.engineSoundProfile, playerVehicle.body.engine.maxRpm);
-
 	spriteSmokeLeft->scale.x =
 			spriteSmokeLeft->scale.y =
 					spriteSmokeRight->scale.x =
@@ -365,7 +363,7 @@ void Pseudo3DRaceState::onEnter()
 
 	course.minimap.roadColor = Color::GREY;
 	course.minimap.bounds.x = hudTimerCurrentLap.bounds.x;
-	course.minimap.bounds.y = 0.4*display.getHeight();
+	course.minimap.bounds.y = 0.3*display.getHeight();
 	course.minimap.bounds.w = 0.1*display.getWidth();
 	course.minimap.bounds.h = 0.1*display.getWidth();
 	course.minimap.scale = fgeal::Vector2D();
@@ -404,12 +402,12 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.isTireBurnoutOccurring = /*onAir = onLongAir =*/ false;
 
 	if(music != null) music->loop();
-	playerVehicle.engineSound.playIdle();
+	playerVehicle.engineSound.play();
 }
 
 void Pseudo3DRaceState::onLeave()
 {
-	playerVehicle.engineSound.haltSound();
+	playerVehicle.engineSound.halt();
 	if(music != null) music->stop();
 	sndSideslipBurnoutIntro->stop();
 	sndSideslipBurnoutLoop->stop();
@@ -832,7 +830,7 @@ void Pseudo3DRaceState::update(float delta)
 	while(playerVehicle.position < 0)
 		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
 
-	playerVehicle.engineSound.updateSound(playerVehicle.body.engine.rpm);
+	playerVehicle.engineSound.update(playerVehicle.body.engine.rpm);
 
 	const bool isPlayerWheelspinOccurring = (
 		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS

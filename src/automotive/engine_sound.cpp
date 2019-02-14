@@ -15,30 +15,32 @@ using fgeal::Sound;
 
 EngineSoundSimulator::~EngineSoundSimulator()
 {
-	for(unsigned i = 0; i < soundData.size(); i++)
-		delete soundData[i];
+	freeSoundData();
 }
 
 void EngineSoundSimulator::setProfile(const EngineSoundProfile& profile, short maxRpm)
+{
+	this->profile = profile;  // copies the profile (preserves the original intact)
+	this->simulatedMaximumRpm = maxRpm;
+}
+
+void EngineSoundSimulator::loadSoundData()
+{
+	if(not soundData.empty())
+		this->freeSoundData();
+
+	// loads sound data
+	for(unsigned i = 0; i < profile.ranges.size(); i++)
+		this->soundData.push_back(new Sound(profile.ranges[i].soundFilename));
+}
+
+void EngineSoundSimulator::freeSoundData()
 {
 	// cleanup
 	for(unsigned i = 0; i < soundData.size(); i++)
 		delete soundData[i];
 
 	this->soundData.clear();
-
-	this->profile = profile;  // copies the profile (preserves the original intact)
-
-	// loads sound data
-	for(unsigned i = 0; i < profile.ranges.size(); i++)
-		this->soundData.push_back(new Sound(profile.ranges[i].soundFilename));
-
-	this->simulatedMaximumRpm = maxRpm;
-}
-
-void EngineSoundSimulator::setSimulatedMaximumRpm(short rpm)
-{
-	this->simulatedMaximumRpm = rpm;
 }
 
 unsigned EngineSoundSimulator::getRangeIndex(float rpm)
@@ -56,13 +58,13 @@ vector<Sound*>& EngineSoundSimulator::getSoundData()
 	return soundData;
 }
 
-void EngineSoundSimulator::playIdle()
+void EngineSoundSimulator::play()
 {
 	if(not profile.ranges.empty())
-		updateSound(profile.ranges[0].startRpm+1);  //XXX this +1 may be unneccessary
+		update(profile.ranges[0].startRpm+1);  //XXX this +1 may be unneccessary
 }
 
-void EngineSoundSimulator::updateSound(float currentRpm)
+void EngineSoundSimulator::update(float currentRpm)
 {
 	const unsigned soundCount = soundData.size();
 	if(soundCount > 0 and currentRpm > 0) // its no use if there is no engine sound or rpm is too low
@@ -128,7 +130,7 @@ void EngineSoundSimulator::updateSound(float currentRpm)
 	}
 }
 
-void EngineSoundSimulator::haltSound()
+void EngineSoundSimulator::halt()
 {
 	for(unsigned i = 0; i < soundData.size(); i++)
 		soundData[i]->stop();

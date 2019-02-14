@@ -61,11 +61,11 @@ struct Pseudo3DVehicle
 
 	~Pseudo3DVehicle();
 
-	/** Disposes of dynamically loaded graphics and sounds. */
-	void clearDynamicData();
+	/** Loads graphics and sounds data. */
+	void loadAssetsData();
 
-	/** Loads dynamic graphics and sounds. */
-	void setupDynamicData();
+	/** Disposes of dynamically loaded graphics and sounds. */
+	void freeAssetsData();
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

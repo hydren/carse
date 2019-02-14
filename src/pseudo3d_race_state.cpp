@@ -216,9 +216,9 @@ void Pseudo3DRaceState::onEnter()
 	settings = game.logic.getNextRaceSettings();
 	simulationType = game.logic.getSimulationType();
 
-	course.clearDynamicData();
+	course.freeAssetsData();
 	course = Pseudo3DCourse(game.logic.getNextCourse());
-	course.setupDynamicData();
+	course.loadAssetsData();
 
 	course.drawAreaWidth = display.getWidth();
 	course.drawAreaHeight = display.getHeight();
@@ -243,9 +243,9 @@ void Pseudo3DRaceState::onEnter()
 	else
 		music = null;
 
-	playerVehicle.clearDynamicData();
+	playerVehicle.freeAssetsData();
 	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
-	playerVehicle.setupDynamicData();
+	playerVehicle.loadAssetsData();
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
 		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);

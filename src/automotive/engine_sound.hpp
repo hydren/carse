@@ -49,10 +49,10 @@ class EngineSoundSimulator
 	void setProfile(const EngineSoundProfile& profile, short simulatedMaximumRpm);
 
 	// effectively loads sound data from files, as specified in the profile (any previously loaded data will be freed if it isn't shared)
-	void loadSoundData();
+	void loadAssetsData();
 
 	// free all sound data loaded by this simulator (if not shared by other objects)
-	void freeSoundData();
+	void freeAssetsData();
 
 	// gets the range index for the given RPM value
 	unsigned getRangeIndex(float currentRpm);

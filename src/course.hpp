@@ -95,9 +95,9 @@ struct Pseudo3DCourse
 
 	void draw(int positionZ, int positionX);
 
-	void clearDynamicData();
+	void freeAssetsData();
 
-	void setupDynamicData();
+	void loadAssetsData();
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

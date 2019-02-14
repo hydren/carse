@@ -62,33 +62,12 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
 
 Pseudo3DVehicle::~Pseudo3DVehicle()
 {
-	clearDynamicData();
+	freeAssetsData();
 }
 
-void Pseudo3DVehicle::clearDynamicData()
+void Pseudo3DVehicle::loadAssetsData()
 {
-	engineSound.freeSoundData();
-
-	if(not sprites.empty())
-	{
-		delete sprites[0]->image;
-
-		for(unsigned i = 0; i < sprites.size(); i++)
-			delete sprites[i];
-
-		sprites.clear();
-	}
-
-	if(brakelightSprite != null)
-		delete brakelightSprite;
-
-	if(shadowSprite != null)
-		delete shadowSprite;
-}
-
-void Pseudo3DVehicle::setupDynamicData()
-{
-	engineSound.loadSoundData();
+	engineSound.loadAssetsData();
 
 	fgeal::Image* sheet = new fgeal::Image(spriteSpec.sheetFilename);
 
@@ -150,4 +129,25 @@ void Pseudo3DVehicle::setupDynamicData()
 
 		shadowSprite->scale = spriteSpec.scale;
 	}
+}
+
+void Pseudo3DVehicle::freeAssetsData()
+{
+	engineSound.freeAssetsData();
+
+	if(not sprites.empty())
+	{
+		delete sprites[0]->image;
+
+		for(unsigned i = 0; i < sprites.size(); i++)
+			delete sprites[i];
+
+		sprites.clear();
+	}
+
+	if(brakelightSprite != null)
+		delete brakelightSprite;
+
+	if(shadowSprite != null)
+		delete shadowSprite;
 }

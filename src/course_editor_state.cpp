@@ -490,9 +490,9 @@ void CourseEditorState::reloadFileList()
 
 void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 {
-	course.clearDynamicData();
+	course.freeAssetsData();
 	course = c;
-	course.setupDynamicData();
+	course.loadAssetsData();
 	course.drawAreaWidth = courseViewBounds.w;
 	course.drawAreaHeight = courseViewBounds.h;
 	course.drawDistance = 300;

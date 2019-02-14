@@ -15,7 +15,7 @@ using fgeal::Sound;
 
 EngineSoundSimulator::~EngineSoundSimulator()
 {
-	freeSoundData();
+	freeAssetsData();
 }
 
 void EngineSoundSimulator::setProfile(const EngineSoundProfile& profile, short maxRpm)
@@ -24,17 +24,17 @@ void EngineSoundSimulator::setProfile(const EngineSoundProfile& profile, short m
 	this->simulatedMaximumRpm = maxRpm;
 }
 
-void EngineSoundSimulator::loadSoundData()
+void EngineSoundSimulator::loadAssetsData()
 {
 	if(not soundData.empty())
-		this->freeSoundData();
+		this->freeAssetsData();
 
 	// loads sound data
 	for(unsigned i = 0; i < profile.ranges.size(); i++)
 		this->soundData.push_back(new Sound(profile.ranges[i].soundFilename));
 }
 
-void EngineSoundSimulator::freeSoundData()
+void EngineSoundSimulator::freeAssetsData()
 {
 	// cleanup
 	for(unsigned i = 0; i < soundData.size(); i++)

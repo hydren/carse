@@ -151,7 +151,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	}
 }
 
-void Pseudo3DCourse::clearDynamicData()
+void Pseudo3DCourse::freeAssetsData()
 {
 	if(not sprites.empty())
 	{
@@ -162,7 +162,7 @@ void Pseudo3DCourse::clearDynamicData()
 	}
 }
 
-void Pseudo3DCourse::setupDynamicData()
+void Pseudo3DCourse::loadAssetsData()
 {
 	for(unsigned i = 0; i < spec.spritesFilenames.size(); i++)
 		if(not spec.spritesFilenames[i].empty())

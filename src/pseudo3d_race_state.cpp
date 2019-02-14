@@ -1004,30 +1004,3 @@ bool Pseudo3DRaceState::isPlayerSteeringRight()
 	return Keyboard::isKeyPressed(controlKeyTurnRight)
 			or (Joystick::getCount() > 0 and Joystick::getAxisPosition(0, controlJoystickAxisTurn) > 0.2);
 }
-
-bool Pseudo3DRaceState::isRaceTypeLoop(RaceType t)
-{
-	return t == RACE_TYPE_LOOP_PRACTICE
-		or t == RACE_TYPE_LOOP_TIME_TRIAL
-		or t == RACE_TYPE_LOOP_TIME_ATTACK;
-}
-
-bool Pseudo3DRaceState::isRaceTypePointToPoint(RaceType t)
-{
-	return t == RACE_TYPE_POINT_TO_POINT_PRACTICE
-		or t == RACE_TYPE_POINT_TO_POINT_TIME_TRIAL;
-}
-
-string Pseudo3DRaceState::toString(Pseudo3DRaceState::RaceType type)
-{
-	switch(type)
-	{
-		case Pseudo3DRaceState::RACE_TYPE_DEBUG: 						return "Debug";
-		case Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE: 				return "Circuit - Practice";
-		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_TRIAL: 				return "Circuit - Time Trial";
-		case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK:				return "Circuit - Time Attack";
-		case Pseudo3DRaceState::RACE_TYPE_POINT_TO_POINT_PRACTICE:		return "Sprint - Practice";
-		case Pseudo3DRaceState::RACE_TYPE_POINT_TO_POINT_TIME_TRIAL:	return "Sprint - Time Trial";
-		default: return "???";
-	}
-}

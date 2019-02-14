@@ -82,7 +82,34 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		RACE_TYPE_COUNT
 	};
 
-	static std::string toString(Pseudo3DRaceState::RaceType type);
+	inline static std::string toString(Pseudo3DRaceState::RaceType type)
+	{
+		switch(type)
+		{
+			case Pseudo3DRaceState::RACE_TYPE_DEBUG: 						return "Debug";
+			case Pseudo3DRaceState::RACE_TYPE_LOOP_PRACTICE: 				return "Circuit - Practice";
+			case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_TRIAL: 				return "Circuit - Time Trial";
+			case Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK:				return "Circuit - Time Attack";
+			case Pseudo3DRaceState::RACE_TYPE_POINT_TO_POINT_PRACTICE:		return "Sprint - Practice";
+			case Pseudo3DRaceState::RACE_TYPE_POINT_TO_POINT_TIME_TRIAL:	return "Sprint - Time Trial";
+			default: return "???";
+		}
+	}
+
+	// returns true if the given race type is a loop-type
+	inline static bool isRaceTypeLoop(RaceType type)
+	{
+		return type == RACE_TYPE_LOOP_PRACTICE
+			or type == RACE_TYPE_LOOP_TIME_TRIAL
+			or type == RACE_TYPE_LOOP_TIME_ATTACK;
+	}
+
+	// returns true if the given race type is a point-to-point-type
+	inline static bool isRaceTypePointToPoint(RaceType type)
+	{
+		return type == RACE_TYPE_POINT_TO_POINT_PRACTICE
+			or type == RACE_TYPE_POINT_TO_POINT_TIME_TRIAL;
+	}
 
 	struct RaceSettings
 	{
@@ -179,12 +206,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	virtual void onKeyPressed(fgeal::Keyboard::Key);
 	virtual void onJoystickButtonPressed(unsigned joystick, unsigned button);
-
-	// returns true if the given race type is a loop-type
-	static bool isRaceTypeLoop(RaceType type);
-
-	// returns true if the given race type is a point-to-point-type
-	static bool isRaceTypePointToPoint(RaceType type);
 
 	private:
 	void handlePhysics(float delta);

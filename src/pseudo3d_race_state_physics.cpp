@@ -131,6 +131,11 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	if(parallax.x > 0)
 		parallax.x -= imgBackground->getWidth();
+
+	foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, trafficVehicles)
+	{
+		trafficVehicle.body.updatePowertrain(delta);
+	}
 }
 
 void Pseudo3DRaceState::shiftGear(int gear)

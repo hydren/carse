@@ -99,6 +99,8 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 		else spritesFilenames.push_back(string());
 	}
 
+	trafficCount = prop.getParsedCStrAllowDefault<int, atoi>("traffic_count", 0);
+
 	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
 	lines.resize(length);
 

@@ -11,13 +11,17 @@
 
 #include "util.hpp"
 
+#include "futil/random.h"
+
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 
 using std::string;
 using std::map;
+using std::vector;
 
 using fgeal::Display;
 using fgeal::Image;
@@ -243,6 +247,37 @@ void Pseudo3DRaceState::onEnter()
 	else
 		music = null;
 
+	if(not trafficVehicles.empty())
+		trafficVehicles.clear();
+
+	if(course.spec.trafficCount > 0)
+	{
+		const Pseudo3DVehicle::Spec spec = Pseudo3DVehicle::Spec::createFromFile("data/traffic/civilian1.properties");
+		vector<Pseudo3DVehicle*> baseVehicles(spec.alternateSprites.size()+1, null);
+
+		for(unsigned i = 0; i < course.spec.trafficCount; i++)
+		{
+			const int skinIndex = spec.alternateSprites.empty()? -1 : futil::random_between(-1, spec.alternateSprites.size());
+			trafficVehicles.push_back(Pseudo3DVehicle(spec, skinIndex));
+			Pseudo3DVehicle& trafficVehicle = trafficVehicles.back();
+
+			if(baseVehicles[skinIndex+1] == null)
+			{
+				trafficVehicle.loadAssetsData();
+				baseVehicles[skinIndex+1] = &trafficVehicle;
+			}
+			else
+				trafficVehicle.loadAssetsData(baseVehicles[skinIndex+1]);
+
+			trafficVehicle.position = futil::random_between(500, course.spec.lines.size());
+			trafficVehicle.horizontalPosition = futil::random_between_decimal(-3, 3);
+			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.3);
+
+			for(unsigned s = 0; s < trafficVehicle.sprites.size(); s++)
+				trafficVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		}
+	}
+
 	playerVehicle.freeAssetsData();
 	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
 	playerVehicle.loadAssetsData();
@@ -435,16 +470,25 @@ void Pseudo3DRaceState::render()
 
 	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
-	fgeal::Graphics::drawFilledRoundedRectangle(course.minimap.bounds, 5, hudMiniMapBgColor);
-
-	course.minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
-
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord
 			0.75f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
 	};
 
 	drawVehicle(playerVehicle, vehicleSpritePosition);
+
+	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
+	{
+		const fgeal::Point pos = {
+				0.5f*displayWidth + trafficVehicle.horizontalPosition + playerVehicle.horizontalPosition,  // x coord
+				0.75f*displayHeight - trafficVehicle.verticalPosition*0.01f  // y coord
+		};
+
+		drawVehicle(trafficVehicle, pos);
+	}
+
+	fgeal::Graphics::drawFilledRoundedRectangle(course.minimap.bounds, 5, hudMiniMapBgColor);
+	course.minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));
 	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);

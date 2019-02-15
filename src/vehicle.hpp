@@ -61,11 +61,22 @@ struct Pseudo3DVehicle
 
 	~Pseudo3DVehicle();
 
-	/** Loads graphics and sounds data. */
-	void loadAssetsData();
+	/** Loads the graphic assets' data from the filesystem. The 'optionalBaseVehicle' argument can be passed to use its sprite data instead of loading the assets again.  */
+	void loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null);
 
-	/** Disposes of dynamically loaded graphics and sounds. */
+	/** Loads the sound assets' data from the filesystem. The 'optionalBaseVehicle' argument can be passed to use its sound data instead of loading the assets again.  */
+	void loadSoundAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null);
+
+	inline void loadAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null) {
+		loadGraphicAssetsData(optionalBaseVehicle);
+		loadSoundAssetsData(optionalBaseVehicle);
+	}
+
+	/** Disposes of loaded graphics and sounds assets. */
 	void freeAssetsData();
+
+	private:
+	bool spriteAssetsAreShared, soundAssetsAreShared;
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

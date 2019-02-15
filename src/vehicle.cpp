@@ -21,7 +21,8 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isTireBurnoutOccurring(false),
-  engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null)
+  engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null),
+  spriteAssetsAreShared(false), soundAssetsAreShared(false)
 {}
 
 Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex)
@@ -31,7 +32,8 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isTireBurnoutOccurring(false),
   engineSound(), spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
-  sprites(), brakelightSprite(null), shadowSprite(null)
+  sprites(), brakelightSprite(null), shadowSprite(null),
+  spriteAssetsAreShared(false), soundAssetsAreShared(false)
 {
 	engineSound.setProfile(spec.soundProfile, spec.engineMaximumRpm);
 
@@ -65,89 +67,116 @@ Pseudo3DVehicle::~Pseudo3DVehicle()
 	freeAssetsData();
 }
 
-void Pseudo3DVehicle::loadAssetsData()
+void Pseudo3DVehicle::loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseVehicle)
 {
-	engineSound.loadAssetsData();
-
-	fgeal::Image* sheet = new fgeal::Image(spriteSpec.sheetFilename);
-
-	if(sheet->getWidth() < (int) spriteSpec.frameWidth)
-		throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
-
-	for(unsigned i = 0; i < spriteSpec.stateCount; i++)
+	if(optionalBaseVehicle != null and spriteSpec.sheetFilename == optionalBaseVehicle->spriteSpec.sheetFilename)
 	{
-		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
-									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
-									0, i*spriteSpec.frameHeight);
-
-		sprite->scale = spriteSpec.scale;
-		sprite->referencePixelY = - (int) spriteSpec.contactOffset;
-		sprites.push_back(sprite);
+		sprites = optionalBaseVehicle->sprites;
+		brakelightSprite = optionalBaseVehicle->brakelightSprite;
+		shadowSprite = optionalBaseVehicle->shadowSprite;
+		spriteAssetsAreShared = true;
 	}
-
-	if(spriteSpec.asymmetrical) for(unsigned i = 1; i < spriteSpec.stateCount; i++)
+	else
 	{
-		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
-									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
-									0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
+		fgeal::Image* sheet = new fgeal::Image(spriteSpec.sheetFilename);
 
-		sprite->scale = spriteSpec.scale;
-		sprite->referencePixelY = - (int) spriteSpec.contactOffset;
-		sprites.push_back(sprite);
-	}
+		if(sheet->getWidth() < (int) spriteSpec.frameWidth)
+			throw std::runtime_error("Invalid sprite width value. Value is smaller than sprite sheet width (no whole sprites could be draw)");
 
-	if(not spriteSpec.brakelightsSheetFilename.empty())
-	{
-		fgeal::Image* brakelightSpriteImage = new fgeal::Image(spriteSpec.brakelightsSheetFilename);
-		if(spriteSpec.brakelightsMultipleSprites)
-			brakelightSprite = new fgeal::Sprite(
-				brakelightSpriteImage,
-				brakelightSpriteImage->getWidth(),
-				brakelightSpriteImage->getHeight()/spriteSpec.stateCount,
+		for(unsigned i = 0; i < spriteSpec.stateCount; i++)
+		{
+			fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
+										spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
+										0, i*spriteSpec.frameHeight);
+
+			sprite->scale = spriteSpec.scale;
+			sprite->referencePixelY = - (int) spriteSpec.contactOffset;
+			sprites.push_back(sprite);
+		}
+
+		if(spriteSpec.asymmetrical) for(unsigned i = 1; i < spriteSpec.stateCount; i++)
+		{
+			fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
+										spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
+										0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
+
+			sprite->scale = spriteSpec.scale;
+			sprite->referencePixelY = - (int) spriteSpec.contactOffset;
+			sprites.push_back(sprite);
+		}
+
+		if(not spriteSpec.brakelightsSheetFilename.empty())
+		{
+			fgeal::Image* brakelightSpriteImage = new fgeal::Image(spriteSpec.brakelightsSheetFilename);
+			if(spriteSpec.brakelightsMultipleSprites)
+				brakelightSprite = new fgeal::Sprite(
+					brakelightSpriteImage,
+					brakelightSpriteImage->getWidth(),
+					brakelightSpriteImage->getHeight()/spriteSpec.stateCount,
+					-1, spriteSpec.stateCount, 0, 0, true
+				);
+			else
+				brakelightSprite = new fgeal::Sprite(
+					brakelightSpriteImage,
+					brakelightSpriteImage->getWidth(),
+					brakelightSpriteImage->getHeight()
+					-1, -1, 0, 0, true
+				);
+
+			brakelightSprite->scale = spriteSpec.brakelightsSpriteScale;
+		}
+
+		if(not spriteSpec.shadowSheetFilename.empty())
+		{
+			fgeal::Image* shadowSpriteImage = new fgeal::Image(spriteSpec.shadowSheetFilename);
+			shadowSprite = new fgeal::Sprite(
+				shadowSpriteImage,
+				shadowSpriteImage->getWidth(),
+				shadowSpriteImage->getHeight()/spriteSpec.stateCount,
 				-1, spriteSpec.stateCount, 0, 0, true
 			);
-		else
-			brakelightSprite = new fgeal::Sprite(
-				brakelightSpriteImage,
-				brakelightSpriteImage->getWidth(),
-				brakelightSpriteImage->getHeight()
-				-1, -1, 0, 0, true
-			);
 
-		brakelightSprite->scale = spriteSpec.brakelightsSpriteScale;
+			shadowSprite->scale = spriteSpec.scale;
+		}
+		spriteAssetsAreShared = false;
 	}
+}
 
-	if(not spriteSpec.shadowSheetFilename.empty())
+void Pseudo3DVehicle::loadSoundAssetsData(const Pseudo3DVehicle* optionalBaseVehicle)
+{
+	if(optionalBaseVehicle != null)
 	{
-		fgeal::Image* shadowSpriteImage = new fgeal::Image(spriteSpec.shadowSheetFilename);
-		shadowSprite = new fgeal::Sprite(
-			shadowSpriteImage,
-			shadowSpriteImage->getWidth(),
-			shadowSpriteImage->getHeight()/spriteSpec.stateCount,
-			-1, spriteSpec.stateCount, 0, 0, true
-		);
-
-		shadowSprite->scale = spriteSpec.scale;
+		engineSound = optionalBaseVehicle->engineSound;
+		soundAssetsAreShared = true;
+	}
+	else
+	{
+		engineSound.loadAssetsData();
+		soundAssetsAreShared = false;
 	}
 }
 
 void Pseudo3DVehicle::freeAssetsData()
 {
-	engineSound.freeAssetsData();
+	if(not soundAssetsAreShared)
+		engineSound.freeAssetsData();
 
-	if(not sprites.empty())
+	if(not spriteAssetsAreShared)
 	{
-		delete sprites[0]->image;
+		if(not sprites.empty())
+		{
+			delete sprites[0]->image;
 
-		for(unsigned i = 0; i < sprites.size(); i++)
-			delete sprites[i];
+			for(unsigned i = 0; i < sprites.size(); i++)
+				delete sprites[i];
 
-		sprites.clear();
+			sprites.clear();
+		}
+
+		if(brakelightSprite != null)
+			delete brakelightSprite;
+
+		if(shadowSprite != null)
+			delete shadowSprite;
 	}
-
-	if(brakelightSprite != null)
-		delete brakelightSprite;
-
-	if(shadowSprite != null)
-		delete shadowSprite;
 }

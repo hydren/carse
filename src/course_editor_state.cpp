@@ -214,13 +214,13 @@ void CourseEditorState::onEnter()
 
 	focus = ON_EDITOR;
 
-	course.minimap.roadColor = Color::RED;
-	course.minimap.roadContrastColorEnabled = true;
-	course.minimap.segmentHighlightColor = Color::YELLOW;
-	course.minimap.offset.x = 0.5*mapBounds.w;
-	course.minimap.offset.y = 0.5*mapBounds.h;
-	course.minimap.scale.x = course.minimap.scale.y = 1.f;
-	course.minimap.bounds = mapBounds;
+	map.roadColor = Color::RED;
+	map.roadContrastColorEnabled = true;
+	map.segmentHighlightColor = Color::YELLOW;
+	map.offset.x = 0.5*mapBounds.w;
+	map.offset.y = 0.5*mapBounds.h;
+	map.scale.x = map.scale.y = 1.f;
+	map.bounds = mapBounds;
 
 	this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
 }
@@ -242,7 +242,7 @@ void CourseEditorState::render()
 
 	// Map
 	Graphics::drawFilledRectangle(mapBounds, Color::DARK_GREEN);
-	course.minimap.drawMap();
+	map.drawMap();
 	font->drawText("Course editor", courseEditorTitlePosition, Color::WHITE);
 
 	// Tools panel
@@ -305,53 +305,53 @@ void CourseEditorState::update(float delta)
 {
 	if(focus == ON_EDITOR)
 	{
-		const Point oldOffset = course.minimap.offset;
+		const Point oldOffset = map.offset;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_UP))
-			course.minimap.offset.y -= 100*delta/course.minimap.scale.y;
+			map.offset.y -= 100*delta/map.scale.y;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_DOWN))
-			course.minimap.offset.y += 100*delta/course.minimap.scale.y;
+			map.offset.y += 100*delta/map.scale.y;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_LEFT))
-			course.minimap.offset.x -= 100*delta/course.minimap.scale.x;
+			map.offset.x -= 100*delta/map.scale.x;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_ARROW_RIGHT))
-			course.minimap.offset.x += 100*delta/course.minimap.scale.x;
+			map.offset.x += 100*delta/map.scale.x;
 
-		const Vector2D oldScale = course.minimap.scale;
+		const Vector2D oldScale = map.scale;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_Q))
-			course.minimap.scale.y *= 1+delta;
+			map.scale.y *= 1+delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_A))
-			course.minimap.scale.y *= 1-delta;
+			map.scale.y *= 1-delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_X))
-			course.minimap.scale.x *= 1+delta;
+			map.scale.x *= 1+delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_Z))
-			course.minimap.scale.x *= 1-delta;
+			map.scale.x *= 1-delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_E))
-			course.minimap.scale *= 1+delta;
+			map.scale *= 1+delta;
 
 		if(Keyboard::isKeyPressed(Keyboard::KEY_S))
-			course.minimap.scale *= 1-delta;
+			map.scale *= 1-delta;
 
-		if(course.minimap.scale.x != oldScale.x)
-			course.minimap.offset.x *= oldScale.x/course.minimap.scale.x;
+		if(map.scale.x != oldScale.x)
+			map.offset.x *= oldScale.x/map.scale.x;
 
-		if(course.minimap.scale.y != oldScale.y)
-			course.minimap.offset.y *= oldScale.y/course.minimap.scale.y;
+		if(map.scale.y != oldScale.y)
+			map.offset.y *= oldScale.y/map.scale.y;
 
-		if(course.minimap.scale != oldScale or scaleIndicatorText.empty() or course.minimap.offset != oldOffset)
+		if(map.scale != oldScale or scaleIndicatorText.empty() or map.offset != oldOffset)
 		{
 			scaleIndicatorText = "Zoom: x=";
-			scaleIndicatorText.append(futil::to_string(course.minimap.scale.x));
+			scaleIndicatorText.append(futil::to_string(map.scale.x));
 			scaleIndicatorText.append(", y=");
-			scaleIndicatorText.append(futil::to_string(course.minimap.scale.y));
-			course.minimap.compile();
+			scaleIndicatorText.append(futil::to_string(map.scale.y));
+			map.compile();
 		}
 	}
 }
@@ -498,13 +498,14 @@ void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
 
-	course.minimap.roadColor = Color::RED;
-	course.minimap.roadContrastColorEnabled = true;
-	course.minimap.segmentHighlightColor = Color::YELLOW;
-	course.minimap.offset.x = 0.5*mapBounds.w;
-	course.minimap.offset.y = 0.5*mapBounds.h;
-	course.minimap.scale = Point();
-	course.minimap.bounds = mapBounds;
+	map.spec = course.spec;
+	map.roadColor = Color::RED;
+	map.roadContrastColorEnabled = true;
+	map.segmentHighlightColor = Color::YELLOW;
+	map.offset.x = 0.5*mapBounds.w;
+	map.offset.y = 0.5*mapBounds.h;
+	map.scale = Point();
+	map.bounds = mapBounds;
 	scaleIndicatorText.clear();
 
 	focus = ON_EDITOR;

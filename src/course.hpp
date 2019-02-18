@@ -78,6 +78,7 @@ struct Pseudo3DCourse
 		float segmentHighlightSize;
 		bool roadContrastColorEnabled, geometryOtimizationEnabled;
 
+		Map();
 		Map(const Spec& spec);
 
 		void compile();
@@ -88,9 +89,6 @@ struct Pseudo3DCourse
 		std::vector<fgeal::Point> cache;
 		std::vector<float> cacheLenght;
 	};
-
-	// mini map drawing parameters
-	Map minimap;
 
 	Pseudo3DCourse();
 	Pseudo3DCourse(Spec spec);

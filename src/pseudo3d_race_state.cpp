@@ -72,8 +72,6 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
-  course(), playerVehicle(),
-
   hudDialTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
@@ -228,6 +226,8 @@ void Pseudo3DRaceState::onEnter()
 	course.drawAreaHeight = display.getHeight();
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
+
+	minimap = Pseudo3DCourse::Map(course.spec);
 
 	if(imgBackground != null)
 		delete imgBackground;
@@ -397,15 +397,15 @@ void Pseudo3DRaceState::onEnter()
 	}
 	hudDialTachometer.compile();
 
-	course.minimap.roadColor = Color::GREY;
-	course.minimap.bounds.x = hudTimerCurrentLap.bounds.x;
-	course.minimap.bounds.y = 0.3*display.getHeight();
-	course.minimap.bounds.w = 0.1*display.getWidth();
-	course.minimap.bounds.h = 0.1*display.getWidth();
-	course.minimap.scale = fgeal::Vector2D();
-	course.minimap.segmentHighlightColor = Color::YELLOW;
-	course.minimap.segmentHighlightSize = 0.005f*display.getWidth();
-	course.minimap.geometryOtimizationEnabled = true;
+	minimap.roadColor = Color::GREY;
+	minimap.bounds.x = hudTimerCurrentLap.bounds.x;
+	minimap.bounds.y = 0.3*display.getHeight();
+	minimap.bounds.w = 0.1*display.getWidth();
+	minimap.bounds.h = 0.1*display.getWidth();
+	minimap.scale = fgeal::Vector2D();
+	minimap.segmentHighlightColor = Color::YELLOW;
+	minimap.segmentHighlightSize = 0.005f*display.getWidth();
+	minimap.geometryOtimizationEnabled = true;
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{
@@ -488,8 +488,8 @@ void Pseudo3DRaceState::render()
 		drawVehicle(trafficVehicle, pos);
 	}
 
-	fgeal::Graphics::drawFilledRoundedRectangle(course.minimap.bounds, 5, hudMiniMapBgColor);
-	course.minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
+	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
+	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));
 	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);

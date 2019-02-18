@@ -42,6 +42,9 @@ class CourseEditorState extends public fgeal::Game::State
 	// the course being edited
 	Pseudo3DCourse course;
 
+	// map being displayed
+	Pseudo3DCourse::Map map;
+
 	// the area being used to draw the course map
 	fgeal::Rectangle mapBounds;
 	fgeal::Point courseEditorTitlePosition;

@@ -252,6 +252,7 @@ void Pseudo3DRaceState::onEnter()
 
 	if(course.spec.trafficCount > 0)
 	{
+		trafficVehicles.reserve(course.spec.trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
 		const Pseudo3DVehicle::Spec spec = Pseudo3DVehicle::Spec::createFromFile("data/traffic/civilian1.properties");
 		vector<Pseudo3DVehicle*> baseVehicles(spec.alternateSprites.size()+1, null);
 

@@ -19,11 +19,6 @@
 #include <ctime>
 #include <cstdlib>
 
-// XXX DEBUG
-#include <iostream>
-using std::cout;
-using std::endl;
-
 using std::string;
 using std::map;
 using std::vector;
@@ -260,22 +255,31 @@ void Pseudo3DRaceState::onEnter()
 	if(course.spec.trafficCount > 0)
 	{
 		trafficVehicles.reserve(course.spec.trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
-		const Pseudo3DVehicle::Spec spec = Pseudo3DVehicle::Spec::createFromFile("data/traffic/suv1.properties");
-		vector<Pseudo3DVehicle*> baseVehicles(spec.alternateSprites.size()+1, null);
+		Pseudo3DVehicle::Spec carSpec, suvSpec;
+		carSpec.loadFromFile("data/traffic/car1.properties");
+		suvSpec.loadFromFile("data/traffic/suv1.properties");
+
+		// used to point to the vehicle instances that will "own" its respective assets and share with other vehicles with same spec/skin
+		vector<Pseudo3DVehicle*> sharedVehicleCar(carSpec.alternateSprites.size()+1, null),
+								 sharedVehicleSuv(suvSpec.alternateSprites.size()+1, null);
 
 		for(unsigned i = 0; i < course.spec.trafficCount; i++)
 		{
+			const bool useSUV = (rand() % 2 == 0);
+			const Pseudo3DVehicle::Spec& spec = useSUV? suvSpec : carSpec;  // grab chosen spec
+			vector<Pseudo3DVehicle*>& sharedVehicles = useSUV? sharedVehicleSuv : sharedVehicleCar;  // grab list of "base" vehicles to use their assets
 			const int skinIndex = spec.alternateSprites.empty()? -1 : futil::random_between(-1, spec.alternateSprites.size());
 			trafficVehicles.push_back(Pseudo3DVehicle(spec, skinIndex));
 			Pseudo3DVehicle& trafficVehicle = trafficVehicles.back();
 
-			if(baseVehicles[skinIndex+1] == null)
+			// if first instance of this spec/skin, load assets and record a pointer
+			if(sharedVehicles[skinIndex+1] == null)
 			{
 				trafficVehicle.loadAssetsData();
-				baseVehicles[skinIndex+1] = &trafficVehicle;
+				sharedVehicles[skinIndex+1] = &trafficVehicle;
 			}
-			else
-				trafficVehicle.loadAssetsData(baseVehicles[skinIndex+1]);
+			else  // if repeated spec/skin, use assets from other ("base") vehicle
+				trafficVehicle.loadAssetsData(sharedVehicles[skinIndex+1]);
 
 			trafficVehicle.position = futil::random_between(500, course.spec.lines.size());
 			trafficVehicle.horizontalPosition = futil::random_between_decimal(-1, 1)*coursePositionFactor;
@@ -858,9 +862,6 @@ void Pseudo3DRaceState::update(float delta)
 	}
 	else if(sndRunningOnDirtLoop->isPlaying())
 		sndRunningOnDirtLoop->stop();
-
-//	for(unsigned v = 0; v < trafficVehicles.size(); v++)
-//		cout << "physics: traffic " << v << " is at pos " << trafficVehicles[v].position << " and offset " << trafficVehicles[v].horizontalPosition << endl;
 }
 
 void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)

@@ -13,11 +13,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <iostream>
-using std::cout;
-using std::endl;
-//XXX DEBUG
-
 using std::string;
 using fgeal::Vector2D;
 using fgeal::Point;
@@ -239,9 +234,6 @@ void Pseudo3DVehicle::draw(const fgeal::Point& p, float angle, float distanceSca
 
 		shadowSprite->scale = originalScale;
 	}
-
-	cout << spriteSpec.sheetFilename << "\nx=" << vehicleSpritePosition.x << "\ny=" << vehicleSpritePosition.y
-		 << " \nscale: " << sprite.scale.toString() << "\n=======================================" <<  endl;
 
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
 

@@ -15,11 +15,6 @@
 #include <cmath>
 #include <iterator>
 
-// XXX DEBUG
-#include <iostream>
-using std::cout;
-using std::endl;
-
 using std::string;
 using std::vector;
 using fgeal::Image;
@@ -158,14 +153,10 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    if(trafficVehicles != null) for(unsigned v = 0; v < trafficVehicles->size(); v++)
 	    {
 	    	Pseudo3DVehicle& trafficVehicle = trafficVehicles->at(v);
-
-//	    	cout << "course: traffic " << v << " is at " << trafficVehicle.position << endl;  //XXX DEBUG
-
 			if(trafficVehicle.position == n)
 			{
 				const Point pt = {lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2, destY};
 				trafficVehicle.draw(pt, 0, lt.W/150);
-				cout << "course: traffic " << v << " being draw at " << pt.x << ", " << pt.y << " scale: " << (lt.W/150) << endl;  //XXX DEBUG
 			}
 	    }
 	}

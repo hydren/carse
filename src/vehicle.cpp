@@ -13,7 +13,17 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <iostream>
+using std::cout;
+using std::endl;
+//XXX DEBUG
+
 using std::string;
+using fgeal::Vector2D;
+using fgeal::Point;
+using fgeal::Image;
+using fgeal::Sprite;
+
 
 Pseudo3DVehicle::Pseudo3DVehicle()
 : body(Engine(), Mechanics::TYPE_OTHER),
@@ -21,7 +31,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isTireBurnoutOccurring(false),
-  engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null),
+  engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null), smokeSprite(null),
   spriteAssetsAreShared(false), soundAssetsAreShared(false)
 {}
 
@@ -32,7 +42,7 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
   isTireBurnoutOccurring(false),
   engineSound(), spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
-  sprites(), brakelightSprite(null), shadowSprite(null),
+  sprites(), brakelightSprite(null), shadowSprite(null), smokeSprite(null),
   spriteAssetsAreShared(false), soundAssetsAreShared(false)
 {
 	engineSound.setProfile(spec.soundProfile, spec.engineMaximumRpm);
@@ -74,6 +84,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseV
 		sprites = optionalBaseVehicle->sprites;
 		brakelightSprite = optionalBaseVehicle->brakelightSprite;
 		shadowSprite = optionalBaseVehicle->shadowSprite;
+		smokeSprite = optionalBaseVehicle->smokeSprite;
 		spriteAssetsAreShared = true;
 	}
 	else
@@ -178,5 +189,121 @@ void Pseudo3DVehicle::freeAssetsData()
 
 		if(shadowSprite != null)
 			delete shadowSprite;
+
+		if(smokeSprite != null)
+			delete smokeSprite;
 	}
+}
+
+void Pseudo3DVehicle::draw(const fgeal::Point& p, float angle, float distanceScale)
+{
+	unsigned animationIndex = 0;
+	for(unsigned i = 1; i < spriteSpec.stateCount; i++)
+		if(fabs(angle) >= spriteSpec.depictedTurnAngle[i])
+			animationIndex = i;
+
+	const bool isLeanRight = (angle > 0 and animationIndex != 0);
+
+	// if asymmetrical, right-leaning sprites are after all left-leaning ones
+	if(isLeanRight and spriteSpec.asymmetrical)
+		animationIndex += (spriteSpec.stateCount-1);
+
+	Sprite& sprite = *sprites[animationIndex];
+	sprite.flipmode = isLeanRight and not spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
+//	sprite.duration = body.speed != 0? 0.1*400.0/(body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
+	sprite.duration = spriteSpec.frameDuration / sqrt(body.speed);  // this formula doesn't present good tire animation results.
+//	sprite.duration = body.speed != 0? 2.0*M_PI*body.tireRadius/(body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
+	sprite.computeCurrentFrame();
+
+	const Vector2D originalSpriteScale = sprite.scale;
+	sprite.scale *= distanceScale;
+
+	const Point vehicleSpritePosition =
+		{ p.x - 0.5f*sprite.scale.x*spriteSpec.frameWidth,
+		  p.y - 0.5f*sprite.scale.y*spriteSpec.frameHeight
+			  - sprite.scale.y*spriteSpec.contactOffset };
+
+	if(shadowSprite != null)
+	{
+		const Vector2D originalScale = shadowSprite->scale;
+		shadowSprite->scale *= distanceScale;
+
+		const Point& shadowPosition = spriteSpec.shadowPositions[animationIndex];
+		shadowSprite->currentFrameSequenceIndex = animationIndex;
+		shadowSprite->flipmode = sprite.flipmode;
+
+		shadowSprite->draw(
+			vehicleSpritePosition.x + shadowPosition.x * sprite.scale.x,
+			vehicleSpritePosition.y + shadowPosition.y * sprite.scale.y
+		);
+
+		shadowSprite->scale = originalScale;
+	}
+
+	cout << spriteSpec.sheetFilename << "\nx=" << vehicleSpritePosition.x << "\ny=" << vehicleSpritePosition.y
+		 << " \nscale: " << sprite.scale.toString() << "\n=======================================" <<  endl;
+
+	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
+
+	if(body.brakePedalPosition > 0 and brakelightSprite != null)
+	{
+		const Vector2D originalScale = brakelightSprite->scale;
+		brakelightSprite->scale *= distanceScale;
+
+		if(spriteSpec.brakelightsMultipleSprites)
+			brakelightSprite->currentFrameSequenceIndex = animationIndex;
+
+		const float scaledBrakelightPositionX = spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
+					scaledBrakelightPositionY = spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,
+					scaledBrakelightOffsetX = spriteSpec.brakelightsOffset.x * brakelightSprite->scale.x,
+					scaledBrakelightOffsetY = spriteSpec.brakelightsOffset.y * brakelightSprite->scale.y,
+					scaledTurnOffset = (spriteSpec.brakelightsPositions[animationIndex].x - spriteSpec.brakelightsPositions[0].x)*sprite.scale.x,
+					scaledFlipOffset = sprite.flipmode != Image::FLIP_HORIZONTAL? 0 : 2*scaledTurnOffset;
+
+		if(not spriteSpec.brakelightsMirrowed)
+			brakelightSprite->flipmode = sprite.flipmode;
+
+		brakelightSprite->draw(
+			vehicleSpritePosition.x + scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX,
+			vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
+		);
+
+		if(spriteSpec.brakelightsMirrowed)
+		{
+			const float scaledFrameWidth = spriteSpec.frameWidth*sprite.scale.x;
+
+			brakelightSprite->draw(
+				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX + 2*scaledTurnOffset,
+				vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
+			);
+		}
+
+		brakelightSprite->scale = originalScale;
+	}
+
+	if(isTireBurnoutOccurring and smokeSprite != null)
+	{
+		const Vector2D originalScale = smokeSprite->scale;
+		smokeSprite->scale *= distanceScale;
+
+		const float maxDepictedTurnAngle = spriteSpec.depictedTurnAngle.size() < 2? 0 : spriteSpec.depictedTurnAngle.back();
+
+		const Point smokeSpritePosition = {
+				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - spriteSpec.depictedVehicleWidth) - smokeSprite->width*smokeSprite->scale.x)
+				+ ((angle > 0? -1.f : 1.f)*10.f*animationIndex*maxDepictedTurnAngle),
+				vehicleSpritePosition.y + sprite.height*sprite.scale.y - smokeSprite->height*smokeSprite->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
+		};
+
+		// left smoke
+		smokeSprite->computeCurrentFrame();
+		smokeSprite->draw(smokeSpritePosition.x, smokeSpritePosition.y);
+
+		// right smoke
+		smokeSprite->computeCurrentFrame();
+		smokeSprite->draw(smokeSpritePosition.x + spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
+
+		smokeSprite->scale = originalScale;
+	}
+
+	sprite.scale = originalSpriteScale;
 }

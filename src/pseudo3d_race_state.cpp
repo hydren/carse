@@ -19,6 +19,11 @@
 #include <ctime>
 #include <cstdlib>
 
+// XXX DEBUG
+#include <iostream>
+using std::cout;
+using std::endl;
+
 using std::string;
 using std::map;
 using std::vector;
@@ -226,6 +231,7 @@ void Pseudo3DRaceState::onEnter()
 	course.drawAreaHeight = display.getHeight();
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
+	course.coursePositionFactor = coursePositionFactor;
 
 	minimap = Pseudo3DCourse::Map(course.spec);
 
@@ -249,11 +255,12 @@ void Pseudo3DRaceState::onEnter()
 
 	if(not trafficVehicles.empty())
 		trafficVehicles.clear();
+	course.trafficVehicles = null;
 
 	if(course.spec.trafficCount > 0)
 	{
 		trafficVehicles.reserve(course.spec.trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
-		const Pseudo3DVehicle::Spec spec = Pseudo3DVehicle::Spec::createFromFile("data/traffic/civilian1.properties");
+		const Pseudo3DVehicle::Spec spec = Pseudo3DVehicle::Spec::createFromFile("data/traffic/suv1.properties");
 		vector<Pseudo3DVehicle*> baseVehicles(spec.alternateSprites.size()+1, null);
 
 		for(unsigned i = 0; i < course.spec.trafficCount; i++)
@@ -271,12 +278,14 @@ void Pseudo3DRaceState::onEnter()
 				trafficVehicle.loadAssetsData(baseVehicles[skinIndex+1]);
 
 			trafficVehicle.position = futil::random_between(500, course.spec.lines.size());
-			trafficVehicle.horizontalPosition = futil::random_between_decimal(-3, 3);
+			trafficVehicle.horizontalPosition = futil::random_between_decimal(-1, 1)*coursePositionFactor;
 			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.3);
 
 			for(unsigned s = 0; s < trafficVehicle.sprites.size(); s++)
 				trafficVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 		}
+
+		course.trafficVehicles = &trafficVehicles;
 	}
 
 	playerVehicle.freeAssetsData();
@@ -476,17 +485,7 @@ void Pseudo3DRaceState::render()
 			0.75f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
 	};
 
-	drawVehicle(playerVehicle, vehicleSpritePosition);
-
-	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
-	{
-		const fgeal::Point pos = {
-				0.5f*displayWidth + trafficVehicle.horizontalPosition + playerVehicle.horizontalPosition,  // x coord
-				0.75f*displayHeight - trafficVehicle.verticalPosition*0.01f  // y coord
-		};
-
-		drawVehicle(trafficVehicle, pos);
-	}
+	playerVehicle.draw(vehicleSpritePosition, playerVehicle.pseudoAngle);
 
 	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
@@ -690,99 +689,6 @@ void Pseudo3DRaceState::render()
 	}
 }
 
-void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const Point& p)
-{
-	unsigned animationIndex = 0;
-	for(unsigned i = 1; i < vehicle.spriteSpec.stateCount; i++)
-		if(fabs(vehicle.pseudoAngle) >= vehicle.spriteSpec.depictedTurnAngle[i])
-			animationIndex = i;
-
-	const bool isLeanRight = (vehicle.pseudoAngle > 0 and animationIndex != 0);
-
-	// if asymmetrical, right-leaning sprites are after all left-leaning ones
-	if(isLeanRight and vehicle.spriteSpec.asymmetrical)
-		animationIndex += (vehicle.spriteSpec.stateCount-1);
-
-	Sprite& sprite = *vehicle.sprites[animationIndex];
-	sprite.flipmode = isLeanRight and not vehicle.spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = vehicle.body.speed != 0? 0.1*400.0/(vehicle.body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = vehicle.spriteSpec.frameDuration / sqrt(vehicle.body.speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = vehicle.body.speed != 0? 2.0*M_PI*vehicle.body.tireRadius/(vehicle.body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
-	sprite.computeCurrentFrame();
-
-	const Point vehicleSpritePosition =
-		{ p.x - 0.5f*sprite.scale.x*vehicle.spriteSpec.frameWidth,
-		  p.y - 0.5f*sprite.scale.y*vehicle.spriteSpec.frameHeight
-			  - sprite.scale.y*vehicle.spriteSpec.contactOffset };
-
-	if(vehicle.shadowSprite != null)
-	{
-		const Point& shadowPosition = vehicle.spriteSpec.shadowPositions[animationIndex];
-		vehicle.shadowSprite->currentFrameSequenceIndex = animationIndex;
-		vehicle.shadowSprite->flipmode = sprite.flipmode;
-
-		vehicle.shadowSprite->draw(
-			vehicleSpritePosition.x + shadowPosition.x * sprite.scale.x,
-			vehicleSpritePosition.y + shadowPosition.y * sprite.scale.y
-		);
-	}
-
-	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
-
-	if(vehicle.isTireBurnoutOccurring)
-	{
-		const float maxDepictedTurnAngle = vehicle.spriteSpec.depictedTurnAngle.size() < 2? 0 : vehicle.spriteSpec.depictedTurnAngle.back();
-
-		const Point smokeSpritePosition = {
-				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteSpec.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
-				+ ((vehicle.pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*maxDepictedTurnAngle),
-				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
-		};
-
-		spriteSmokeLeft->computeCurrentFrame();
-		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
-
-		spriteSmokeRight->computeCurrentFrame();
-		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
-	}
-
-	if(vehicle.body.brakePedalPosition > 0 and vehicle.brakelightSprite != null)
-	{
-		if(vehicle.spriteSpec.brakelightsMultipleSprites)
-			vehicle.brakelightSprite->currentFrameSequenceIndex = animationIndex;
-
-		const float scaledBrakelightPositionX = vehicle.spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
-					scaledBrakelightPositionY = vehicle.spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,
-					scaledBrakelightOffsetX = vehicle.spriteSpec.brakelightsOffset.x * vehicle.brakelightSprite->scale.x,
-					scaledBrakelightOffsetY = vehicle.spriteSpec.brakelightsOffset.y * vehicle.brakelightSprite->scale.y,
-					scaledTurnOffset = (vehicle.spriteSpec.brakelightsPositions[animationIndex].x - vehicle.spriteSpec.brakelightsPositions[0].x)*sprite.scale.x,
-					scaledFlipOffset = sprite.flipmode != Image::FLIP_HORIZONTAL? 0 : 2*scaledTurnOffset;
-
-		if(not vehicle.spriteSpec.brakelightsMirrowed)
-			vehicle.brakelightSprite->flipmode = sprite.flipmode;
-
-		vehicle.brakelightSprite->draw(
-			vehicleSpritePosition.x + scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX,
-			vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
-		);
-
-		if(vehicle.spriteSpec.brakelightsMirrowed)
-		{
-			const float scaledFrameWidth = vehicle.spriteSpec.frameWidth*sprite.scale.x;
-
-			vehicle.brakelightSprite->draw(
-				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX + 2*scaledTurnOffset,
-				vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
-			);
-		}
-	}
-}
-
-void Pseudo3DRaceState::drawVehicleShadow()
-{
-	//todo draw vehicle shadow here
-}
-
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
 
 void Pseudo3DRaceState::update(float delta)
@@ -952,6 +858,9 @@ void Pseudo3DRaceState::update(float delta)
 	}
 	else if(sndRunningOnDirtLoop->isPlaying())
 		sndRunningOnDirtLoop->stop();
+
+//	for(unsigned v = 0; v < trafficVehicles.size(); v++)
+//		cout << "physics: traffic " << v << " is at pos " << trafficVehicles[v].position << " and offset " << trafficVehicles[v].horizontalPosition << endl;
 }
 
 void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)

@@ -13,6 +13,10 @@
 
 #include "fgeal/fgeal.hpp"
 
+#include "vehicle.hpp"
+
+#include <vector>
+
 struct Pseudo3DCourse
 {
 	struct Spec extends CourseSpec
@@ -62,13 +66,6 @@ struct Pseudo3DCourse
 		void saveSegments(const std::string& filename);
 	};
 
-	Spec spec;
-	std::vector<fgeal::Image*> sprites;
-
-	int drawAreaWidth, drawAreaHeight;
-	unsigned drawDistance;
-	float cameraDepth;
-
 	struct Map
 	{
 		Spec spec;
@@ -89,6 +86,16 @@ struct Pseudo3DCourse
 		std::vector<fgeal::Point> cache;
 		std::vector<float> cacheLenght;
 	};
+
+	Spec spec;
+	std::vector<fgeal::Image*> sprites;
+
+	int drawAreaWidth, drawAreaHeight;
+	unsigned drawDistance;
+	float cameraDepth;
+
+	float coursePositionFactor;
+	std::vector<Pseudo3DVehicle>* trafficVehicles;
 
 	Pseudo3DCourse();
 	Pseudo3DCourse(Spec spec);

@@ -52,7 +52,7 @@ struct Pseudo3DVehicle
 	// graphics data
 	Pseudo3DVehicleAnimationSpec spriteSpec;
 	std::vector<fgeal::Sprite*> sprites;
-	fgeal::Sprite* brakelightSprite, *shadowSprite;
+	fgeal::Sprite* brakelightSprite, *shadowSprite, *smokeSprite;
 
 	Pseudo3DVehicle();  // zero constructor
 
@@ -74,6 +74,9 @@ struct Pseudo3DVehicle
 
 	/** Disposes of loaded graphics and sounds assets. */
 	void freeAssetsData();
+
+	/** Draws this vehicle at the given position. The 'angle' argument specifies the angle to be depicted. The 'distanceScale' specifies how far the vehicle is depicted. */
+	void draw(const fgeal::Point& p, float angle=0, float distanceScale=1);
 
 	private:
 	bool spriteAssetsAreShared, soundAssetsAreShared;

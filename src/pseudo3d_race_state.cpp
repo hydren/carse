@@ -260,14 +260,14 @@ void Pseudo3DRaceState::onEnter()
 		suvSpec.loadFromFile("data/traffic/suv1.properties");
 
 		// used to point to the vehicle instances that will "own" its respective assets and share with other vehicles with same spec/skin
-		vector<Pseudo3DVehicle*> sharedVehicleCar(carSpec.alternateSprites.size()+1, null),
-								 sharedVehicleSuv(suvSpec.alternateSprites.size()+1, null);
+		vector<Pseudo3DVehicle*> sharedVehiclesCar(carSpec.alternateSprites.size()+1, null),
+								 sharedVehiclesSuv(suvSpec.alternateSprites.size()+1, null);
 
 		for(unsigned i = 0; i < course.spec.trafficCount; i++)
 		{
 			const bool useSUV = (rand() % 2 == 0);
 			const Pseudo3DVehicle::Spec& spec = useSUV? suvSpec : carSpec;  // grab chosen spec
-			vector<Pseudo3DVehicle*>& sharedVehicles = useSUV? sharedVehicleSuv : sharedVehicleCar;  // grab list of "base" vehicles to use their assets
+			vector<Pseudo3DVehicle*>& sharedVehicles = useSUV? sharedVehiclesSuv : sharedVehiclesCar;  // grab list of "base" vehicles to use their assets
 			const int skinIndex = spec.alternateSprites.empty()? -1 : futil::random_between(-1, spec.alternateSprites.size());
 			trafficVehicles.push_back(Pseudo3DVehicle(spec, skinIndex));
 			Pseudo3DVehicle& trafficVehicle = trafficVehicles.back();
@@ -284,10 +284,18 @@ void Pseudo3DRaceState::onEnter()
 			trafficVehicle.position = futil::random_between(500, course.spec.lines.size());
 			trafficVehicle.horizontalPosition = futil::random_between_decimal(-1, 1)*coursePositionFactor;
 			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.3);
-
-			for(unsigned s = 0; s < trafficVehicle.sprites.size(); s++)
-				trafficVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 		}
+
+		// apply screen scale to traffic sprites
+		foreach(Pseudo3DVehicle*, sharedVehicle, vector<Pseudo3DVehicle*>, sharedVehiclesCar)
+			if(sharedVehicle != null)
+				foreach(Sprite*, sprite, vector<Sprite*>, sharedVehicle->sprites)
+					sprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+
+		foreach(Pseudo3DVehicle*, sharedVehicle, vector<Pseudo3DVehicle*>, sharedVehiclesSuv)
+			if(sharedVehicle != null)
+				foreach(Sprite*, sprite, vector<Sprite*>, sharedVehicle->sprites)
+					sprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
 		course.trafficVehicles = &trafficVehicles;
 	}

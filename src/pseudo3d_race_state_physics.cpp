@@ -135,6 +135,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, trafficVehicles)
 	{
 		trafficVehicle.body.updatePowertrain(delta);
+//		trafficVehicle.position += playerVehicle.body.speed*delta;  // update position
 	}
 }
 

@@ -132,7 +132,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 			Image& s = *sprites[l.spriteID];
 			const int w = s.getWidth(), h = s.getHeight();
 
-			const float scale = lt.W/w,
+			const float scale = lt.W/150,
 						destW = w*scale,
 						destH = h*scale;
 			float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
@@ -151,14 +151,13 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				s.drawScaledRegion(destX, destY, scale, scale, Image::FLIP_NONE, 0, 0, sw, sh);
 		}
 
-	    if(trafficVehicles != null) for(unsigned v = 0; v < trafficVehicles->size(); v++)
+		if(trafficVehicles != null) foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, *trafficVehicles)
 	    {
-	    	Pseudo3DVehicle& trafficVehicle = trafficVehicles->at(v);
 			if(trafficVehicle.position == n)
 			{
 				const int w = trafficVehicle.spriteSpec.frameWidth, h = trafficVehicle.spriteSpec.frameHeight;
 
-				const float scale = lt.W/w,
+				const float scale = lt.W/150,
 							destW = w*scale,
 							destH = h*scale;
 				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;

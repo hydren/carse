@@ -226,7 +226,6 @@ void Pseudo3DRaceState::onEnter()
 	course.drawAreaHeight = display.getHeight();
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
-	course.coursePositionFactor = coursePositionFactor;
 
 	minimap = Pseudo3DCourse::Map(course.spec);
 

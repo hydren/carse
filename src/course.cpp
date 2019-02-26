@@ -28,13 +28,13 @@ using futil::random_between_decimal;
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
   drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
-  coursePositionFactor(), trafficVehicles(null)
+  trafficVehicles(null)
 {}
 
 Pseudo3DCourse::Pseudo3DCourse(Spec spec)
 : spec(spec), sprites(),
   drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
-  coursePositionFactor(), trafficVehicles(null)
+  trafficVehicles(null)
 {}
 
 //custom call to draw quad

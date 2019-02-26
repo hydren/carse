@@ -281,10 +281,13 @@ void Pseudo3DRaceState::onEnter()
 				trafficVehicle.loadAssetsData(sharedVehicles[skinIndex+1]);
 
 			// random parameters
-			trafficVehicle.position = futil::random_between(500, course.spec.lines.size());
+			trafficVehicle.position = futil::random_between_decimal(0.1, 0.9) * course.spec.roadSegmentLength * course.spec.lines.size();
 //			trafficVehicle.horizontalPosition = futil::random_between_decimal(-3, 3);
 			trafficVehicle.horizontalPosition = 2;
-			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.2);
+			trafficVehicle.body.simulationType = simulationType;
+			trafficVehicle.body.reset();
+			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.5, 0.8);
+			trafficVehicle.body.automaticShiftingEnabled = true;
 		}
 
 		// apply screen scale to traffic sprites

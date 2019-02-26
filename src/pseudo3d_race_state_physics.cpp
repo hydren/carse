@@ -134,8 +134,10 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, trafficVehicles)
 	{
+		trafficVehicle.body.rollingResistanceFactor = ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
+		trafficVehicle.body.tireFrictionFactor = TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT;
 		trafficVehicle.body.updatePowertrain(delta);
-//		trafficVehicle.position += playerVehicle.body.speed*delta;  // update position
+		trafficVehicle.position += coursePositionFactor*trafficVehicle.body.speed*delta;  // update position
 	}
 }
 

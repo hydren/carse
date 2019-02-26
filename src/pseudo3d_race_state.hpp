@@ -47,7 +47,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Point parallax;
 	float backgroundScale;
 
+	// value used to convert physics position to course segment position
 	float coursePositionFactor;
+
 	Mechanics::SimulationType simulationType;
 
 	bool onSceneIntro, onSceneFinish;

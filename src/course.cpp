@@ -153,7 +153,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 		if(trafficVehicles != null) foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, *trafficVehicles)
 	    {
-			if(trafficVehicle.position == n)
+			if((static_cast<unsigned>(trafficVehicle.position/spec.roadSegmentLength))%N == n)
 			{
 				const int w = trafficVehicle.spriteSpec.frameWidth, h = trafficVehicle.spriteSpec.frameHeight;
 

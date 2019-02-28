@@ -156,7 +156,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    {
 			if((static_cast<unsigned>(trafficVehicle.position/spec.roadSegmentLength))%N == n)
 			{
-				const int w = trafficVehicle.spriteSpec.frameWidth,
+				const int w = trafficVehicle.spriteSpec.frameWidth * trafficVehicle.sprites.back()->scale.x,
 						  h = trafficVehicle.spriteSpec.frameHeight * trafficVehicle.sprites.back()->scale.y;
 
 				const float scale = lt.W/150,
@@ -165,6 +165,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;
 				float destY = lt.Y + 4;
 
+				destX += scale * trafficVehicle.horizontalPosition;  // offsetX
 				destY += destH * (-0.5);  // offsetY
 
 				const Point pt = { destX, destY };

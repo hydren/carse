@@ -130,16 +130,17 @@ void Pseudo3DCourse::draw(int pos, int posX)
 		if(l.spriteID != -1)
 		{
 			Image& s = *sprites[l.spriteID];
-			const int w = s.getWidth(), h = s.getHeight();
+			const int w = s.getWidth(),
+					  h = s.getHeight();
 
 			const float scale = lt.W/150,
-						destW = w*scale,
-						destH = h*scale;
+				  destW = w*scale,
+				  destH = h*scale;
 			float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
 			float destY = lt.Y + 4;
 
-			destX += destW * l.spriteX; //offsetX
-			destY += destH * (-1);    //offsetY
+			destX += destW * l.spriteX;  // offsetX
+			destY += destH * (-1);  // offsetY
 
 			float clipH = destY+destH-l.clip;
 			if(clipH < 0)
@@ -151,17 +152,20 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				s.drawScaledRegion(destX, destY, scale, scale, Image::FLIP_NONE, 0, 0, sw, sh);
 		}
 
-		if(trafficVehicles != null) foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, *trafficVehicles)
+		if(trafficVehicles != null) foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, *trafficVehicles)
 	    {
 			if((static_cast<unsigned>(trafficVehicle.position/spec.roadSegmentLength))%N == n)
 			{
-				const int w = trafficVehicle.spriteSpec.frameWidth, h = trafficVehicle.spriteSpec.frameHeight;
+				const int w = trafficVehicle.spriteSpec.frameWidth,
+						  h = trafficVehicle.spriteSpec.frameHeight * trafficVehicle.sprites.back()->scale.y;
 
 				const float scale = lt.W/150,
-							destW = w*scale,
-							destH = h*scale;
+					  destW = w*scale,
+					  destH = h*scale;
 				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;
 				float destY = lt.Y + 4;
+
+				destY += destH * (-0.5);  // offsetY
 
 				const Point pt = { destX, destY };
 				trafficVehicle.draw(pt, 0, scale);

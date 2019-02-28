@@ -498,7 +498,7 @@ void Pseudo3DRaceState::render()
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord
-			0.75f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
+			0.825f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
 	};
 
 	playerVehicle.draw(vehicleSpritePosition, playerVehicle.pseudoAngle);

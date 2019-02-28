@@ -215,7 +215,7 @@ void Pseudo3DVehicle::draw(const fgeal::Point& p, float angle, float distanceSca
 
 	const Point vehicleSpritePosition = {
 		p.x - sprite.scale.x * 0.5f * spriteSpec.frameWidth,
-		p.y - sprite.scale.y * 0.5f * spriteSpec.frameHeight - sprite.scale.y * spriteSpec.contactOffset
+		p.y - sprite.scale.y * spriteSpec.frameHeight + sprite.scale.y * spriteSpec.contactOffset
 	};
 
 	if(shadowSprite != null)

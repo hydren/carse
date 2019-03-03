@@ -496,12 +496,7 @@ void Pseudo3DRaceState::render()
 
 	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
-	const fgeal::Point vehicleSpritePosition = {
-			0.5f*displayWidth,  // x coord
-			0.825f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
-	};
-
-	playerVehicle.draw(vehicleSpritePosition, playerVehicle.pseudoAngle);
+	playerVehicle.draw(0.5f*displayWidth, 0.825f*displayHeight - playerVehicle.verticalPosition*0.01f, playerVehicle.pseudoAngle);
 
 	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);

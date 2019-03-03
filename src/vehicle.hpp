@@ -76,7 +76,7 @@ struct Pseudo3DVehicle
 	void freeAssetsData();
 
 	/** Draws this vehicle at the given position. The 'angle' argument specifies the angle to be depicted. The 'distanceScale' specifies how far the vehicle is depicted. */
-	void draw(const fgeal::Point& p, float angle=0, float distanceScale=1);
+	void draw(float x, float y, float angle=0, float distanceScale=1);
 
 	private:
 	bool spriteAssetsAreShared, soundAssetsAreShared;

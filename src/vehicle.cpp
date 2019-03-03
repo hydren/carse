@@ -190,7 +190,7 @@ void Pseudo3DVehicle::freeAssetsData()
 	}
 }
 
-void Pseudo3DVehicle::draw(const fgeal::Point& p, float angle, float distanceScale)
+void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale)
 {
 	unsigned animationIndex = 0;
 	for(unsigned i = 1; i < spriteSpec.stateCount; i++)
@@ -214,8 +214,8 @@ void Pseudo3DVehicle::draw(const fgeal::Point& p, float angle, float distanceSca
 	sprite.scale *= distanceScale;
 
 	const Point vehicleSpritePosition = {
-		p.x - sprite.scale.x * 0.5f * spriteSpec.frameWidth,
-		p.y - sprite.scale.y * spriteSpec.frameHeight + sprite.scale.y * spriteSpec.contactOffset
+		x - sprite.scale.x * 0.5f * spriteSpec.frameWidth,
+		y - sprite.scale.y * spriteSpec.frameHeight + sprite.scale.y * spriteSpec.contactOffset
 	};
 
 	if(shadowSprite != null)

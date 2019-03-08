@@ -501,7 +501,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	spec.scale.y = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spec.scale.y;  // if y-scale factor is available, override previous definition
 
 	key = "sprite_contact_offset";
-	spec.contactOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 0;
+	spec.contactOffset = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 2;
 
 	spec.asymmetrical = false;
 	key = "sprite_asymmetric";

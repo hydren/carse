@@ -184,7 +184,7 @@ void Pseudo3DVehicle::draw(float px, float py, float angle, float distanceScale)
 
 	const Point vehicleSpritePosition = {
 		px - sprite.scale.x * 0.5f * spriteSpec.frameWidth,
-		py - sprite.scale.y * 0.5f * spriteSpec.frameHeight - sprite.scale.y * spriteSpec.contactOffset
+		py - sprite.scale.y * spriteSpec.frameHeight + sprite.scale.y * spriteSpec.contactOffset
 	};
 
 	if(shadowSprite != null)

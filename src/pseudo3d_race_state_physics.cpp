@@ -77,8 +77,8 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	}
 	else playerVehicle.pseudoAngle *= 1/(1+5*delta);
 
-	if(playerVehicle.pseudoAngle > PSEUDO_ANGLE_MAX) playerVehicle.pseudoAngle = PSEUDO_ANGLE_MAX;
-	if(playerVehicle.pseudoAngle <-PSEUDO_ANGLE_MAX) playerVehicle.pseudoAngle =-PSEUDO_ANGLE_MAX;
+	if(fabs(playerVehicle.pseudoAngle) > PSEUDO_ANGLE_MAX)
+		playerVehicle.pseudoAngle = PSEUDO_ANGLE_MAX * sgn(playerVehicle.pseudoAngle);
 
 	// update strafing
 	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * coursePositionFactor;

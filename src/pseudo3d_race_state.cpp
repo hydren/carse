@@ -60,7 +60,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
-  spriteSmokeLeft(null), spriteSmokeRight(null),
+  spriteSmoke(null),
 
   parallax(), backgroundScale(),
 
@@ -117,8 +117,8 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(sndCountdownBuzzer != null) delete sndCountdownBuzzer;
 	if(sndCountdownBuzzerFinal != null) delete sndCountdownBuzzerFinal;
 
-	if(spriteSmokeLeft != null) delete spriteSmokeLeft;
-	if(spriteSmokeRight != null) delete spriteSmokeRight;
+	if(spriteSmoke != null) delete spriteSmoke;
+	playerVehicle.smokeSprite = null;
 }
 
 void Pseudo3DRaceState::initialize()
@@ -141,10 +141,7 @@ void Pseudo3DRaceState::initialize()
 	sndCountdownBuzzer->setVolume(0.8);
 	sndCountdownBuzzerFinal->setVolume(0.8);
 
-	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
-	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
-	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
-	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
+	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, -1, 0, 0, true);
 
 	hudDialTachometer.borderThickness = 6;
 	hudDialTachometer.graduationLevel = 2;
@@ -245,9 +242,11 @@ void Pseudo3DRaceState::onEnter()
 	else
 		music = null;
 
+	playerVehicle.smokeSprite = null;
 	playerVehicle.freeAssetsData();
 	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
 	playerVehicle.loadAssetsData();
+	playerVehicle.smokeSprite = spriteSmoke;
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
 		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
@@ -258,10 +257,7 @@ void Pseudo3DRaceState::onEnter()
 	if(playerVehicle.shadowSprite != null)
 		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
-	spriteSmokeLeft->scale.x =
-			spriteSmokeLeft->scale.y =
-					spriteSmokeRight->scale.x =
-							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
+	spriteSmoke->scale.x = spriteSmoke->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
@@ -440,12 +436,7 @@ void Pseudo3DRaceState::render()
 	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
-	const fgeal::Point vehicleSpritePosition = {
-			0.5f*displayWidth,  // x coord
-			0.75f*displayHeight - playerVehicle.verticalPosition*0.01f  // y coord
-	};
-
-	drawVehicle(playerVehicle, vehicleSpritePosition);
+	playerVehicle.draw(0.5f * displayWidth, 0.75f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
 
 	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));
 	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
@@ -644,99 +635,6 @@ void Pseudo3DRaceState::render()
 			fontSmall->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*fontSmall->getHeight(), fgeal::Color::WHITE);
 		}
 	}
-}
-
-void Pseudo3DRaceState::drawVehicle(const Pseudo3DVehicle& vehicle, const Point& p)
-{
-	unsigned animationIndex = 0;
-	for(unsigned i = 1; i < vehicle.spriteSpec.stateCount; i++)
-		if(fabs(vehicle.pseudoAngle) >= vehicle.spriteSpec.depictedTurnAngle[i])
-			animationIndex = i;
-
-	const bool isLeanRight = (vehicle.pseudoAngle > 0 and animationIndex != 0);
-
-	// if asymmetrical, right-leaning sprites are after all left-leaning ones
-	if(isLeanRight and vehicle.spriteSpec.asymmetrical)
-		animationIndex += (vehicle.spriteSpec.stateCount-1);
-
-	Sprite& sprite = *vehicle.sprites[animationIndex];
-	sprite.flipmode = isLeanRight and not vehicle.spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = vehicle.body.speed != 0? 0.1*400.0/(vehicle.body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = vehicle.spriteSpec.frameDuration / sqrt(vehicle.body.speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = vehicle.body.speed != 0? 2.0*M_PI*vehicle.body.tireRadius/(vehicle.body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
-	sprite.computeCurrentFrame();
-
-	const Point vehicleSpritePosition =
-		{ p.x - 0.5f*sprite.scale.x*vehicle.spriteSpec.frameWidth,
-		  p.y - 0.5f*sprite.scale.y*vehicle.spriteSpec.frameHeight
-			  - sprite.scale.y*vehicle.spriteSpec.contactOffset };
-
-	if(vehicle.shadowSprite != null)
-	{
-		const Point& shadowPosition = vehicle.spriteSpec.shadowPositions[animationIndex];
-		vehicle.shadowSprite->currentFrameSequenceIndex = animationIndex;
-		vehicle.shadowSprite->flipmode = sprite.flipmode;
-
-		vehicle.shadowSprite->draw(
-			vehicleSpritePosition.x + shadowPosition.x * sprite.scale.x,
-			vehicleSpritePosition.y + shadowPosition.y * sprite.scale.y
-		);
-	}
-
-	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
-
-	if(vehicle.isTireBurnoutOccurring)
-	{
-		const float maxDepictedTurnAngle = vehicle.spriteSpec.depictedTurnAngle.size() < 2? 0 : vehicle.spriteSpec.depictedTurnAngle.back();
-
-		const Point smokeSpritePosition = {
-				vehicleSpritePosition.x + 0.5f*(sprite.scale.x*(sprite.width - vehicle.spriteSpec.depictedVehicleWidth) - spriteSmokeLeft->width*spriteSmokeLeft->scale.x)
-				+ ((vehicle.pseudoAngle > 0? -1.f : 1.f)*10.f*animationIndex*maxDepictedTurnAngle),
-				vehicleSpritePosition.y + sprite.height*sprite.scale.y - spriteSmokeLeft->height*spriteSmokeLeft->scale.y  // should have included ` - sprite.offset*sprite.scale.x`, but don't look good
-		};
-
-		spriteSmokeLeft->computeCurrentFrame();
-		spriteSmokeLeft->draw(smokeSpritePosition.x, smokeSpritePosition.y);
-
-		spriteSmokeRight->computeCurrentFrame();
-		spriteSmokeRight->draw(smokeSpritePosition.x + vehicle.spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
-	}
-
-	if(vehicle.body.brakePedalPosition > 0 and vehicle.brakelightSprite != null)
-	{
-		if(vehicle.spriteSpec.brakelightsMultipleSprites)
-			vehicle.brakelightSprite->currentFrameSequenceIndex = animationIndex;
-
-		const float scaledBrakelightPositionX = vehicle.spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
-					scaledBrakelightPositionY = vehicle.spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,
-					scaledBrakelightOffsetX = vehicle.spriteSpec.brakelightsOffset.x * vehicle.brakelightSprite->scale.x,
-					scaledBrakelightOffsetY = vehicle.spriteSpec.brakelightsOffset.y * vehicle.brakelightSprite->scale.y,
-					scaledTurnOffset = (vehicle.spriteSpec.brakelightsPositions[animationIndex].x - vehicle.spriteSpec.brakelightsPositions[0].x)*sprite.scale.x,
-					scaledFlipOffset = sprite.flipmode != Image::FLIP_HORIZONTAL? 0 : 2*scaledTurnOffset;
-
-		if(not vehicle.spriteSpec.brakelightsMirrowed)
-			vehicle.brakelightSprite->flipmode = sprite.flipmode;
-
-		vehicle.brakelightSprite->draw(
-			vehicleSpritePosition.x + scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX,
-			vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
-		);
-
-		if(vehicle.spriteSpec.brakelightsMirrowed)
-		{
-			const float scaledFrameWidth = vehicle.spriteSpec.frameWidth*sprite.scale.x;
-
-			vehicle.brakelightSprite->draw(
-				vehicleSpritePosition.x + scaledFrameWidth - scaledBrakelightPositionX - scaledFlipOffset + scaledBrakelightOffsetX + 2*scaledTurnOffset,
-				vehicleSpritePosition.y + scaledBrakelightPositionY + scaledBrakelightOffsetY
-			);
-		}
-	}
-}
-
-void Pseudo3DRaceState::drawVehicleShadow()
-{
-	//todo draw vehicle shadow here
 }
 
 static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%

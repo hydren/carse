@@ -42,7 +42,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 				 *sndJumpImpact, *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
 
 	fgeal::Color bgColor, bgColorHorizon;
-	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
+	fgeal::Sprite* spriteSmoke;
 
 	fgeal::Point parallax;
 	float backgroundScale;
@@ -211,9 +211,6 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	private:
 	void handlePhysics(float delta);
-
-	void drawVehicle(const Pseudo3DVehicle&, const fgeal::Point&);
-	void drawVehicleShadow();
 
 	void shiftGear(int gear);
 

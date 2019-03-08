@@ -225,6 +225,8 @@ void Pseudo3DRaceState::onEnter()
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
 
+	minimap = Pseudo3DCourse::Map(course.spec);
+
 	if(imgBackground != null)
 		delete imgBackground;
 
@@ -361,15 +363,15 @@ void Pseudo3DRaceState::onEnter()
 	}
 	hudDialTachometer.compile();
 
-	course.minimap.roadColor = Color::GREY;
-	course.minimap.bounds.x = hudTimerCurrentLap.bounds.x;
-	course.minimap.bounds.y = 0.3*display.getHeight();
-	course.minimap.bounds.w = 0.1*display.getWidth();
-	course.minimap.bounds.h = 0.1*display.getWidth();
-	course.minimap.scale = fgeal::Vector2D();
-	course.minimap.segmentHighlightColor = Color::YELLOW;
-	course.minimap.segmentHighlightSize = 0.005f*display.getWidth();
-	course.minimap.geometryOtimizationEnabled = true;
+	minimap.roadColor = Color::GREY;
+	minimap.bounds.x = hudTimerCurrentLap.bounds.x;
+	minimap.bounds.y = 0.3*display.getHeight();
+	minimap.bounds.w = 0.1*display.getWidth();
+	minimap.bounds.h = 0.1*display.getWidth();
+	minimap.scale = fgeal::Vector2D();
+	minimap.segmentHighlightColor = Color::YELLOW;
+	minimap.segmentHighlightSize = 0.005f*display.getWidth();
+	minimap.geometryOtimizationEnabled = true;
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
 	{
@@ -435,9 +437,8 @@ void Pseudo3DRaceState::render()
 
 	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
-	fgeal::Graphics::drawFilledRoundedRectangle(course.minimap.bounds, 5, hudMiniMapBgColor);
-
-	course.minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
+	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
+	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	const fgeal::Point vehicleSpritePosition = {
 			0.5f*displayWidth,  // x coord

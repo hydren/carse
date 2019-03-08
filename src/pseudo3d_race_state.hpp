@@ -134,6 +134,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Pseudo3DVehicle playerVehicle;
 
+	Pseudo3DCourse::Map minimap;
+
 	Hud::DialGauge<float> hudDialTachometer;
 	Hud::BarGauge<float> hudBarTachometer;
 	Hud::NumericalDisplay<float> hudSpeedometer;

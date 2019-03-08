@@ -27,12 +27,12 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100), minimap(spec)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
 {}
 
 Pseudo3DCourse::Pseudo3DCourse(Spec spec)
 : spec(spec), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100), minimap(spec)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
 {}
 
 //custom call to draw quad
@@ -187,6 +187,13 @@ void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 }
 
 // #################### Pseudo3D Course Map methods #####################################################
+
+Pseudo3DCourse::Map::Map()
+: spec(Pseudo3DCourse::Spec(0,0)), bounds(), offset(), scale(),
+  roadColor(), segmentHighlightColor(),
+  segmentHighlightSize(0), roadContrastColorEnabled(),
+  geometryOtimizationEnabled()
+{}
 
 Pseudo3DCourse::Map::Map(const Spec& s)
 : spec(s), bounds(), offset(), scale(),

@@ -72,6 +72,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
+  course(), playerVehicle(),
+
   hudDialTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),

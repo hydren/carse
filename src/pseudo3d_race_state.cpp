@@ -64,7 +64,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
-  spriteSmokeLeft(null), spriteSmokeRight(null),
+  spriteSmoke(null),
 
   parallax(), backgroundScale(),
 
@@ -119,8 +119,8 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(sndCountdownBuzzer != null) delete sndCountdownBuzzer;
 	if(sndCountdownBuzzerFinal != null) delete sndCountdownBuzzerFinal;
 
-	if(spriteSmokeLeft != null) delete spriteSmokeLeft;
-	if(spriteSmokeRight != null) delete spriteSmokeRight;
+	if(spriteSmoke != null) delete spriteSmoke;
+	playerVehicle.smokeSprite = null;
 }
 
 void Pseudo3DRaceState::initialize()
@@ -143,10 +143,7 @@ void Pseudo3DRaceState::initialize()
 	sndCountdownBuzzer->setVolume(0.8);
 	sndCountdownBuzzerFinal->setVolume(0.8);
 
-	Image* smokeSpriteSheet = new Image("assets/smoke-sprite.png");
-	spriteSmokeLeft = new Sprite(smokeSpriteSheet, 32, 32, 0.25, -1, 0, 0, true);
-	spriteSmokeRight = new Sprite(smokeSpriteSheet, 32, 32, 0.25);
-	spriteSmokeRight->flipmode = Image::FLIP_HORIZONTAL;
+	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, -1, 0, 0, true);
 
 	hudDialTachometer.borderThickness = 6;
 	hudDialTachometer.graduationLevel = 2;
@@ -304,9 +301,11 @@ void Pseudo3DRaceState::onEnter()
 		course.trafficVehicles = &trafficVehicles;
 	}
 
+	playerVehicle.smokeSprite = null;
 	playerVehicle.freeAssetsData();
 	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
 	playerVehicle.loadAssetsData();
+	playerVehicle.smokeSprite = spriteSmoke;
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
 		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
@@ -317,10 +316,7 @@ void Pseudo3DRaceState::onEnter()
 	if(playerVehicle.shadowSprite != null)
 		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
 
-	spriteSmokeLeft->scale.x =
-			spriteSmokeLeft->scale.y =
-					spriteSmokeRight->scale.x =
-							spriteSmokeRight->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
+	spriteSmoke->scale.x = spriteSmoke->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };

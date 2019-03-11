@@ -42,7 +42,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 				 *sndJumpImpact, *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
 
 	fgeal::Color bgColor, bgColorHorizon;
-	fgeal::Sprite* spriteSmokeLeft, *spriteSmokeRight;
+	fgeal::Sprite* spriteSmoke;
 
 	fgeal::Point parallax;
 	float backgroundScale;

@@ -288,10 +288,12 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale)
 
 		// left smoke
 		smokeSprite->computeCurrentFrame();
+		smokeSprite->flipmode = Image::FLIP_NONE;
 		smokeSprite->draw(smokeSpritePosition.x, smokeSpritePosition.y);
 
 		// right smoke
 		smokeSprite->computeCurrentFrame();
+		smokeSprite->flipmode = Image::FLIP_HORIZONTAL;
 		smokeSprite->draw(smokeSpritePosition.x + spriteSpec.depictedVehicleWidth*sprite.scale.x, smokeSpritePosition.y);
 
 		smokeSprite->scale = originalScale;

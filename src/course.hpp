@@ -60,13 +60,6 @@ struct Pseudo3DCourse
 		void saveSegments(const std::string& filename);
 	};
 
-	Spec spec;
-	std::vector<fgeal::Image*> sprites;
-
-	int drawAreaWidth, drawAreaHeight;
-	unsigned drawDistance;
-	float cameraDepth;
-
 	struct Map
 	{
 		Spec spec;
@@ -87,6 +80,13 @@ struct Pseudo3DCourse
 		std::vector<fgeal::Point> cache;
 		std::vector<float> cacheLenght;
 	};
+
+	Spec spec;
+	std::vector<fgeal::Image*> sprites;
+
+	int drawAreaWidth, drawAreaHeight;
+	unsigned drawDistance;
+	float cameraDepth;
 
 	Pseudo3DCourse();
 	Pseudo3DCourse(Spec spec);

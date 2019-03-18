@@ -190,7 +190,7 @@ void Pseudo3DVehicle::freeAssetsData()
 	}
 }
 
-void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale)
+void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, float cropY)
 {
 	unsigned animationIndex = 0;
 	for(unsigned i = 1; i < spriteSpec.stateCount; i++)
@@ -235,7 +235,9 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale)
 		shadowSprite->scale = originalScale;
 	}
 
+	sprite.croppingArea.h = cropY;
 	sprite.draw(vehicleSpritePosition.x, vehicleSpritePosition.y);
+	sprite.croppingArea.h = 0;
 
 	if(body.brakePedalPosition > 0 and brakelightSprite != null)
 	{

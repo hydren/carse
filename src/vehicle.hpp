@@ -75,8 +75,11 @@ struct Pseudo3DVehicle
 	/** Disposes of loaded graphics and sounds assets. */
 	void freeAssetsData();
 
-	/** Draws this vehicle at the given position. The 'angle' argument specifies the angle to be depicted. The 'distanceScale' specifies how far the vehicle is depicted. */
-	void draw(float x, float y, float angle=0, float distanceScale=1);
+	/** Draws this vehicle at the given position (x, y).
+	 *  The 'angle' argument specifies the angle to be depicted.
+	 *  The 'distanceScale' specifies how far the vehicle is depicted.
+	 *  TThe 'cropY' parameter specifies how much to crop the sprite vertically (bottom-up). */
+	void draw(float x, float y, float angle=0, float distanceScale=1.0, float cropY=0);
 
 	private:
 	bool spriteAssetsAreShared, soundAssetsAreShared;

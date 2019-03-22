@@ -281,11 +281,10 @@ void Pseudo3DRaceState::onEnter()
 
 			// random parameters
 			trafficVehicle.position = futil::random_between_decimal(0.1, 0.9) * course.spec.roadSegmentLength * course.spec.lines.size();
-//			trafficVehicle.horizontalPosition = futil::random_between_decimal(-3, 3);
-			trafficVehicle.horizontalPosition = 2;
+			trafficVehicle.horizontalPosition = futil::random_between(-2, 2);
 			trafficVehicle.body.simulationType = simulationType;
 			trafficVehicle.body.reset();
-			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.5, 0.8);
+			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.4);
 			trafficVehicle.body.automaticShiftingEnabled = true;
 		}
 

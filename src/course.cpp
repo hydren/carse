@@ -165,8 +165,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;
 				float destY = lt.Y + 4;
 
-//				destX += destW * trafficVehicle.horizontalPosition;  // offsetX
-				destX += scale * trafficVehicle.horizontalPosition;  // offsetX
+				destX += 128 * scale * trafficVehicle.horizontalPosition;  // offsetX
 
 				float clipH = destY - l.clip;
 				if(clipH < 0)
@@ -174,7 +173,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 				const float sh = h-h*clipH/destH;
 
-				if(not (clipH >= destH or sh <= 1))
+				if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
 					trafficVehicle.draw(destX, destY, 0, scale, sh);
 			}
 	    }

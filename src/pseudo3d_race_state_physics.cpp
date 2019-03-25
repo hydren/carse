@@ -36,6 +36,7 @@ static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
 				   TIRE_FRICTION_COEFFICIENT_GRASS = 0.42,
 				   ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013,
 				   ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100,
+				   COLLISION_RESTITUTION_COEFFICIENT = 0.5,
 
 				   PSEUDO_ANGLE_MAX = 1.0,
 				   CURVE_PULL_FACTOR = 0.2,  // @suppress("Unused variable declaration in file scope")
@@ -138,6 +139,24 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		trafficVehicle.body.tireFrictionFactor = TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT;
 		trafficVehicle.body.updatePowertrain(delta);
 		trafficVehicle.position += coursePositionFactor*trafficVehicle.body.speed*delta;  // update position
+
+		const CourseSpec::Segment& trafficVehicleSegment = course.spec.lines[((int)(trafficVehicle.position/course.spec.roadSegmentLength))%course.spec.lines.size()];
+
+		if(&trafficVehicleSegment == &segment)  // if on the same segment, check for collision
+		{
+			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x,
+						px = playerVehicle.horizontalPosition - 0.5f*pw,
+						tw = trafficVehicle.spriteSpec.depictedVehicleWidth * trafficVehicle.sprites.back()->scale.x,
+						tx = trafficVehicle.horizontalPosition*coursePositionFactor - 0.5f*tw;
+
+			if(not (px + pw < tx or px > tx + tw))
+			{
+				// slow player's vehicle down using collision formula (but not applying to traffic vehicle, though)
+				playerVehicle.body.speed = (COLLISION_RESTITUTION_COEFFICIENT * trafficVehicle.body.mass * (trafficVehicle.body.speed - playerVehicle.body.speed)
+											+ playerVehicle.body.mass * playerVehicle.body.speed + trafficVehicle.body.mass * trafficVehicle.body.speed)
+													/(playerVehicle.body.mass + trafficVehicle.body.mass);
+			}
+		}
 	}
 }
 

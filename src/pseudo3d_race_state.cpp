@@ -563,6 +563,10 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fm", playerVehicle.position);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
+		fontDev->drawText("Horiz. position: ", 175, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm", playerVehicle.horizontalPosition);
+		fontSmall->drawText(std::string(buffer), 290, offset, fgeal::Color::WHITE);
+
 		offset += 18;
 		fontDev->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fkm/h", playerVehicle.body.speed*3.6);

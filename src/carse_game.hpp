@@ -73,6 +73,7 @@ class CarseGame extends public fgeal::Game
 		unsigned raceOnlyCourseIndex, raceOnlyPlayerVehicleIndex;
 		int raceOnlyPlayerVehicleAlternateSpriteIndex, raceOnlyRaceType;
 		unsigned raceOnlyLapCount;
+		float masterVolume;
 
 		int currentMainMenuStateId, currentVehicleSelectionStateId;
 

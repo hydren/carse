@@ -281,8 +281,10 @@ void Pseudo3DRaceState::onEnter()
 				trafficVehicle.loadAssetsData(sharedVehicles[skinIndex+1]);
 
 			// random parameters
+			//FIXME number of lanes should be accounted for when deciding horizontal positions
+			//FIXME road shoulder size should be accounted for when deciding horizontal positions
 			trafficVehicle.position = futil::random_between_decimal(0.1, 0.9) * course.spec.roadSegmentLength * course.spec.lines.size();
-			trafficVehicle.horizontalPosition = futil::random_between(-2, 2);
+			trafficVehicle.horizontalPosition = (futil::random_between(-2, 3)/2.f) * 0.825 * course.spec.roadWidth / coursePositionFactor;
 			trafficVehicle.body.simulationType = simulationType;
 			trafficVehicle.body.reset();
 			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.4);

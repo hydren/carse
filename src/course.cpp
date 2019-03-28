@@ -165,7 +165,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;
 				float destY = lt.Y + 4;
 
-				destX += 128 * scale * trafficVehicle.horizontalPosition;  // offsetX
+				destX += 65 * scale * trafficVehicle.horizontalPosition;  // offsetX
 
 				float clipH = destY - l.clip;
 				if(clipH < 0)

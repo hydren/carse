@@ -32,6 +32,10 @@ CarseGame::~CarseGame()
 void CarseGame::initialize()
 {
 	this->sharedResources = new SharedResources();
+	this->sharedResources->sndCursorIn.setVolume(logic.masterVolume);
+	this->sharedResources->sndCursorOut.setVolume(logic.masterVolume);
+	this->sharedResources->sndCursorMove.setVolume(logic.masterVolume);
+
 	this->logic.initialize();
 
 	this->addState(new Pseudo3DRaceState(this));

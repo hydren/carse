@@ -129,17 +129,14 @@ void Pseudo3DRaceState::initialize()
 
 	imgStopwatch = new Image("assets/stopwatch.png");
 
-	sndWheelspinBurnoutIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");
-	sndWheelspinBurnoutLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");
-	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");
-	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");
-	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");
-	sndJumpImpact = new Sound("assets/sound/landing.ogg");
-	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg");
-	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg");
-
-	sndCountdownBuzzer->setVolume(0.8);
-	sndCountdownBuzzerFinal->setVolume(0.8);
+	sndWheelspinBurnoutIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");  sndWheelspinBurnoutIntro->setVolume(game.logic.masterVolume);
+	sndWheelspinBurnoutLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");  sndWheelspinBurnoutLoop->setVolume(game.logic.masterVolume);
+	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");  sndSideslipBurnoutIntro->setVolume(game.logic.masterVolume);
+	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");  sndSideslipBurnoutLoop->setVolume(game.logic.masterVolume);
+	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");  sndRunningOnDirtLoop->setVolume(game.logic.masterVolume);
+	sndJumpImpact = new Sound("assets/sound/landing.ogg");  sndJumpImpact->setVolume(game.logic.masterVolume);
+	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg");  sndCountdownBuzzer->setVolume(0.8 * game.logic.masterVolume);
+	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg");  sndCountdownBuzzerFinal->setVolume(0.8 * game.logic.masterVolume);
 
 	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, -1, 0, 0, true);
 
@@ -238,7 +235,10 @@ void Pseudo3DRaceState::onEnter()
 		delete music;
 
 	if(not course.spec.musicFilename.empty())
+	{
 		music = new fgeal::Music(course.spec.musicFilename);
+		music->setVolume(game.logic.masterVolume);
+	}
 	else
 		music = null;
 
@@ -247,6 +247,7 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
 	playerVehicle.loadAssetsData();
 	playerVehicle.smokeSprite = spriteSmoke;
+	playerVehicle.engineSound.setVolume(game.logic.masterVolume);
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
 		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);

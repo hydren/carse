@@ -41,6 +41,9 @@ class EngineSoundSimulator
 	// the maximum RPM expected to be simulated. this must be the maximum value expected to be passed to EngineSoundSimulator::updateSound().
 	short simulatedMaximumRpm;
 
+	// the overall volume of this simulator. this must be a decimal in the range [0,1].
+	float volume;
+
 	//calculates engine sound pitch for given RPM and max RPM
 	float calculatePitch(float rpmDiff);
 
@@ -68,6 +71,12 @@ class EngineSoundSimulator
 
 	// stops all currently playing sounds from this simulator
 	void halt();
+
+	// sets the overall volume of this simulator (parameter 'volume' must be a decimal in the range [0,1])
+	void setVolume(float volume);
+
+	// returns the overall volume of this simulator
+	float getVolume() const;
 
 	~EngineSoundSimulator();
 };

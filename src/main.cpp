@@ -74,6 +74,9 @@ int main(int argc, char** argv)
 			" If in fullscreen mode, tells carse to set the given resolution", false, string(), "<WIDTHxHEIGHT>");
 	cmd.add(argResolution);
 
+	ValueArg<float> argMasterVolume("v", "master-volume", "Sets the master volume, in the range [0-1] (0 being no sound, 1.0 being maximum volume)", false, -1, "decimal");
+	cmd.add(argMasterVolume);
+
 	SwitchArg argRace("R", "race", "Tells carse to go directly start a race with current vehicle and course.", false);
 	cmd.add(argRace);
 
@@ -178,6 +181,14 @@ int main(int argc, char** argv)
 					game.logic.raceOnlyPlayerVehicleAlternateSpriteIndex = argVehicleAltSprite.getValue();
 			}
 		}
+		if(argMasterVolume.isSet())
+		{
+			if(argMasterVolume.getValue() < 0.f or argMasterVolume.getValue() > 1.f)
+				cout << "volume argument out of the range [1, 0]. ignoring..." << endl;
+			else
+				game.logic.masterVolume = argMasterVolume.getValue();
+		}
+
 		game.start();
 	}
 	catch(const fgeal::AdapterException& e)

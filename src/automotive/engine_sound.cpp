@@ -79,7 +79,7 @@ void EngineSoundSimulator::update(float currentRpm)
 					currentRangeSize = currentRangeUpperRpm - currentRangeLowerRpm,
 					currentRangeSoundDepictedRpm = profile.ranges[currentRangeIndex].depictedRpm;
 
-		currentSound.setVolume(1.0f);
+		currentSound.setVolume(volume);
 
 		if(profile.allowRpmPitching)
 			currentSound.setPlaybackSpeed(currentRpm/currentRangeSoundDepictedRpm, true);
@@ -102,7 +102,7 @@ void EngineSoundSimulator::update(float currentRpm)
 					and currentRpm - currentRangeLowerRpm < 0.25*currentRangeSize)  // current RPM is within 0-25% of current range
 			{
 //				snd.setVolume(1.0 - 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent);  // linear fade out
-				rangeSound.setVolume(sqrt(1-16*pow((currentRpm - currentRangeLowerRpm)/currentRangeSize, 2)));  // quadratic fade out
+				rangeSound.setVolume(volume * sqrt(1-16*pow((currentRpm - currentRangeLowerRpm)/currentRangeSize, 2)));  // quadratic fade out
 
 				if(profile.allowRpmPitching)
 					rangeSound.setPlaybackSpeed(currentRpm/rangeSoundDepictedRpm, true);
@@ -116,7 +116,7 @@ void EngineSoundSimulator::update(float currentRpm)
 					and currentRpm - currentRangeLowerRpm > 0.75*currentRangeSize)  // current RPM is within 75-100% of current range
 			{
 //				snd.setVolume(-3.0 + 4*(currentRpm - lowerRpmCurrent)/rangeSizeCurrent);  // linear fade in
-				rangeSound.setVolume(sqrt(1-pow(4*((currentRpm - currentRangeLowerRpm)/currentRangeSize)-4, 2)) );  // quadratic fade in
+				rangeSound.setVolume(volume * sqrt(1-pow(4*((currentRpm - currentRangeLowerRpm)/currentRangeSize)-4, 2)));  // quadratic fade in
 
 				if(profile.allowRpmPitching)
 					rangeSound.setPlaybackSpeed(currentRpm/rangeSoundDepictedRpm, true);
@@ -134,4 +134,14 @@ void EngineSoundSimulator::halt()
 {
 	for(unsigned i = 0; i < soundData.size(); i++)
 		soundData[i]->stop();
+}
+
+void EngineSoundSimulator::setVolume(float vol)
+{
+	this->volume = (vol < 0.f? 0.f : vol > 1.f? 1.f : vol);
+}
+
+float EngineSoundSimulator::getVolume() const
+{
+	return this->volume;
 }

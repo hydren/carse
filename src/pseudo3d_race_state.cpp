@@ -61,7 +61,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
   sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
-  sndRunningOnDirtLoop(null), sndJumpImpact(null),
+  sndRunningOnDirtLoop(null),
+  sndCrashImpact(null), sndJumpImpact(null),
   sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
@@ -118,6 +119,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(sndSideslipBurnoutIntro != null) delete sndSideslipBurnoutIntro;
 	if(sndSideslipBurnoutLoop != null) delete sndSideslipBurnoutLoop;
 	if(sndRunningOnDirtLoop != null) delete sndRunningOnDirtLoop;
+	if(sndCrashImpact != null) delete sndCrashImpact;
 	if(sndJumpImpact != null) delete sndJumpImpact;
 	if(sndCountdownBuzzer != null) delete sndCountdownBuzzer;
 	if(sndCountdownBuzzerFinal != null) delete sndCountdownBuzzerFinal;
@@ -139,6 +141,7 @@ void Pseudo3DRaceState::initialize()
 	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");  sndSideslipBurnoutIntro->setVolume(game.logic.masterVolume);
 	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");  sndSideslipBurnoutLoop->setVolume(game.logic.masterVolume);
 	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");  sndRunningOnDirtLoop->setVolume(game.logic.masterVolume);
+	sndCrashImpact = new Sound("assets/sound/crash.ogg"); sndCrashImpact->setVolume(game.logic.masterVolume);
 	sndJumpImpact = new Sound("assets/sound/landing.ogg");  sndJumpImpact->setVolume(game.logic.masterVolume);
 	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg");  sndCountdownBuzzer->setVolume(0.8 * game.logic.masterVolume);
 	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg");  sndCountdownBuzzerFinal->setVolume(0.8 * game.logic.masterVolume);
@@ -874,6 +877,14 @@ void Pseudo3DRaceState::update(float delta)
 	}
 	else if(sndRunningOnDirtLoop->isPlaying())
 		sndRunningOnDirtLoop->stop();
+
+	if(playerVehicle.isCrashing)
+	{
+		if(not sndCrashImpact->isPlaying())
+			sndCrashImpact->play();
+
+		playerVehicle.isCrashing = false;
+	}
 }
 
 void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)

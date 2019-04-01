@@ -155,6 +155,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 				playerVehicle.body.speed = (COLLISION_RESTITUTION_COEFFICIENT * trafficVehicle.body.mass * (trafficVehicle.body.speed - playerVehicle.body.speed)
 											+ playerVehicle.body.mass * playerVehicle.body.speed + trafficVehicle.body.mass * trafficVehicle.body.speed)
 													/(playerVehicle.body.mass + trafficVehicle.body.mass);
+				playerVehicle.isCrashing = true;
 			}
 		}
 	}

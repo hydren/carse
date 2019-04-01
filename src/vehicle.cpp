@@ -25,7 +25,7 @@ Pseudo3DVehicle::Pseudo3DVehicle()
   position(), horizontalPosition(), verticalPosition(),
   pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
-  isTireBurnoutOccurring(false),
+  isTireBurnoutOccurring(false), isCrashing(false),
   engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null), smokeSprite(null),
   spriteAssetsAreShared(false), soundAssetsAreShared(false)
 {}
@@ -35,7 +35,7 @@ Pseudo3DVehicle::Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternat
   position(), horizontalPosition(), verticalPosition(),
   pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
   /* verticalSpeed(0), onAir(false), onLongAir(false), */
-  isTireBurnoutOccurring(false),
+  isTireBurnoutOccurring(false), isCrashing(false),
   engineSound(), spriteSpec(alternateSpriteIndex == -1? spec.sprite : spec.alternateSprites[alternateSpriteIndex]),
   sprites(), brakelightSprite(null), shadowSprite(null), smokeSprite(null),
   spriteAssetsAreShared(false), soundAssetsAreShared(false)

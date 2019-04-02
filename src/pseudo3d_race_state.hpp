@@ -52,6 +52,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	// value used to convert physics position to course segment position
 	float coursePositionFactor;
 
+	// offset of the starting position of the player
+	float courseStartPositionOffset;
+
 	Mechanics::SimulationType simulationType;
 
 	bool onSceneIntro, onSceneFinish;

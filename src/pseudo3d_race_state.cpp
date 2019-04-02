@@ -43,8 +43,7 @@ const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED_FACTOR = 30;  // undefined u
 
 static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556,  // == 20kph
 		GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125,
-		BACKGROUND_POSITION_FACTOR = 0.509375,
-		COURSE_START_POSITION_OFFSET = 100;
+		BACKGROUND_POSITION_FACTOR = 0.509375;
 
 #if __cplusplus < 201103L
 	double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
@@ -70,7 +69,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  coursePositionFactor(500), simulationType(),
+  coursePositionFactor(500), courseStartPositionOffset(6), simulationType(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
@@ -453,7 +452,7 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	parallax.x = parallax.y = 0;
-	playerVehicle.position = COURSE_START_POSITION_OFFSET;
+	playerVehicle.position = courseStartPositionOffset;
 	playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //	verticalSpeed = 0;
 	playerVehicle.body.simulationType = simulationType;
@@ -498,7 +497,7 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw(playerVehicle.position * coursePositionFactor - COURSE_START_POSITION_OFFSET, playerVehicle.horizontalPosition);
+	course.draw((playerVehicle.position - courseStartPositionOffset) * coursePositionFactor, playerVehicle.horizontalPosition);
 
 	playerVehicle.draw(0.5f*displayWidth, 0.825f*displayHeight - playerVehicle.verticalPosition*0.01f, playerVehicle.pseudoAngle);
 
@@ -903,7 +902,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 				game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_R:
-			playerVehicle.position = COURSE_START_POSITION_OFFSET;
+			playerVehicle.position = courseStartPositionOffset;
 			playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //					verticalSpeed = 0;
 			playerVehicle.body.reset();

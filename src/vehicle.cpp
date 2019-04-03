@@ -96,7 +96,6 @@ void Pseudo3DVehicle::loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseV
 										0, i*spriteSpec.frameHeight);
 
 			sprite->scale = spriteSpec.scale;
-			sprite->referencePixelY = - (int) spriteSpec.contactOffset;
 			sprites.push_back(sprite);
 		}
 
@@ -107,7 +106,6 @@ void Pseudo3DVehicle::loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseV
 										0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
 
 			sprite->scale = spriteSpec.scale;
-			sprite->referencePixelY = - (int) spriteSpec.contactOffset;
 			sprites.push_back(sprite);
 		}
 
@@ -215,7 +213,7 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 
 	const Point vehicleSpritePosition = {
 		x - sprite.scale.x * 0.5f * spriteSpec.frameWidth,
-		y - sprite.scale.y * spriteSpec.frameHeight + sprite.scale.y * spriteSpec.contactOffset
+		y - sprite.scale.y * (spriteSpec.frameHeight - spriteSpec.contactOffset)
 	};
 
 	if(shadowSprite != null)

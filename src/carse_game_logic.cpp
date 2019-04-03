@@ -19,7 +19,8 @@ CarseGame::Logic::Logic()
   raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0),
   raceOnlyPlayerVehicleAlternateSpriteIndex(-1), raceOnlyRaceType(-1), raceOnlyLapCount(2),
   masterVolume(1.f),
-  currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID), currentVehicleSelectionStateId(CarseGame::VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID)
+  currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
+  currentVehicleSelectionStateId(CarseGame::VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID)
 {}
 
 void CarseGame::Logic::initialize()
@@ -27,6 +28,7 @@ void CarseGame::Logic::initialize()
 	this->loadPresetEngineSoundProfiles();
 	this->loadCourses();
 	this->loadVehicles();
+	this->loadTrafficVehicles();
 }
 
 void CarseGame::Logic::onStatesListInitFinished()
@@ -143,10 +145,10 @@ void CarseGame::Logic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int 
 	nextMatchPlayerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
 }
 
-//void CarseGame::Logic::drawPickedVehicle(float x, float y, float scale, int angleType)
-//{
-//	static_cast<VehicleSelectionState*>(game.getState(CarseGame::VEHICLE_SELECTION_STATE_ID))->drawVehiclePreview(x, y, scale, -1, angleType);
-//}
+const vector<Pseudo3DVehicle::Spec>& CarseGame::Logic::getTrafficVehicleList()
+{
+	return trafficVehicles;
+}
 
 Mechanics::SimulationType CarseGame::Logic::getSimulationType()
 {

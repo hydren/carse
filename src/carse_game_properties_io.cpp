@@ -33,8 +33,9 @@ static bool isEngineSoundProfileRequestingPreset(const Properties& prop)
 // ========================================================================================================================
 
 const string
-	CarseGame::Logic::VEHICLES_FOLDER = "data/vehicles",
 	CarseGame::Logic::COURSES_FOLDER = "data/courses",
+	CarseGame::Logic::VEHICLES_FOLDER = "data/vehicles",
+	CarseGame::Logic::TRAFFIC_FOLDER = "data/traffic",
 	CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine";
 
 void CarseGame::Logic::loadPresetEngineSoundProfiles()
@@ -160,6 +161,43 @@ void CarseGame::Logic::loadVehicles()
 				}
 
 				cout << "read vehicle specification: " << filename << endl;
+			}
+		}
+	}
+}
+
+void CarseGame::Logic::loadTrafficVehicles()
+{
+	cout << "reading traffic vehicles specs..." << endl;
+
+	// create a list of files inside the traffic folder and inside its subfolders (but not recursively)
+	vector<string> possibleTrafficPropertiesFilenames;
+	const vector<string> trafficFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::TRAFFIC_FOLDER);
+	for(unsigned i = 0; i < trafficFolderFilenames.size(); i++)
+	{
+		const string& filename = trafficFolderFilenames[i];
+		if(fgeal::filesystem::isFilenameDirectory(filename))
+		{
+			const vector<string> subfolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(filename);
+			for(unsigned j = 0; j < subfolderFilenames.size(); j++)
+				possibleTrafficPropertiesFilenames.push_back(subfolderFilenames[j]);
+		}
+		else possibleTrafficPropertiesFilenames.push_back(filename);
+	}
+
+	// check the list of possible "traffic vehicles properties" filenames
+	for(unsigned i = 0; i < possibleTrafficPropertiesFilenames.size(); i++)
+	{
+		const string& filename = possibleTrafficPropertiesFilenames[i];
+		if(fgeal::filesystem::isFilenameArchive(filename) and ends_with(filename, ".properties"))
+		{
+			Properties prop;
+			prop.load(filename);
+			if(prop.containsKey("definition") and prop.get("definition") == "vehicle")
+			{
+				try { trafficVehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename)); }
+				catch(const std::exception& e) { cout << "error while reading traffic specification: " << e.what() << endl; continue; }
+				cout << "read traffic specification: " << filename << endl;
 			}
 		}
 	}

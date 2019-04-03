@@ -713,6 +713,19 @@ void Pseudo3DRaceState::update(float delta)
 {
 	handlePhysics(delta);
 
+	// course looping control
+	bool courseEndReached = false;
+	const unsigned N = course.spec.lines.size();
+	while((playerVehicle.position - courseStartPositionOffset) * coursePositionFactor >= N*course.spec.roadSegmentLength)
+	{
+		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
+		courseEndReached = true;
+	}
+	while((playerVehicle.position - courseStartPositionOffset) < 0)
+		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
+
+
+	// scene control
 	if(onSceneIntro)
 	{
 		timerSceneIntro -= delta;
@@ -753,6 +766,36 @@ void Pseudo3DRaceState::update(float delta)
 		}
 	}
 
+	if(courseEndReached and not onSceneFinish)
+	{
+		if(isRaceTypeLoop(settings.raceType))
+		{
+			lapCurrent++;
+			if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
+				lapTimeBest = lapTimeCurrent;
+			lapTimeCurrent = 0;
+
+			if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+			{
+				if(lapCurrent > settings.lapCountGoal)
+				{
+					onSceneFinish = true;
+					timerSceneFinish = 8.0;
+					lapCurrent--;
+				}
+			}
+		}
+		else if(isRaceTypePointToPoint(settings.raceType))
+		{
+			onSceneFinish = true;
+			timerSceneFinish = 8.0;
+		}
+	}
+
+	// engine sound control
+	playerVehicle.engineSound.update(playerVehicle.body.engine.rpm);
+
+	// 0-60 time control (debug)
 	if(acc0to60time == 0)
 	{
 		if(playerVehicle.body.engine.throttlePosition > 0 and playerVehicle.body.speed > 0 and acc0to60clock == 0)
@@ -763,44 +806,7 @@ void Pseudo3DRaceState::update(float delta)
 			acc0to60time = fgeal::uptime() - acc0to60clock;
 	}
 
-	// course looping control
-	const unsigned N = course.spec.lines.size();
-	while(playerVehicle.position * coursePositionFactor >= N*course.spec.roadSegmentLength)
-	{
-		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
-
-		if(not onSceneFinish)
-		{
-			if(isRaceTypeLoop(settings.raceType))
-			{
-				lapCurrent++;
-				if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
-					lapTimeBest = lapTimeCurrent;
-				lapTimeCurrent = 0;
-
-				if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
-				{
-					if(lapCurrent > settings.lapCountGoal)
-					{
-						onSceneFinish = true;
-						timerSceneFinish = 8.0;
-						lapCurrent--;
-					}
-				}
-			}
-			else if(isRaceTypePointToPoint(settings.raceType))
-			{
-				onSceneFinish = true;
-				timerSceneFinish = 8.0;
-			}
-		}
-
-	}
-	while(playerVehicle.position < 0)
-		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
-
-	playerVehicle.engineSound.update(playerVehicle.body.engine.rpm);
-
+	// wheelspin logic control
 	const bool isPlayerWheelspinOccurring = (
 		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS
 			and

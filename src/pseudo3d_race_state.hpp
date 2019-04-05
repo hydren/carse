@@ -38,8 +38,10 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Music* music;
 
 	fgeal::Sound* sndWheelspinBurnoutIntro, *sndWheelspinBurnoutLoop,
-				 *sndSideslipBurnoutIntro, *sndSideslipBurnoutLoop, *sndRunningOnDirtLoop,
-				 *sndJumpImpact, *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
+				 *sndSideslipBurnoutIntro, *sndSideslipBurnoutLoop,
+				 *sndRunningOnDirtLoop,
+				 *sndCrashImpact, *sndJumpImpact,
+				 *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
 
 	fgeal::Color bgColor, bgColorHorizon;
 	fgeal::Sprite* spriteSmoke;
@@ -47,7 +49,12 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Point parallax;
 	float backgroundScale;
 
+	// value used to convert physics position to course segment position
 	float coursePositionFactor;
+
+	// offset of the starting position of the player
+	float courseStartPositionOffset;
+
 	Mechanics::SimulationType simulationType;
 
 	bool onSceneIntro, onSceneFinish;
@@ -134,6 +141,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Pseudo3DVehicle playerVehicle;
 
+	std::vector<Pseudo3DVehicle> trafficVehicles;
+
+	// HUD stuff --------------------------------------------------------------
 	Pseudo3DCourse::Map minimap;
 
 	Hud::DialGauge<float> hudDialTachometer;
@@ -150,7 +160,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	fgeal::Rectangle stopwatchIconBounds;
 
-	// keybindings
+	// keybindings ------------------------------------------------------------
 	fgeal::Keyboard::Key controlKeyAccelerate,
 						 controlKeyBrake,
 						 controlKeyTurnLeft,

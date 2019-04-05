@@ -27,12 +27,14 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
+  trafficVehicles(null)
 {}
 
 Pseudo3DCourse::Pseudo3DCourse(Spec spec)
 : spec(spec), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
+  trafficVehicles(null)
 {}
 
 //custom call to draw quad
@@ -123,31 +125,58 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	for(unsigned n = fromPos + drawDistance; n >= fromPos+1; n--)
 	{
 		const CourseSpec::Segment& l = spec.lines[n%N];
-		if(l.spriteID == -1)
-			continue;
+		const ScreenCoordCache& lt = lts[n%N];
 
-	    Image& s = *sprites[l.spriteID];
-	    const int w = s.getWidth(), h = s.getHeight();
-	    const ScreenCoordCache& lt = lts[n%N];
+		if(l.spriteID != -1)
+		{
+			Image& s = *sprites[l.spriteID];
+			const int w = s.getWidth(),
+					  h = s.getHeight();
 
-	    float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
-	    float destY = lt.Y + 4;
-	    float destW  = w * lt.W / 150;
-	    float destH  = h * lt.W / 150;
+			const float scale = lt.W/150,
+				  destW = w*scale,
+				  destH = h*scale;
+			float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
+			float destY = lt.Y + 4;
 
-	    destX += destW * l.spriteX; //offsetX
-	    destY += destH * (-1);    //offsetY
+			destX += destW * l.spriteX;  // offsetX
+			destY += destH * (-1);  // offsetY
 
-	    float clipH = destY+destH-l.clip;
-	    if(clipH < 0)
-	    	clipH = 0;
+			float clipH = destY+destH-l.clip;
+			if(clipH < 0)
+				clipH = 0;
 
-	    const float sw = w, sh = h-h*clipH/destH;
+			const float sw = w, sh = h-h*clipH/destH;
 
-	    if(clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1)
-	    	continue;
+			if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
+				s.drawScaledRegion(destX, destY, scale, scale, Image::FLIP_NONE, 0, 0, sw, sh);
+		}
 
-	    s.drawScaledRegion(destX, destY, destW/w, destH/h, Image::FLIP_NONE, 0, 0, sw, sh);
+		if(trafficVehicles != null) foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, *trafficVehicles)
+	    {
+			if((static_cast<unsigned>(trafficVehicle.position/spec.roadSegmentLength))%N == n)
+			{
+				const int w = trafficVehicle.spriteSpec.frameWidth,
+						  h = trafficVehicle.spriteSpec.frameHeight;
+
+				const float scale = lt.W/400,
+					  destW = w*scale*trafficVehicle.sprites.back()->scale.x,
+					  destH = h*scale*trafficVehicle.sprites.back()->scale.y;
+				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;
+				float destY = lt.Y + 4;
+
+				destX += 65 * scale * trafficVehicle.horizontalPosition;  // offsetX
+
+				float clipH = destY - l.clip;
+				if(clipH < 0)
+					clipH = 0;
+
+				const float sh = h-h*clipH/destH;
+
+				if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
+					trafficVehicle.draw(destX, destY, 0, scale, sh);
+			}
+	    }
 	}
 }
 

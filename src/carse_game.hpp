@@ -42,7 +42,7 @@ class CarseGame extends public fgeal::Game
 
 		std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 		std::vector<Pseudo3DCourse::Spec> courses;
-		std::vector<Pseudo3DVehicle::Spec> vehicles;
+		std::vector<Pseudo3DVehicle::Spec> vehicles, trafficVehicles;
 
 		// parameters for next match
 		Pseudo3DRaceState::RaceSettings nextMatchRaceSettings;
@@ -67,6 +67,9 @@ class CarseGame extends public fgeal::Game
 
 		// intended to run on startup, loads all vehicles in the data/vehicles folder
 		void loadVehicles();
+
+		// intended to run on startup, loads all traffic vehicles in the data/traffic folder
+		void loadTrafficVehicles();
 
 		public:
 		bool raceOnlyMode, raceOnlyDebug, raceOnlyRandomCourse;
@@ -95,6 +98,8 @@ class CarseGame extends public fgeal::Game
 		const Pseudo3DVehicle::Spec& getPickedVehicle();
 		const int getPickedVehicleAlternateSpriteIndex();
 
+		const std::vector<Pseudo3DVehicle::Spec>& getTrafficVehicleList();
+
 		Mechanics::SimulationType getSimulationType();
 		void setSimulationType(Mechanics::SimulationType type);
 
@@ -103,8 +108,9 @@ class CarseGame extends public fgeal::Game
 
 		// special locations
 		const static std::string
-			VEHICLES_FOLDER,
 			COURSES_FOLDER,
+			VEHICLES_FOLDER,
+			TRAFFIC_FOLDER,
 			PRESET_ENGINE_SOUND_PROFILES_FOLDER;
 	} logic;
 

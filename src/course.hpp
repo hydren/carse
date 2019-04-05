@@ -13,6 +13,10 @@
 
 #include "fgeal/fgeal.hpp"
 
+#include "vehicle.hpp"
+
+#include <vector>
+
 struct Pseudo3DCourse
 {
 	struct Spec extends CourseSpec
@@ -32,8 +36,10 @@ struct Pseudo3DCourse
 
 		std::string musicFilename;
 
+		unsigned trafficCount;
+
 		Spec(float segmentLength, float roadWidth)
-		: CourseSpec(segmentLength, roadWidth) {}
+		: CourseSpec(segmentLength, roadWidth), trafficCount() {}
 
 		inline std::string toString() const { return not name.empty()? name : not filename.empty()? filename : "<unnamed>"; }
 		inline operator std::string() const { return this->toString(); }
@@ -87,6 +93,8 @@ struct Pseudo3DCourse
 	int drawAreaWidth, drawAreaHeight;
 	unsigned drawDistance;
 	float cameraDepth;
+
+	std::vector<Pseudo3DVehicle>* trafficVehicles;
 
 	Pseudo3DCourse();
 	Pseudo3DCourse(Spec spec);

@@ -11,13 +11,17 @@
 
 #include "util.hpp"
 
+#include "futil/random.h"
+
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
 #include <ctime>
+#include <cstdlib>
 
 using std::string;
 using std::map;
+using std::vector;
 
 using fgeal::Display;
 using fgeal::Image;
@@ -35,11 +39,11 @@ using fgeal::Rectangle;
 
 #define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
 
-static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556;  // == 20kph
 const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED_FACTOR = 30;  // undefined unit
-static const float GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125;
 
-static const float BACKGROUND_POSITION_FACTOR = 0.509375;
+static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556,  // == 20kph
+		GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125,
+		BACKGROUND_POSITION_FACTOR = 0.509375;
 
 #if __cplusplus < 201103L
 	double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
@@ -56,7 +60,8 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
   sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
-  sndRunningOnDirtLoop(null), sndJumpImpact(null),
+  sndRunningOnDirtLoop(null),
+  sndCrashImpact(null), sndJumpImpact(null),
   sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
@@ -64,7 +69,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  coursePositionFactor(500), simulationType(),
+  coursePositionFactor(500), courseStartPositionOffset(6), simulationType(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
@@ -113,6 +118,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(sndSideslipBurnoutIntro != null) delete sndSideslipBurnoutIntro;
 	if(sndSideslipBurnoutLoop != null) delete sndSideslipBurnoutLoop;
 	if(sndRunningOnDirtLoop != null) delete sndRunningOnDirtLoop;
+	if(sndCrashImpact != null) delete sndCrashImpact;
 	if(sndJumpImpact != null) delete sndJumpImpact;
 	if(sndCountdownBuzzer != null) delete sndCountdownBuzzer;
 	if(sndCountdownBuzzerFinal != null) delete sndCountdownBuzzerFinal;
@@ -134,6 +140,7 @@ void Pseudo3DRaceState::initialize()
 	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");  sndSideslipBurnoutIntro->setVolume(game.logic.masterVolume);
 	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");  sndSideslipBurnoutLoop->setVolume(game.logic.masterVolume);
 	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");  sndRunningOnDirtLoop->setVolume(game.logic.masterVolume);
+	sndCrashImpact = new Sound("assets/sound/crash.ogg"); sndCrashImpact->setVolume(game.logic.masterVolume);
 	sndJumpImpact = new Sound("assets/sound/landing.ogg");  sndJumpImpact->setVolume(game.logic.masterVolume);
 	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg");  sndCountdownBuzzer->setVolume(0.8 * game.logic.masterVolume);
 	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg");  sndCountdownBuzzerFinal->setVolume(0.8 * game.logic.masterVolume);
@@ -241,6 +248,60 @@ void Pseudo3DRaceState::onEnter()
 	}
 	else
 		music = null;
+
+	if(not trafficVehicles.empty())
+		trafficVehicles.clear();
+	course.trafficVehicles = null;
+
+	if(course.spec.trafficCount > 0)
+	{
+		trafficVehicles.reserve(course.spec.trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
+
+		const vector<Pseudo3DVehicle::Spec>& trafficVehicleSpecs = game.logic.getTrafficVehicleList();
+
+		// used to point to the vehicle instances that will "own" its respective assets and share with other vehicles with same spec/skin
+		vector< vector<Pseudo3DVehicle*> > allSharedVehicles(trafficVehicleSpecs.size());
+		for(unsigned i = 0; i < allSharedVehicles.size(); i++)
+			allSharedVehicles[i].resize(trafficVehicleSpecs[i].alternateSprites.size()+1, null);
+
+		for(unsigned i = 0; i < course.spec.trafficCount; i++)
+		{
+			const unsigned trafficVehicleIndex = futil::random_between(0, trafficVehicleSpecs.size());
+			const Pseudo3DVehicle::Spec& spec = trafficVehicleSpecs[trafficVehicleIndex];  // grab randomly chosen spec
+			vector<Pseudo3DVehicle*>& sharedVehicles = allSharedVehicles[trafficVehicleIndex];  // grab list of "base" vehicles to use their assets
+			const int skinIndex = spec.alternateSprites.empty()? -1 : futil::random_between(-1, spec.alternateSprites.size());
+			trafficVehicles.push_back(Pseudo3DVehicle(spec, skinIndex));
+			Pseudo3DVehicle& trafficVehicle = trafficVehicles.back();
+
+			// if first instance of this spec/skin, load assets and record a pointer
+			if(sharedVehicles[skinIndex+1] == null)
+			{
+				trafficVehicle.loadAssetsData();
+				sharedVehicles[skinIndex+1] = &trafficVehicle;
+			}
+			else  // if repeated spec/skin, use assets from other ("base") vehicle
+				trafficVehicle.loadAssetsData(sharedVehicles[skinIndex+1]);
+
+			// random parameters
+			//FIXME number of lanes should be accounted for when deciding horizontal positions
+			//FIXME road shoulder size should be accounted for when deciding horizontal positions
+			trafficVehicle.position = futil::random_between_decimal(0.1, 0.9) * course.spec.roadSegmentLength * course.spec.lines.size();
+			trafficVehicle.horizontalPosition = (futil::random_between(-2, 3)/2.f) * 0.825 * course.spec.roadWidth / coursePositionFactor;
+			trafficVehicle.body.simulationType = simulationType;
+			trafficVehicle.body.reset();
+			trafficVehicle.body.engine.throttlePosition = futil::random_between_decimal(0.1, 0.4);
+			trafficVehicle.body.automaticShiftingEnabled = true;
+		}
+
+		// apply screen scale to traffic sprites
+		foreach(vector<Pseudo3DVehicle*>&, sharedVehiclesOfSpec, vector< vector<Pseudo3DVehicle*> >, allSharedVehicles)
+			foreach(Pseudo3DVehicle*, sharedVehicle, vector<Pseudo3DVehicle*>, sharedVehiclesOfSpec)
+				if(sharedVehicle != null)
+					foreach(Sprite*, sprite, vector<Sprite*>, sharedVehicle->sprites)
+						sprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+
+		course.trafficVehicles = &trafficVehicles;
+	}
 
 	playerVehicle.smokeSprite = null;
 	playerVehicle.freeAssetsData();
@@ -387,7 +448,7 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
 	parallax.x = parallax.y = 0;
-	playerVehicle.position = 0;
+	playerVehicle.position = courseStartPositionOffset;
 	playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //	verticalSpeed = 0;
 	playerVehicle.body.simulationType = simulationType;
@@ -432,7 +493,7 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
+	course.draw((playerVehicle.position - courseStartPositionOffset) * coursePositionFactor, playerVehicle.horizontalPosition);
 
 	playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
 
@@ -503,6 +564,10 @@ void Pseudo3DRaceState::render()
 		fontDev->drawText("Position:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm", playerVehicle.position);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+
+		fontDev->drawText("Horiz. position: ", 175, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm", playerVehicle.horizontalPosition);
+		fontSmall->drawText(std::string(buffer), 290, offset, fgeal::Color::WHITE);
 
 		offset += 18;
 		fontDev->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
@@ -644,6 +709,19 @@ void Pseudo3DRaceState::update(float delta)
 {
 	handlePhysics(delta);
 
+	// course looping control
+	bool courseEndReached = false;
+	const unsigned N = course.spec.lines.size();
+	while((playerVehicle.position - courseStartPositionOffset) * coursePositionFactor >= N*course.spec.roadSegmentLength)
+	{
+		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
+		courseEndReached = true;
+	}
+	while((playerVehicle.position - courseStartPositionOffset) < 0)
+		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
+
+
+	// scene control
 	if(onSceneIntro)
 	{
 		timerSceneIntro -= delta;
@@ -684,6 +762,36 @@ void Pseudo3DRaceState::update(float delta)
 		}
 	}
 
+	if(courseEndReached and not onSceneFinish)
+	{
+		if(isRaceTypeLoop(settings.raceType))
+		{
+			lapCurrent++;
+			if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
+				lapTimeBest = lapTimeCurrent;
+			lapTimeCurrent = 0;
+
+			if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
+			{
+				if(lapCurrent > settings.lapCountGoal)
+				{
+					onSceneFinish = true;
+					timerSceneFinish = 8.0;
+					lapCurrent--;
+				}
+			}
+		}
+		else if(isRaceTypePointToPoint(settings.raceType))
+		{
+			onSceneFinish = true;
+			timerSceneFinish = 8.0;
+		}
+	}
+
+	// engine sound control
+	playerVehicle.engineSound.update(playerVehicle.body.engine.rpm);
+
+	// 0-60 time control (debug)
 	if(acc0to60time == 0)
 	{
 		if(playerVehicle.body.engine.throttlePosition > 0 and playerVehicle.body.speed > 0 and acc0to60clock == 0)
@@ -694,44 +802,7 @@ void Pseudo3DRaceState::update(float delta)
 			acc0to60time = fgeal::uptime() - acc0to60clock;
 	}
 
-	// course looping control
-	const unsigned N = course.spec.lines.size();
-	while(playerVehicle.position * coursePositionFactor >= N*course.spec.roadSegmentLength)
-	{
-		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
-
-		if(not onSceneFinish)
-		{
-			if(isRaceTypeLoop(settings.raceType))
-			{
-				lapCurrent++;
-				if(lapTimeCurrent < lapTimeBest or lapTimeBest == 0)
-					lapTimeBest = lapTimeCurrent;
-				lapTimeCurrent = 0;
-
-				if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
-				{
-					if(lapCurrent > settings.lapCountGoal)
-					{
-						onSceneFinish = true;
-						timerSceneFinish = 8.0;
-						lapCurrent--;
-					}
-				}
-			}
-			else if(isRaceTypePointToPoint(settings.raceType))
-			{
-				onSceneFinish = true;
-				timerSceneFinish = 8.0;
-			}
-		}
-
-	}
-	while(playerVehicle.position < 0)
-		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
-
-	playerVehicle.engineSound.update(playerVehicle.body.engine.rpm);
-
+	// wheelspin logic control
 	const bool isPlayerWheelspinOccurring = (
 		(playerVehicle.body.simulationType == Mechanics::SIMULATION_TYPE_SLIPLESS
 			and
@@ -807,6 +878,14 @@ void Pseudo3DRaceState::update(float delta)
 	}
 	else if(sndRunningOnDirtLoop->isPlaying())
 		sndRunningOnDirtLoop->stop();
+
+	if(playerVehicle.isCrashing)
+	{
+		if(not sndCrashImpact->isPlaying())
+			sndCrashImpact->play();
+
+		playerVehicle.isCrashing = false;
+	}
 }
 
 void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
@@ -825,7 +904,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 				game.enterState(game.logic.currentMainMenuStateId);
 			break;
 		case Keyboard::KEY_R:
-			playerVehicle.position = 0;
+			playerVehicle.position = courseStartPositionOffset;
 			playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
 //					verticalSpeed = 0;
 			playerVehicle.body.reset();

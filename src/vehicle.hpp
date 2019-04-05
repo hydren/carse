@@ -44,7 +44,7 @@ struct Pseudo3DVehicle
 	float pseudoAngle, strafeSpeed, curvePull, corneringStiffness;
 //	float verticalSpeed;
 //	bool onAir, onLongAir;
-	bool isTireBurnoutOccurring;
+	bool isTireBurnoutOccurring, isCrashing;
 
 	// sound data
 	EngineSoundSimulator engineSound;
@@ -61,16 +61,28 @@ struct Pseudo3DVehicle
 
 	~Pseudo3DVehicle();
 
-	/** Loads graphics and sounds data. */
-	void loadAssetsData();
+	/** Loads the graphic assets' data from the filesystem. The 'optionalBaseVehicle' argument can be passed to use its sprite data instead of loading the assets again.  */
+	void loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null);
 
-	/** Disposes of dynamically loaded graphics and sounds. */
+	/** Loads the sound assets' data from the filesystem. The 'optionalBaseVehicle' argument can be passed to use its sound data instead of loading the assets again.  */
+	void loadSoundAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null);
+
+	inline void loadAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null) {
+		loadGraphicAssetsData(optionalBaseVehicle);
+		loadSoundAssetsData(optionalBaseVehicle);
+	}
+
+	/** Disposes of loaded graphics and sounds assets. */
 	void freeAssetsData();
 
 	/** Draws this vehicle at the given position (x, y).
 	 *  The 'angle' argument specifies the angle to be depicted.
-	 *  The 'distanceScale' specifies how far the vehicle is depicted. */
-	void draw(float x, float y, float angle=0, float distanceScale=1.0);
+	 *  The 'distanceScale' specifies how far the vehicle is depicted.
+	 *  TThe 'cropY' parameter specifies how much to crop the sprite vertically (bottom-up). */
+	void draw(float x, float y, float angle=0, float distanceScale=1.0, float cropY=0);
+
+	private:
+	bool spriteAssetsAreShared, soundAssetsAreShared;
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

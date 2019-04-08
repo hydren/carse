@@ -34,10 +34,13 @@ using std::vector;
 using std::string;
 using futil::to_string;
 
+// these guys help giving semantics to menu indexes.
 enum SettingsMenuIndex
 {
 	SETTINGS_RACE_TYPE = 0,
-	SETTINGS_LAPS = 1
+	SETTINGS_LAPS = 1,
+	SETTINGS_TRAFFIC_DENSITY = 2,
+	SETTINGS_MENU_COUNT
 };
 
 static const string TITLE_TEXT = "Choose a course";
@@ -92,8 +95,10 @@ void CourseSelectionState::initialize()
 	menuSettings.bgColor = menuCourse.bgColor;
 	menuSettings.borderColor = menuCourse.borderColor;
 	menuSettings.focusedEntryFontColor = menuCourse.focusedEntryFontColor;
-	menuSettings.addEntry("Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType));
-	menuSettings.addEntry("Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal));
+	menuSettings.addEntry("Race type: ");
+	menuSettings.addEntry("Laps: ");
+	menuSettings.addEntry("Traffic: ");
+	updateMenuSettingsLabels();
 	menuSettings.cursorWrapAroundEnabled = false;
 
 	courseMapViewer.roadColor = Color::WHITE;
@@ -313,12 +318,20 @@ void CourseSelectionState::update(float delta)
 	}
 }
 
-void CourseSelectionState::updateLapCount()
+void CourseSelectionState::updateMenuSettingsLabels()
 {
-	if(menuSettings.getEntryAt(1).enabled)
-		menuSettings.getEntryAt(1).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
+	Pseudo3DRaceState::RaceSettings& raceSettings = game.logic.getNextRaceSettings();
+
+	menuSettings.getEntryAt(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(raceSettings.raceType);
+
+	menuSettings.getEntryAt(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(raceSettings.raceType);
+
+	if(menuSettings.getEntryAt(SETTINGS_LAPS).enabled)
+		menuSettings.getEntryAt(SETTINGS_LAPS).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
 	else
-		menuSettings.getEntryAt(1).label = "Laps: --";
+		menuSettings.getEntryAt(SETTINGS_LAPS).label = "Laps: --";
+
+	menuSettings.getEntryAt(SETTINGS_TRAFFIC_DENSITY).label = "Traffic: " + to_string(raceSettings.trafficDensity*100) + "%";
 }
 
 void CourseSelectionState::onKeyPressed(Keyboard::Key key)
@@ -401,30 +414,29 @@ void CourseSelectionState::handleInputOnSettings(Keyboard::Key key)
 		case Keyboard::KEY_ENTER:
 		{
 			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
+			Pseudo3DRaceState::RaceSettings& raceSettings = game.logic.getNextRaceSettings();
 			sndCursorMove->play();
 			switch(menuSettings.getSelectedIndex())
 			{
-				case SETTINGS_RACE_TYPE:  // race type
+				case SETTINGS_RACE_TYPE:
 				{
 					unsigned nextType;
 					if(isCursorLeft)
-						if(game.logic.getNextRaceSettings().raceType == 0)
+						if(raceSettings.raceType == 0)
 							nextType = Pseudo3DRaceState::RACE_TYPE_COUNT-1;
 						else
-							nextType = game.logic.getNextRaceSettings().raceType-1;
+							nextType = raceSettings.raceType-1;
 					else
-						if(game.logic.getNextRaceSettings().raceType == Pseudo3DRaceState::RACE_TYPE_COUNT-1)
+						if(raceSettings.raceType == Pseudo3DRaceState::RACE_TYPE_COUNT-1)
 							nextType = 0;
 						else
-							nextType = game.logic.getNextRaceSettings().raceType+1;
+							nextType = raceSettings.raceType+1;
 
-					game.logic.getNextRaceSettings().raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
-					menuSettings.getEntryAt(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(game.logic.getNextRaceSettings().raceType);
-					menuSettings.getEntryAt(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(game.logic.getNextRaceSettings().raceType);
-					updateLapCount();
+					raceSettings.raceType = static_cast<Pseudo3DRaceState::RaceType>(nextType);
+
 					break;
 				}
-				case SETTINGS_LAPS:  // laps
+				case SETTINGS_LAPS:
 				{
 					// if not a loop type race, do nothing
 					if(not menuSettings.getEntryAt(SETTINGS_LAPS).enabled)
@@ -432,17 +444,31 @@ void CourseSelectionState::handleInputOnSettings(Keyboard::Key key)
 
 					if(isCursorLeft)
 					{
-						if(game.logic.getNextRaceSettings().lapCountGoal > 2)
-							game.logic.getNextRaceSettings().lapCountGoal--;
+						if(raceSettings.lapCountGoal > 2)
+							raceSettings.lapCountGoal--;
 					}
 					else
-						game.logic.getNextRaceSettings().lapCountGoal++;
+						raceSettings.lapCountGoal++;
 
-					updateLapCount();
+					break;
+				}
+				case SETTINGS_TRAFFIC_DENSITY:
+				{
+					if(isCursorLeft)
+					{
+						raceSettings.trafficDensity -= raceSettings.trafficDensity <= 0.10f? 0.01f : 0.10f;
+						if(raceSettings.trafficDensity < 0.f)
+							raceSettings.trafficDensity = 0.f;
+					}
+					else
+						raceSettings.trafficDensity += raceSettings.trafficDensity < 0.099f? 0.01f : 0.10f;  // using "crooked" decimals as a epsilon for comparison
+
 					break;
 				}
 				default: break;
 			}
+
+			updateMenuSettingsLabels();
 		}
 		break;
 

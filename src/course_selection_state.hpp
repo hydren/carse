@@ -89,7 +89,7 @@ class CourseSelectionState extends public fgeal::Game::State
 	private:
 	void handleInputOnSettings(fgeal::Keyboard::Key k);
 
-	void updateLapCount();
+	void updateMenuSettingsLabels();
 };
 
 #endif /* COURSE_SELECTION_STATE_HPP_ */

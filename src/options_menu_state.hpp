@@ -31,19 +31,6 @@ class OptionsMenuState extends public fgeal::Game::State
 
 	bool isResolutionMenuActive;
 
-	// these guys helps giving semantics to menu indexes.
-	enum MenuItem
-	{
-		MENU_ITEM_RESOLUTION,
-		MENU_ITEM_FULLSCREEN,
-		MENU_ITEM_UNIT,
-		MENU_ITEM_SIMULATION_TYPE,
-		MENU_ITEM_TACHOMETER_TYPE,
-		MENU_ITEM_TACHOMETER_POINTER_TYPE,
-		MENU_ITEM_CACHE_TACHOMETER,
-		MENU_ITEM_COUNT
-	};
-
 	public:
 	virtual int getId();
 

@@ -23,6 +23,19 @@ using fgeal::Rectangle;
 
 using std::string;
 
+// these guys help giving semantics to menu indexes.
+enum MenuItem
+{
+	MENU_ITEM_RESOLUTION,
+	MENU_ITEM_FULLSCREEN,
+	MENU_ITEM_UNIT,
+	MENU_ITEM_SIMULATION_TYPE,
+	MENU_ITEM_TACHOMETER_TYPE,
+	MENU_ITEM_TACHOMETER_POINTER_TYPE,
+	MENU_ITEM_CACHE_TACHOMETER,
+	MENU_ITEM_COUNT
+};
+
 int OptionsMenuState::getId() { return CarseGame::OPTIONS_MENU_STATE_ID; }
 
 OptionsMenuState::OptionsMenuState(CarseGame* game)

@@ -36,10 +36,8 @@ struct Pseudo3DCourse
 
 		std::string musicFilename;
 
-		unsigned trafficCount;
-
 		Spec(float segmentLength, float roadWidth)
-		: CourseSpec(segmentLength, roadWidth), trafficCount() {}
+		: CourseSpec(segmentLength, roadWidth) {}
 
 		inline std::string toString() const { return not name.empty()? name : not filename.empty()? filename : "<unnamed>"; }
 		inline operator std::string() const { return this->toString(); }

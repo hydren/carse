@@ -253,9 +253,10 @@ void Pseudo3DRaceState::onEnter()
 		trafficVehicles.clear();
 	course.trafficVehicles = null;
 
-	if(course.spec.trafficCount > 0)
+	const float trafficCount = settings.trafficDensity * (course.spec.lines.size() * course.spec.roadSegmentLength)/1000.f;
+	if(trafficCount > 0)
 	{
-		trafficVehicles.reserve(course.spec.trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
+		trafficVehicles.reserve(trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
 
 		const vector<Pseudo3DVehicle::Spec>& trafficVehicleSpecs = game.logic.getTrafficVehicleList();
 
@@ -264,7 +265,7 @@ void Pseudo3DRaceState::onEnter()
 		for(unsigned i = 0; i < allSharedVehicles.size(); i++)
 			allSharedVehicles[i].resize(trafficVehicleSpecs[i].alternateSprites.size()+1, null);
 
-		for(unsigned i = 0; i < course.spec.trafficCount; i++)
+		for(unsigned i = 0; i < trafficCount; i++)
 		{
 			const unsigned trafficVehicleIndex = futil::random_between(0, trafficVehicleSpecs.size());
 			const Pseudo3DVehicle::Spec& spec = trafficVehicleSpecs[trafficVehicleIndex];  // grab randomly chosen spec
@@ -906,7 +907,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 		case Keyboard::KEY_R:
 			playerVehicle.position = courseStartPositionOffset;
 			playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
-//					verticalSpeed = 0;
+//			verticalSpeed = 0;
 			playerVehicle.body.reset();
 			playerVehicle.pseudoAngle = 0;
 			parallax.x = parallax.y = 0;
@@ -915,7 +916,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			onSceneIntro = true;
 			timerSceneIntro = 4.5;
 			countdownBuzzerCounter = 5;
-//					isBurningRubber = onAir = onLongAir = false;
+//			isBurningRubber = onAir = onLongAir = false;
 			acc0to60time = acc0to60clock = 0;
 			break;
 		case Keyboard::KEY_T:

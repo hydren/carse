@@ -122,6 +122,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	{
 		RaceType raceType;
 		unsigned lapCountGoal;
+		float trafficDensity;
 		bool isImperialUnit;
 		bool useBarTachometer;
 		bool useCachedTachometer;

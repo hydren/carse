@@ -123,7 +123,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseV
 					brakelightSpriteImage,
 					brakelightSpriteImage->getWidth(),
 					brakelightSpriteImage->getHeight(),
-					-1, -1, 0, 0, true
+					-1, true
 				);
 
 			brakelightSprite->scale = spriteSpec.brakelightsSpriteScale;

@@ -122,7 +122,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseV
 				brakelightSprite = new fgeal::Sprite(
 					brakelightSpriteImage,
 					brakelightSpriteImage->getWidth(),
-					brakelightSpriteImage->getHeight()
+					brakelightSpriteImage->getHeight(),
 					-1, -1, 0, 0, true
 				);
 

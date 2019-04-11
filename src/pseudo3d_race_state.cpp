@@ -253,7 +253,7 @@ void Pseudo3DRaceState::onEnter()
 		trafficVehicles.clear();
 	course.trafficVehicles = null;
 
-	const float trafficCount = settings.trafficDensity * (course.spec.lines.size() * course.spec.roadSegmentLength)/1000.f;
+	const unsigned trafficCount = settings.trafficDensity * (course.spec.lines.size() * course.spec.roadSegmentLength)/1000.f;
 	if(trafficCount > 0)
 	{
 		trafficVehicles.reserve(trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)

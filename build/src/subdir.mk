@@ -13,7 +13,7 @@ CPP_SRCS += \
 ../src/course_parser.cpp \
 ../src/course_selection_state.cpp \
 ../src/main.cpp \
-../src/main_menu_classic_layout_state.cpp \
+../src/main_menu_retro_layout_state.cpp \
 ../src/main_menu_simple_list_state.cpp \
 ../src/options_menu_state.cpp \
 ../src/pseudo3d_race_state.cpp \
@@ -33,7 +33,7 @@ OBJS += \
 ./src/course_parser.o \
 ./src/course_selection_state.o \
 ./src/main.o \
-./src/main_menu_classic_layout_state.o \
+./src/main_menu_retro_layout_state.o \
 ./src/main_menu_simple_list_state.o \
 ./src/options_menu_state.o \
 ./src/pseudo3d_race_state.o \
@@ -53,7 +53,7 @@ CPP_DEPS += \
 ./src/course_parser.d \
 ./src/course_selection_state.d \
 ./src/main.d \
-./src/main_menu_classic_layout_state.d \
+./src/main_menu_retro_layout_state.d \
 ./src/main_menu_simple_list_state.d \
 ./src/options_menu_state.d \
 ./src/pseudo3d_race_state.d \

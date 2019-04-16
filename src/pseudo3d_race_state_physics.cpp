@@ -38,6 +38,8 @@ static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
 				   ROLLING_RESISTANCE_COEFFICIENT_GRASS = 0.100,
 				   COLLISION_RESTITUTION_COEFFICIENT = 0.5,
 
+				   PLAYER_VEHICLE_PROJECTION_OFFSET = 6.0,  // needed since the player vehicle sprite is projected "ahead" of its actual position
+
 				   PSEUDO_ANGLE_MAX = 1.0,
 				   CURVE_PULL_FACTOR = 0.2,  // @suppress("Unused variable declaration in file scope")
 				   STEERING_SPEED = 2.0,
@@ -140,7 +142,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		trafficVehicle.body.updatePowertrain(delta);
 		trafficVehicle.position += coursePositionFactor*trafficVehicle.body.speed*delta;  // update position
 
-		const CourseSpec::Segment& trafficVehicleSegment = course.spec.lines[((int)(trafficVehicle.position/course.spec.roadSegmentLength))%course.spec.lines.size()];
+		const CourseSpec::Segment& trafficVehicleSegment = course.spec.lines[((int)((trafficVehicle.position - PLAYER_VEHICLE_PROJECTION_OFFSET*coursePositionFactor)/course.spec.roadSegmentLength))%course.spec.lines.size()];
 
 		if(&trafficVehicleSegment == &segment)  // if on the same segment, check for collision
 		{

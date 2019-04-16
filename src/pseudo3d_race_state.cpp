@@ -494,7 +494,7 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw((playerVehicle.position - courseStartPositionOffset) * coursePositionFactor, playerVehicle.horizontalPosition);
+	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
 
 	playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
 

@@ -13,6 +13,10 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
+template <typename T> T pow2(T val) {
+	return val*val;
+}
+
 /* Tire coefficients
  *
  *          Rolling resist. | Peak static frict. | Kinetic frict.
@@ -41,7 +45,6 @@ static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
 				   PLAYER_VEHICLE_PROJECTION_OFFSET = 6.0,  // needed since the player vehicle sprite is projected "ahead" of its actual position
 
 				   PSEUDO_ANGLE_MAX = 1.0,
-				   CURVE_PULL_FACTOR = 0.2,  // @suppress("Unused variable declaration in file scope")
 				   STEERING_SPEED = 2.0,
 				   MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
 
@@ -94,9 +97,14 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		playerVehicle.strafeSpeed = maxStrafeSpeed * sgn(playerVehicle.strafeSpeed);
 
 	// update curve pull
-	//curvePull = segment.curve * vehicle.body.speed * coursePositionFactor * CURVE_PULL_FACTOR;
-	playerVehicle.curvePull = sin(atan2(courseSegment.curve*50, course.spec.roadSegmentLength));
-	playerVehicle.curvePull *= playerVehicle.body.speed * coursePositionFactor;
+//	const float curvatureFactor = 2 * sin(0.5 * courseSegment.curve);  // correct formula according to theory, assuming 'courseSegment.curve' is the degree of curvature, in radians. however it does not behave nicely...
+//	const float curvatureFactor = 2 * sin(atan(0.5 * courseSegment.curve));
+//	const float curvatureFactor = 2 * sin(atan(0.4 * pow2(courseSegment.curve))) * sgn(courseSegment.curve);
+//	const float curvatureFactor = sqrt(2 * courseSegment.curve) * atan(0.5 * courseSegment.curve);
+//	const float curvatureFactor = sqrt(2 * fabs(courseSegment.curve)) * atan(0.25 * pow2(courseSegment.curve)) * sgn(courseSegment.curve);
+//	const float curvatureFactor = 1.25 * courseSegment.curve - atan(courseSegment.curve);
+	const float curvatureFactor = 1.25 * courseSegment.curve;
+	playerVehicle.curvePull = coursePositionFactor * pow2(playerVehicle.body.speed) * curvatureFactor / course.spec.roadSegmentLength;
 
 	// update strafe position
 	playerVehicle.horizontalPosition += (playerVehicle.strafeSpeed - playerVehicle.curvePull)*delta;

@@ -299,7 +299,7 @@ void Pseudo3DRaceState::onEnter()
 			foreach(Pseudo3DVehicle*, sharedVehicle, vector<Pseudo3DVehicle*>, sharedVehiclesOfSpec)
 				if(sharedVehicle != null)
 					foreach(Sprite*, sprite, vector<Sprite*>, sharedVehicle->sprites)
-						sprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+						sprite->scale *= GLOBAL_VEHICLE_SCALE_FACTOR;
 
 		course.trafficVehicles = &trafficVehicles;
 	}

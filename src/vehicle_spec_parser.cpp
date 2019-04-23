@@ -388,8 +388,8 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 
 // default sprite uint constants
 static const unsigned
-	DEFAULT_SPRITE_WIDTH = 56,
-	DEFAULT_SPRITE_HEIGHT = 36,
+	DEFAULT_SPRITE_WIDTH = 60,
+	DEFAULT_SPRITE_HEIGHT = 35,
 	DEFAULT_BRAKELIGHTS_SPRITE_WIDTH = 32,
 	DEFAULT_BRAKELIGHTS_SPRITE_HEIGHT = 32;
 

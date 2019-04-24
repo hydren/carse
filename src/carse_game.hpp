@@ -47,6 +47,7 @@ class CarseGame extends public fgeal::Game
 		// parameters for next match
 		Pseudo3DRaceState::RaceSettings nextMatchRaceSettings;
 		Mechanics::SimulationType nextMatchSimulationType;
+		bool nextMatchJumpSimulationEnabled;
 		Pseudo3DCourse::Spec nextMatchCourseSpec;
 		Pseudo3DVehicle::Spec nextMatchPlayerVehicleSpec;
 		int nextMatchPlayerVehicleSpecAlternateSpriteIndex;
@@ -102,6 +103,9 @@ class CarseGame extends public fgeal::Game
 
 		Mechanics::SimulationType getSimulationType();
 		void setSimulationType(Mechanics::SimulationType type);
+
+		bool isJumpSimulationEnabled();
+		void setJumpSimulationEnabled(bool enabled=true);
 
 		// spec. loading functions
 		void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);

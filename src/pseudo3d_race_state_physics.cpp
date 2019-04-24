@@ -36,6 +36,8 @@ template <typename T> T pow2(T val) {
  *
  * */
 
+#define GRAVITY_ACCELERATION Mechanics::GRAVITY_ACCELERATION
+
 static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
 				   TIRE_FRICTION_COEFFICIENT_GRASS = 0.42,
 				   ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT = 0.013,
@@ -90,7 +92,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update strafing
 	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * coursePositionFactor;
 
-//	if(onAir) playerVehicle.strafeSpeed = 0;
+	if(playerVehicle.onAir) playerVehicle.strafeSpeed = 0;
 
 	// limit strafing speed by magic constant
 	if(fabs(playerVehicle.strafeSpeed) > maxStrafeSpeed)
@@ -109,30 +111,33 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update strafe position
 	playerVehicle.horizontalPosition += (playerVehicle.strafeSpeed - playerVehicle.curvePull)*delta;
 
-	// update vertical position
-	playerVehicle.verticalPosition = courseSegment.y;
-
-	/*
-	if(segment.y >= posY)
+	if(enableJumpSimulation)
 	{
-		verticalSpeed = (segment.y - posY)/delta;
-		posY = segment.y;
-		if(onLongAir)
+		if(courseSegment.y >= playerVehicle.verticalPosition)
 		{
-			onLongAir = false;
-			sndJumpImpact->stop();
-			sndJumpImpact->play();
+			playerVehicle.verticalSpeed = (courseSegment.y - playerVehicle.verticalPosition)/delta;
+			playerVehicle.verticalPosition = courseSegment.y;  // update vertical position
+			if(playerVehicle.onLongAir)
+			{
+				playerVehicle.onLongAir = false;
+				sndJumpImpact->stop();
+				sndJumpImpact->play();
+			}
+			playerVehicle.onAir = false;
 		}
-		onAir = false;
+		else if(courseSegment.y < playerVehicle.verticalPosition)
+		{
+			playerVehicle.verticalSpeed += 2500*GRAVITY_ACCELERATION * delta;
+			if(playerVehicle.verticalSpeed > 1000) playerVehicle.onAir = true;
+			if(playerVehicle.verticalSpeed > 6000) playerVehicle.onLongAir = true;
+			playerVehicle.verticalPosition -= playerVehicle.verticalSpeed*delta;
+		}
 	}
-	else if(segment.y < posY)
+	else
 	{
-		verticalSpeed += 2500*GRAVITY_ACCELERATION * delta;
-		if(verticalSpeed > 1000) onAir = true;
-		if(verticalSpeed > 6000) onLongAir = true;
-		posY -= verticalSpeed*delta;
+		// update vertical position
+		playerVehicle.verticalPosition = courseSegment.y;
 	}
-	*/
 
 	// update bg parallax
 	parallax.x -= courseSegment.curve*playerVehicle.body.speed*0.025;

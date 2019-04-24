@@ -30,6 +30,7 @@ enum MenuItem
 	MENU_ITEM_FULLSCREEN,
 	MENU_ITEM_UNIT,
 	MENU_ITEM_SIMULATION_TYPE,
+	MENU_ITEM_ENABLE_JUMP,
 	MENU_ITEM_TACHOMETER_TYPE,
 	MENU_ITEM_TACHOMETER_POINTER_TYPE,
 	MENU_ITEM_CACHE_TACHOMETER,
@@ -72,6 +73,7 @@ void OptionsMenuState::initialize()
 	menu.addEntry("Fullscreen: ");
 	menu.addEntry("Unit: ");
 	menu.addEntry("Simulation mode: ");
+	menu.addEntry("Enable jumps (experimental): ");
 	menu.addEntry("Tachometer type: ");
 	menu.addEntry("Tachometer pointer type: ");
 	menu.addEntry("Use cached tachometer (experimental): ");
@@ -238,6 +240,9 @@ void OptionsMenuState::onMenuSelect()
 		game.logic.setSimulationType(newType);
 	}
 
+	if(menu.getSelectedIndex() == MENU_ITEM_ENABLE_JUMP)
+		game.logic.setJumpSimulationEnabled(!game.logic.isJumpSimulationEnabled());
+
 	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
 		game.logic.getNextRaceSettings().useBarTachometer = !game.logic.getNextRaceSettings().useBarTachometer;
 
@@ -274,6 +279,7 @@ void OptionsMenuState::updateLabels()
 		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  strSimType = "longitudinal-only slip (Pacejka)"; break;
 	}
 	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
+	setMenuItemValueText(MENU_ITEM_ENABLE_JUMP, game.logic.isJumpSimulationEnabled()? "enabled" : "disabled");
 	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "dial gauge");
 	setMenuItemValueText(MENU_ITEM_TACHOMETER_POINTER_TYPE, game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty()? "built-in" : "custom");
 	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");

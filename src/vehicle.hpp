@@ -42,8 +42,8 @@ struct Pseudo3DVehicle
 	// logic data
 	float position, horizontalPosition, verticalPosition;
 	float pseudoAngle, strafeSpeed, curvePull, corneringStiffness;
-//	float verticalSpeed;
-//	bool onAir, onLongAir;
+	float verticalSpeed;
+	bool onAir, onLongAir;
 	bool isTireBurnoutOccurring, isCrashing;
 
 	// sound data

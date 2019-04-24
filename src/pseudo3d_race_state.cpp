@@ -69,7 +69,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  coursePositionFactor(500), courseStartPositionOffset(6), simulationType(),
+  coursePositionFactor(500), courseStartPositionOffset(6), simulationType(), enableJumpSimulation(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
@@ -216,6 +216,7 @@ void Pseudo3DRaceState::onEnter()
 
 	settings = game.logic.getNextRaceSettings();
 	simulationType = game.logic.getSimulationType();
+	enableJumpSimulation = game.logic.isJumpSimulationEnabled();
 
 	course.freeAssetsData();
 	course = Pseudo3DCourse(game.logic.getNextCourse());
@@ -451,7 +452,7 @@ void Pseudo3DRaceState::onEnter()
 	parallax.x = parallax.y = 0;
 	playerVehicle.position = courseStartPositionOffset;
 	playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
-//	verticalSpeed = 0;
+	playerVehicle.verticalSpeed = 0;
 	playerVehicle.body.simulationType = simulationType;
 	playerVehicle.body.reset();
 	playerVehicle.body.automaticShiftingEnabled = true;
@@ -460,7 +461,7 @@ void Pseudo3DRaceState::onEnter()
 	lapCurrent = 1;
 	acc0to60time = acc0to60clock = 0;
 
-	playerVehicle.isTireBurnoutOccurring = /*onAir = onLongAir =*/ false;
+	playerVehicle.isTireBurnoutOccurring = playerVehicle.onAir = playerVehicle.onLongAir = false;
 
 	if(music != null) music->loop();
 	playerVehicle.engineSound.play();
@@ -589,10 +590,10 @@ void Pseudo3DRaceState::render()
 		sprintf(buffer, "%2.2fm", playerVehicle.verticalPosition);
 		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
 
-//		offset += 18;
-//		fontDev->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
-//		sprintf(buffer, "%2.2fm/s", verticalSpeed);
-//		font->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
+		offset += 18;
+		fontDev->drawText("Vertical speed:", 25, offset, fgeal::Color::WHITE);
+		sprintf(buffer, "%2.2fm/s", playerVehicle.verticalSpeed);
+		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDev->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
@@ -907,7 +908,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 		case Keyboard::KEY_R:
 			playerVehicle.position = courseStartPositionOffset;
 			playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
-//			verticalSpeed = 0;
+			playerVehicle.verticalSpeed = 0;
 			playerVehicle.body.reset();
 			playerVehicle.pseudoAngle = 0;
 			parallax.x = parallax.y = 0;
@@ -916,7 +917,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			onSceneIntro = true;
 			timerSceneIntro = 4.5;
 			countdownBuzzerCounter = 5;
-//			isBurningRubber = onAir = onLongAir = false;
+			playerVehicle.onAir = playerVehicle.onLongAir = false;
 			acc0to60time = acc0to60clock = 0;
 			break;
 		case Keyboard::KEY_T:

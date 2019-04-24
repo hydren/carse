@@ -57,6 +57,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Mechanics::SimulationType simulationType;
 
+	// trigger vehicle jump simulation
+	bool enableJumpSimulation;
+
 	bool onSceneIntro, onSceneFinish;
 	float timerSceneIntro, timerSceneFinish;
 

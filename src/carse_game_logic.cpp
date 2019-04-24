@@ -15,7 +15,8 @@ using std::string;
 
 // logic constructor, booooooring!
 CarseGame::Logic::Logic()
-: nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
+: nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchJumpSimulationEnabled(),
+  nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
   raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0),
   raceOnlyPlayerVehicleAlternateSpriteIndex(-1), raceOnlyRaceType(-1), raceOnlyLapCount(2),
   masterVolume(1.f),
@@ -41,6 +42,7 @@ void CarseGame::Logic::onStatesListInitFinished()
 	nextMatchRaceSettings.useCachedTachometer = false;
 	nextMatchRaceSettings.hudTachometerPointerImageFilename.clear();
 	nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
+	nextMatchJumpSimulationEnabled = false;
 
 	if(raceOnlyMode)
 	{
@@ -161,4 +163,14 @@ Mechanics::SimulationType CarseGame::Logic::getSimulationType()
 void CarseGame::Logic::setSimulationType(Mechanics::SimulationType type)
 {
 	nextMatchSimulationType = type;
+}
+
+bool CarseGame::Logic::isJumpSimulationEnabled()
+{
+	return nextMatchJumpSimulationEnabled;
+}
+
+void CarseGame::Logic::setJumpSimulationEnabled(bool enabled)
+{
+	nextMatchJumpSimulationEnabled = enabled;
 }

@@ -182,9 +182,9 @@ float Mechanics::getDriveForce()
 	switch(simulationType)
 	{
 		default:
-		case SIMULATION_TYPE_SLIPLESS:  	return getDriveForceBySimplifiedSchemeSlipless();
-		case SIMULATION_TYPE_WHEEL_LOAD_CAP:		return getDriveForceBySimplifiedSchemeFakeSlip();
-		case SIMULATION_TYPE_PACEJKA_BASED: return getDriveForceByPacejkaScheme();
+		case SIMULATION_TYPE_SLIPLESS:			return getDriveForceBySimplifiedSchemeSlipless();
+		case SIMULATION_TYPE_WHEEL_LOAD_CAP:	return getDriveForceBySimplifiedSchemeFakeSlip();
+		case SIMULATION_TYPE_PACEJKA_BASED:		return getDriveForceByPacejkaScheme();
 	}
 }
 

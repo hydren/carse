@@ -593,7 +593,9 @@ void Pseudo3DRaceState::render()
 		offset += 18;
 		fontDev->drawText("Vertical speed:", 25, offset, fgeal::Color::WHITE);
 		sprintf(buffer, "%2.2fm/s", playerVehicle.verticalSpeed);
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
+		fontSmall->drawText(std::string(buffer), 140, offset, fgeal::Color::WHITE);
+
+		fontDev->drawText(playerVehicle.onAir? "(On air)" : "(On ground)", 220, offset, fgeal::Color::WHITE);
 
 		offset += 25;
 		fontDev->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);

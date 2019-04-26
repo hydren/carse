@@ -58,10 +58,10 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
 				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * coursePositionFactor * playerVehicle.corneringStiffness;
 
-	playerVehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
-	playerVehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
+	playerVehicle.body.tireFrictionFactor = playerVehicle.onAir? 0 : getTireKineticFrictionCoefficient();
+	playerVehicle.body.rollingResistanceFactor = playerVehicle.onAir? 0 : getTireRollingResistanceCoefficient();
 	playerVehicle.body.arbitraryForceFactor = wheelAngleFactor;
-	playerVehicle.body.slopeAngle = atan2(courseSegment.y - playerVehicle.verticalPosition, course.spec.roadSegmentLength);
+	playerVehicle.body.slopeAngle = playerVehicle.onAir? 0 : atan2(courseSegment.y - playerVehicle.verticalPosition, course.spec.roadSegmentLength);
 
 	if(onSceneIntro)
 		playerVehicle.body.engine.gear = 0;
@@ -92,7 +92,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update strafing
 	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * coursePositionFactor;
 
-	if(playerVehicle.onAir) playerVehicle.strafeSpeed = 0;
+	if(playerVehicle.onLongAir) playerVehicle.strafeSpeed = 0;
 
 	// limit strafing speed by magic constant
 	if(fabs(playerVehicle.strafeSpeed) > maxStrafeSpeed)
@@ -113,25 +113,27 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 
 	if(enableJumpSimulation)
 	{
+		if(playerVehicle.onAir)
+			playerVehicle.verticalSpeed -= 10 * GRAVITY_ACCELERATION * delta;
+		else
+			playerVehicle.verticalSpeed = fabs(playerVehicle.body.speed) * sin(playerVehicle.body.slopeAngle);
+
+		playerVehicle.verticalPosition += coursePositionFactor * playerVehicle.verticalSpeed * delta;
+
 		if(courseSegment.y >= playerVehicle.verticalPosition)
 		{
-			playerVehicle.verticalSpeed = (courseSegment.y - playerVehicle.verticalPosition)/delta;
-			playerVehicle.verticalPosition = courseSegment.y;  // update vertical position
+			playerVehicle.verticalPosition = courseSegment.y;
 			if(playerVehicle.onLongAir)
-			{
-				playerVehicle.onLongAir = false;
-				sndJumpImpact->stop();
 				sndJumpImpact->play();
-			}
-			playerVehicle.onAir = false;
+			playerVehicle.onAir = playerVehicle.onLongAir = false;
 		}
-		else if(courseSegment.y < playerVehicle.verticalPosition)
+		else
 		{
-			playerVehicle.verticalSpeed += 2500*GRAVITY_ACCELERATION * delta;
-			if(playerVehicle.verticalSpeed > 1000) playerVehicle.onAir = true;
-			if(playerVehicle.verticalSpeed > 6000) playerVehicle.onLongAir = true;
-			playerVehicle.verticalPosition -= playerVehicle.verticalSpeed*delta;
+			playerVehicle.onAir = true;
+			if(playerVehicle.verticalPosition - courseSegment.y > 500)
+				playerVehicle.onLongAir = true;
 		}
+
 	}
 	else
 	{

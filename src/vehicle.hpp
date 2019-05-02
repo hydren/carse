@@ -54,26 +54,35 @@ struct Pseudo3DVehicle
 	std::vector<fgeal::Sprite*> sprites;
 	fgeal::Sprite* brakelightSprite, *shadowSprite, *smokeSprite;
 
-	Pseudo3DVehicle();  // zero constructor
-
-	/** Creates a vehicle with the given specifications. The optional 'alternateSpriteIndex' argument specifies an alternate skin to use (-1 means use default sprite). */
-	Pseudo3DVehicle(const Pseudo3DVehicle::Spec& spec, int alternateSpriteIndex=-1);
+	Pseudo3DVehicle();
 
 	~Pseudo3DVehicle();
 
-	/** Loads the graphic assets' data from the filesystem. The 'optionalBaseVehicle' argument can be passed to use its sprite data instead of loading the assets again.  */
-	void loadGraphicAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null);
+	/** Sets the attributes of this vehicle according to the specifications given by the Spec argument.
+	 *  The optional 'alternateSpriteIndex' argument specifies whether to use the standard sprite or an alternate one (-1 means use standard sprite). */
+	void setSpec(const Spec&, int alternateSpriteIndex=-1);
 
-	/** Loads the sound assets' data from the filesystem. The 'optionalBaseVehicle' argument can be passed to use its sound data instead of loading the assets again.  */
-	void loadSoundAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null);
+	/** Loads the graphic assets' data from the filesystem. */
+	void loadGraphicAssetsData();
 
-	inline void loadAssetsData(const Pseudo3DVehicle* optionalBaseVehicle=null) {
-		loadGraphicAssetsData(optionalBaseVehicle);
-		loadSoundAssetsData(optionalBaseVehicle);
+	/** Loads the sound assets' data from the filesystem. */
+	void loadSoundAssetsData();
+
+	inline void loadAssetsData() {
+		loadGraphicAssetsData();
+		loadSoundAssetsData();
 	}
 
-	/** Disposes of loaded graphics and sounds assets. */
-	void freeAssetsData();
+	/** Loads the graphic assets' data from the 'baseVehicle' argument to use its sprite data in this vehicle as well. The 'baseVehicle' "owns" the resources, though.  */
+	void loadGraphicAssetsData(const Pseudo3DVehicle* baseVehicle);
+
+	/** Loads the sound assets' data from the 'baseVehicle' argument to use its sound data in this vehicle as well. The 'baseVehicle' "owns" the resources, though. */
+	void loadSoundAssetsData(const Pseudo3DVehicle* baseVehicle);
+
+	inline void loadAssetsData(const Pseudo3DVehicle* baseVehicle) {
+		loadGraphicAssetsData(baseVehicle);
+		loadSoundAssetsData(baseVehicle);
+	}
 
 	/** Draws this vehicle at the given position (x, y).
 	 *  The 'angle' argument specifies the angle to be depicted.
@@ -83,6 +92,9 @@ struct Pseudo3DVehicle
 
 	private:
 	bool spriteAssetsAreShared, soundAssetsAreShared;
+
+	// Disposes of loaded graphics and sounds assets.
+	void freeAssetsData();
 };
 
 #endif /* PSEUDO3D_VEHICLE_HPP_ */

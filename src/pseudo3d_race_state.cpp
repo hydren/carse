@@ -254,7 +254,7 @@ void Pseudo3DRaceState::onEnter()
 	const unsigned trafficCount = settings.trafficDensity * (course.spec.lines.size() * course.spec.roadSegmentLength)/1000.f;
 	if(trafficCount > 0)
 	{
-		trafficVehicles.reserve(trafficCount);  // NEEDED TO AVOID THE VEHICLE'S DESTRUCTOR BEING CALLED BY STD::VECTOR (INSERTING ELEMENTS CAN CAUSE REALOCATION)
+		trafficVehicles.resize(trafficCount);
 
 		const vector<Pseudo3DVehicle::Spec>& trafficVehicleSpecs = game.logic.getTrafficVehicleList();
 
@@ -269,8 +269,8 @@ void Pseudo3DRaceState::onEnter()
 			const Pseudo3DVehicle::Spec& spec = trafficVehicleSpecs[trafficVehicleIndex];  // grab randomly chosen spec
 			vector<Pseudo3DVehicle*>& sharedVehicles = allSharedVehicles[trafficVehicleIndex];  // grab list of "base" vehicles to use their assets
 			const int skinIndex = spec.alternateSprites.empty()? -1 : futil::random_between(-1, spec.alternateSprites.size());
-			trafficVehicles.push_back(Pseudo3DVehicle(spec, skinIndex));
-			Pseudo3DVehicle& trafficVehicle = trafficVehicles.back();
+			Pseudo3DVehicle& trafficVehicle = trafficVehicles[i];
+			trafficVehicle.setSpec(spec, skinIndex);
 
 			// if first instance of this spec/skin, load assets and record a pointer
 			if(sharedVehicles[skinIndex+1] == null)
@@ -303,8 +303,7 @@ void Pseudo3DRaceState::onEnter()
 	}
 
 	playerVehicle.smokeSprite = null;
-	playerVehicle.freeAssetsData();
-	playerVehicle = Pseudo3DVehicle(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
+	playerVehicle.setSpec(game.logic.getPickedVehicle(), game.logic.getPickedVehicleAlternateSpriteIndex());
 	playerVehicle.loadAssetsData();
 	playerVehicle.smokeSprite = spriteSmoke;
 	playerVehicle.engineSound.setVolume(game.logic.masterVolume);

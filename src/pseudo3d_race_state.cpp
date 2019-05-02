@@ -218,10 +218,7 @@ void Pseudo3DRaceState::onEnter()
 	simulationType = game.logic.getSimulationType();
 	enableJumpSimulation = game.logic.isJumpSimulationEnabled();
 
-	course.freeAssetsData();
-	course = Pseudo3DCourse(game.logic.getNextCourse());
-	course.loadAssetsData();
-
+	course.loadSpec(game.logic.getNextCourse());
 	course.drawAreaWidth = display.getWidth();
 	course.drawAreaHeight = display.getHeight();
 	course.drawDistance = 300;

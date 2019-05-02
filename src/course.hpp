@@ -95,13 +95,10 @@ struct Pseudo3DCourse
 	std::vector<Pseudo3DVehicle>* trafficVehicles;
 
 	Pseudo3DCourse();
-	Pseudo3DCourse(Spec spec);
+
+	void loadSpec(Spec);
 
 	void draw(int positionZ, int positionX);
-
-	void freeAssetsData();
-
-	void loadAssetsData();
 };
 
 #endif /* PSEUDO3D_COURSE_HPP_ */

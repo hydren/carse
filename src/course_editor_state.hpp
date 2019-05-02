@@ -89,7 +89,7 @@ class CourseEditorState extends public fgeal::Game::State
 
 	private:
 	void reloadFileList();
-	void loadCourse(const Pseudo3DCourse& course);
+	void loadCourseSpec(const Pseudo3DCourse::Spec&);
 };
 
 #endif /* STATES_COURSE_EDITOR_STATE_HPP_ */

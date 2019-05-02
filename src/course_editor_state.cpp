@@ -222,7 +222,7 @@ void CourseEditorState::onEnter()
 	map.scale.x = map.scale.y = 1.f;
 	map.bounds = mapBounds;
 
-	this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
+	this->loadCourseSpec(Pseudo3DCourse::Spec(200, 3000));
 }
 
 void CourseEditorState::onLeave()
@@ -386,7 +386,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		if(key == Keyboard::KEY_ENTER)
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
+			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 		}
 	}
 	else if(focus == ON_SAVE_DIALOG)
@@ -405,7 +405,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(newButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse(Pseudo3DCourse::Spec(200, 3000)));
+			this->loadCourseSpec(Pseudo3DCourse::Spec(200, 3000));
 		}
 
 		if(loadButton.bounds.contains(x, y))
@@ -423,7 +423,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(generateButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
+			this->loadCourseSpec(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
 		}
 
 		if(exitButton.bounds.contains(x, y))
@@ -443,7 +443,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(loadDialogSelectButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourse(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
+			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 		}
 
 		if(loadDialogCancelButton.bounds.contains(x, y))
@@ -488,11 +488,9 @@ void CourseEditorState::reloadFileList()
 		fileMenu.addEntry(courses[i].filename);
 }
 
-void CourseEditorState::loadCourse(const Pseudo3DCourse& c)
+void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)
 {
-	course.freeAssetsData();
-	course = c;
-	course.loadAssetsData();
+	course.loadSpec(spec);
 	course.drawAreaWidth = courseViewBounds.w;
 	course.drawAreaHeight = courseViewBounds.h;
 	course.drawDistance = 300;

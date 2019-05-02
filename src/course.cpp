@@ -31,11 +31,27 @@ Pseudo3DCourse::Pseudo3DCourse()
   trafficVehicles(null)
 {}
 
-Pseudo3DCourse::Pseudo3DCourse(Spec spec)
-: spec(spec), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
-  trafficVehicles(null)
-{}
+void Pseudo3DCourse::loadSpec(Spec spec)
+{
+	// free assets' data
+	if(not sprites.empty())
+	{
+		for(unsigned i = 0; i < sprites.size(); i++)
+			delete sprites[i];
+
+		sprites.clear();
+	}
+
+	// set new spec and reset some values
+	this->spec = spec;
+
+	// load assets' data
+	for(unsigned i = 0; i < spec.spritesFilenames.size(); i++)
+		if(not spec.spritesFilenames[i].empty())
+			sprites.push_back(new Image(spec.spritesFilenames[i]));
+		else
+			sprites.push_back(null);
+}
 
 //custom call to draw quad
 inline static void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
@@ -178,26 +194,6 @@ void Pseudo3DCourse::draw(int pos, int posX)
 			}
 	    }
 	}
-}
-
-void Pseudo3DCourse::freeAssetsData()
-{
-	if(not sprites.empty())
-	{
-		for(unsigned i = 0; i < sprites.size(); i++)
-			delete sprites[i];
-
-		sprites.clear();
-	}
-}
-
-void Pseudo3DCourse::loadAssetsData()
-{
-	for(unsigned i = 0; i < spec.spritesFilenames.size(); i++)
-		if(not spec.spritesFilenames[i].empty())
-			sprites.push_back(new Image(spec.spritesFilenames[i]));
-		else
-			sprites.push_back(null);
 }
 
 // #################### Pseudo3D Course Spec. methods #####################################################

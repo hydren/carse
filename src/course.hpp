@@ -97,7 +97,7 @@ struct Pseudo3DCourse
 	Pseudo3DCourse();
 	~Pseudo3DCourse();
 
-	void loadSpec(Spec);
+	void loadSpec(const Spec&);
 
 	void draw(int positionZ, int positionX);
 };

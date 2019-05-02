@@ -40,7 +40,7 @@ Pseudo3DCourse::~Pseudo3DCourse()
 	}
 }
 
-void Pseudo3DCourse::loadSpec(Spec spec)
+void Pseudo3DCourse::loadSpec(const Spec& spec)
 {
 	// free assets' data
 	if(not sprites.empty())

@@ -31,6 +31,15 @@ Pseudo3DCourse::Pseudo3DCourse()
   trafficVehicles(null)
 {}
 
+Pseudo3DCourse::~Pseudo3DCourse()
+{
+	if(not sprites.empty())
+	{
+		for(unsigned i = 0; i < sprites.size(); i++)
+			delete sprites[i];
+	}
+}
+
 void Pseudo3DCourse::loadSpec(Spec spec)
 {
 	// free assets' data

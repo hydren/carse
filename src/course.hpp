@@ -95,6 +95,7 @@ struct Pseudo3DCourse
 	std::vector<Pseudo3DVehicle>* trafficVehicles;
 
 	Pseudo3DCourse();
+	~Pseudo3DCourse();
 
 	void loadSpec(Spec);
 

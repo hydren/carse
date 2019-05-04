@@ -189,7 +189,7 @@ void Pseudo3DVehicle::freeAssetsData()
 	}
 }
 
-void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, float cropY)
+void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, float cropY) const
 {
 	unsigned animationIndex = 0;
 	for(unsigned i = 1; i < spriteSpec.stateCount; i++)

@@ -88,7 +88,7 @@ struct Pseudo3DVehicle
 	 *  The 'angle' argument specifies the angle to be depicted.
 	 *  The 'distanceScale' specifies how far the vehicle is depicted.
 	 *  TThe 'cropY' parameter specifies how much to crop the sprite vertically (bottom-up). */
-	void draw(float x, float y, float angle=0, float distanceScale=1.0, float cropY=0);
+	void draw(float x, float y, float angle=0, float distanceScale=1.0, float cropY=0) const;
 
 	private:
 	bool spriteAssetsAreShared, soundAssetsAreShared;

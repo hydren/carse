@@ -223,6 +223,7 @@ void Pseudo3DRaceState::onEnter()
 	course.drawAreaHeight = display.getHeight();
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
+	course.lengthScale = coursePositionFactor;
 	course.vehicles.clear();
 
 	minimap = Pseudo3DCourse::Map(course.spec);
@@ -284,7 +285,7 @@ void Pseudo3DRaceState::onEnter()
 			// random parameters
 			//FIXME number of lanes should be accounted for when deciding horizontal positions
 			//FIXME road shoulder size should be accounted for when deciding horizontal positions
-			trafficVehicle.position = futil::random_between_decimal(0.1, 0.9) * course.spec.roadSegmentLength * course.spec.lines.size();
+			trafficVehicle.position = futil::random_between_decimal(0.1, 0.9) * course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
 			trafficVehicle.horizontalPosition = (futil::random_between(-2, 3)/2.f) * 0.825 * course.spec.roadWidth / coursePositionFactor;
 			trafficVehicle.body.simulationType = simulationType;
 			trafficVehicle.body.reset();

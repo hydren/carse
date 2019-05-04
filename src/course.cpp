@@ -27,7 +27,8 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
+  lengthScale(1)
 {}
 
 Pseudo3DCourse::~Pseudo3DCourse()
@@ -178,7 +179,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 		const_foreach(const Pseudo3DVehicle*, vehicle, vector<const Pseudo3DVehicle*>, vehicles)
 	    {
-			if((static_cast<unsigned>(vehicle->position/spec.roadSegmentLength))%N == n)
+			if((static_cast<unsigned>(vehicle->position * lengthScale / spec.roadSegmentLength))%N == n)
 			{
 				const int w = vehicle->spriteSpec.frameWidth,
 						  h = vehicle->spriteSpec.frameHeight;

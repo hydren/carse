@@ -9,6 +9,8 @@
 
 #include "carse_game.hpp"
 
+using std::vector;
+
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
@@ -151,14 +153,14 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	if(parallax.x > 0)
 		parallax.x -= imgBackground->getWidth();
 
-	foreach(Pseudo3DVehicle&, trafficVehicle, std::vector<Pseudo3DVehicle>, trafficVehicles)
+	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
 	{
 		trafficVehicle.body.rollingResistanceFactor = ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
 		trafficVehicle.body.tireFrictionFactor = TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT;
 		trafficVehicle.body.updatePowertrain(delta);
-		trafficVehicle.position += coursePositionFactor*trafficVehicle.body.speed*delta;  // update position
+		trafficVehicle.position += trafficVehicle.body.speed*delta;  // update position
 
-		const unsigned trafficVehicleCourseSegmentIndex = static_cast<int>((trafficVehicle.position - PLAYER_VEHICLE_PROJECTION_OFFSET * coursePositionFactor) / course.spec.roadSegmentLength) % course.spec.lines.size();
+		const unsigned trafficVehicleCourseSegmentIndex = static_cast<int>((trafficVehicle.position - PLAYER_VEHICLE_PROJECTION_OFFSET) * coursePositionFactor / course.spec.roadSegmentLength) % course.spec.lines.size();
 		if(trafficVehicleCourseSegmentIndex == courseSegmentIndex)  // if on the same segment, check for collision
 		{
 			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,

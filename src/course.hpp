@@ -93,6 +93,7 @@ struct Pseudo3DCourse
 	float cameraDepth;
 
 	std::vector<const Pseudo3DVehicle*> vehicles;
+	float lengthScale;
 
 	Pseudo3DCourse();
 	~Pseudo3DCourse();

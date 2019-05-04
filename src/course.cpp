@@ -27,8 +27,7 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
-  trafficVehicles(null)
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100)
 {}
 
 Pseudo3DCourse::~Pseudo3DCourse()
@@ -177,20 +176,20 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				s.drawScaledRegion(destX, destY, scale, scale, Image::FLIP_NONE, 0, 0, sw, sh);
 		}
 
-		if(trafficVehicles != null) foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, *trafficVehicles)
+		const_foreach(const Pseudo3DVehicle*, vehicle, vector<const Pseudo3DVehicle*>, vehicles)
 	    {
-			if((static_cast<unsigned>(trafficVehicle.position/spec.roadSegmentLength))%N == n)
+			if((static_cast<unsigned>(vehicle->position/spec.roadSegmentLength))%N == n)
 			{
-				const int w = trafficVehicle.spriteSpec.frameWidth,
-						  h = trafficVehicle.spriteSpec.frameHeight;
+				const int w = vehicle->spriteSpec.frameWidth,
+						  h = vehicle->spriteSpec.frameHeight;
 
 				const float scale = lt.W * 1.2f,
-					  destW = w*scale*trafficVehicle.sprites.back()->scale.x,
-					  destH = h*scale*trafficVehicle.sprites.back()->scale.y;
-				float destX = lt.X + lt.scale * trafficVehicle.horizontalPosition * drawAreaWidth/2;
+					  destW = w*scale*vehicle->sprites.back()->scale.x,
+					  destH = h*scale*vehicle->sprites.back()->scale.y;
+				float destX = lt.X + lt.scale * vehicle->horizontalPosition * drawAreaWidth/2;
 				float destY = lt.Y + 4;
 
-				destX += 0.135f * scale * trafficVehicle.horizontalPosition;  // offsetX
+				destX += 0.135f * scale * vehicle->horizontalPosition;  // offsetX
 
 				float clipH = destY - l.clip;
 				if(clipH < 0)
@@ -199,7 +198,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				const float sh = h-h*clipH/destH;
 
 				if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
-					trafficVehicle.draw(destX, destY, 0, scale, sh);
+					vehicle->draw(destX, destY, 0, scale, sh);
 			}
 	    }
 	}

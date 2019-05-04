@@ -92,7 +92,7 @@ struct Pseudo3DCourse
 	unsigned drawDistance;
 	float cameraDepth;
 
-	std::vector<Pseudo3DVehicle>* trafficVehicles;
+	std::vector<const Pseudo3DVehicle*> vehicles;
 
 	Pseudo3DCourse();
 	~Pseudo3DCourse();

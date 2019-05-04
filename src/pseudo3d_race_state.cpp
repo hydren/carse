@@ -223,6 +223,7 @@ void Pseudo3DRaceState::onEnter()
 	course.drawAreaHeight = display.getHeight();
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
+	course.vehicles.clear();
 
 	minimap = Pseudo3DCourse::Map(course.spec);
 
@@ -249,7 +250,6 @@ void Pseudo3DRaceState::onEnter()
 
 	if(not trafficVehicles.empty())
 		trafficVehicles.clear();
-	course.trafficVehicles = null;
 
 	const unsigned trafficCount = settings.trafficDensity * (course.spec.lines.size() * course.spec.roadSegmentLength)/1000.f;
 	if(trafficCount > 0)
@@ -299,7 +299,8 @@ void Pseudo3DRaceState::onEnter()
 					foreach(Sprite*, sprite, vector<Sprite*>, sharedVehicle->sprites)
 						sprite->scale *= GLOBAL_VEHICLE_SCALE_FACTOR;
 
-		course.trafficVehicles = &trafficVehicles;
+		foreach(Pseudo3DVehicle&, vehicle, vector<Pseudo3DVehicle>, trafficVehicles)
+			course.vehicles.push_back(&vehicle);
 	}
 
 	playerVehicle.smokeSprite = null;

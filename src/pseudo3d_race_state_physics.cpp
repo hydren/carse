@@ -58,7 +58,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	const CourseSpec::Segment& courseSegment = course.spec.lines[courseSegmentIndex];
 	const float corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5),
 				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
-				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * coursePositionFactor * playerVehicle.corneringStiffness;
+				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * playerVehicle.corneringStiffness;
 
 	playerVehicle.body.tireFrictionFactor = playerVehicle.onAir? 0 : getTireKineticFrictionCoefficient();
 	playerVehicle.body.rollingResistanceFactor = playerVehicle.onAir? 0 : getTireRollingResistanceCoefficient();
@@ -92,7 +92,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		playerVehicle.pseudoAngle = PSEUDO_ANGLE_MAX * sgn(playerVehicle.pseudoAngle);
 
 	// update strafing
-	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed * coursePositionFactor;
+	playerVehicle.strafeSpeed = playerVehicle.pseudoAngle * playerVehicle.body.speed;
 
 	if(playerVehicle.onLongAir) playerVehicle.strafeSpeed = 0;
 
@@ -108,7 +108,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 //	const float curvatureFactor = sqrt(2 * fabs(courseSegment.curve)) * atan(0.25 * pow2(courseSegment.curve)) * sgn(courseSegment.curve);
 //	const float curvatureFactor = 1.25 * courseSegment.curve - atan(courseSegment.curve);
 	const float curvatureFactor = 1.25 * courseSegment.curve;
-	playerVehicle.curvePull = coursePositionFactor * pow2(playerVehicle.body.speed) * curvatureFactor / course.spec.roadSegmentLength;
+	playerVehicle.curvePull = pow2(playerVehicle.body.speed) * curvatureFactor / course.spec.roadSegmentLength;
 
 	// update strafe position
 	playerVehicle.horizontalPosition += (playerVehicle.strafeSpeed - playerVehicle.curvePull)*delta;
@@ -164,9 +164,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		if(trafficVehicleCourseSegmentIndex == courseSegmentIndex)  // if on the same segment, check for collision
 		{
 			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,
-						px = playerVehicle.horizontalPosition - 0.5f*pw,
+						px = playerVehicle.horizontalPosition * coursePositionFactor - 0.5f*pw,
 						tw = trafficVehicle.spriteSpec.depictedVehicleWidth * trafficVehicle.sprites.back()->scale.x * 7,
-						tx = trafficVehicle.horizontalPosition*coursePositionFactor - 0.5f*tw;
+						tx = trafficVehicle.horizontalPosition * coursePositionFactor - 0.5f*tw;
 
 			if(not (px + pw < tx or px > tx + tw))
 			{
@@ -188,7 +188,7 @@ void Pseudo3DRaceState::shiftGear(int gear)
 
 Pseudo3DRaceState::SurfaceType Pseudo3DRaceState::getCurrentSurfaceType()
 {
-	if(fabs(playerVehicle.horizontalPosition) > 1.2*course.spec.roadWidth)
+	if(fabs(playerVehicle.horizontalPosition * coursePositionFactor) > 1.2*course.spec.roadWidth)
 		return SURFACE_TYPE_GRASS;
 	else
 		return SURFACE_TYPE_DRY_ASPHALT;

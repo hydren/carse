@@ -493,7 +493,7 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition);
+	course.draw(playerVehicle.position * coursePositionFactor, playerVehicle.horizontalPosition * coursePositionFactor);
 
 	playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
 
@@ -607,13 +607,13 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDev->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", playerVehicle.strafeSpeed/coursePositionFactor);
+		sprintf(buffer, "%2.2fm/s", playerVehicle.strafeSpeed);
 		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
 
 
 		offset += 25;
 		fontDev->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", playerVehicle.curvePull/coursePositionFactor);
+		sprintf(buffer, "%2.2fm/s", playerVehicle.curvePull);
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 		offset += 18;
@@ -638,7 +638,7 @@ void Pseudo3DRaceState::render()
 
 		offset += 18;
 		fontDev->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (playerVehicle.curvePull/coursePositionFactor + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
+		sprintf(buffer, "%2.2fN", (playerVehicle.curvePull + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
 		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
 
 
@@ -837,7 +837,7 @@ void Pseudo3DRaceState::update(float delta)
 
 	const bool isPlayerSideslipOccurring = (
 			fabs(playerVehicle.body.speed) > MINIMUM_SPEED_TO_SIDESLIP
-		and MAXIMUM_STRAFE_SPEED_FACTOR * coursePositionFactor * playerVehicle.corneringStiffness - fabs(playerVehicle.strafeSpeed) < 1
+		and MAXIMUM_STRAFE_SPEED_FACTOR * playerVehicle.corneringStiffness - fabs(playerVehicle.strafeSpeed) < 1
 	);
 
 	if(isPlayerWheelspinOccurring and getCurrentSurfaceType() == SURFACE_TYPE_DRY_ASPHALT)

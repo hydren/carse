@@ -69,7 +69,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  coursePositionFactor(500), courseStartPositionOffset(6), simulationType(), enableJumpSimulation(),
+  coursePositionFactor(500), playerVehicleProjectionOffset(6), courseStartPositionOffset(0), simulationType(), enableJumpSimulation(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
@@ -714,12 +714,12 @@ void Pseudo3DRaceState::update(float delta)
 	// course looping control
 	bool courseEndReached = false;
 	const unsigned N = course.spec.lines.size();
-	while((playerVehicle.position - courseStartPositionOffset) * coursePositionFactor >= N*course.spec.roadSegmentLength)
+	while((playerVehicle.position - playerVehicleProjectionOffset) * coursePositionFactor >= N*course.spec.roadSegmentLength)
 	{
 		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
 		courseEndReached = true;
 	}
-	while((playerVehicle.position - courseStartPositionOffset) < 0)
+	while((playerVehicle.position - playerVehicleProjectionOffset) < 0)
 		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
 
 

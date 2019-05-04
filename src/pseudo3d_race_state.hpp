@@ -52,6 +52,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	// value used to convert physics position to course segment position
 	float coursePositionFactor;
 
+	// the distance the player's vehicle's sprite is being drawn ahead of the vehicle's actual position (needed since the player vehicle sprite is projected "ahead" of its actual position)
+	float playerVehicleProjectionOffset;
+
 	// offset of the starting position of the player
 	float courseStartPositionOffset;
 

@@ -31,6 +31,12 @@ Pseudo3DCourse::Pseudo3DCourse()
   lengthScale(1)
 {}
 
+inline static float modf(float x)
+{
+	static float t;
+	return std::modf(x, &t);
+}
+
 Pseudo3DCourse::~Pseudo3DCourse()
 {
 	if(not sprites.empty())
@@ -181,14 +187,22 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    {
 			if((static_cast<unsigned>(vehicle->position * lengthScale / spec.roadSegmentLength))%N == n)
 			{
+				const float ltprop = modf(vehicle->position * lengthScale / spec.roadSegmentLength), lt2prop = 1 - ltprop;
+
+				const ScreenCoordCache& lt2 = lts[(n-1)%N];
+				const float ltW = lt.W * ltprop + lt2.W * lt2prop,
+							ltX = lt.X * ltprop + lt2.X * lt2prop,
+							ltY = lt.Y * ltprop + lt2.Y * lt2prop,
+							ltScale = lt.scale * ltprop + lt2.scale * lt2prop;
+
 				const int w = vehicle->spriteSpec.frameWidth,
 						  h = vehicle->spriteSpec.frameHeight;
 
-				const float scale = lt.W * 1.2f,
+				const float scale = ltW * 1.2f,
 					  destW = w*scale*vehicle->sprites.back()->scale.x,
 					  destH = h*scale*vehicle->sprites.back()->scale.y;
-				float destX = lt.X + lt.scale * vehicle->horizontalPosition * drawAreaWidth/2;
-				float destY = lt.Y + 4;
+				float destX = ltX + ltScale * vehicle->horizontalPosition * drawAreaWidth/2;
+				float destY = ltY + 4;
 
 				destX += 0.135f * scale * vehicle->horizontalPosition;  // offsetX
 

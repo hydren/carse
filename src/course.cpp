@@ -198,13 +198,13 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				const int w = vehicle->spriteSpec.frameWidth,
 						  h = vehicle->spriteSpec.frameHeight;
 
-				const float scale = ltW * 1.2f,
+				const float scale = ltW * 1.55f,
 					  destW = w*scale*vehicle->sprites.back()->scale.x,
 					  destH = h*scale*vehicle->sprites.back()->scale.y;
 				float destX = ltX + ltScale * vehicle->horizontalPosition * drawAreaWidth/2;
 				float destY = ltY + 4;
 
-				destX += 0.135f * scale * vehicle->horizontalPosition;  // offsetX
+				destX += 0.10731f * scale * vehicle->horizontalPosition;  // offsetX
 
 				float clipH = destY - l.clip;
 				if(clipH < 0)
@@ -213,7 +213,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				const float sh = h-h*clipH/destH;
 
 				if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
-					vehicle->draw(destX, destY, 0, scale, sh);
+					vehicle->draw(destX, destY, vehicle->pseudoAngle, scale, sh);
 			}
 	    }
 	}

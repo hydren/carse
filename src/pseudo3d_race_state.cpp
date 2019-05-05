@@ -69,11 +69,13 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   parallax(), backgroundScale(),
 
-  coursePositionFactor(500), playerVehicleProjectionOffset(6), courseStartPositionOffset(0), simulationType(), enableJumpSimulation(),
+  coursePositionFactor(500), playerVehicleProjectionOffset(4), courseStartPositionOffset(0), simulationType(), enableJumpSimulation(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
   lapTimeCurrent(0), lapTimeBest(0), lapCurrent(0), acc0to60clock(0), acc0to60time(0),
 
   course(), playerVehicle(),
+
+  showLegacyPlayerSprite(false),
 
   hudDialTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
   hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
@@ -309,17 +311,18 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.loadAssetsData();
 	playerVehicle.smokeSprite = spriteSmoke;
 	playerVehicle.engineSound.setVolume(game.logic.masterVolume);
+	course.vehicles.push_back(&playerVehicle);
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
-		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		playerVehicle.sprites[s]->scale *= GLOBAL_VEHICLE_SCALE_FACTOR;
 
 	if(playerVehicle.brakelightSprite != null)
-		playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		playerVehicle.brakelightSprite->scale *= GLOBAL_VEHICLE_SCALE_FACTOR;
 
 	if(playerVehicle.shadowSprite != null)
-		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		playerVehicle.shadowSprite->scale *= GLOBAL_VEHICLE_SCALE_FACTOR;
 
-	spriteSmoke->scale.x = spriteSmoke->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
+	spriteSmoke->scale.x = spriteSmoke->scale.y = GLOBAL_VEHICLE_SCALE_FACTOR * 0.75f;
 
 	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
 	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
@@ -495,7 +498,18 @@ void Pseudo3DRaceState::render()
 
 	course.draw((playerVehicle.position - playerVehicleProjectionOffset) * coursePositionFactor, playerVehicle.horizontalPosition * coursePositionFactor);
 
-	playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
+	if(showLegacyPlayerSprite)
+	{
+		vector<fgeal::Vector2D> tmpScale(playerVehicle.sprites.size());
+		for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
+		{
+			tmpScale[s] = playerVehicle.sprites[s]->scale;
+			playerVehicle.sprites[s]->scale *= displayWidth;
+		}
+		playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
+		for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
+			playerVehicle.sprites[s]->scale = tmpScale[s];
+	}
 
 	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
@@ -934,6 +948,9 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			break;
 		case Keyboard::KEY_D:
 			debugMode = !debugMode;
+			break;
+		case Keyboard::KEY_V:
+			showLegacyPlayerSprite = !showLegacyPlayerSprite;
 			break;
 		case Keyboard::KEY_PAGE_UP:
 			course.drawDistance++;

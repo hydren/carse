@@ -148,6 +148,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	Pseudo3DVehicle playerVehicle;
 
+	//XXX DEBUG
+	bool showLegacyPlayerSprite;
+
 	std::vector<Pseudo3DVehicle> trafficVehicles;
 
 	// HUD stuff --------------------------------------------------------------

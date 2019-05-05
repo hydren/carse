@@ -158,7 +158,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		trafficVehicle.body.updatePowertrain(delta);
 		trafficVehicle.position += trafficVehicle.body.speed*delta;  // update position
 
-		const unsigned trafficVehicleCourseSegmentIndex = static_cast<int>((trafficVehicle.position - playerVehicleProjectionOffset) * coursePositionFactor / course.spec.roadSegmentLength) % course.spec.lines.size();
+		const unsigned trafficVehicleCourseSegmentIndex = static_cast<int>(trafficVehicle.position * coursePositionFactor / course.spec.roadSegmentLength) % course.spec.lines.size();
 		if(trafficVehicleCourseSegmentIndex == courseSegmentIndex)  // if on the same segment, check for collision
 		{
 			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,

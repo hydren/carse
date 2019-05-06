@@ -103,7 +103,6 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
-	// todo delete sounds
 	if(fontSmall != null) delete fontSmall;
 	if(fontCountdown != null) delete fontCountdown;
 	if(font3 != null) delete font3;
@@ -135,15 +134,15 @@ void Pseudo3DRaceState::initialize()
 
 	imgStopwatch = new Image("assets/stopwatch.png");
 
-	sndWheelspinBurnoutIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg");  sndWheelspinBurnoutIntro->setVolume(game.logic.masterVolume);
-	sndWheelspinBurnoutLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg");  sndWheelspinBurnoutLoop->setVolume(game.logic.masterVolume);
-	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg");  sndSideslipBurnoutIntro->setVolume(game.logic.masterVolume);
-	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg");  sndSideslipBurnoutLoop->setVolume(game.logic.masterVolume);
-	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg");  sndRunningOnDirtLoop->setVolume(game.logic.masterVolume);
-	sndCrashImpact = new Sound("assets/sound/crash.ogg"); sndCrashImpact->setVolume(game.logic.masterVolume);
-	sndJumpImpact = new Sound("assets/sound/landing.ogg");  sndJumpImpact->setVolume(game.logic.masterVolume);
-	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg");  sndCountdownBuzzer->setVolume(0.8 * game.logic.masterVolume);
-	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg");  sndCountdownBuzzerFinal->setVolume(0.8 * game.logic.masterVolume);
+	sndWheelspinBurnoutIntro = new Sound("assets/sound/tire_burnout_stand1_intro.ogg", game.logic.masterVolume);
+	sndWheelspinBurnoutLoop = new Sound("assets/sound/tire_burnout_stand1_loop.ogg", game.logic.masterVolume);
+	sndSideslipBurnoutIntro = new Sound("assets/sound/tire_burnout_normal1_intro.ogg", game.logic.masterVolume);
+	sndSideslipBurnoutLoop = new Sound("assets/sound/tire_burnout_normal1_loop.ogg", game.logic.masterVolume);
+	sndRunningOnDirtLoop = new Sound("assets/sound/on_gravel.ogg", game.logic.masterVolume);
+	sndCrashImpact = new Sound("assets/sound/crash.ogg", game.logic.masterVolume);
+	sndJumpImpact = new Sound("assets/sound/landing.ogg", game.logic.masterVolume);
+	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg", 0.8 * game.logic.masterVolume);
+	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg", 0.8 * game.logic.masterVolume);
 
 	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, true);
 

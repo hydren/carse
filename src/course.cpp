@@ -31,9 +31,10 @@ Pseudo3DCourse::Pseudo3DCourse()
   lengthScale(1)
 {}
 
-inline static float modf(float x)
+template <typename T>
+inline static T modf(T x)
 {
-	static float t;
+	static T t;
 	return std::modf(x, &t);
 }
 

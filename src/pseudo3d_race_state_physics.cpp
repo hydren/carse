@@ -11,11 +11,15 @@
 
 using std::vector;
 
-template <typename T> int sgn(T val) {
+template <typename T>
+static inline int sgn(T val)
+{
     return (T(0) < val) - (val < T(0));
 }
 
-template <typename T> T pow2(T val) {
+template <typename T>
+static inline T pow2(T val)
+{
 	return val*val;
 }
 

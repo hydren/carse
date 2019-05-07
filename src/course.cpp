@@ -106,6 +106,9 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	if(spec.lines.empty() or spec.roadSegmentLength == 0)
 		return;
 
+	if(pos < 0)
+		pos = 0;
+
 	const unsigned N = spec.lines.size(), fromPos = pos/spec.roadSegmentLength;
 	const float camHeight = 1500 + spec.lines[fromPos].y;
 	float x = 0, dx = 0;

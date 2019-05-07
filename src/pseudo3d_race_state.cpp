@@ -484,7 +484,8 @@ void Pseudo3DRaceState::render()
 
 	game.getDisplay().clear();
 
-	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale;
+	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale,
+				courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
 
 	fgeal::Graphics::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
 	fgeal::Graphics::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
@@ -492,7 +493,11 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
-	course.draw((playerVehicle.position - playerVehicleProjectionOffset) * coursePositionFactor, playerVehicle.horizontalPosition * coursePositionFactor);
+	float cameraPosition = playerVehicle.position - playerVehicleProjectionOffset;
+	while(cameraPosition < 0)  // course drawing method cannot receive negative position, take position modulus
+		cameraPosition += courseLength;
+
+	course.draw(cameraPosition * coursePositionFactor, playerVehicle.horizontalPosition * coursePositionFactor);
 
 	playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
 
@@ -522,8 +527,7 @@ void Pseudo3DRaceState::render()
 	}
 	else if(isRaceTypePointToPoint(settings.raceType))
 	{
-		const float courseLength = (course.spec.lines.size()*course.spec.roadSegmentLength)/coursePositionFactor,
-					progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));
+		const float progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));
 		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
 
@@ -711,16 +715,13 @@ void Pseudo3DRaceState::update(float delta)
 	handlePhysics(delta);
 
 	// course looping control
-	bool courseEndReached = false;
-	const unsigned N = course.spec.lines.size();
-	while((playerVehicle.position - playerVehicleProjectionOffset) * coursePositionFactor >= N*course.spec.roadSegmentLength)
-	{
-		playerVehicle.position -= N*course.spec.roadSegmentLength / coursePositionFactor;
-		courseEndReached = true;
-	}
-	while((playerVehicle.position - playerVehicleProjectionOffset) < 0)
-		playerVehicle.position += N*course.spec.roadSegmentLength / coursePositionFactor;
+	const float courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
+	const bool courseEndReached = (playerVehicle.position >= courseLength);
+	if(courseEndReached) while(playerVehicle.position >= courseLength)  // position larger than course length not allowed, take position modulus
+		playerVehicle.position -= courseLength;
 
+	while(playerVehicle.position < 0)  // negative position is not allowed, take backwards position modulus
+		playerVehicle.position += courseLength;
 
 	// scene control
 	if(onSceneIntro)
@@ -732,7 +733,7 @@ void Pseudo3DRaceState::update(float delta)
 			sndCountdownBuzzer->play();
 			countdownBuzzerCounter--;
 
-			if(countdownBuzzerCounter == 2)  // dont play at last call
+			if(countdownBuzzerCounter == 2)  // do not play at last call
 				countdownBuzzerCounter = 0;
 		}
 

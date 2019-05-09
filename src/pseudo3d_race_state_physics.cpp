@@ -62,10 +62,17 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
 				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * playerVehicle.corneringStiffness;
 
-	playerVehicle.body.tireFrictionFactor = playerVehicle.onAir? 0 : getTireKineticFrictionCoefficient();
-	playerVehicle.body.rollingResistanceFactor = playerVehicle.onAir? 0 : getTireRollingResistanceCoefficient();
+	playerVehicle.body.tireFrictionFactor = getTireKineticFrictionCoefficient();
+	playerVehicle.body.rollingResistanceFactor = getTireRollingResistanceCoefficient();
 	playerVehicle.body.arbitraryForceFactor = wheelAngleFactor;
-	playerVehicle.body.slopeAngle = playerVehicle.onAir? 0 : atan2(courseSegment.y - playerVehicle.verticalPosition, course.spec.roadSegmentLength);
+	playerVehicle.body.slopeAngle = courseSegmentIndex == 0? 0 : atan2(courseSegment.y - course.spec.lines[courseSegmentIndex-1].y, course.spec.roadSegmentLength);
+
+	if(playerVehicle.onAir)
+	{
+		playerVehicle.body.tireFrictionFactor = 0;
+		playerVehicle.body.rollingResistanceFactor = 0;
+		playerVehicle.body.slopeAngle = 0;  // todo make this go asymptotically to zero
+	}
 
 	if(onSceneIntro)
 		playerVehicle.body.engine.gear = 0;
@@ -145,16 +152,6 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		playerVehicle.verticalPosition = courseSegment.y;
 	}
 
-	// update bg parallax
-	parallax.x -= courseSegment.curve*playerVehicle.body.speed*0.025;
-	parallax.y -= 2*playerVehicle.body.slopeAngle;
-
-	if(parallax.x < -(2.0f*imgBackground->getWidth()-game.getDisplay().getWidth()))
-		parallax.x += imgBackground->getWidth();
-
-	if(parallax.x > 0)
-		parallax.x -= imgBackground->getWidth();
-
 	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
 	{
 		trafficVehicle.body.rollingResistanceFactor = ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;
@@ -180,6 +177,17 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 			}
 		}
 	}
+
+	// update bg parallax
+	parallax.x -= courseSegment.curve*playerVehicle.body.speed*0.025;
+
+	if(parallax.x < -(2.0f*imgBackground->getWidth()-game.getDisplay().getWidth()))
+		parallax.x += imgBackground->getWidth();
+
+	if(parallax.x > 0)
+		parallax.x -= imgBackground->getWidth();
+
+	parallax.y = 45*tan(playerVehicle.body.slopeAngle);
 }
 
 void Pseudo3DRaceState::shiftGear(int gear)

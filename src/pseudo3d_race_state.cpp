@@ -24,6 +24,7 @@ using std::map;
 using std::vector;
 
 using fgeal::Display;
+using fgeal::Graphics;
 using fgeal::Image;
 using fgeal::Font;
 using fgeal::Color;
@@ -400,14 +401,14 @@ void Pseudo3DRaceState::onEnter()
 		}
 
 		imgCacheTachometer = new Image(hudDialTachometer.bounds.w, hudDialTachometer.bounds.h);
-		fgeal::Graphics::setDrawTarget(imgCacheTachometer);
-		fgeal::Graphics::drawFilledRectangle(0, 0, imgCacheTachometer->getWidth(), imgCacheTachometer->getHeight(), Color::_TRANSPARENT);
+		Graphics::setDrawTarget(imgCacheTachometer);
+		Graphics::drawFilledRectangle(0, 0, imgCacheTachometer->getWidth(), imgCacheTachometer->getHeight(), Color::_TRANSPARENT);
 		float oldx = hudDialTachometer.bounds.x, oldy = hudDialTachometer.bounds.y;
 		hudDialTachometer.bounds.x = 0;
 		hudDialTachometer.bounds.y = 0;
 		hudDialTachometer.compile();
 		hudDialTachometer.drawBackground();
-		fgeal::Graphics::setDefaultDrawTarget();
+		Graphics::setDefaultDrawTarget();
 		hudDialTachometer.backgroundImage = imgCacheTachometer;
 		hudDialTachometer.imagesAreShared = true;
 		hudDialTachometer.graduationLevel = 0;
@@ -487,8 +488,8 @@ void Pseudo3DRaceState::render()
 	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale,
 				courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
 
-	fgeal::Graphics::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	fgeal::Graphics::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
+	Graphics::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
+	Graphics::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
 
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
@@ -501,7 +502,7 @@ void Pseudo3DRaceState::render()
 
 	playerVehicle.draw(0.5f * displayWidth, 0.83f * displayHeight - 0.01f * playerVehicle.verticalPosition, playerVehicle.pseudoAngle);
 
-	fgeal::Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
+	Graphics::drawFilledRoundedRectangle(minimap.bounds, 5, hudMiniMapBgColor);
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));

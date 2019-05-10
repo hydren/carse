@@ -92,7 +92,10 @@ struct Pseudo3DCourse
 	unsigned drawDistance;
 	float cameraDepth;
 
+	/** A list of vehicles (pointers) to be displayed */
 	std::vector<const Pseudo3DVehicle*> vehicles;
+
+	/** Scale factor of the position of vehicles. */
 	float lengthScale;
 
 	Pseudo3DCourse();

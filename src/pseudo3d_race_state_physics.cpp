@@ -166,9 +166,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		if(trafficVehicleCourseSegmentIndex == courseSegmentIndex)  // if on the same segment, check for collision
 		{
 			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,
-						px = playerVehicle.horizontalPosition * coursePositionFactor - 0.5f*pw,
+						px = playerVehicle.horizontalPosition - 0.5f*pw,
 						tw = trafficVehicle.spriteSpec.depictedVehicleWidth * trafficVehicle.sprites.back()->scale.x * 7,
-						tx = trafficVehicle.horizontalPosition * coursePositionFactor - 0.5f*tw;
+						tx = trafficVehicle.horizontalPosition - 0.5f*tw;
 
 			if(not (px + pw < tx or px > tx + tw))
 			{

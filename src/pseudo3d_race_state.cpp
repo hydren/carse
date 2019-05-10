@@ -494,6 +494,7 @@ void Pseudo3DRaceState::render()
 	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
 		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
 
+//	float cameraPosition = playerVehicle.position;  // gives better visual results regarding cornering, but causes glitch in collision, making it occur on visually wrong positions
 	float cameraPosition = playerVehicle.position - playerVehicleProjectionOffset;
 	while(cameraPosition < 0)  // course drawing method cannot receive negative position, take position modulus
 		cameraPosition += courseLength;

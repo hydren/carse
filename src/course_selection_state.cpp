@@ -95,9 +95,7 @@ void CourseSelectionState::initialize()
 	menuSettings.bgColor = menuCourse.bgColor;
 	menuSettings.borderColor = menuCourse.borderColor;
 	menuSettings.focusedEntryFontColor = menuCourse.focusedEntryFontColor;
-	menuSettings.addEntry("Race type: ");
-	menuSettings.addEntry("Laps: ");
-	menuSettings.addEntry("Traffic: ");
+	for(int i = 0; i < SETTINGS_MENU_COUNT; i++) menuSettings.addEntry(string());
 	updateMenuSettingsLabels();
 	menuSettings.cursorWrapAroundEnabled = false;
 
@@ -331,7 +329,7 @@ void CourseSelectionState::updateMenuSettingsLabels()
 	else
 		menuSettings.getEntryAt(SETTINGS_LAPS).label = "Laps: --";
 
-	menuSettings.getEntryAt(SETTINGS_TRAFFIC_DENSITY).label = "Traffic: " + to_string(raceSettings.trafficDensity*100) + "%";
+	menuSettings.getEntryAt(SETTINGS_TRAFFIC_DENSITY).label = "Traffic (experimental): " + to_string(raceSettings.trafficDensity*100) + "%";
 }
 
 void CourseSelectionState::onKeyPressed(Keyboard::Key key)

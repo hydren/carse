@@ -79,6 +79,9 @@ namespace Hud
 		/** An optional scaling factor for the graduation values shown. It's better used if set power of 10, like 0.1, 0.01, 0.001, etc. */
 		float graduationValueScale;
 
+		/** an optional value that is offset'd from each graduation interval (except the first). */
+		NumberType graduationValueOffset;
+
 		/** The level of graduation to show (currently 0 to 3). Setting as 0 makes the gauge to display no graduation at all. */
 		short graduationLevel;
 
@@ -126,9 +129,9 @@ namespace Hud
 		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
 		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
 		  graduationColor(fgeal::Color::BLACK), graduationFont(null),
-		  graduationPrimaryLineSize(0.5), graduationSecondaryLineSize(0.3), graduationTertiaryLineSize(0.2),
-		  graduationValueScale(1.0), graduationLevel(1),
-		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0),
+		  graduationPrimaryLineSize(0.5f), graduationSecondaryLineSize(0.3f), graduationTertiaryLineSize(0.2f),
+		  graduationValueScale(1.0f), graduationValueOffset(0), graduationLevel(1),
+		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0f),
 		  backgroundImage(null), foregroundImage(null), pointerImage(null), imagesAreShared(false)
 		{
 			setRecommendedGraduationSizes();
@@ -161,19 +164,28 @@ namespace Hud
 			graduationTertiaryCache.clear();
 
 			if(graduationLevel >= 1)  // primary graduation
-			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
-							gradeSize = 0.5f - 0.2f * graduationPrimaryLineSize;
-				graduationPrimaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
-				                                      center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
-
-				// numerical graduation
-				if(graduationFont != null)
+				bool offsetApplied = false;
+				for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
 				{
-					const std::string str(futil::to_string(g * graduationValueScale));
-					graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
-							                                                       center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
+					const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
+								gradeSize = 0.5f - 0.2f * graduationPrimaryLineSize;
+					graduationPrimaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
+														  center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
+
+					// numerical graduation
+					if(graduationFont != null)
+					{
+						const std::string str(futil::to_string(g * graduationValueScale));
+						graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
+																					   center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
+					}
+
+					if(not offsetApplied)
+					{
+						g += graduationValueOffset;
+						offsetApplied = true;
+					}
 				}
 			}
 

@@ -41,7 +41,7 @@ using fgeal::Color;
 using futil::starts_with;
 using futil::split;
 
-const string CARSE_VERSION = "0.5-dev",
+const string CARSE_VERSION = "0.5",
              programPresentation = "carse - pseudo 3d racing engine";
 
 void runSplash()

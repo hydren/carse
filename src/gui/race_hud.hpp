@@ -166,7 +166,7 @@ namespace Hud
 				// numerical graduation
 				if(graduationFont != null)
 				{
-					const std::string str = futil::to_string(g * graduationValueScale);
+					const std::string str(futil::to_string(g * graduationValueScale));
 					graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
 							                                                       center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
 				}

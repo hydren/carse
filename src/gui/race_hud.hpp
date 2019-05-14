@@ -303,7 +303,7 @@ namespace Hud
 
 		void draw()
 		{
-			const float fillRatio = (value-min)/(max-min);
+			const float fillRatio = (std::min(value, max)-min)/(max-min);
 			fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
 			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
 											  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);

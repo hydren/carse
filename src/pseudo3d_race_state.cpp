@@ -147,9 +147,6 @@ void Pseudo3DRaceState::initialize()
 
 	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, true);
 
-	hudDialTachometer.graduationLevel = 2;
-	hudDialTachometer.graduationPrimarySize = 1000;
-	hudDialTachometer.graduationSecondarySize = 100;
 	hudDialTachometer.graduationValueScale = 0.001;
 	hudDialTachometer.graduationFont = fontSmall;
 
@@ -327,7 +324,13 @@ void Pseudo3DRaceState::onEnter()
 //	hudDialTachometer.max = playerVehicle.body.engine.maxRpm;
 	hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
 	hudDialTachometer.bounds = gaugeSize;
-	hudDialTachometer.graduationLevel = 2;
+	hudDialTachometer.graduationLevel = 3;
+	hudDialTachometer.graduationPrimarySize = 1000.f;
+	hudDialTachometer.graduationPrimaryLineSize = 0.5;
+	hudDialTachometer.graduationSecondarySize = 0.5 * hudDialTachometer.graduationPrimarySize;
+	hudDialTachometer.graduationSecondaryLineSize = 0.55;
+	hudDialTachometer.graduationTertiarySize = 0.1 * hudDialTachometer.graduationPrimarySize;
+	hudDialTachometer.graduationTertiaryLineSize = 0.3;
 	hudDialTachometer.backgroundImage = null;
 	hudDialTachometer.borderThickness = 0.01 * displayHeight;
 	hudDialTachometer.boltRadius = 0.025 * displayHeight;

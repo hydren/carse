@@ -73,6 +73,9 @@ namespace Hud
 		/** The font used to display graduation values. If null, no graduation values are shown. */
 		fgeal::Font* graduationFont;
 
+		/** the (non-zero) size of the line of each graduation level, in the range ]0, 1] */
+		float graduationPrimaryLineSize, graduationSecondaryLineSize, graduationTertiaryLineSize;
+
 		/** An optional scaling factor for the graduation values shown. It's better used if set power of 10, like 0.1, 0.01, 0.001, etc. */
 		float graduationValueScale;
 
@@ -123,6 +126,7 @@ namespace Hud
 		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
 		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
 		  graduationColor(fgeal::Color::BLACK), graduationFont(null),
+		  graduationPrimaryLineSize(0.5), graduationSecondaryLineSize(0.3), graduationTertiaryLineSize(0.2),
 		  graduationValueScale(1.0), graduationLevel(1),
 		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0),
 		  backgroundImage(null), foregroundImage(null), pointerImage(null), imagesAreShared(false)
@@ -159,9 +163,10 @@ namespace Hud
 			if(graduationLevel >= 1)  // primary graduation
 			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				graduationPrimaryCache.push_back(Line(center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
-				                                      center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle)));
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
+							gradeSize = 0.5f - 0.2f * graduationPrimaryLineSize;
+				graduationPrimaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
+				                                      center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
 
 				// numerical graduation
 				if(graduationFont != null)
@@ -175,17 +180,19 @@ namespace Hud
 			if(graduationLevel >= 2)  // secondary graduation
 			for(NumberType g = min; g <= max; g += graduationSecondarySize)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				graduationSecondaryCache.push_back(Line(center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
-								                        center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
+							gradeSize = 0.5f - 0.2f * graduationSecondaryLineSize;
+				graduationSecondaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
+								                        center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
 			}
 
 			if(graduationLevel >= 3)  // tertiary graduation
 			for(NumberType g = min; g <= max; g += graduationTertiarySize)
 			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				graduationTertiaryCache.push_back(Line(center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
-								                       center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
+				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
+							gradeSize = 0.5f - 0.2f * graduationTertiaryLineSize;
+				graduationTertiaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
+								                       center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
 			}
 
 			if(backgroundImage != null)

@@ -147,19 +147,16 @@ void Pseudo3DRaceState::initialize()
 
 	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, true);
 
-	hudDialTachometer.borderThickness = 6;
 	hudDialTachometer.graduationLevel = 2;
 	hudDialTachometer.graduationPrimarySize = 1000;
 	hudDialTachometer.graduationSecondarySize = 100;
 	hudDialTachometer.graduationValueScale = 0.001;
 	hudDialTachometer.graduationFont = fontSmall;
 
-	hudBarTachometer.borderThickness = 6;
 	hudBarTachometer.fillColor = Color::RED;
 
 	hudGearDisplay.font = fontSmall;
 	hudGearDisplay.fontIsShared = true;
-	hudGearDisplay.borderThickness = 6;
 	hudGearDisplay.borderColor = Color::LIGHT_GREY;
 	hudGearDisplay.backgroundColor = Color::BLACK;
 	hudGearDisplay.specialCases[0] = "N";
@@ -202,16 +199,18 @@ void Pseudo3DRaceState::initialize()
 void Pseudo3DRaceState::onEnter()
 {
 	Display& display = game.getDisplay();
+	const float displayWidth = display.getWidth(),
+				displayHeight = display.getHeight();
 
 	// reload fonts if display size changed
-	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
+	if(lastDisplaySize.x != displayWidth or lastDisplaySize.y != displayHeight)
 	{
 		fontSmall->setFontSize(dip(10));
 		fontCountdown->setFontSize(dip(36));
 		font3->setFontSize(dip(24));
 		hudSpeedometer.font->setFontSize(dip(24));
-		lastDisplaySize.x = display.getWidth();
-		lastDisplaySize.y = display.getHeight();
+		lastDisplaySize.x = displayWidth;
+		lastDisplaySize.y = displayHeight;
 	}
 
 	settings = game.logic.getNextRaceSettings();
@@ -219,8 +218,8 @@ void Pseudo3DRaceState::onEnter()
 	enableJumpSimulation = game.logic.isJumpSimulationEnabled();
 
 	course.loadSpec(game.logic.getNextCourse());
-	course.drawAreaWidth = display.getWidth();
-	course.drawAreaHeight = display.getHeight();
+	course.drawAreaWidth = displayWidth;
+	course.drawAreaHeight = displayHeight;
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
 	course.lengthScale = coursePositionFactor;
@@ -233,7 +232,7 @@ void Pseudo3DRaceState::onEnter()
 
 	imgBackground = new Image(course.spec.landscapeFilename);
 
-	backgroundScale = 0.2 * display.getHeight() / (float) imgBackground->getHeight();
+	backgroundScale = 0.2 * displayHeight / (float) imgBackground->getHeight();
 
 	bgColor = course.spec.colorLandscape;
 	bgColorHorizon = course.spec.colorHorizon;
@@ -311,25 +310,27 @@ void Pseudo3DRaceState::onEnter()
 	playerVehicle.engineSound.setVolume(game.logic.masterVolume);
 
 	for(unsigned s = 0; s < playerVehicle.sprites.size(); s++)
-		playerVehicle.sprites[s]->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		playerVehicle.sprites[s]->scale *= (displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR);
 
 	if(playerVehicle.brakelightSprite != null)
-		playerVehicle.brakelightSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		playerVehicle.brakelightSprite->scale *= (displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR);
 
 	if(playerVehicle.shadowSprite != null)
-		playerVehicle.shadowSprite->scale *= (display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR);
+		playerVehicle.shadowSprite->scale *= (displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR);
 
-	spriteSmoke->scale.x = spriteSmoke->scale.y = display.getWidth() * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
+	spriteSmoke->scale.x = spriteSmoke->scale.y = displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
-	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
-	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
+	float gaugeDiameter = 0.15*std::max(displayWidth, displayHeight);
+	Rectangle gaugeSize = { displayWidth - 1.1f*gaugeDiameter, displayHeight - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
 
 	hudDialTachometer.min = playerVehicle.body.engine.minRpm;
-//	hudTachometer.max = playerVehicle.body.engine.maxRpm;
+//	hudDialTachometer.max = playerVehicle.body.engine.maxRpm;
 	hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
 	hudDialTachometer.bounds = gaugeSize;
 	hudDialTachometer.graduationLevel = 2;
 	hudDialTachometer.backgroundImage = null;
+	hudDialTachometer.borderThickness = 0.01 * displayHeight;
+	hudDialTachometer.boltRadius = 0.025 * displayHeight;
 	if(hudDialTachometer.pointerImage != null)
 	{
 		delete hudDialTachometer.pointerImage;
@@ -350,12 +351,14 @@ void Pseudo3DRaceState::onEnter()
 	hudBarTachometer.bounds.y *= 1.15;
 	hudBarTachometer.bounds.w *= 2;
 	hudBarTachometer.bounds.h *= 0.125;
+	hudBarTachometer.borderThickness = 0.01 * displayHeight;
 
 	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
 	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
-	gaugeSize.w = 24;
+	gaugeSize.w = 0.04 * displayHeight;
 	gaugeSize.h = 1.5 * fontSmall->getHeight();
 	hudGearDisplay.bounds = gaugeSize;
+	hudGearDisplay.borderThickness = 0.01 * displayHeight;
 
 	gaugeSize.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
 	gaugeSize.w *= 3;
@@ -363,9 +366,9 @@ void Pseudo3DRaceState::onEnter()
 	hudSpeedometer.bounds = gaugeSize;
 	hudSpeedometer.valueScale = settings.isImperialUnit? 2.25 : 3.6;
 
-	gaugeSize.x = display.getWidth() - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
+	gaugeSize.x = displayWidth - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
 	hudTimerCurrentLap.bounds = gaugeSize;
-	hudTimerCurrentLap.bounds.y = display.getHeight() * 0.01;
+	hudTimerCurrentLap.bounds.y = displayHeight * 0.01;
 	hudTimerCurrentLap.valueScale = 1000;
 
 	hudTimerBestLap.bounds = gaugeSize;
@@ -382,15 +385,15 @@ void Pseudo3DRaceState::onEnter()
 	rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("999/999");
 	offsetHudLapGoal = font3->getTextWidth("Laps: 999");
 
-	stopwatchIconBounds.w = 0.032*display.getWidth();
+	stopwatchIconBounds.w = 0.032*displayWidth;
 	stopwatchIconBounds.h = imgStopwatch->getHeight()*(stopwatchIconBounds.w/imgStopwatch->getWidth());
 	stopwatchIconBounds.x = rightHudMargin - 1.2*stopwatchIconBounds.w;
 	stopwatchIconBounds.y = hudTimerCurrentLap.bounds.y;
 
-	posHudCountdown.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("0"));
-	posHudCountdown.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
-	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
-	posHudFinishedCaption.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
+	posHudCountdown.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("0"));
+	posHudCountdown.y = 0.4f*(displayHeight - fontCountdown->getHeight());
+	posHudFinishedCaption.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("FINISHED"));
+	posHudFinishedCaption.y = 0.4f*(displayHeight - fontCountdown->getHeight());
 
 	if(settings.useCachedTachometer and not settings.useBarTachometer)
 	{
@@ -423,12 +426,12 @@ void Pseudo3DRaceState::onEnter()
 
 	minimap.roadColor = Color::GREY;
 	minimap.bounds.x = hudTimerCurrentLap.bounds.x;
-	minimap.bounds.y = 0.3*display.getHeight();
-	minimap.bounds.w = 0.1*display.getWidth();
-	minimap.bounds.h = 0.1*display.getWidth();
+	minimap.bounds.y = 0.3*displayHeight;
+	minimap.bounds.w = 0.1*displayWidth;
+	minimap.bounds.h = 0.1*displayWidth;
 	minimap.scale = fgeal::Vector2D();
 	minimap.segmentHighlightColor = Color::YELLOW;
-	minimap.segmentHighlightSize = 0.005f*display.getWidth();
+	minimap.segmentHighlightSize = 0.005f*displayWidth;
 	minimap.geometryOtimizationEnabled = true;
 
 	if(settings.raceType != RACE_TYPE_DEBUG)

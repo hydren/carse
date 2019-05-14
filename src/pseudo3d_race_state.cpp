@@ -325,8 +325,9 @@ void Pseudo3DRaceState::onEnter()
 	hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
 	hudDialTachometer.bounds = gaugeSize;
 	hudDialTachometer.graduationLevel = 3;
-	hudDialTachometer.graduationPrimarySize = 1000.f;
+	hudDialTachometer.graduationPrimarySize = 1000.f * static_cast<int>(1+hudDialTachometer.max/13000.f);
 	hudDialTachometer.graduationPrimaryLineSize = 0.5;
+	hudDialTachometer.graduationValueOffset = (hudDialTachometer.graduationPrimarySize > 1000.f? -0.5f * hudDialTachometer.graduationPrimarySize : 0);
 	hudDialTachometer.graduationSecondarySize = 0.5 * hudDialTachometer.graduationPrimarySize;
 	hudDialTachometer.graduationSecondaryLineSize = 0.55;
 	hudDialTachometer.graduationTertiarySize = 0.1 * hudDialTachometer.graduationPrimarySize;

@@ -54,7 +54,8 @@ class CourseSelectionState extends public fgeal::Game::State
 
 	fgeal::Button backButton, selectButton;
 
-	bool isLoadedCourseSelected, isDebugCourseSelected;
+	Pseudo3DRaceState::RaceSettings raceSettings;
+	bool isLoadedCourseSelected, isDebugCourseSelected, canceledChanges;
 
 	enum ScreenFocus
 	{

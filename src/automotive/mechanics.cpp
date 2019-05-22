@@ -258,7 +258,6 @@ void Mechanics::updateByPacejkaScheme(float delta)
 	const float wheelMass = AVERAGE_WHEEL_DENSITY * pow2(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
 	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * pow2(tireRadius) * 0.5;  // I = (mr^2)/2
 
-//	const float tractionForce = unstable? 0 : getNormalizedTractionForce() * getDrivenWheelsTireLoad();  // assume zero traction when unstable
 	const float tractionForce = getNormalizedTractionForce() * tireFrictionFactor * getDrivenWheelsWeightLoad();
 	const float tractionTorque = tractionForce * tireRadius;
 
@@ -303,9 +302,6 @@ void Mechanics::updateSlipRatio(float delta)
 		slipRatio = differentialSlipRatio + TAU_CONSTANT * deltaRatio;
 	else
 		slipRatio = differentialSlipRatio;
-
-//	slipRatio = fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius)/fabs(speed) - 1.0;
-//	slipRatio = fabs(speed)==0? 0 : ((double) engine.getAngularSpeed() * (double) tireRadius - (double) speed)/fabs(speed);
 }
 
 float Mechanics::getNormalizedTractionForce()

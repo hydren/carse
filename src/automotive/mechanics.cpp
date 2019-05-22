@@ -280,9 +280,6 @@ float Mechanics::getDriveForceByPacejkaScheme()
 	return getNormalizedTractionForce() * getDrivenWheelsWeightLoad() * tireFrictionFactor;
 }
 
-// increasing this constant degrades simulation quality
-static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  //@suppress("Unused variable declaration in file scope")
-
 void Mechanics::updateSlipRatio(float delta)
 {
 	static const double B_CONSTANT = 0.91,     // constant

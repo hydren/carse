@@ -286,9 +286,6 @@ void Mechanics::updateSlipRatio(float delta)
 						TAU_CONSTANT = 0.02,   // oscillation period (experimental)
 						LOWEST_STABLE_SPEED = 5.0f;
 
-	if(engine.gear == 0)
-		engine.gear = 0;
-
 	// approach suggested by Bernard and Clover in [SAE950311].
 	double deltaRatio = ((double) wheelAngularSpeed * (double) tireRadius - (double) speed) - fabs((double) speed)* differentialSlipRatio;
 	delta /= B_CONSTANT;

@@ -282,13 +282,15 @@ float Mechanics::getDriveForceByPacejkaScheme()
 
 void Mechanics::updateSlipRatio(float delta)
 {
+	// slip ratio computation don't work properly on low speeds due to numerical instability when dividing by values closer and closer to zero
+	// in an attempt to attenuate the issue, we follow an approach suggested by Bernard and Clover in [SAE950311]
 	static const double B_CONSTANT = 0.91,     // constant
 						TAU_CONSTANT = 0.02,   // oscillation period (experimental)
 						LOWEST_STABLE_SPEED = 5.0f;
 
 	// approach suggested by Bernard and Clover in [SAE950311].
-	double deltaRatio = ((double) wheelAngularSpeed * (double) tireRadius - (double) speed) - fabs((double) speed)* differentialSlipRatio;
-	delta /= B_CONSTANT;
+	double deltaRatio = ((double) wheelAngularSpeed * (double) tireRadius - (double) speed) - fabs((double) speed) * differentialSlipRatio;
+	deltaRatio /= B_CONSTANT;
 	differentialSlipRatio += deltaRatio * delta;
 
 	// The differential equation tends to oscillate at low speeds.
@@ -296,7 +298,7 @@ void Mechanics::updateSlipRatio(float delta)
 	//
 	//   SR = SR + Tau * d SR/dt, where Tau is close to the oscillation period
 	//
-	// (Thanks to Gregor Veble in r.a.s.)
+	// (Thanks to Gregor Veble in rec.autos.simulators)
 	if(speed < LOWEST_STABLE_SPEED)
 		slipRatio = differentialSlipRatio + TAU_CONSTANT * deltaRatio;
 	else
@@ -308,8 +310,7 @@ void Mechanics::updateSlipRatio(float delta)
 
 float Mechanics::getNormalizedTractionForce()
 {
-	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
-	// this formula don't work properly on low speeds (numerical instability)
+	// approximation/simplification based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
 	return slipRatio < 0.06? (20.0*slipRatio)  // 0 to 6% slip ratio gives traction from 0 up to 120%
 		 : slipRatio < 0.20? (9.0 - 10.0*slipRatio)/7.0  // 6 to 20% slip ratio gives traction from 120% up to 100%
 		 : slipRatio < 1.00? (1.075 - 0.375*slipRatio)  // 20% to 100% slip ratio gives traction from 100 down to 70%

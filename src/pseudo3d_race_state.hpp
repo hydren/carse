@@ -228,6 +228,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	private:
 	void handlePhysics(float delta);
+	void drawDebugInfo();
 
 	void shiftGear(int gear);
 

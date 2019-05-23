@@ -717,11 +717,18 @@ void Pseudo3DRaceState::render()
 	}
 }
 
-static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
+static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2,  // 20%
+		MAXIMUM_PHYSICS_DELTA_TIME = 0.01;
 
 void Pseudo3DRaceState::update(float delta)
 {
-	handlePhysics(delta);
+	float physicsDelta = delta;
+	while(physicsDelta > MAXIMUM_PHYSICS_DELTA_TIME)  // process delta too large in smaller delta steps
+	{
+		handlePhysics(MAXIMUM_PHYSICS_DELTA_TIME);
+		physicsDelta -= MAXIMUM_PHYSICS_DELTA_TIME;
+	}
+	handlePhysics(physicsDelta);
 
 	// course looping control
 	const float courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;

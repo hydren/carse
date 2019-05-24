@@ -35,6 +35,7 @@ CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(), focus(),
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
+  isPresetsTabActive(),
   loadDialogSelectButton(), loadDialogCancelButton(),
   saveDialogSaveButton(), saveDialogCancelButton()
 {}
@@ -57,13 +58,20 @@ void CourseEditorState::initialize()
 	saveDialogTextField.textColor = Color::WHITE;
 	saveDialogTextField.borderColor = Color::_TRANSPARENT;
 
-//	newButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
-	newButton.bgColor = Color::GREY;
-	newButton.borderColor = Color::_TRANSPARENT;
+	presetsTabButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
+	presetsTabButton.bgColor = Color::GREY;
+	presetsTabButton.borderColor = Color::_TRANSPARENT;
+	presetsTabButton.highlightColor = Color::LIGHT_GREY;
+	presetsTabButton.font = font;
+	presetsTabButton.label = "Preset";
+
+	propertiesTabButton = presetsTabButton;
+	propertiesTabButton.label = "Proper.";
+
+	newButton = presetsTabButton;
+	newButton.shape = Button::SHAPE_RECTANGULAR;
 	newButton.highlightColor = Color::RED;
-	newButton.font = font;
 	newButton.label = "New";
-	newButton.textColor = Color::BLACK;
 
 	loadButton = newButton;
 	loadButton.label = "Load";
@@ -130,17 +138,31 @@ void CourseEditorState::onEnter()
 	toolsPanelBounds.w = 0.25*dw;
 	toolsPanelBounds.h = 0.75*dh;
 
-	presetsPanelBounds = toolsPanelBounds;
-	presetsPanelBounds.x += widgetSpacing;
-	presetsPanelBounds.y += widgetSpacing;
-	presetsPanelBounds.w -= 2*widgetSpacing;
-	presetsPanelBounds.h -= 4*widgetSpacing + 0.1*dh;
+	presetsTabButton.bounds = toolsPanelBounds;
+	presetsTabButton.bounds.x += widgetSpacing;
+	presetsTabButton.bounds.y += widgetSpacing;
+	presetsTabButton.bounds.w /= 2;
+	presetsTabButton.bounds.w -= 2*widgetSpacing;
+	presetsTabButton.bounds.h = std::max(1.2f*presetsTabButton.font->getHeight(), 2*widgetSpacing);
+	presetsTabButton.highlighted = false;
 
-	newButton.bounds.x = presetsPanelBounds.x;
-	newButton.bounds.y = presetsPanelBounds.y + presetsPanelBounds.h + widgetSpacing;
+	propertiesTabButton.bounds = presetsTabButton.bounds;
+	propertiesTabButton.bounds.x += presetsTabButton.bounds.w + widgetSpacing;
+	propertiesTabButton.highlighted = false;
+
+	presetsTabPanelBounds = toolsPanelBounds;
+	presetsTabPanelBounds.x += widgetSpacing;
+	presetsTabPanelBounds.y += widgetSpacing + 0.75 * presetsTabButton.bounds.h;
+	presetsTabPanelBounds.w -= 2*widgetSpacing;
+	presetsTabPanelBounds.h -= 4*widgetSpacing + presetsTabButton.bounds.h + 0.1*dh;
+
+	propertiesTabPanelBounds = presetsTabPanelBounds;
+
+	newButton.bounds.x = presetsTabPanelBounds.x;
+	newButton.bounds.y = presetsTabPanelBounds.y + presetsTabPanelBounds.h + widgetSpacing;
 	newButton.bounds.w = 0.08*dh;
 	newButton.bounds.h = 0.05*dh;
-	newButton.highlightSpacing = 0.007*dh;
+	newButton.highlightSpacing = 0.4*widgetSpacing;
 
 	loadButton.bounds = newButton.bounds;
 	loadButton.bounds.x += newButton.bounds.w + widgetSpacing;
@@ -213,6 +235,7 @@ void CourseEditorState::onEnter()
 	// initial values
 
 	focus = ON_EDITOR;
+	setPresetsTabActive();
 
 	map.roadColor = Color::RED;
 	map.roadContrastColorEnabled = true;
@@ -247,7 +270,22 @@ void CourseEditorState::render()
 
 	// Tools panel
 	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
-	Graphics::drawFilledRectangle(presetsPanelBounds, Color::BLACK);
+
+	presetsTabButton.highlighted = focus == ON_EDITOR and presetsTabButton.bounds.contains(mousePosition);
+	presetsTabButton.draw();
+
+	propertiesTabButton.highlighted = focus == ON_EDITOR and propertiesTabButton.bounds.contains(mousePosition);
+	propertiesTabButton.draw();
+
+	if(isPresetsTabActive)
+	{
+		Graphics::drawFilledRectangle(presetsTabPanelBounds, Color::BLACK);
+		// todo draw presets
+	}
+	else
+	{
+		Graphics::drawFilledRectangle(propertiesTabPanelBounds, Color::GREY);
+	}
 
 	newButton.highlighted = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
 	newButton.draw();
@@ -402,6 +440,18 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
 	if(focus == ON_EDITOR)
 	{
+		if(presetsTabButton.bounds.contains(x, y) and not isPresetsTabActive)
+		{
+			sndCursorMove->play();
+			setPresetsTabActive();
+		}
+
+		if(propertiesTabButton.bounds.contains(x, y) and isPresetsTabActive)
+		{
+			sndCursorMove->play();
+			setPresetsTabActive(false);
+		}
+
 		if(newButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
@@ -486,6 +536,18 @@ void CourseEditorState::reloadFileList()
 	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
 	for(unsigned i = 0; i < courses.size(); i++)
 		fileMenu.addEntry(courses[i].filename);
+}
+
+void CourseEditorState::setPresetsTabActive(bool choice)
+{
+	isPresetsTabActive = choice;
+	Button &selectedButton = isPresetsTabActive? presetsTabButton : propertiesTabButton,
+		   &unselectedButton = isPresetsTabActive? propertiesTabButton : presetsTabButton;
+
+	selectedButton.bgColor = Color::GREY;
+	selectedButton.textColor = Color::BLACK;
+	unselectedButton.bgColor = Color(112, 112, 112);
+	unselectedButton.textColor = Color::DARK_GREY.getDarker();
 }
 
 void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)

@@ -53,8 +53,9 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Rectangle courseViewBounds;
 
 	// tools panel stuff
-	fgeal::Rectangle toolsPanelBounds, presetsPanelBounds;
-	fgeal::Button newButton, loadButton, saveButton, generateButton, exitButton;
+	fgeal::Rectangle toolsPanelBounds, presetsTabPanelBounds, propertiesTabPanelBounds;
+	fgeal::Button presetsTabButton, propertiesTabButton, newButton, loadButton, saveButton, generateButton, exitButton;
+	bool isPresetsTabActive;
 
 	// load dialog
 	fgeal::Menu fileMenu;
@@ -89,6 +90,7 @@ class CourseEditorState extends public fgeal::Game::State
 
 	private:
 	void reloadFileList();
+	void setPresetsTabActive(bool choice=true);
 	void loadCourseSpec(const Pseudo3DCourse::Spec&);
 };
 

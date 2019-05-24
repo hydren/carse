@@ -57,6 +57,11 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Button presetsTabButton, propertiesTabButton, newButton, loadButton, saveButton, generateButton, exitButton;
 	bool isPresetsTabActive;
 
+	// properties tab stuff
+	fgeal::TextField landscapeTextField, roadstyleTextField, courseNameTextField;
+	unsigned selectedLandscapeIndex, selectedRoadstyleIndex;
+	fgeal::Button landscapeChangeButton, roadstyleChangeButton;
+
 	// load dialog
 	fgeal::Menu fileMenu;
 	fgeal::Rectangle loadDialogBounds;
@@ -91,6 +96,7 @@ class CourseEditorState extends public fgeal::Game::State
 	private:
 	void reloadFileList();
 	void setPresetsTabActive(bool choice=true);
+	void inferLandscapeAndRoadStyle();
 	void loadCourseSpec(const Pseudo3DCourse::Spec&);
 };
 

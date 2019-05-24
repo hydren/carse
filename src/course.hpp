@@ -57,6 +57,20 @@ struct Pseudo3DCourse
 		/* Generates a random course spec, with given length and curveness factor. */
 		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
 
+		static struct RoadColorSet {
+			fgeal::Color primary, secondary, humblePrimary, humbleSecondary;
+			std::string name;
+		}
+		presetRoadColors[];
+		static unsigned presetRoadColorsSize;
+
+		static struct LandscapeSettings {
+			fgeal::Color terrainPrimary, terrainSecondary, sky;
+			std::string landscapeBgFilename, sprite1, sprite2, sprite3, name;
+		}
+		presetLandscapeSettings[];
+		static unsigned presetLandscapeSettingsSize;
+
 		private:
 		void parseProperties(const std::string& filename);
 		void loadSegments(const std::string& filename);

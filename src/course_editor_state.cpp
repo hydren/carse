@@ -36,6 +36,7 @@ CourseEditorState::CourseEditorState(CarseGame* game)
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
   isPresetsTabActive(),
+  selectedLandscapeIndex(), selectedRoadstyleIndex(), landscapeChangeButton(), roadstyleChangeButton(),
   loadDialogSelectButton(), loadDialogCancelButton(),
   saveDialogSaveButton(), saveDialogCancelButton()
 {}
@@ -67,6 +68,18 @@ void CourseEditorState::initialize()
 
 	propertiesTabButton = presetsTabButton;
 	propertiesTabButton.label = "Proper.";
+
+	landscapeTextField = courseNameTextField = saveDialogTextField;
+	landscapeTextField.caretPosition = 9999;
+
+	roadstyleTextField = landscapeTextField;
+
+	landscapeChangeButton = presetsTabButton;
+	landscapeChangeButton.shape = Button::SHAPE_RECTANGULAR;
+	landscapeChangeButton.bgColor = Color::LIGHT_GREY;
+	landscapeChangeButton.label = ">>";
+
+	roadstyleChangeButton = landscapeChangeButton;
 
 	newButton = presetsTabButton;
 	newButton.shape = Button::SHAPE_RECTANGULAR;
@@ -157,6 +170,31 @@ void CourseEditorState::onEnter()
 	presetsTabPanelBounds.h -= 4*widgetSpacing + presetsTabButton.bounds.h + 0.1*dh;
 
 	propertiesTabPanelBounds = presetsTabPanelBounds;
+
+	courseNameTextField.content.clear();
+	courseNameTextField.caretPosition = 0;
+	courseNameTextField.bounds.x = propertiesTabPanelBounds.x + widgetSpacing;
+	courseNameTextField.bounds.y = propertiesTabPanelBounds.y + font->getHeight() + widgetSpacing;
+	courseNameTextField.bounds.w = propertiesTabPanelBounds.w - 2*widgetSpacing;
+	courseNameTextField.bounds.h = 1.1f*courseNameTextField.font->getHeight();
+
+	landscapeTextField.content = Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex].name;
+	landscapeTextField.bounds = courseNameTextField.bounds;
+	landscapeTextField.bounds.y += courseNameTextField.bounds.h + font->getHeight() + widgetSpacing;
+	landscapeTextField.bounds.w *= 0.75;
+
+	roadstyleTextField.content = Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex].name;
+	roadstyleTextField.bounds = landscapeTextField.bounds;
+	roadstyleTextField.bounds.y += landscapeTextField.bounds.h + font->getHeight() + widgetSpacing;
+
+	landscapeChangeButton.bounds.x = landscapeTextField.bounds.x + landscapeTextField.bounds.w + widgetSpacing;
+	landscapeChangeButton.bounds.y = landscapeTextField.bounds.y;
+	landscapeChangeButton.bounds.w = propertiesTabPanelBounds.w - landscapeTextField.bounds.w - 3*widgetSpacing;
+	landscapeChangeButton.bounds.h = presetsTabButton.bounds.h;
+
+	roadstyleChangeButton = landscapeChangeButton;
+	roadstyleChangeButton.bounds.x = roadstyleTextField.bounds.x + roadstyleTextField.bounds.w + widgetSpacing;
+	roadstyleChangeButton.bounds.y = roadstyleTextField.bounds.y;
 
 	newButton.bounds.x = presetsTabPanelBounds.x;
 	newButton.bounds.y = presetsTabPanelBounds.y + presetsTabPanelBounds.h + widgetSpacing;
@@ -285,6 +323,14 @@ void CourseEditorState::render()
 	else
 	{
 		Graphics::drawFilledRectangle(propertiesTabPanelBounds, Color::GREY);
+		courseNameTextField.draw();
+		font->drawText("name:", courseNameTextField.bounds.x, courseNameTextField.bounds.y - font->getHeight());
+		landscapeTextField.draw();
+		font->drawText("landscape:", landscapeTextField.bounds.x, landscapeTextField.bounds.y - font->getHeight());
+		landscapeChangeButton.draw();
+		roadstyleTextField.draw();
+		font->drawText("road style:", roadstyleTextField.bounds.x, roadstyleTextField.bounds.y - font->getHeight());
+		roadstyleChangeButton.draw();
 	}
 
 	newButton.highlighted = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
@@ -452,16 +498,56 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			setPresetsTabActive(false);
 		}
 
+		if(not isPresetsTabActive)
+		{
+			if(landscapeChangeButton.bounds.contains(x, y))
+			{
+				selectedLandscapeIndex++;
+				if(selectedLandscapeIndex >= Pseudo3DCourse::Spec::presetLandscapeSettingsSize)
+					selectedLandscapeIndex = 0;
+
+				const Pseudo3DCourse::Spec::LandscapeSettings& landscape = Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex];
+				landscapeTextField.content = landscape.name;
+
+				course.spec.spritesFilenames.clear();
+				course.spec.spritesFilenames.push_back("assets/"+landscape.sprite1);
+				course.spec.spritesFilenames.push_back("assets/"+landscape.sprite2);
+				course.spec.spritesFilenames.push_back("assets/"+landscape.sprite3);
+				course.spec.landscapeFilename = "assets/"+landscape.landscapeBgFilename;
+				course.spec.colorOffRoadPrimary = landscape.terrainPrimary;
+				course.spec.colorOffRoadSecondary = landscape.terrainSecondary;
+				course.spec.colorLandscape = landscape.sky;
+				course.spec.colorHorizon = course.spec.colorOffRoadPrimary;
+				course.loadSpec(course.spec);  // reloads its own spec so it reload the new sprites
+			}
+			if(roadstyleChangeButton.bounds.contains(x, y))
+			{
+				selectedRoadstyleIndex++;
+				if(selectedRoadstyleIndex >= Pseudo3DCourse::Spec::presetRoadColorsSize)
+					selectedRoadstyleIndex = 0;
+
+				const Pseudo3DCourse::Spec::RoadColorSet& roadColors = Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex];
+				roadstyleTextField.content = roadColors.name;
+
+				course.spec.colorRoadPrimary = roadColors.primary;
+				course.spec.colorRoadSecondary = roadColors.secondary;
+				course.spec.colorHumblePrimary = roadColors.humblePrimary;
+				course.spec.colorHumbleSecondary = roadColors.humbleSecondary;
+			}
+		}
+
 		if(newButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec(200, 3000));
+			inferLandscapeAndRoadStyle();
 		}
 
 		if(loadButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_FILE_MENU;
+			inferLandscapeAndRoadStyle();
 		}
 
 		if(saveButton.bounds.contains(x, y))
@@ -474,6 +560,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
+			inferLandscapeAndRoadStyle();
 		}
 
 		if(exitButton.bounds.contains(x, y))
@@ -548,6 +635,36 @@ void CourseEditorState::setPresetsTabActive(bool choice)
 	selectedButton.textColor = Color::BLACK;
 	unselectedButton.bgColor = Color(112, 112, 112);
 	unselectedButton.textColor = Color::DARK_GREY.getDarker();
+}
+
+void CourseEditorState::inferLandscapeAndRoadStyle()
+{
+	for(unsigned i = 0; i < Pseudo3DCourse::Spec::presetRoadColorsSize; i++)
+	{
+		const Pseudo3DCourse::Spec::RoadColorSet& roadColors = Pseudo3DCourse::Spec::presetRoadColors[i];
+		if( roadColors.primary == course.spec.colorRoadPrimary and roadColors.secondary == course.spec.colorRoadSecondary
+		and roadColors.humblePrimary == course.spec.colorHumblePrimary and roadColors.humbleSecondary == course.spec.colorHumbleSecondary)
+		{
+			selectedRoadstyleIndex = i;
+			roadstyleTextField.content = roadColors.name;
+			break;
+		}
+	}
+
+	for(unsigned i = 0; i < Pseudo3DCourse::Spec::presetLandscapeSettingsSize; i++)
+	{
+		const Pseudo3DCourse::Spec::LandscapeSettings& landscape = Pseudo3DCourse::Spec::presetLandscapeSettings[i];
+		if( landscape.terrainPrimary == course.spec.colorOffRoadPrimary and landscape.terrainSecondary == course.spec.colorOffRoadSecondary
+		and landscape.sky == course.spec.colorLandscape and "assets/"+landscape.landscapeBgFilename == course.spec.landscapeFilename
+		and ((landscape.sprite1.empty() and course.spec.spritesFilenames.size() == 0) or (not landscape.sprite1.empty() and course.spec.spritesFilenames.size() > 0 and "assets/"+landscape.sprite1 == course.spec.spritesFilenames[0]))
+		and ((landscape.sprite2.empty() and course.spec.spritesFilenames.size() <= 1) or (not landscape.sprite2.empty() and course.spec.spritesFilenames.size() > 1 and "assets/"+landscape.sprite2 == course.spec.spritesFilenames[1]))
+		and ((landscape.sprite3.empty() and course.spec.spritesFilenames.size() <= 2) or (not landscape.sprite3.empty() and course.spec.spritesFilenames.size() > 2 and "assets/"+landscape.sprite3 == course.spec.spritesFilenames[2])))
+		{
+			selectedLandscapeIndex = i;
+			landscapeTextField.content = landscape.name;
+			break;
+		}
+	}
 }
 
 void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)

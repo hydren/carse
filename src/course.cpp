@@ -433,9 +433,10 @@ Pseudo3DCourse::Spec::LandscapeSettings Pseudo3DCourse::Spec::presetLandscapeSet
 		{ Color(  0,112,  0), Color(  0, 88,  0), Color(136,204,238), "bg.png", "bush.png", "tree.png", "redbarn.png", "grasslands" },
 		{ Color( 31, 85,  0), Color( 31, 68,  0), Color(173,201,152), "bg_forest.jpg", "bush.png", "tree.png", "talltree.png", "forest" },
 		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 35, 31, 32), "bg_nightcity.jpg", "bush.png", "streetlight_double.png", "buildings.png", "night city" },
-		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 51, 51, 102), "bg_sunsetcity.jpg", "bush.png", "streetlight_double.png", "buildings.png", "sunset city" },
+		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 51, 51,102), "bg_sunsetcity.jpg", "bush.png", "streetlight_double.png", "buildings.png", "sunset city" },
 		{ Color(220,170,139), Color(188,137,106), Color(248,156, 31), "bg_desert.jpg", "rock.png", "cactus.png", "cliff.png", "desert" },
 		{ Color(190,229,246), Color(159,198,213), Color(123,138,155), "bg_montains.jpg", "bush_snow.png", "talltree.png", "cliff_alpine.png", "snow" },
+		{ Color(227,211,195), Color(235,219,203), Color( 22, 88,229), "bg_ocean.jpg", "bush.png", "palmtree.png", "talltree.png", "beach 1" },
 };
 
 unsigned Pseudo3DCourse::Spec::presetLandscapeSettingsSize = sizeof(presetLandscapeSettings)/sizeof(LandscapeSettings);

@@ -178,12 +178,10 @@ void CourseEditorState::onEnter()
 	courseNameTextField.bounds.w = propertiesTabPanelBounds.w - 2*widgetSpacing;
 	courseNameTextField.bounds.h = 1.1f*courseNameTextField.font->getHeight();
 
-	landscapeTextField.content = Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex].name;
 	landscapeTextField.bounds = courseNameTextField.bounds;
 	landscapeTextField.bounds.y += courseNameTextField.bounds.h + font->getHeight() + widgetSpacing;
 	landscapeTextField.bounds.w *= 0.75;
 
-	roadstyleTextField.content = Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex].name;
 	roadstyleTextField.bounds = landscapeTextField.bounds;
 	roadstyleTextField.bounds.y += landscapeTextField.bounds.h + font->getHeight() + widgetSpacing;
 
@@ -274,6 +272,11 @@ void CourseEditorState::onEnter()
 
 	focus = ON_EDITOR;
 	setPresetsTabActive();
+
+	setLandscapeSettings(Pseudo3DCourse::Spec::presetLandscapeSettings[0]);
+	setRoadStyle(Pseudo3DCourse::Spec::presetRoadColors[0]);
+	selectedLandscapeIndex = selectedRoadstyleIndex = 0;
+	inferLandscapeAndRoadStyle();
 
 	map.roadColor = Color::RED;
 	map.roadContrastColorEnabled = true;
@@ -471,6 +474,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
+			focus = ON_EDITOR;
 		}
 	}
 	else if(focus == ON_SAVE_DIALOG)
@@ -503,36 +507,21 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			if(landscapeChangeButton.bounds.contains(x, y))
 			{
 				selectedLandscapeIndex++;
-				if(selectedLandscapeIndex >= Pseudo3DCourse::Spec::presetLandscapeSettingsSize)
+				if(selectedLandscapeIndex >= (int) Pseudo3DCourse::Spec::presetLandscapeSettingsSize)
 					selectedLandscapeIndex = 0;
 
-				const Pseudo3DCourse::Spec::LandscapeSettings& landscape = Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex];
-				landscapeTextField.content = landscape.name;
-
-				course.spec.spritesFilenames.clear();
-				course.spec.spritesFilenames.push_back("assets/"+landscape.sprite1);
-				course.spec.spritesFilenames.push_back("assets/"+landscape.sprite2);
-				course.spec.spritesFilenames.push_back("assets/"+landscape.sprite3);
-				course.spec.landscapeFilename = "assets/"+landscape.landscapeBgFilename;
-				course.spec.colorOffRoadPrimary = landscape.terrainPrimary;
-				course.spec.colorOffRoadSecondary = landscape.terrainSecondary;
-				course.spec.colorLandscape = landscape.sky;
-				course.spec.colorHorizon = course.spec.colorOffRoadPrimary;
+				landscapeTextField.content = Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex].name;
+				this->setLandscapeSettings(Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex]);
 				course.loadSpec(course.spec);  // reloads its own spec so it reload the new sprites
 			}
 			if(roadstyleChangeButton.bounds.contains(x, y))
 			{
 				selectedRoadstyleIndex++;
-				if(selectedRoadstyleIndex >= Pseudo3DCourse::Spec::presetRoadColorsSize)
+				if(selectedRoadstyleIndex >= (int) Pseudo3DCourse::Spec::presetRoadColorsSize)
 					selectedRoadstyleIndex = 0;
 
-				const Pseudo3DCourse::Spec::RoadColorSet& roadColors = Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex];
-				roadstyleTextField.content = roadColors.name;
-
-				course.spec.colorRoadPrimary = roadColors.primary;
-				course.spec.colorRoadSecondary = roadColors.secondary;
-				course.spec.colorHumblePrimary = roadColors.humblePrimary;
-				course.spec.colorHumbleSecondary = roadColors.humbleSecondary;
+				roadstyleTextField.content = Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex].name;
+				this->setRoadStyle(Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex]);
 			}
 		}
 
@@ -540,14 +529,13 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec(200, 3000));
-			inferLandscapeAndRoadStyle();
+			this->inferLandscapeAndRoadStyle();
 		}
 
 		if(loadButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
 			focus = ON_FILE_MENU;
-			inferLandscapeAndRoadStyle();
 		}
 
 		if(saveButton.bounds.contains(x, y))
@@ -560,7 +548,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
-			inferLandscapeAndRoadStyle();
+			this->inferLandscapeAndRoadStyle();
 		}
 
 		if(exitButton.bounds.contains(x, y))
@@ -581,6 +569,8 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
+			this->inferLandscapeAndRoadStyle();
+			focus = ON_EDITOR;
 		}
 
 		if(loadDialogCancelButton.bounds.contains(x, y))
@@ -639,6 +629,8 @@ void CourseEditorState::setPresetsTabActive(bool choice)
 
 void CourseEditorState::inferLandscapeAndRoadStyle()
 {
+	selectedRoadstyleIndex = -1;
+	roadstyleTextField.content = "custom";
 	for(unsigned i = 0; i < Pseudo3DCourse::Spec::presetRoadColorsSize; i++)
 	{
 		const Pseudo3DCourse::Spec::RoadColorSet& roadColors = Pseudo3DCourse::Spec::presetRoadColors[i];
@@ -651,6 +643,8 @@ void CourseEditorState::inferLandscapeAndRoadStyle()
 		}
 	}
 
+	selectedLandscapeIndex = -1;
+	landscapeTextField.content = "custom";
 	for(unsigned i = 0; i < Pseudo3DCourse::Spec::presetLandscapeSettingsSize; i++)
 	{
 		const Pseudo3DCourse::Spec::LandscapeSettings& landscape = Pseudo3DCourse::Spec::presetLandscapeSettings[i];
@@ -665,6 +659,27 @@ void CourseEditorState::inferLandscapeAndRoadStyle()
 			break;
 		}
 	}
+}
+
+void CourseEditorState::setLandscapeSettings(Pseudo3DCourse::Spec::LandscapeSettings landscape)
+{
+	course.spec.spritesFilenames.clear();
+	course.spec.spritesFilenames.push_back("assets/"+landscape.sprite1);
+	course.spec.spritesFilenames.push_back("assets/"+landscape.sprite2);
+	course.spec.spritesFilenames.push_back("assets/"+landscape.sprite3);
+	course.spec.landscapeFilename = "assets/"+landscape.landscapeBgFilename;
+	course.spec.colorOffRoadPrimary = landscape.terrainPrimary;
+	course.spec.colorOffRoadSecondary = landscape.terrainSecondary;
+	course.spec.colorLandscape = landscape.sky;
+	course.spec.colorHorizon = course.spec.colorOffRoadPrimary;
+}
+
+void CourseEditorState::setRoadStyle(Pseudo3DCourse::Spec::RoadColorSet roadColors)
+{
+	course.spec.colorRoadPrimary = roadColors.primary;
+	course.spec.colorRoadSecondary = roadColors.secondary;
+	course.spec.colorHumblePrimary = roadColors.humblePrimary;
+	course.spec.colorHumbleSecondary = roadColors.humbleSecondary;
 }
 
 void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)
@@ -684,6 +699,4 @@ void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)
 	map.scale = Point();
 	map.bounds = mapBounds;
 	scaleIndicatorText.clear();
-
-	focus = ON_EDITOR;
 }

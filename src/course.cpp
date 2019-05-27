@@ -423,8 +423,11 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segment
 }
 
 Pseudo3DCourse::Spec::RoadColorSet Pseudo3DCourse::Spec::presetRoadColors[] = {
-		{ Color(64, 80, 80), Color(40, 64, 64), Color(200,200,200), Color(152,  0,  0), "racetrack" },
-		{ Color(12, 28, 12), Color(31, 28, 31), Color( 12, 28, 12), Color( 31, 28, 31), "countryside" }
+		{ Color( 64, 80, 80), Color( 40, 64, 64), Color(200,200,200), Color(152,  0,  0), "racetrack 1" },
+		{ Color( 64, 80, 80), Color( 40, 64, 64), Color(222,219,222), Color( 15, 16,221), "racetrack 2" },
+		{ Color(146,146,146), Color(154,154,154), Color(243,243,243), Color(154,154,154), "road 1" },
+		{ Color(104,108,104), Color(144,144,144), Color(248,252,248), Color(144,144,144), "road 2" },
+		{ Color( 12, 28, 12), Color( 31, 28, 31), Color( 12, 28, 12), Color( 31, 28, 31), "countryside" }
 };
 
 unsigned Pseudo3DCourse::Spec::presetRoadColorsSize = sizeof(presetRoadColors)/sizeof(RoadColorSet);

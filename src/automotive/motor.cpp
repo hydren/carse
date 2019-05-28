@@ -27,25 +27,19 @@ static const float ENGINE_FRICTION_COEFFICIENT = 0.2 * 30.0,
 		           TORQUE_POWER_CONVERSION_FACTOR = 5252.0 * 1.355818,
                    RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
 
-/* todo revise TorqueCurveProfile to be able to specify specific RPMs for max. power or/and max. torque.
- * The calculation of the torque curves could be more specific to the point that one could specify a torque
- * curve from a data set, but a proper interface to do this needs to be done; nevertheless, the current
- * model supports it.
- *
- * Also, there is a way to specify a RPM value of the maximum power output and adjust the torque curve
- * parameters accordingly, to match that specific characteristic, but the formula gets too complicated. */
-
-void Engine::TorqueCurveProfile::queryParameters(PowerBandType type, float& initialTorqueFactor, float& redlineTorqueFactor)
+/// Stores "baked" parameters in the given float arguments, according to the given PowerBandType parameter.
+/// The first parameter ('l') is the fraction of the engine's maximum torque that is available at 1000RPM
+/// The second parameter ('u') is the fraction of the engine's maximum torque that is available at the redline RPM.
+static inline void queryParameters(Engine::TorqueCurveProfile::PowerBandType type, float& l, float& u)
 {
-	float& l = initialTorqueFactor, &u = redlineTorqueFactor;
 	switch(type)
 	{
 		default:
-		case POWER_BAND_TYPICAL:      l = 0.60; u = 0.75; break;  // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
-		case POWER_BAND_PEAKY:        l = 0.40; u = 0.80; break;  // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
-		case POWER_BAND_TORQUEY:      l = 0.80; u = 0.40; break;  // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
-		case POWER_BAND_SEMI_TORQUEY: l = 0.50; u = 0.65; break;  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
-		case POWER_BAND_WIDE:         l = 0.70; u = 0.80; break;  // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
+		case Engine::TorqueCurveProfile::POWER_BAND_TYPICAL:      l = 0.60; u = 0.75; break;  // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
+		case Engine::TorqueCurveProfile::POWER_BAND_PEAKY:        l = 0.40; u = 0.80; break;  // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
+		case Engine::TorqueCurveProfile::POWER_BAND_TORQUEY:      l = 0.80; u = 0.40; break;  // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
+		case Engine::TorqueCurveProfile::POWER_BAND_SEMI_TORQUEY: l = 0.50; u = 0.65; break;  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
+		case Engine::TorqueCurveProfile::POWER_BAND_WIDE:         l = 0.70; u = 0.80; break;  // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
 	}
 }
 
@@ -59,10 +53,18 @@ static vector<float> createLinearSegment(float rpm_i, float torque_i, float rpm_
 	return param;
 }
 
+/* todo revise TorqueCurveProfile to be able to specify specific RPMs for max. power or/and max. torque.
+ * The calculation of the torque curves could be more specific to the point that one could specify a torque
+ * curve from a data set, but a proper interface to do this needs to be done; nevertheless, the current
+ * model supports it.
+ *
+ * Also, there is a way to specify a RPM value of the maximum power output and adjust the torque curve
+ * parameters accordingly, to match that specific characteristic, but the formula gets too complicated. */
+
 Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsDualLinear(float maxRpm, PowerBandType type, float rpmMaxTorque, float* rpmMaxPowerPtr, float* maxNormPowerPtr)
 {
 	float torque_i, torque_f;
-	TorqueCurveProfile::queryParameters(type, torque_i, torque_f);
+	queryParameters(type, torque_i, torque_f);
 
 	if(rpmMaxTorque == -1)
 		rpmMaxTorque = TorqueCurveProfile::createAsSingleQuadratic(maxRpm, type, null, null).getRpmMaxTorque();
@@ -89,17 +91,8 @@ Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsDualLinear(float 
 
 Engine::TorqueCurveProfile Engine::TorqueCurveProfile::createAsSingleQuadratic(float maxRpm, PowerBandType type, float* rpmMaxPowerPtr, float* maxNormPowerPtr)
 {
-	float l;  // the fraction of the engine's maximum torque that is available at 1000RPM
-	float u;  // the fraction of the engine's maximum torque that is available at the redline RPM.
-	switch(type)
-	{
-		default:
-		case POWER_BAND_TYPICAL:      l = 0.60; u = 0.75; break;  // peak power at 91.5% of RPM range / peak torque at 55.8% of RPM range
-		case POWER_BAND_PEAKY:        l = 0.40; u = 0.80; break;  // peak power at 94.0% of RPM range / peak torque at 63.4% of RPM range
-		case POWER_BAND_TORQUEY:      l = 0.80; u = 0.40; break;  // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
-		case POWER_BAND_SEMI_TORQUEY: l = 0.50; u = 0.65; break;  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
-		case POWER_BAND_WIDE:         l = 0.70; u = 0.80; break;  // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
-	}
+	float l, u;
+	queryParameters(type, l, u);
 
 	//a = (l+u-2)-2sqrt((l-1)(u-1)), b =(2-2l)+2sqrt((l-1)(u-1)), c=l
 	const float a = (l+u-2)-2*sqrt((l-1)*(u-1)), b = (2-2*l)+2*sqrt((l-1)*(u-1)), c = l;
@@ -189,14 +182,9 @@ void Engine::reset()
 	throttlePosition = 0;
 }
 
-float Engine::getCurrentTorque()
-{
-	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm : torqueCurveProfile.getTorqueFactor(rpm));
-}
-
 float Engine::getTorqueAt(float rpm)
 {
-	return throttlePosition * maximumTorque * ( rpm > maxRpm ? -rpm/maxRpm : torqueCurveProfile.getTorqueFactor(rpm));
+	return throttlePosition * maximumTorque * (rpm > maxRpm ? -rpm/maxRpm : torqueCurveProfile.getTorqueFactor(rpm));
 }
 
 float Engine::getDriveTorque()
@@ -206,7 +194,7 @@ float Engine::getDriveTorque()
 
 float Engine::getAngularSpeed()
 {
-	return rpm / ((gear==0? 1.0 : gearRatio[gear-1]) * differentialRatio * RAD_TO_RPM);
+	return (gear == 0? rpm : rpm/gearRatio[gear-1]) * differentialRatio * RAD_TO_RPM;
 }
 
 void Engine::update(float delta, float wheelAngularSpeed)
@@ -222,9 +210,8 @@ void Engine::update(float delta, float wheelAngularSpeed)
 	}
 	else  // disengaged gear
 	{
-		const float rpmRatio = rpm/maxRpm,
-					engineFedTorqueRpm = getCurrentTorque()*RAD_TO_RPM,
-					engineFrictionTorqueRpm = (1-throttlePosition)*rpmRatio*maximumTorque*ENGINE_FRICTION_COEFFICIENT,
+		const float engineFedTorqueRpm = getCurrentTorque()*RAD_TO_RPM,
+					engineFrictionTorqueRpm = (1-throttlePosition)*(rpm/maxRpm)*maximumTorque*ENGINE_FRICTION_COEFFICIENT,
 					displacementFactor = 1 + (displacement != 0? 10000.0/displacement : 0);
 
 		rpm += delta * (engineFedTorqueRpm - engineFrictionTorqueRpm)*displacementFactor;

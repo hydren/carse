@@ -764,7 +764,7 @@ void Pseudo3DRaceState::update(float delta)
 		if(timerSceneIntro < 1)
 		{
 			onSceneIntro = false;
-			playerVehicle.body.engine.gear = 1;
+			playerVehicle.body.shiftGear(1);
 			sndCountdownBuzzerFinal->play();
 		}
 	}

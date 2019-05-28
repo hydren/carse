@@ -14,6 +14,8 @@
 #include "futil/random.h"
 #include "futil/snprintf.h"
 
+using futil::snprintf;
+
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
@@ -537,7 +539,7 @@ void Pseudo3DRaceState::render()
 	}
 	else if(isRaceTypePointToPoint(settings.raceType))
 	{
-		const float progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));
+		const float progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));  // @suppress("Function cannot be resolved")
 		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
 

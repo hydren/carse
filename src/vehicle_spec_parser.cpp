@@ -637,7 +637,19 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 
 	key = "sprite_frame_duration";
-	spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.25;
+	if(prop.get(key) == "dynamic")
+	{
+		spec.frameDurationProportionalToSpeed = true;
+		spec.frameDuration = -1;
+	}
+	else
+	{
+		spec.frameDurationProportionalToSpeed = false;
+		spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.25;
+	}
+
+	key = "sprite_animation_speed_factor";
+	spec.animationSpeedFactor = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
 
 	key = "brakelights_sprite_filename";
 	spec.brakelightsSheetFilename = prop.get(key);

@@ -79,9 +79,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData()
 	for(unsigned i = 0; i < spriteSpec.stateCount; i++)
 	{
 		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
-									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
-									0, i*spriteSpec.frameHeight);
-
+				spriteSpec.frameDurationProportionalToSpeed? 1.0 : spriteSpec.frameDuration, spriteSpec.stateFrameCount[i], 0, i*spriteSpec.frameHeight);
 		sprite->scale = spriteSpec.scale;
 		sprites.push_back(sprite);
 	}
@@ -89,9 +87,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData()
 	if(spriteSpec.asymmetrical) for(unsigned i = 1; i < spriteSpec.stateCount; i++)
 	{
 		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
-									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
-									0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
-
+				spriteSpec.frameDurationProportionalToSpeed? 1.0 : spriteSpec.frameDuration, spriteSpec.stateFrameCount[i], 0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
 		sprite->scale = spriteSpec.scale;
 		sprites.push_back(sprite);
 	}
@@ -204,7 +200,8 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 
 	Sprite& sprite = *sprites[animationIndex];
 	sprite.flipmode = isLeanRight and not spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-	sprite.frameDuration = body.wheelAngularSpeed != 0? spriteSpec.frameDuration * 2.0*M_PI / (body.wheelAngularSpeed * sprite.frameSequence.size()) : -1;
+	if(spriteSpec.frameDurationProportionalToSpeed)
+		sprite.frameDuration = body.wheelAngularSpeed != 0? spriteSpec.animationSpeedFactor * 2.0*M_PI / (body.wheelAngularSpeed * sprite.frameSequence.size()) : -1;
 	sprite.computeCurrentFrame();
 
 	const Vector2D originalSpriteScale = sprite.scale;

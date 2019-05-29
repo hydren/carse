@@ -39,8 +39,16 @@ struct Pseudo3DVehicleAnimationSpec
 	fgeal::Vector2D scale;
 
 	//todo make it possible to specify frame duration for each state (maybe even for each frame)
-	/** The time duration of each frame. Applies to all frames. */
+	/** The time duration of each frame. Applies to all frames.
+	 *  If 'frameDurationProportionalToSpeed' is true, this value is ignored. */
 	float frameDuration;
+
+	/** If true, the duration of each frame is computed according to vehicle speed. */
+	bool frameDurationProportionalToSpeed;
+
+	//todo make it possible to specify this factor for each state individually (maybe even for each frame)
+	/** A scale factor applied to the animation speed. */
+	float animationSpeedFactor;
 
 	/** A vector containing the amount of frames of each state. Each index corresponds to each state. */
 	std::vector<unsigned> stateFrameCount;

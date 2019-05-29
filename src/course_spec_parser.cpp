@@ -1,5 +1,5 @@
 /*
- * course_parser.cpp
+ * course_spec_parser.cpp
  *
  *  Created on: 26 de fev de 2018
  *      Author: carlosfaruolo

@@ -148,7 +148,7 @@ void Pseudo3DRaceState::initialize()
 	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg", 0.8 * game.logic.masterVolume);
 	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg", 0.8 * game.logic.masterVolume);
 
-	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, true);
+	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.036, true);
 
 	hudDialTachometer.graduationValueScale = 0.001;
 	hudDialTachometer.graduationFont = fontSmall;

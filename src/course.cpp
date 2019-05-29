@@ -31,11 +31,9 @@ Pseudo3DCourse::Pseudo3DCourse()
   lengthScale(1)
 {}
 
-template <typename T>
-inline static T modf(T x)
+inline static float fractional_part(float value)
 {
-	static T t;
-	return std::modf(x, &t);
+	return value - (int) value;
 }
 
 Pseudo3DCourse::~Pseudo3DCourse()
@@ -191,7 +189,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	    {
 			if((static_cast<unsigned>(vehicle->position * lengthScale / spec.roadSegmentLength))%N == n)
 			{
-				const float ltprop = modf(vehicle->position * lengthScale / spec.roadSegmentLength), lt2prop = 1 - ltprop;
+				const float ltprop = fractional_part(vehicle->position * lengthScale / spec.roadSegmentLength), lt2prop = 1 - ltprop;
 
 				const ScreenCoordCache& lt2 = lts[(n-1)%N];
 				const float ltW = lt.W * ltprop + lt2.W * lt2prop,

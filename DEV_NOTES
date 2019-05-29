@@ -1,8 +1,6 @@
 # to do
 
 - Add inline-5 engine sound profile;
-- Fix traffic behind the player vehicle not being drawn over it;
-- Fix behavior when changing height: horizon should move, not just back ground (actually, 3 different camera behaviors can be implemented, see notes on it)
 - Add opponent cars;
 - Add option to specify custom vehicle portrait;
 - Add option to specify custom vehicle rotating sprite (for showroom);
@@ -30,7 +28,8 @@
 
 # bugs
 
-- Fix incorrect tire animation speed.
+- Fix traffic behind the player vehicle not being drawn over it;
+- Fix behavior when changing height: horizon should move, not just back ground (actually, 3 different camera behaviors can be implemented, see notes on it)
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
 - Test specifying custom shadow sprite/layer positions.

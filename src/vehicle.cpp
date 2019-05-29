@@ -204,9 +204,7 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 
 	Sprite& sprite = *sprites[animationIndex];
 	sprite.flipmode = isLeanRight and not spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = body.speed != 0? 0.1*400.0/(body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = spriteSpec.frameDuration / sqrt(body.speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = body.speed != 0? 2.0*M_PI*body.tireRadius/(body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
+	sprite.frameDuration = body.wheelAngularSpeed != 0? spriteSpec.frameDuration * 2.0*M_PI / (body.wheelAngularSpeed * sprite.frameSequence.size()) : -1;
 	sprite.computeCurrentFrame();
 
 	const Vector2D originalSpriteScale = sprite.scale;
@@ -223,7 +221,7 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 		shadowSprite->scale *= distanceScale;
 
 		const Point& shadowPosition = spriteSpec.shadowPositions[animationIndex];
-		shadowSprite->currentFrameSequenceIndex = animationIndex;
+		shadowSprite->frameSequenceCurrentIndex = animationIndex;
 		shadowSprite->flipmode = sprite.flipmode;
 
 		shadowSprite->draw(
@@ -244,7 +242,7 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 		brakelightSprite->scale *= distanceScale;
 
 		if(spriteSpec.brakelightsMultipleSprites)
-			brakelightSprite->currentFrameSequenceIndex = animationIndex;
+			brakelightSprite->frameSequenceCurrentIndex = animationIndex;
 
 		const float scaledBrakelightPositionX = spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
 					scaledBrakelightPositionY = spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,

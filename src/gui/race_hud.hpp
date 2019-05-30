@@ -73,6 +73,9 @@ namespace Hud
 		/** The font used to display graduation values. If null, no graduation values are shown. */
 		fgeal::Font* graduationFont;
 
+		/** an optional, relative offset, from the center, to the position of graduation values, in the range ]0, 1] */
+		float graduationValuePositionOffset;
+
 		/** the (non-zero) size of the line of each graduation level, in the range ]0, 1] */
 		float graduationPrimaryLineSize, graduationSecondaryLineSize, graduationTertiaryLineSize;
 
@@ -128,7 +131,7 @@ namespace Hud
 		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
 		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
 		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
-		  graduationColor(fgeal::Color::BLACK), graduationFont(null),
+		  graduationColor(fgeal::Color::BLACK), graduationFont(null), graduationValuePositionOffset(0.35f),
 		  graduationPrimaryLineSize(0.5f), graduationSecondaryLineSize(0.3f), graduationTertiaryLineSize(0.2f),
 		  graduationValueScale(1.0f), graduationValueOffset(0), graduationLevel(1),
 		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0f),
@@ -177,8 +180,8 @@ namespace Hud
 					if(graduationFont != null)
 					{
 						const std::string str(futil::to_string(g * graduationValueScale));
-						graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
-																					   center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
+						graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + graduationValuePositionOffset*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
+																					   center.y + graduationValuePositionOffset*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
 					}
 
 					if(not offsetApplied)

@@ -58,7 +58,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(),
-  fontSmall(null), fontCountdown(null), font3(null), fontDev(null),
+  fontSmall(null), fontTiny(null), fontCountdown(null), font3(null), fontDev(null),
   imgCacheTachometer(null), imgStopwatch(null),
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
@@ -77,6 +77,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   course(), playerVehicle(),
 
   hudDialTachometer(playerVehicle.body.engine.rpm),
+  hudDialSpeedometer(playerVehicle.body.speed),
   hudBarTachometer(playerVehicle.body.engine.rpm),
   hudSpeedometer(playerVehicle.body.speed),
   hudGearDisplay(playerVehicle.body.engine.gear),
@@ -105,6 +106,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	if(fontSmall != null) delete fontSmall;
+	if(fontTiny != null) delete fontTiny;
 	if(fontCountdown != null) delete fontCountdown;
 	if(font3 != null) delete font3;
 
@@ -130,6 +132,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 void Pseudo3DRaceState::initialize()
 {
 	fontSmall = new Font(game.sharedResources->font1Path);
+	fontTiny = new Font(game.sharedResources->font1Path);
 	fontCountdown = new Font(game.sharedResources->font2Path);
 	font3 = new Font(game.sharedResources->font1Path);
 
@@ -149,6 +152,8 @@ void Pseudo3DRaceState::initialize()
 
 	hudDialTachometer.graduationValueScale = 0.001;
 	hudDialTachometer.graduationFont = fontSmall;
+
+	hudDialSpeedometer.graduationFont = fontTiny;
 
 	hudBarTachometer.fillColor = Color::RED;
 
@@ -203,6 +208,7 @@ void Pseudo3DRaceState::onEnter()
 	if(lastDisplaySize.x != displayWidth or lastDisplaySize.y != displayHeight)
 	{
 		fontSmall->setFontSize(dip(10));
+		fontTiny->setFontSize(dip(8));
 		fontCountdown->setFontSize(dip(36));
 		font3->setFontSize(dip(24));
 		hudSpeedometer.font->setFontSize(dip(24));
@@ -347,6 +353,35 @@ void Pseudo3DRaceState::onEnter()
 		hudDialTachometer.pointerOffset = 45;
 	}
 	hudDialTachometer.compile();
+
+	hudDialSpeedometer.graduationValueScale = settings.isImperialUnit? 2.236936 : 3.6;
+	hudDialSpeedometer.min = 0;
+	hudDialSpeedometer.max = (settings.isImperialUnit? 200 : 320) / hudDialSpeedometer.graduationValueScale;  // fixme compute geartrain limit instead
+	hudDialSpeedometer.bounds = gaugeSize;
+	hudDialSpeedometer.bounds.x -= hudDialTachometer.bounds.w + 0.05 * displayWidth;
+	hudDialSpeedometer.bounds.w *= 1.33;
+	hudDialSpeedometer.bounds.h *= 1.33;
+	hudDialSpeedometer.graduationLevel = 2;
+	hudDialSpeedometer.graduationPrimarySize = 20 / hudDialSpeedometer.graduationValueScale;
+	hudDialSpeedometer.graduationPrimaryLineSize = 0.25;
+	hudDialSpeedometer.graduationSecondarySize = 10 / hudDialSpeedometer.graduationValueScale;
+	hudDialSpeedometer.graduationSecondaryLineSize = 0.4;
+	hudDialSpeedometer.graduationValuePositionOffset = 0.4;
+	hudDialSpeedometer.backgroundImage = null;
+	hudDialSpeedometer.borderThickness = 0.01 * displayHeight;
+	hudDialSpeedometer.boltRadius = 0.025 * displayHeight;
+	if(hudDialSpeedometer.pointerImage != null)
+	{
+		delete hudDialSpeedometer.pointerImage;
+		hudDialSpeedometer.pointerImage = null;
+		hudDialSpeedometer.pointerOffset = 0;
+	}
+	if(not settings.hudTachometerPointerImageFilename.empty())
+	{
+		hudDialSpeedometer.pointerImage = new Image(settings.hudTachometerPointerImageFilename);
+		hudDialSpeedometer.pointerOffset = 45;
+	}
+	hudDialSpeedometer.compile();
 
 	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
 	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
@@ -543,8 +578,16 @@ void Pseudo3DRaceState::render()
 		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
 
-	hudSpeedometer.draw();
-	fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudDialTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
+	if(true)
+	{
+		hudDialSpeedometer.draw();
+		fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", hudDialSpeedometer.bounds.x + 0.5f*hudDialSpeedometer.bounds.w, hudDialSpeedometer.bounds.y + 0.75f*hudDialSpeedometer.bounds.h, fgeal::Color::BLACK);
+	}
+	else
+	{
+		hudSpeedometer.draw();
+		fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudDialTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
+	}
 
 	if(settings.useBarTachometer)
 		hudBarTachometer.draw();

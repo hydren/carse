@@ -8,20 +8,9 @@
 #include "pseudo3d_race_state.hpp"
 
 #include "carse_game.hpp"
+#include "util.hpp"
 
 using std::vector;
-
-template <typename T>
-static inline int sgn(T val)
-{
-    return (T(0) < val) - (val < T(0));
-}
-
-template <typename T>
-static inline T pow2(T val)
-{
-	return val*val;
-}
 
 /* Tire coefficients
  *

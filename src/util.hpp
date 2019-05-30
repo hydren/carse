@@ -18,6 +18,27 @@
 // device-independent pixel (size based on a 480px tall display); can only be used if there is a 'display' instance in the scope
 #define dip(px) (px*(display.getHeight()/480.0))
 
+template <typename T>
+inline int sgn(T val)
+{
+    return (T(0) < val) - (val < T(0));
+}
+
+template <typename T>
+static inline T pow2(T val)
+{
+	return val*val;
+}
+
+inline float fractional_part(float value)
+{
+	return value - (int) value;
+}
+
+#if __cplusplus < 201103L
+	inline double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
+#endif
+
 // returns a spaced outline, like a margin or something
 inline fgeal::Rectangle getSpacedOutline(const fgeal::Rectangle& bounds, float spacing)
 {

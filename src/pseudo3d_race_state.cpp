@@ -52,15 +52,6 @@ static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556,  // == 20kph
 		BACKGROUND_HORIZONTAL_PARALLAX_FACTOR = 0.35 * HORIZON_DISTANCE,
 		BACKGROUND_VERTICAL_PARALLAX_FACTOR = 0.509375;
 
-#if __cplusplus < 201103L
-	double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
-#endif
-
-inline float fractional_part(float value)
-{
-	return value - (int) value;
-}
-
 // -------------------------------------------------------------------------------
 
 int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }

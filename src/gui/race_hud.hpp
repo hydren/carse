@@ -166,12 +166,12 @@ namespace Hud
 			if(graduationLevel >= 1)  // primary graduation
 			{
 				bool offsetApplied = false;
-				for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
+				for(NumberType g = min; g <= max; g += graduationPrimarySize)
 				{
 					const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
 								gradeSize = 0.5f - 0.2f * graduationPrimaryLineSize;
 					graduationPrimaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
-														  center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
+														  center.x + 0.5f*bounds.w*sin(gAngle),      center.y + 0.5f*bounds.h*cos(gAngle)));
 
 					// numerical graduation
 					if(graduationFont != null)
@@ -194,8 +194,18 @@ namespace Hud
 			{
 				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
 							gradeSize = 0.5f - 0.2f * graduationSecondaryLineSize;
-				graduationSecondaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
-								                        center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
+
+				const Line line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
+				          center.x + 0.5f*bounds.w*sin(gAngle),      center.y + 0.5f*bounds.h*cos(gAngle));
+
+				// check if line will not occupy the same slot of a primary graduation line
+				bool isSlotFree = true;
+				for(unsigned i = 0; isSlotFree and i < graduationPrimaryCache.size(); i++)
+					if(line.x2 == graduationPrimaryCache[i].x2 and line.y2 == graduationPrimaryCache[i].y2)
+						isSlotFree = false;
+
+				if(isSlotFree)
+					graduationSecondaryCache.push_back(line);
 			}
 
 			if(graduationLevel >= 3)  // tertiary graduation
@@ -203,8 +213,21 @@ namespace Hud
 			{
 				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min),
 							gradeSize = 0.5f - 0.2f * graduationTertiaryLineSize;
-				graduationTertiaryCache.push_back(Line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
-								                       center.x + 0.5f*bounds.w*sin(gAngle), center.y + 0.5f*bounds.h*cos(gAngle)));
+
+				const Line line(center.x + gradeSize*bounds.w*sin(gAngle), center.y + gradeSize*bounds.h*cos(gAngle),
+						  center.x + 0.5f*bounds.w*sin(gAngle),      center.y + 0.5f*bounds.h*cos(gAngle));
+
+				// check if line will not occupy the same slot of a primary or secondary graduation line
+				bool isSlotFree = true;
+				for(unsigned i = 0; isSlotFree and i < graduationPrimaryCache.size(); i++)
+					if(line.x2 == graduationPrimaryCache[i].x2 and line.y2 == graduationPrimaryCache[i].y2)
+						isSlotFree = false;
+				for(unsigned i = 0; isSlotFree and i < graduationSecondaryCache.size(); i++)
+					if(line.x2 == graduationSecondaryCache[i].x2 and line.y2 == graduationSecondaryCache[i].y2)
+						isSlotFree = false;
+
+				if(isSlotFree)
+					graduationTertiaryCache.push_back(line);
 			}
 
 			if(backgroundImage != null)

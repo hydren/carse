@@ -76,14 +76,14 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   course(), playerVehicle(),
 
-  hudDialTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
-  hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
-  hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
-  hudGearDisplay(playerVehicle.body.engine.gear, Rectangle(), null),
-  hudTimerCurrentLap(lapTimeCurrent, Rectangle(), null),
-  hudTimerBestLap(lapTimeBest, Rectangle(), null),
-  hudCurrentLap(lapCurrent, Rectangle(), null),
-  hudLapCountGoal(settings.lapCountGoal, Rectangle(), null),
+  hudDialTachometer(playerVehicle.body.engine.rpm),
+  hudBarTachometer(playerVehicle.body.engine.rpm),
+  hudSpeedometer(playerVehicle.body.speed),
+  hudGearDisplay(playerVehicle.body.engine.gear),
+  hudTimerCurrentLap(lapTimeCurrent),
+  hudTimerBestLap(lapTimeBest),
+  hudCurrentLap(lapCurrent),
+  hudLapCountGoal(settings.lapCountGoal),
 
   rightHudMargin(), offsetHudLapGoal(), posHudCountdown(), posHudFinishedCaption(),
 

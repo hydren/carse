@@ -120,7 +120,7 @@ namespace Hud
 
 		public:
 
-		DialGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
+		DialGauge(const NumberType& var, NumberType min=NumberType(), NumberType max=NumberType(), const fgeal::Rectangle& bounds=fgeal::Rectangle())
 		: value(var), min(min), max(max),
 		  graduationPrimarySize(), graduationSecondarySize(), graduationTertiarySize(),
 		  bounds(bounds), angleMin(0.25*M_PI), angleMax(1.75*M_PI),
@@ -312,7 +312,7 @@ namespace Hud
 		/** The needle's color. */
 		fgeal::Color fillColor;
 
-		BarGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
+		BarGauge(const NumberType& var, NumberType min=NumberType(), NumberType max=NumberType(), const fgeal::Rectangle& bounds=fgeal::Rectangle())
 		: value(var), min(min), max(max),
 		  bounds(bounds),
 		  backgroundColor(fgeal::Color::WHITE),
@@ -375,7 +375,7 @@ namespace Hud
 
 		public:
 
-		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
+		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds=fgeal::Rectangle(), fgeal::Font* font=null)
 		: value(var), valueScale(1.0), bounds(bounds),
 		  backgroundColor(fgeal::Color::WHITE), disableBackground(false),
 		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK), displayColor(fgeal::Color::GREEN),
@@ -412,7 +412,7 @@ namespace Hud
 	template<typename TimeType>
 	struct TimerDisplay extends NumericalDisplay<TimeType>
 	{
-		TimerDisplay(const TimeType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
+		TimerDisplay(const TimeType& var, const fgeal::Rectangle& bounds=fgeal::Rectangle(), fgeal::Font* font=null)
 		: NumericalDisplay<TimeType>(var, bounds, font),
 		  showMillisec(false)
 		{}

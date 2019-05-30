@@ -115,6 +115,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update strafe position
 	playerVehicle.horizontalPosition += (playerVehicle.strafeSpeed - playerVehicle.curvePull)*delta;
 
+	// update "virtual" orientation
+	playerVehicle.virtualOrientation += courseSegment.curve * playerVehicle.body.speed * delta;  // FIXME get a proper formula for this, instead of this rough approximation
+
 	if(enableJumpSimulation)
 	{
 		if(playerVehicle.onAir)
@@ -137,23 +140,12 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 			if(playerVehicle.verticalPosition - courseSegment.y > 500)
 				playerVehicle.onLongAir = true;
 		}
-
 	}
 	else
 	{
 		// update vertical position
 		playerVehicle.verticalPosition = courseSegment.y;
 	}
-
-	// update bg parallax
-	parallax.x -= courseSegment.curve*playerVehicle.body.speed*0.025;
-	parallax.y -= 2*playerVehicle.body.slopeAngle;
-
-	if(parallax.x < -(2.0f*imgBackground->getWidth()-game.getDisplay().getWidth()))
-		parallax.x += imgBackground->getWidth();
-
-	if(parallax.x > 0)
-		parallax.x -= imgBackground->getWidth();
 
 	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
 	{

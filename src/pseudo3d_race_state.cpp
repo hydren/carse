@@ -38,6 +38,7 @@ using fgeal::Sound;
 using fgeal::Music;
 using fgeal::Sprite;
 using fgeal::Point;
+using fgeal::Vector2D;
 using fgeal::Joystick;
 using fgeal::Rectangle;
 
@@ -47,11 +48,18 @@ const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED_FACTOR = 30;  // undefined u
 
 static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556,  // == 20kph
 		GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125,
-		BACKGROUND_POSITION_FACTOR = 0.509375;
+		HORIZON_DISTANCE = 7.14,  // == 7.14km TODO use camera height instead in the horizon formula: 3.57*sqrt(cameraHeightInMeters)
+		BACKGROUND_HORIZONTAL_PARALLAX_FACTOR = 0.35 * HORIZON_DISTANCE,
+		BACKGROUND_VERTICAL_PARALLAX_FACTOR = 0.509375;
 
 #if __cplusplus < 201103L
 	double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
 #endif
+
+inline float fractional_part(float value)
+{
+	return value - (int) value;
+}
 
 // -------------------------------------------------------------------------------
 
@@ -60,7 +68,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(),
   fontSmall(null), fontCountdown(null), font3(null), fontDev(null),
-  imgBackground(null), imgCacheTachometer(null), imgStopwatch(null),
+  imgCacheTachometer(null), imgStopwatch(null),
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
   sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
@@ -69,9 +77,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
-  spriteSmoke(null),
-
-  parallax(), backgroundScale(),
+  spriteSmoke(null), spriteBackground(null), verticalBackgroundParallax(),
 
   coursePositionFactor(500), playerVehicleProjectionOffset(6), courseStartPositionOffset(0), simulationType(), enableJumpSimulation(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
@@ -111,7 +117,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(fontCountdown != null) delete fontCountdown;
 	if(font3 != null) delete font3;
 
-	if(imgBackground != null) delete imgBackground;
+	if(spriteBackground != null) delete spriteBackground;
 	if(imgCacheTachometer != null) delete imgCacheTachometer;
 	if(imgStopwatch != null) delete imgStopwatch;
 	if(music != null) delete music;
@@ -227,12 +233,12 @@ void Pseudo3DRaceState::onEnter()
 
 	minimap = Pseudo3DCourse::Map(course.spec);
 
-	if(imgBackground != null)
-		delete imgBackground;
+	if(spriteBackground != null)
+		delete spriteBackground;
 
-	imgBackground = new Image(course.spec.landscapeFilename);
-
-	backgroundScale = 0.2 * displayHeight / (float) imgBackground->getHeight();
+	Image* imgBackground = new Image(course.spec.landscapeFilename);
+	spriteBackground = new Sprite(imgBackground, imgBackground->getWidth(), imgBackground->getHeight(), 0.25, true);
+	spriteBackground->scale *= 0.2 * displayHeight / spriteBackground->height;
 
 	bgColor = course.spec.colorLandscape;
 	bgColorHorizon = course.spec.colorHorizon;
@@ -457,10 +463,11 @@ void Pseudo3DRaceState::onEnter()
 
 	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
-	parallax.x = parallax.y = 0;
+	verticalBackgroundParallax = 0;
 	playerVehicle.position = courseStartPositionOffset;
 	playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
-	playerVehicle.verticalSpeed = 0;
+	playerVehicle.verticalSpeed = playerVehicle.strafeSpeed = 0;
+	playerVehicle.virtualOrientation = 0;
 	playerVehicle.body.simulationType = simulationType;
 	playerVehicle.body.reset();
 	playerVehicle.body.automaticShiftingEnabled = true;
@@ -495,14 +502,16 @@ void Pseudo3DRaceState::render()
 
 	game.getDisplay().clear();
 
-	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale,
+	const Vector2D backgroundSize = { spriteBackground->width * spriteBackground->scale.x, spriteBackground->height * spriteBackground->scale.y };
+	const float parallaxAbsoluteX = playerVehicle.virtualOrientation * BACKGROUND_HORIZONTAL_PARALLAX_FACTOR,
+				parallaxAbsoluteY = verticalBackgroundParallax - backgroundSize.y + BACKGROUND_VERTICAL_PARALLAX_FACTOR * displayHeight,
 				courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
 
 	Graphics::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	Graphics::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
+	Graphics::drawFilledRectangle(0, parallaxAbsoluteY + backgroundSize.y, displayWidth, displayHeight, bgColorHorizon);
 
-	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
-		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
+	for(float bgx = -backgroundSize.x * fractional_part(fabs(parallaxAbsoluteX)/backgroundSize.x); bgx < displayWidth; bgx += backgroundSize.x)
+		spriteBackground->draw(bgx, parallaxAbsoluteY);
 
 //	float cameraPosition = playerVehicle.position;  // gives better visual results regarding cornering, but causes glitch in collision, making it occur on visually wrong positions
 	float cameraPosition = playerVehicle.position - playerVehicleProjectionOffset;
@@ -749,6 +758,9 @@ void Pseudo3DRaceState::update(float delta)
 	while(playerVehicle.position < 0)  // negative position is not allowed, take backwards position modulus
 		playerVehicle.position += courseLength;
 
+	// update bg parallax
+	verticalBackgroundParallax -= 2*playerVehicle.body.slopeAngle;
+
 	// scene control
 	if(onSceneIntro)
 	{
@@ -937,7 +949,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			playerVehicle.verticalSpeed = 0;
 			playerVehicle.body.reset();
 			playerVehicle.pseudoAngle = 0;
-			parallax.x = parallax.y = 0;
+			verticalBackgroundParallax = 0;
 			lapTimeCurrent = 0;
 			lapCurrent = 1;
 			onSceneIntro = true;

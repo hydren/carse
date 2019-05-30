@@ -40,9 +40,10 @@ struct Pseudo3DVehicle
 	Mechanics body;
 
 	// logic data
-	float position, horizontalPosition, verticalPosition;
-	float pseudoAngle, strafeSpeed, curvePull, corneringStiffness;
-	float verticalSpeed;
+	float position, horizontalPosition, verticalPosition;  // positions
+	float strafeSpeed, verticalSpeed;  // velocities ("forward" speed is in body class)
+	float pseudoAngle, corneringStiffness, curvePull;  // "curving" variables
+	float virtualOrientation;  // "virtual" vehicle orientation angle in the map (which direction is pointing in map)
 	bool onAir, onLongAir;
 	bool isTireBurnoutOccurring, isCrashing;
 

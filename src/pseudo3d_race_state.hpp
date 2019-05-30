@@ -34,7 +34,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Vector2D lastDisplaySize;
 
 	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDev;
-	fgeal::Image* imgBackground, *imgCacheTachometer, *imgStopwatch;
+	fgeal::Image* imgCacheTachometer, *imgStopwatch;
 	fgeal::Music* music;
 
 	fgeal::Sound* sndWheelspinBurnoutIntro, *sndWheelspinBurnoutLoop,
@@ -44,10 +44,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 				 *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
 
 	fgeal::Color bgColor, bgColorHorizon;
-	fgeal::Sprite* spriteSmoke;
+	fgeal::Sprite* spriteSmoke, *spriteBackground;
 
-	fgeal::Point parallax;
-	float backgroundScale;
+	float verticalBackgroundParallax;
 
 	// value used to convert physics position to course segment position
 	float coursePositionFactor;

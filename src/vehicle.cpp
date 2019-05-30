@@ -22,8 +22,10 @@ using fgeal::Sprite;
 Pseudo3DVehicle::Pseudo3DVehicle()
 : body(Engine(), Mechanics::TYPE_OTHER),
   position(), horizontalPosition(), verticalPosition(),
-  pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
-  verticalSpeed(0), onAir(false), onLongAir(false),
+  strafeSpeed(), verticalSpeed(),
+  pseudoAngle(), corneringStiffness(), curvePull(),
+  virtualOrientation(),
+  onAir(false), onLongAir(false),
   isTireBurnoutOccurring(false), isCrashing(false),
   engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null), smokeSprite(null),
   spriteAssetsAreShared(false), soundAssetsAreShared(false)

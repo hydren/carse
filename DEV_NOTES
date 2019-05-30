@@ -12,7 +12,7 @@
 - Add option for vehicle to specify custom smoke;
 - Add gear shifting sounds;
 - Add option for vehicle to specify custom gear shifting sound;
-- Re-attempt to create jumping physics. Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite;
+- Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite when jumping;
 - Add transition effects to each game state (fade in / fade out);
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation;
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation;
@@ -29,7 +29,7 @@
 # bugs
 
 - Fix traffic behind the player vehicle not being drawn over it;
-- Fix behavior when changing height: horizon should move, not just back ground (actually, 3 different camera behaviors can be implemented, see notes on it)
+- Fix behavior when changing height or going through slopes: horizon should move, not just background (actually, 3 different camera behaviors can be implemented, see notes on it)
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
 - Test specifying custom shadow sprite/layer positions.

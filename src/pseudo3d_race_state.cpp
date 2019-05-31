@@ -356,7 +356,7 @@ void Pseudo3DRaceState::onEnter()
 
 	hudDialSpeedometer.graduationValueScale = settings.isImperialUnit? 2.236936 : 3.6;
 	hudDialSpeedometer.min = 0;
-	hudDialSpeedometer.max = (settings.isImperialUnit? 200 : 320) / hudDialSpeedometer.graduationValueScale;  // fixme compute geartrain limit instead
+	hudDialSpeedometer.max = (((playerVehicle.body.getMaximumWheelAngularSpeed() * playerVehicle.body.tireRadius * hudDialSpeedometer.graduationValueScale) / 10 + 1) * 10) / hudDialSpeedometer.graduationValueScale;
 	hudDialSpeedometer.bounds = gaugeSize;
 	hudDialSpeedometer.bounds.x -= hudDialTachometer.bounds.w + 0.05 * displayWidth;
 	hudDialSpeedometer.bounds.w *= 1.33;

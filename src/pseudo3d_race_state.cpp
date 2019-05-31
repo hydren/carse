@@ -50,7 +50,9 @@ static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556,  // == 20kph
 		GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125,
 		HORIZON_DISTANCE = 7.14,  // == 7.14km TODO use camera height instead in the horizon formula: 3.57*sqrt(cameraHeightInMeters)
 		BACKGROUND_HORIZONTAL_PARALLAX_FACTOR = 0.35 * HORIZON_DISTANCE,
-		BACKGROUND_VERTICAL_PARALLAX_FACTOR = 0.509375;
+		BACKGROUND_VERTICAL_PARALLAX_FACTOR = 0.509375,
+		MPS_TO_MPH = 2.236936,  // m/s to mph conversion factor
+		MPS_TO_KPH = 3.6;  // m/s to km/h conversion factor
 
 // -------------------------------------------------------------------------------
 
@@ -354,7 +356,7 @@ void Pseudo3DRaceState::onEnter()
 	}
 	hudDialTachometer.compile();
 
-	hudDialSpeedometer.graduationValueScale = settings.isImperialUnit? 2.236936 : 3.6;
+	hudDialSpeedometer.graduationValueScale = settings.isImperialUnit? MPS_TO_MPH : MPS_TO_KPH;
 	hudDialSpeedometer.min = 0;
 	hudDialSpeedometer.max = (((playerVehicle.body.getMaximumWheelAngularSpeed() * playerVehicle.body.tireRadius * hudDialSpeedometer.graduationValueScale) / 10 + 1) * 10) / hudDialSpeedometer.graduationValueScale;
 	hudDialSpeedometer.bounds = gaugeSize;
@@ -403,7 +405,7 @@ void Pseudo3DRaceState::onEnter()
 	gaugeSize.w *= 3;
 	gaugeSize.h *= 1.7;
 	hudSpeedometer.bounds = gaugeSize;
-	hudSpeedometer.valueScale = settings.isImperialUnit? 2.25 : 3.6;
+	hudSpeedometer.valueScale = settings.isImperialUnit? MPS_TO_MPH : MPS_TO_KPH;
 
 	gaugeSize.x = displayWidth - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
 	hudTimerCurrentLap.bounds = gaugeSize;

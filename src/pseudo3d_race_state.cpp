@@ -487,6 +487,38 @@ void Pseudo3DRaceState::onEnter()
 	}
 	hudDialTachometer.compile();
 
+	if(settings.useCachedDialGauge and settings.useDialSpeedometer)
+	{
+		if(hudDialSpeedometer.backgroundImage != null)
+		{
+			delete hudDialSpeedometer.backgroundImage;
+			hudDialSpeedometer.backgroundImage = null;
+		}
+
+		Image* imgCacheSpeedometer = new Image(hudDialSpeedometer.bounds.w, hudDialSpeedometer.bounds.h);
+		Graphics::setDrawTarget(imgCacheSpeedometer);
+		Graphics::drawFilledRectangle(0, 0, imgCacheSpeedometer->getWidth(), imgCacheSpeedometer->getHeight(), Color::_TRANSPARENT);
+		float oldx = hudDialSpeedometer.bounds.x, oldy = hudDialSpeedometer.bounds.y;
+		hudDialSpeedometer.bounds.x = 0;
+		hudDialSpeedometer.bounds.y = 0;
+		hudDialSpeedometer.compile();
+		hudDialSpeedometer.drawBackground();
+		Graphics::setDefaultDrawTarget();
+		hudDialSpeedometer.backgroundImage = imgCacheSpeedometer;
+		hudDialSpeedometer.imagesAreShared = true;
+		hudDialSpeedometer.graduationLevel = 0;
+		hudDialSpeedometer.bounds.x = oldx;
+		hudDialSpeedometer.bounds.y = oldy;
+	}
+	else
+	{
+		if(hudDialSpeedometer.backgroundImage != null)
+			delete hudDialSpeedometer.backgroundImage;
+
+		hudDialSpeedometer.backgroundImage = null;
+	}
+	hudDialSpeedometer.compile();
+
 	minimap.roadColor = Color::GREY;
 	minimap.bounds.x = hudTimerCurrentLap.bounds.x;
 	minimap.bounds.y = 0.3*displayHeight;

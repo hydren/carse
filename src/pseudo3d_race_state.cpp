@@ -61,7 +61,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(),
   fontSmall(null), fontTiny(null), fontCountdown(null), font3(null), fontDev(null),
-  imgCacheTachometer(null), imgStopwatch(null),
+  imgStopwatch(null),
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
   sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
@@ -113,7 +113,6 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(font3 != null) delete font3;
 
 	if(spriteBackground != null) delete spriteBackground;
-	if(imgCacheTachometer != null) delete imgCacheTachometer;
 	if(imgStopwatch != null) delete imgStopwatch;
 	if(music != null) delete music;
 
@@ -458,13 +457,13 @@ void Pseudo3DRaceState::onEnter()
 
 	if(settings.useCachedDialGauge and not settings.useBarTachometer)
 	{
-		if(imgCacheTachometer != null)
+		if(hudDialTachometer.backgroundImage != null)
 		{
-			delete imgCacheTachometer;
-			imgCacheTachometer = null;
+			delete hudDialTachometer.backgroundImage;
+			hudDialTachometer.backgroundImage = null;
 		}
 
-		imgCacheTachometer = new Image(hudDialTachometer.bounds.w, hudDialTachometer.bounds.h);
+		Image* imgCacheTachometer = new Image(hudDialTachometer.bounds.w, hudDialTachometer.bounds.h);
 		Graphics::setDrawTarget(imgCacheTachometer);
 		Graphics::drawFilledRectangle(0, 0, imgCacheTachometer->getWidth(), imgCacheTachometer->getHeight(), Color::_TRANSPARENT);
 		float oldx = hudDialTachometer.bounds.x, oldy = hudDialTachometer.bounds.y;
@@ -481,6 +480,9 @@ void Pseudo3DRaceState::onEnter()
 	}
 	else
 	{
+		if(hudDialTachometer.backgroundImage != null)
+			delete hudDialTachometer.backgroundImage;
+
 		hudDialTachometer.backgroundImage = null;
 	}
 	hudDialTachometer.compile();

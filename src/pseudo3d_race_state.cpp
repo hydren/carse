@@ -156,6 +156,7 @@ void Pseudo3DRaceState::initialize()
 	hudDialTachometer.graduationFont = fontSmall;
 
 	hudDialSpeedometer.graduationFont = fontTiny;
+	hudDialSpeedometer.angleMax = 1.5*M_PI;
 
 	hudBarTachometer.fillColor = Color::RED;
 
@@ -168,9 +169,8 @@ void Pseudo3DRaceState::initialize()
 
 	hudSpeedometer.font = new Font(game.sharedResources->font2Path);
 	hudSpeedometer.fontIsShared = false;
-	hudSpeedometer.disableBackground = true;
-	hudSpeedometer.displayColor = Color::WHITE;
-	hudSpeedometer.borderThickness = 0;
+	hudSpeedometer.borderColor = Color::LIGHT_GREY;
+	hudSpeedometer.backgroundColor = Color::BLACK;
 
 	hudCurrentLap.font = font3;
 	hudCurrentLap.fontIsShared = true;
@@ -326,12 +326,12 @@ void Pseudo3DRaceState::onEnter()
 	spriteSmoke->scale.x = spriteSmoke->scale.y = displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	float gaugeDiameter = 0.15*std::max(displayWidth, displayHeight);
-	Rectangle gaugeSize = { displayWidth - 1.1f*gaugeDiameter, displayHeight - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
+	Rectangle bounds = { displayWidth - 1.1f*gaugeDiameter, displayHeight - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
 
 	hudDialTachometer.min = playerVehicle.body.engine.minRpm;
 //	hudDialTachometer.max = playerVehicle.body.engine.maxRpm;
 	hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
-	hudDialTachometer.bounds = gaugeSize;
+	hudDialTachometer.bounds = bounds;
 	hudDialTachometer.graduationLevel = 3;
 	hudDialTachometer.graduationPrimarySize = 1000.f * static_cast<int>(1+hudDialTachometer.max/13000.f);
 	hudDialTachometer.graduationPrimaryLineSize = 0.5;
@@ -359,7 +359,7 @@ void Pseudo3DRaceState::onEnter()
 	hudDialSpeedometer.graduationValueScale = settings.isImperialUnit? MPS_TO_MPH : MPS_TO_KPH;
 	hudDialSpeedometer.min = 0;
 	hudDialSpeedometer.max = (((playerVehicle.body.getMaximumWheelAngularSpeed() * playerVehicle.body.tireRadius * hudDialSpeedometer.graduationValueScale) / 10 + 1) * 10) / hudDialSpeedometer.graduationValueScale;
-	hudDialSpeedometer.bounds = gaugeSize;
+	hudDialSpeedometer.bounds = bounds;
 	hudDialSpeedometer.bounds.x -= hudDialTachometer.bounds.w + 0.05 * displayWidth;
 	hudDialSpeedometer.bounds.w *= 1.33;
 	hudDialSpeedometer.bounds.h *= 1.33;
@@ -368,7 +368,7 @@ void Pseudo3DRaceState::onEnter()
 	hudDialSpeedometer.graduationPrimaryLineSize = 0.25;
 	hudDialSpeedometer.graduationSecondarySize = 10 / hudDialSpeedometer.graduationValueScale;
 	hudDialSpeedometer.graduationSecondaryLineSize = 0.4;
-	hudDialSpeedometer.graduationValuePositionOffset = 0.4;
+	hudDialSpeedometer.graduationValuePositionOffset = 0.375;
 	hudDialSpeedometer.backgroundImage = null;
 	hudDialSpeedometer.borderThickness = 0.01 * displayHeight;
 	hudDialSpeedometer.boltRadius = 0.025 * displayHeight;
@@ -387,39 +387,59 @@ void Pseudo3DRaceState::onEnter()
 
 	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
 	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
-	hudBarTachometer.bounds = gaugeSize;
+	hudBarTachometer.bounds = bounds;
 	hudBarTachometer.bounds.x *= 0.8;
 	hudBarTachometer.bounds.y *= 1.15;
 	hudBarTachometer.bounds.w *= 2;
 	hudBarTachometer.bounds.h *= 0.125;
 	hudBarTachometer.borderThickness = 0.01 * displayHeight;
 
-	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
-	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
-	gaugeSize.w = 0.04 * displayHeight;
-	gaugeSize.h = 1.5 * fontSmall->getHeight();
-	hudGearDisplay.bounds = gaugeSize;
+	bounds.y = bounds.y + 0.7*bounds.h;
+	bounds.x = bounds.x + 0.4*bounds.w;
+	bounds.w = 0.04 * displayHeight;
+	bounds.h = 1.5 * fontSmall->getHeight();
+	hudGearDisplay.bounds = bounds;
 	hudGearDisplay.borderThickness = 0.01 * displayHeight;
 
-	gaugeSize.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
-	gaugeSize.w *= 3;
-	gaugeSize.h *= 1.7;
-	hudSpeedometer.bounds = gaugeSize;
+	if(true)
+	{
+		hudSpeedometer.font->setFontSize(dip(13));
+		hudSpeedometer.bounds.w = hudSpeedometer.font->getTextWidth("0000");
+		hudSpeedometer.bounds.h = 1.75f * hudSpeedometer.font->getHeight();
+		hudSpeedometer.bounds.x = hudDialSpeedometer.bounds.x + 0.425f * hudDialSpeedometer.bounds.w;
+		hudSpeedometer.bounds.y = hudDialSpeedometer.bounds.y + 0.6f * hudDialSpeedometer.bounds.h;
+		hudSpeedometer.disableBackground = false;
+		hudSpeedometer.displayColor = Color::GREEN;
+		hudSpeedometer.borderThickness = 0.01f * displayHeight;
+	}
+	else
+	{
+		hudSpeedometer.font->setFontSize(dip(24));
+		hudSpeedometer.bounds.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
+		hudSpeedometer.bounds.y = bounds.y;
+		hudSpeedometer.bounds.w = 3*bounds.w;
+		hudSpeedometer.bounds.h = 1.7*bounds.h;
+		hudSpeedometer.disableBackground = true;
+		hudSpeedometer.displayColor = Color::WHITE;
+		hudSpeedometer.borderThickness = 0;
+	}
 	hudSpeedometer.valueScale = settings.isImperialUnit? MPS_TO_MPH : MPS_TO_KPH;
 
-	gaugeSize.x = displayWidth - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
-	hudTimerCurrentLap.bounds = gaugeSize;
+	bounds.x = displayWidth - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
+	bounds.w *= 3;
+	bounds.h *= 1.7;
+	hudTimerCurrentLap.bounds = bounds;
 	hudTimerCurrentLap.bounds.y = displayHeight * 0.01;
 	hudTimerCurrentLap.valueScale = 1000;
 
-	hudTimerBestLap.bounds = gaugeSize;
+	hudTimerBestLap.bounds = bounds;
 	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + font3->getHeight()*1.05;
 
-	hudCurrentLap.bounds = gaugeSize;
+	hudCurrentLap.bounds = bounds;
 	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + font3->getHeight()*1.05;
 	hudCurrentLap.bounds.w = hudCurrentLap.font->getTextWidth("999");
 
-	hudLapCountGoal.bounds = gaugeSize;
+	hudLapCountGoal.bounds = bounds;
 	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");
 	hudLapCountGoal.bounds.y = hudCurrentLap.bounds.y;
 
@@ -586,10 +606,9 @@ void Pseudo3DRaceState::render()
 		fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", hudDialSpeedometer.bounds.x + 0.5f*hudDialSpeedometer.bounds.w, hudDialSpeedometer.bounds.y + 0.75f*hudDialSpeedometer.bounds.h, fgeal::Color::BLACK);
 	}
 	else
-	{
-		hudSpeedometer.draw();
 		fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudDialTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
-	}
+
+	hudSpeedometer.draw();
 
 	if(settings.useBarTachometer)
 		hudBarTachometer.draw();

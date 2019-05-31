@@ -33,7 +33,7 @@ enum MenuItem
 	MENU_ITEM_ENABLE_JUMP,
 	MENU_ITEM_TACHOMETER_TYPE,
 	MENU_ITEM_SPEEDOMETER_TYPE,
-	MENU_ITEM_TACHOMETER_POINTER_TYPE,
+	MENU_ITEM_DIAL_GAUGE_POINTER_TYPE,
 	MENU_ITEM_CACHE_TACHOMETER,
 	MENU_ITEM_COUNT
 };
@@ -76,9 +76,9 @@ void OptionsMenuState::initialize()
 	menu.addEntry("Simulation mode: ");
 	menu.addEntry("Enable jumps (experimental): ");
 	menu.addEntry("Tachometer type: ");
-	menu.addEntry("Speedometer type:");
-	menu.addEntry("Tachometer pointer type: ");
-	menu.addEntry("Use cached tachometer (experimental): ");
+	menu.addEntry("Speedometer type: ");
+	menu.addEntry("Dial gauge pointer type: ");
+	menu.addEntry("Cached gauge texture (experimental): ");
 	menu.addEntry("Back to main menu");
 
 	menuResolution.setFont(font);
@@ -251,16 +251,16 @@ void OptionsMenuState::onMenuSelect()
 	if(menu.getSelectedIndex() == MENU_ITEM_SPEEDOMETER_TYPE)
 			game.logic.getNextRaceSettings().useDialSpeedometer = !game.logic.getNextRaceSettings().useDialSpeedometer;
 
-	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_POINTER_TYPE)
+	if(menu.getSelectedIndex() == MENU_ITEM_DIAL_GAUGE_POINTER_TYPE)
 	{
-		if(game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty())
-			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename = "assets/pointer.png";
+		if(game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.empty())
+			game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename = "assets/pointer.png";
 		else
-			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.clear();
+			game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.clear();
 	}
 
 	if(menu.getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
-		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
+		game.logic.getNextRaceSettings().useCachedDialGauge = !game.logic.getNextRaceSettings().useCachedDialGauge;
 
 	if(menu.getSelectedIndex() == menu.getEntries().size()-1)
 		game.enterState(game.logic.currentMainMenuStateId);
@@ -287,8 +287,8 @@ void OptionsMenuState::updateLabels()
 	setMenuItemValueText(MENU_ITEM_ENABLE_JUMP, game.logic.isJumpSimulationEnabled()? "enabled" : "disabled");
 	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "dial gauge");
 	setMenuItemValueText(MENU_ITEM_SPEEDOMETER_TYPE, game.logic.getNextRaceSettings().useDialSpeedometer? "dial gauge" : "overlay digits");
-	setMenuItemValueText(MENU_ITEM_TACHOMETER_POINTER_TYPE, game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty()? "built-in" : "custom");
-	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
+	setMenuItemValueText(MENU_ITEM_DIAL_GAUGE_POINTER_TYPE, game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.empty()? "built-in" : "custom");
+	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedDialGauge? "yes" : "no");
 }
 
 void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)

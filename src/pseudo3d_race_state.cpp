@@ -349,9 +349,9 @@ void Pseudo3DRaceState::onEnter()
 		hudDialTachometer.pointerImage = null;
 		hudDialTachometer.pointerOffset = 0;
 	}
-	if(not settings.hudTachometerPointerImageFilename.empty())
+	if(not settings.hudDialGaugePointerImageFilename.empty())
 	{
-		hudDialTachometer.pointerImage = new Image(settings.hudTachometerPointerImageFilename);
+		hudDialTachometer.pointerImage = new Image(settings.hudDialGaugePointerImageFilename);
 		hudDialTachometer.pointerOffset = 45;
 	}
 	hudDialTachometer.compile();
@@ -378,9 +378,9 @@ void Pseudo3DRaceState::onEnter()
 		hudDialSpeedometer.pointerImage = null;
 		hudDialSpeedometer.pointerOffset = 0;
 	}
-	if(not settings.hudTachometerPointerImageFilename.empty())
+	if(not settings.hudDialGaugePointerImageFilename.empty())
 	{
-		hudDialSpeedometer.pointerImage = new Image(settings.hudTachometerPointerImageFilename);
+		hudDialSpeedometer.pointerImage = new Image(settings.hudDialGaugePointerImageFilename);
 		hudDialSpeedometer.pointerOffset = 45;
 	}
 	hudDialSpeedometer.compile();
@@ -456,7 +456,7 @@ void Pseudo3DRaceState::onEnter()
 	posHudFinishedCaption.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("FINISHED"));
 	posHudFinishedCaption.y = 0.4f*(displayHeight - fontCountdown->getHeight());
 
-	if(settings.useCachedTachometer and not settings.useBarTachometer)
+	if(settings.useCachedDialGauge and not settings.useBarTachometer)
 	{
 		if(imgCacheTachometer != null)
 		{

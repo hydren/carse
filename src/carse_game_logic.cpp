@@ -39,8 +39,9 @@ void CarseGame::Logic::onStatesListInitFinished()
 	nextMatchRaceSettings.trafficDensity = 0;  // by default, no traffic
 	nextMatchRaceSettings.isImperialUnit = false;
 	nextMatchRaceSettings.useBarTachometer = false;
-	nextMatchRaceSettings.useCachedTachometer = false;
-	nextMatchRaceSettings.hudTachometerPointerImageFilename.clear();
+	nextMatchRaceSettings.useDialSpeedometer = false;
+	nextMatchRaceSettings.useCachedDialGauge = false;
+	nextMatchRaceSettings.hudDialGaugePointerImageFilename.clear();
 	nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
 	nextMatchJumpSimulationEnabled = false;
 

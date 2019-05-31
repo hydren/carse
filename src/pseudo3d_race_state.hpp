@@ -33,7 +33,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	fgeal::Vector2D lastDisplaySize;
 
-	fgeal::Font* fontSmall, *fontTiny, *fontCountdown, *font3, *fontDev;
+	fgeal::Font* fontSmall, *fontTiny, *fontCountdown, *fontTimers, *fontDev;
 	fgeal::Image* imgStopwatch;
 	fgeal::Music* music;
 

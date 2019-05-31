@@ -14,8 +14,6 @@
 #include "futil/random.h"
 #include "futil/snprintf.h"
 
-using futil::snprintf;
-
 #include <algorithm>
 #include <cstdio>
 #include <cmath>
@@ -25,6 +23,8 @@ using futil::snprintf;
 using std::string;
 using std::map;
 using std::vector;
+
+using futil::snprintf;
 
 using fgeal::Display;
 using fgeal::Graphics;
@@ -60,7 +60,7 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(),
-  fontSmall(null), fontTiny(null), fontCountdown(null), font3(null), fontDev(null),
+  fontSmall(null), fontTiny(null), fontCountdown(null), fontTimers(null), fontDev(null),
   imgStopwatch(null),
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
@@ -110,7 +110,7 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 	if(fontSmall != null) delete fontSmall;
 	if(fontTiny != null) delete fontTiny;
 	if(fontCountdown != null) delete fontCountdown;
-	if(font3 != null) delete font3;
+	if(fontTimers != null) delete fontTimers;
 
 	if(spriteBackground != null) delete spriteBackground;
 	if(imgStopwatch != null) delete imgStopwatch;
@@ -135,7 +135,7 @@ void Pseudo3DRaceState::initialize()
 	fontSmall = new Font(game.sharedResources->font1Path);
 	fontTiny = new Font(game.sharedResources->font1Path);
 	fontCountdown = new Font(game.sharedResources->font2Path);
-	font3 = new Font(game.sharedResources->font1Path);
+	fontTimers = new Font(game.sharedResources->font1Path);
 
 	imgStopwatch = new Image("assets/stopwatch.png");
 
@@ -171,22 +171,22 @@ void Pseudo3DRaceState::initialize()
 	hudSpeedometer.borderColor = Color::LIGHT_GREY;
 	hudSpeedometer.backgroundColor = Color::BLACK;
 
-	hudCurrentLap.font = font3;
+	hudCurrentLap.font = fontTimers;
 	hudCurrentLap.fontIsShared = true;
 	hudCurrentLap.disableBackground = true;
 	hudCurrentLap.displayColor = Color::WHITE;
 
-	hudLapCountGoal.font = font3;
+	hudLapCountGoal.font = fontTimers;
 	hudLapCountGoal.fontIsShared = true;
 	hudLapCountGoal.disableBackground = true;
 	hudLapCountGoal.displayColor = Color::WHITE;
 
-	hudTimerCurrentLap.font = font3;
+	hudTimerCurrentLap.font = fontTimers;
 	hudTimerCurrentLap.fontIsShared = true;
 	hudTimerCurrentLap.disableBackground = true;
 	hudTimerCurrentLap.displayColor = Color::WHITE;
 
-	hudTimerBestLap.font = font3;
+	hudTimerBestLap.font = fontTimers;
 	hudTimerBestLap.fontIsShared = true;
 	hudTimerBestLap.disableBackground = true;
 	hudTimerBestLap.displayColor = Color::WHITE;
@@ -211,7 +211,7 @@ void Pseudo3DRaceState::onEnter()
 		fontSmall->setFontSize(dip(10));
 		fontTiny->setFontSize(dip(8));
 		fontCountdown->setFontSize(dip(36));
-		font3->setFontSize(dip(24));
+		fontTimers->setFontSize(dip(24));
 		hudSpeedometer.font->setFontSize(dip(24));
 		lastDisplaySize.x = displayWidth;
 		lastDisplaySize.y = displayHeight;
@@ -432,18 +432,18 @@ void Pseudo3DRaceState::onEnter()
 	hudTimerCurrentLap.valueScale = 1000;
 
 	hudTimerBestLap.bounds = bounds;
-	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + font3->getHeight()*1.05;
+	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + fontTimers->getHeight()*1.05;
 
 	hudCurrentLap.bounds = bounds;
-	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + font3->getHeight()*1.05;
+	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + fontTimers->getHeight()*1.05;
 	hudCurrentLap.bounds.w = hudCurrentLap.font->getTextWidth("999");
 
 	hudLapCountGoal.bounds = bounds;
 	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");
 	hudLapCountGoal.bounds.y = hudCurrentLap.bounds.y;
 
-	rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("999/999");
-	offsetHudLapGoal = font3->getTextWidth("Laps: 999");
+	rightHudMargin = hudCurrentLap.bounds.x - fontTimers->getTextWidth("999/999");
+	offsetHudLapGoal = fontTimers->getTextWidth("Laps: 999");
 
 	stopwatchIconBounds.w = 0.032*displayWidth;
 	stopwatchIconBounds.h = imgStopwatch->getHeight()*(stopwatchIconBounds.w/imgStopwatch->getWidth());
@@ -608,30 +608,30 @@ void Pseudo3DRaceState::render()
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));
-	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
+	fontTimers->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
 	hudTimerCurrentLap.draw();
 
 	if(isRaceTypeLoop(settings.raceType))
 	{
-		font3->drawText("Lap", rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
+		fontTimers->drawText("Lap", rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
 		hudCurrentLap.draw();
 
 		if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 		{
-			font3->drawText("/", 1.025*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
+			fontTimers->drawText("/", 1.025*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
 			hudLapCountGoal.draw();
 		}
 
-		font3->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
+		fontTimers->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 		if(lapTimeBest == 0)
-			font3->drawText("--", hudTimerBestLap.bounds.x, hudTimerBestLap.bounds.y, Color::WHITE);
+			fontTimers->drawText("--", hudTimerBestLap.bounds.x, hudTimerBestLap.bounds.y, Color::WHITE);
 		else
 			hudTimerBestLap.draw();
 	}
 	else if(isRaceTypePointToPoint(settings.raceType))
 	{
 		const float progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));  // @suppress("Function cannot be resolved")
-		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
+		fontTimers->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
 
 	if(settings.useDialSpeedometer)

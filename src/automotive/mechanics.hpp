@@ -22,7 +22,9 @@
  *  */
 struct Mechanics
 {
-	static const float GRAVITY_ACCELERATION;
+	static const float GRAVITY_ACCELERATION,  // in m/s^2
+					   RAD_TO_RPM,  // 60/2pi conversion to RPM
+					   AIR_DENSITY;  // air density at sea level and 20ºC (68ºF) temperature, in kg/m^3
 
 	enum SimulationType
 	{

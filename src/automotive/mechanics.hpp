@@ -24,7 +24,7 @@ struct Mechanics
 {
 	static const float GRAVITY_ACCELERATION,  // in m/s^2
 					   RAD_TO_RPM,  // 60/2pi conversion to RPM
-					   AIR_DENSITY;  // air density at sea level and 20ºC (68ºF) temperature, in kg/m^3
+					   AIR_DENSITY;  // air density at sea level and 20ÂºC (68ÂºF) temperature, in kg/m^3
 
 	enum SimulationType
 	{
@@ -91,6 +91,12 @@ struct Mechanics
 
 	/** Returns the current total weight load on the driven wheels. */
 	float getDrivenWheelsWeightLoad();
+
+	/** Returns the maximum angular speed of the driven wheels (in radians) as allowed by this vehicle's geartrain. */
+	inline float getMaximumWheelAngularSpeed()
+	{
+		return engine.maxRpm/(engine.gearRatio[engine.gearCount-1] * engine.differentialRatio * RAD_TO_RPM);
+	}
 
 	private:
 

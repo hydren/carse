@@ -401,7 +401,7 @@ void Pseudo3DRaceState::onEnter()
 	hudGearDisplay.bounds = bounds;
 	hudGearDisplay.borderThickness = 0.01 * displayHeight;
 
-	if(true)
+	if(settings.useDialSpeedometer)
 	{
 		hudSpeedometer.font->setFontSize(dip(13));
 		hudSpeedometer.bounds.w = hudSpeedometer.font->getTextWidth("0000");
@@ -600,7 +600,7 @@ void Pseudo3DRaceState::render()
 		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
 
-	if(true)
+	if(settings.useDialSpeedometer)
 	{
 		hudDialSpeedometer.draw();
 		fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", hudDialSpeedometer.bounds.x + 0.5f*hudDialSpeedometer.bounds.w, hudDialSpeedometer.bounds.y + 0.75f*hudDialSpeedometer.bounds.h, fgeal::Color::BLACK);

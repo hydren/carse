@@ -27,10 +27,9 @@
 #define BRAKE_PAD_TORQUE_ARBITRARY_ADJUST 7500
 #define ROLLING_RESISTANCE_TORQUE_ARBITRARY_ADJUST 0.25
 
-const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-
-static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
-                   RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
+const float Mechanics::GRAVITY_ACCELERATION = 9.8066, // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+			Mechanics::RAD_TO_RPM = (30.0/M_PI),  // 60/2pi conversion to RPM
+			Mechanics::AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
 : simulationType(SIMULATION_TYPE_WHEEL_LOAD_CAP), vehicleType(type), engine(eng),

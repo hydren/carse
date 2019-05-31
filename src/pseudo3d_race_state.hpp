@@ -33,7 +33,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	fgeal::Vector2D lastDisplaySize;
 
-	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDev;
+	fgeal::Font* fontSmall, *fontTiny, *fontCountdown, *font3, *fontDev;
 	fgeal::Image* imgCacheTachometer, *imgStopwatch;
 	fgeal::Music* music;
 
@@ -130,6 +130,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		float trafficDensity;
 		bool isImperialUnit;
 		bool useBarTachometer;
+		bool useDialSpeedometer;
 		bool useCachedTachometer;
 		std::string hudTachometerPointerImageFilename;
 	};
@@ -152,7 +153,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	// HUD stuff --------------------------------------------------------------
 	Pseudo3DCourse::Map minimap;
 
-	Hud::DialGauge<float> hudDialTachometer;
+	Hud::DialGauge<float> hudDialTachometer, hudDialSpeedometer;
 	Hud::BarGauge<float> hudBarTachometer;
 	Hud::NumericalDisplay<float> hudSpeedometer;
 	Hud::NumericalDisplay<int> hudGearDisplay;

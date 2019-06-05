@@ -57,9 +57,10 @@ OptionsMenuState::~OptionsMenuState()
 void OptionsMenuState::initialize()
 {
 	Display& display = game.getDisplay();
+	const FontSizer fs(display.getHeight());
 	background = new Image("assets/options-bg.jpg");
-	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
-	font = new Font(game.sharedResources->font1Path, dip(16));
+	fontTitle = new Font(game.sharedResources->font2Path, fs(48));
+	font = new Font(game.sharedResources->font1Path, fs(16));
 
 	menu.setFont(font);
 	menu.titleColor = Color(16, 24, 192);
@@ -320,7 +321,8 @@ void OptionsMenuState::setResolution()
 	Display::Mode resolution = Display::Mode::getList()[menuResolution.getSelectedIndex()];
 	Display& display = game.getDisplay();
 	display.setSize(resolution.width, resolution.height);
-	font->setFontSize(dip(16));
-	fontTitle->setFontSize(dip(48));
+	const FontSizer fs(display.getHeight());
+	font->setFontSize(fs(16));
+	fontTitle->setFontSize(fs(48));
 	isResolutionMenuActive = false;
 }

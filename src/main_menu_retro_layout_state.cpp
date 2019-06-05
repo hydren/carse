@@ -72,7 +72,6 @@ void MainMenuRetroLayoutState::initialize()
 void MainMenuRetroLayoutState::onEnter()
 {
 	Display& display = game.getDisplay();
-
 	const float w = display.getWidth(),
 				h = display.getHeight(),
 				titleHeaderHeight = 0.2 * w,
@@ -83,8 +82,9 @@ void MainMenuRetroLayoutState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != w or lastDisplaySize.y != h)
 	{
-		fntTitle->setFontSize(dip(32));
-		fntMain->setFontSize(dip(18));
+		const FontSizer fs(display.getHeight());
+		fntTitle->setFontSize(fs(32));
+		fntMain->setFontSize(fs(18));
 		lastDisplaySize.x = w;
 		lastDisplaySize.y = h;
 	}

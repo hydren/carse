@@ -15,8 +15,13 @@
 #define scaledToSize(imgPtr, size) (size).getWidth()/(float)((imgPtr)->getWidth()), (size).getHeight()/(float)((imgPtr)->getHeight())
 #define scaledToRect(imgPtr, rect) (rect).w/(float)((imgPtr)->getWidth()), (rect).h/(float)((imgPtr)->getHeight())
 
-// device-independent pixel (size based on a 480px tall display); can only be used if there is a 'display' instance in the scope
-#define dip(px) (px*(display.getHeight()/480.0))
+// functor to produce a resolution-relative size (size based on a 480px tall display)
+struct FontSizer
+{
+	const unsigned referenceSize;
+	FontSizer(unsigned rs) : referenceSize(rs) {}
+	inline unsigned operator()(unsigned size) const { return size * referenceSize / 480.f; }
+};
 
 template <typename T>
 inline int sgn(T val)

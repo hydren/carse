@@ -64,8 +64,9 @@ void MainMenuSimpleListState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
 	{
-		fntTitle->setFontSize(dip(32));
-		menu.getFont().setFontSize(dip(18));
+		const FontSizer fs(display.getHeight());
+		fntTitle->setFontSize(fs(32));
+		menu.getFont().setFontSize(fs(18));
 		lastDisplaySize.x = display.getWidth();
 		lastDisplaySize.y = display.getHeight();
 	}

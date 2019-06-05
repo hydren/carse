@@ -202,17 +202,18 @@ void Pseudo3DRaceState::initialize()
 void Pseudo3DRaceState::onEnter()
 {
 	Display& display = game.getDisplay();
+	const FontSizer fs(display.getHeight());
 	const float displayWidth = display.getWidth(),
 				displayHeight = display.getHeight();
 
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != displayWidth or lastDisplaySize.y != displayHeight)
 	{
-		fontSmall->setFontSize(dip(10));
-		fontTiny->setFontSize(dip(8));
-		fontCountdown->setFontSize(dip(36));
-		fontTimers->setFontSize(dip(24));
-		hudSpeedometer.font->setFontSize(dip(24));
+		fontSmall->setFontSize(fs(10));
+		fontTiny->setFontSize(fs(8));
+		fontCountdown->setFontSize(fs(36));
+		fontTimers->setFontSize(fs(24));
+		hudSpeedometer.font->setFontSize(fs(24));
 		lastDisplaySize.x = displayWidth;
 		lastDisplaySize.y = displayHeight;
 	}
@@ -402,7 +403,7 @@ void Pseudo3DRaceState::onEnter()
 
 	if(settings.useDialSpeedometer)
 	{
-		hudSpeedometer.font->setFontSize(dip(13));
+		hudSpeedometer.font->setFontSize(fs(13));
 		hudSpeedometer.bounds.w = hudSpeedometer.font->getTextWidth("0000");
 		hudSpeedometer.bounds.h = 1.75f * hudSpeedometer.font->getHeight();
 		hudSpeedometer.bounds.x = hudDialSpeedometer.bounds.x + 0.425f * hudDialSpeedometer.bounds.w;
@@ -413,7 +414,7 @@ void Pseudo3DRaceState::onEnter()
 	}
 	else
 	{
-		hudSpeedometer.font->setFontSize(dip(24));
+		hudSpeedometer.font->setFontSize(fs(24));
 		hudSpeedometer.bounds.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
 		hudSpeedometer.bounds.y = bounds.y;
 		hudSpeedometer.bounds.w = 3*bounds.w;

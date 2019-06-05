@@ -126,10 +126,11 @@ void CourseSelectionState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		fontMain->setFontSize(dip(28));
-		fontInfo->setFontSize(dip(14));
-		fontSmall->setFontSize(dip(10));
-		menuCourse.getFont().setFontSize(dip(12));
+		const FontSizer fs(display.getHeight());
+		fontMain->setFontSize(fs(28));
+		fontInfo->setFontSize(fs(14));
+		fontSmall->setFontSize(fs(10));
+		menuCourse.getFont().setFontSize(fs(12));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}

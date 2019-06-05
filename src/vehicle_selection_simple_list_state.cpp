@@ -119,10 +119,11 @@ void VehicleSelectionSimpleListState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		fontMain->setFontSize(dip(28));
-		fontSub->setFontSize(dip(36));
-		fontInfo->setFontSize(dip(12));
-		menu.getFont().setFontSize(dip(18));
+		const FontSizer fs(display.getHeight());
+		fontMain->setFontSize(fs(28));
+		fontSub->setFontSize(fs(36));
+		fontInfo->setFontSize(fs(12));
+		menu.getFont().setFontSize(fs(18));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}

@@ -270,12 +270,12 @@ void CourseSelectionState::render()
 	fontSmall->drawText("Course", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, Color::WHITE);
 	fontSmall->drawText("  editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y+fontSmall->getHeight(), Color::WHITE);
 	if(focus == FOCUS_ON_COURSE_EDITOR_PORTRAIT and blinkCycle)
-		fgeal::Graphics::drawRectangle(getSpacedOutline(courseEditorPortraitBounds, focusSpacing), Color::RED);
+		fgeal::Graphics::drawRectangle(courseEditorPortraitBounds.getSpacedOutline(focusSpacing), Color::RED);
 
 	// draw course list
 	menuCourse.draw();
 	if(focus == FOCUS_ON_COURSE_LIST_SELECTION and blinkCycle)
-		fgeal::Graphics::drawRectangle(getSpacedOutline(menuCourse.bounds, focusSpacing), Color::RED);
+		fgeal::Graphics::drawRectangle(menuCourse.bounds.getSpacedOutline(focusSpacing), Color::RED);
 
 	{
 		const Rectangle& bounds = imgMenuCourseArrowUpBounds;
@@ -291,7 +291,7 @@ void CourseSelectionState::render()
 	menuSettings.focusedEntryFontColor = (focus == FOCUS_ON_SETTINGS_LIST_SELECTION? Color::WHITE : Color::RED);
 	menuSettings.draw();
 	if(focus == FOCUS_ON_SETTINGS_LIST_SELECTION or (focus == FOCUS_ON_SETTINGS_LIST_HOVER and blinkCycle))
-		fgeal::Graphics::drawRectangle(getSpacedOutline(menuSettings.bounds, focusSpacing), Color::RED);
+		fgeal::Graphics::drawRectangle(menuSettings.bounds.getSpacedOutline(focusSpacing), Color::RED);
 
 	backButton.draw();
 	selectButton.draw();

@@ -44,19 +44,6 @@ inline float fractional_part(float value)
 	inline double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
 #endif
 
-// returns a spaced outline, like a margin or something
-inline fgeal::Rectangle getSpacedOutline(const fgeal::Rectangle& bounds, float spacing)
-{
-	const fgeal::Rectangle outline = {
-		bounds.x - spacing,
-		bounds.y - spacing,
-		bounds.w + 2*spacing,
-		bounds.h + 2*spacing
-	};
-
-	return outline;
-}
-
 /** Attempt to get a contextualized filename.
  *  First it attempts to check if "baseDir1 + specifiedFilename" is a valid file and returns it if true.
  *  If not, then it tries the same with "baseDir2 + specifiedFilename".

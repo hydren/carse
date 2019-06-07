@@ -31,8 +31,7 @@ enum MenuItem
 	MENU_ITEM_UNIT,
 	MENU_ITEM_SIMULATION_TYPE,
 	MENU_ITEM_ENABLE_JUMP,
-	MENU_ITEM_TACHOMETER_TYPE,
-	MENU_ITEM_SPEEDOMETER_TYPE,
+	MENU_ITEM_HUD_TYPE,
 	MENU_ITEM_DIAL_GAUGE_POINTER_TYPE,
 	MENU_ITEM_CACHE_TACHOMETER,
 	MENU_ITEM_COUNT
@@ -76,8 +75,7 @@ void OptionsMenuState::initialize()
 	menu.addEntry("Unit: ");
 	menu.addEntry("Simulation mode: ");
 	menu.addEntry("Enable jumps (experimental): ");
-	menu.addEntry("Tachometer type: ");
-	menu.addEntry("Speedometer type: ");
+	menu.addEntry("HUD type: ");
 	menu.addEntry("Dial gauge pointer type: ");
 	menu.addEntry("Cached gauge texture (experimental): ");
 	menu.addEntry("Back to main menu");
@@ -246,11 +244,8 @@ void OptionsMenuState::onMenuSelect()
 	if(menu.getSelectedIndex() == MENU_ITEM_ENABLE_JUMP)
 		game.logic.setJumpSimulationEnabled(!game.logic.isJumpSimulationEnabled());
 
-	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
-		game.logic.getNextRaceSettings().useBarTachometer = !game.logic.getNextRaceSettings().useBarTachometer;
-
-	if(menu.getSelectedIndex() == MENU_ITEM_SPEEDOMETER_TYPE)
-			game.logic.getNextRaceSettings().useDialSpeedometer = !game.logic.getNextRaceSettings().useDialSpeedometer;
+	if(menu.getSelectedIndex() == MENU_ITEM_HUD_TYPE)
+		game.logic.getNextRaceSettings().hudType = static_cast<Pseudo3DRaceState::HudType>((game.logic.getNextRaceSettings().hudType+1)%Pseudo3DRaceState::HUD_TYPE_COUNT);
 
 	if(menu.getSelectedIndex() == MENU_ITEM_DIAL_GAUGE_POINTER_TYPE)
 	{
@@ -276,18 +271,24 @@ void OptionsMenuState::updateLabels()
 	setMenuItemValueText(MENU_ITEM_FULLSCREEN, display.isFullscreen()? "yes" : "no");
 	setMenuItemValueText(MENU_ITEM_UNIT, game.logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
 
-	string strSimType;
+	string auxStr;
 	switch(game.logic.getSimulationType())
 	{
 		default:
-		case Mechanics::SIMULATION_TYPE_SLIPLESS:       strSimType = "slipless"; break;
-		case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: strSimType = "slipless with wheel-load-capped power"; break;
-		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  strSimType = "longitudinal-only slip (Pacejka)"; break;
+		case Mechanics::SIMULATION_TYPE_SLIPLESS:       auxStr = "slipless"; break;
+		case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: auxStr = "slipless with wheel-load-capped power"; break;
+		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  auxStr = "longitudinal-only slip (Pacejka)"; break;
 	}
-	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
+	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, auxStr);
 	setMenuItemValueText(MENU_ITEM_ENABLE_JUMP, game.logic.isJumpSimulationEnabled()? "enabled" : "disabled");
-	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "dial gauge");
-	setMenuItemValueText(MENU_ITEM_SPEEDOMETER_TYPE, game.logic.getNextRaceSettings().useDialSpeedometer? "dial gauge" : "overlay digits");
+	switch(game.logic.getNextRaceSettings().hudType)
+	{
+		default:
+		case Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO: auxStr = "dial tacho / numeric speedometer"; break;
+		case Pseudo3DRaceState::HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO:       auxStr = "bar tacho / numeric speedometer"; break;
+		case Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO:     auxStr = "dial tacho / dial speedometer"; break;
+	}
+	setMenuItemValueText(MENU_ITEM_HUD_TYPE, auxStr);
 	setMenuItemValueText(MENU_ITEM_DIAL_GAUGE_POINTER_TYPE, game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.empty()? "built-in" : "custom");
 	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedDialGauge? "yes" : "no");
 }

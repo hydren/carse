@@ -38,8 +38,7 @@ void CarseGame::Logic::onStatesListInitFinished()
 	nextMatchRaceSettings.lapCountGoal = 2;    // set default lap count
 	nextMatchRaceSettings.trafficDensity = 0;  // by default, no traffic
 	nextMatchRaceSettings.isImperialUnit = false;
-	nextMatchRaceSettings.useBarTachometer = false;
-	nextMatchRaceSettings.useDialSpeedometer = false;
+	nextMatchRaceSettings.hudType = Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO;
 	nextMatchRaceSettings.useCachedDialGauge = false;
 	nextMatchRaceSettings.hudDialGaugePointerImageFilename.clear();
 	nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;

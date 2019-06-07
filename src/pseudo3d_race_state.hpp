@@ -123,14 +123,21 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 			or type == RACE_TYPE_POINT_TO_POINT_TIME_TRIAL;
 	}
 
+	enum HudType
+	{
+		HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO,
+		HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO,
+		HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO,
+		HUD_TYPE_COUNT
+	};
+
 	struct RaceSettings
 	{
 		RaceType raceType;
 		unsigned lapCountGoal;
 		float trafficDensity;
 		bool isImperialUnit;
-		bool useBarTachometer;
-		bool useDialSpeedometer;
+		HudType hudType;
 		bool useCachedDialGauge;
 		std::string hudDialGaugePointerImageFilename;
 	};
@@ -163,7 +170,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Color hudMiniMapBgColor;
 
 	float rightHudMargin, offsetHudLapGoal;
-	fgeal::Point posHudCountdown, posHudFinishedCaption;
+	fgeal::Point posSpeedUnit, posHudCountdown, posHudFinishedCaption;
 
 	fgeal::Rectangle stopwatchIconBounds;
 

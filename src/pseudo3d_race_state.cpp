@@ -378,7 +378,7 @@ void Pseudo3DRaceState::onEnter()
 		hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
 		hudBarTachometer.bounds.w = 1.75f * gaugeSize;
 		hudBarTachometer.bounds.h = hudGearDisplay.bounds.h;
-		hudBarTachometer.borderThickness = hudGearDisplay.borderThickness;
+		hudBarTachometer.borderThickness = hudGearDisplay.borderThickness/2;
 	}
 	if(hudDialTachometer.backgroundImage != null)
 		delete hudDialTachometer.backgroundImage;
@@ -420,7 +420,7 @@ void Pseudo3DRaceState::onEnter()
 		hudSpeedometer.bounds.h = 1.75f * hudSpeedometer.font->getHeight();
 		hudSpeedometer.disableBackground = false;
 		hudSpeedometer.displayColor = Color::GREEN;
-		hudSpeedometer.borderThickness = 0.01f * displayHeight;
+		hudSpeedometer.borderThickness = hudGearDisplay.borderThickness;
 	}
 	else  // numeric-display-only speedometer
 	{

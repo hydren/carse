@@ -349,11 +349,18 @@ namespace Hud
 		void draw()
 		{
 			const float fillRatio = (std::min(value, max)-min)/(max-min);
-			fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
-			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-											  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
-			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-											  fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness, fillColor);
+			if(backgroundColor.a != 255)
+			{
+				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, borderThickness, borderColor);
+				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y + bounds.h - borderThickness, bounds.w, borderThickness, borderColor);
+				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, borderThickness, bounds.h, borderColor);
+				fgeal::Graphics::drawFilledRectangle(bounds.x + bounds.w - borderThickness, bounds.y, borderThickness, bounds.h, borderColor);
+			}
+			else
+				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
+
+			fgeal::Graphics::drawFilledRectangle(bounds.x + borderThickness + 1, bounds.y + borderThickness + 1, bounds.w - 2*borderThickness - 2, bounds.h - 2*borderThickness - 2, backgroundColor);
+			fgeal::Graphics::drawFilledRectangle(bounds.x + borderThickness + 1, bounds.y + borderThickness + 1, fillRatio*(bounds.w - 2*borderThickness - 2), bounds.h - 2*borderThickness - 2, fillColor);
 		}
 	};
 

@@ -158,6 +158,7 @@ void Pseudo3DRaceState::initialize()
 	hudDialSpeedometer.angleMax = 1.5*M_PI;
 
 	hudBarTachometer.fillColor = Color::RED;
+	hudBarTachometer.backgroundColor = Color::_TRANSPARENT;
 
 	hudGearDisplay.font = fontSmall;
 	hudGearDisplay.fontIsShared = true;

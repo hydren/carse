@@ -426,16 +426,16 @@ namespace Hud
 			if(not disableBackground)
 			{
 				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
-				fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-												  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
+				fgeal::Graphics::drawFilledRectangle(bounds.x + borderThickness, bounds.y + borderThickness,
+												   bounds.w - 2*borderThickness, bounds.h - 2*borderThickness, backgroundColor);
 			}
 
 			if(specialCases.count(value))
-				font->drawText(specialCases[value], bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+				font->drawText(specialCases[value], bounds.x + borderThickness, bounds.y + borderThickness, displayColor);
 			else
 			{
 				sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
-				font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+				font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + borderThickness, displayColor);
 			}
 
 		}

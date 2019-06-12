@@ -325,9 +325,9 @@ void Pseudo3DRaceState::onEnter()
 	spriteSmoke->scale.x = spriteSmoke->scale.y = displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	// ------------------- set-up gear indicator -------------------
-	hudGearDisplay.bounds.w = 0.04 * displayHeight;
-	hudGearDisplay.bounds.h = 1.5f * fontSmall->getTextHeight();
-	hudGearDisplay.borderThickness = 0.01f * displayHeight;
+	hudGearDisplay.bounds.w = 1.50f * fontSmall->getSize();
+	hudGearDisplay.bounds.h = 1.75f * fontSmall->getSize();
+	hudGearDisplay.borderThickness = 0.005f * displayHeight;
 	if(settings.hudType != HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO)
 	{
 		hudGearDisplay.borderColor = Color::LIGHT_GREY;
@@ -417,8 +417,8 @@ void Pseudo3DRaceState::onEnter()
 		}
 
 		hudSpeedometer.font->setSize(fs(13));
-		hudSpeedometer.bounds.w = hudSpeedometer.font->getTextWidth("0000");
-		hudSpeedometer.bounds.h = 1.75f * hudSpeedometer.font->getTextHeight();
+		hudSpeedometer.bounds.w = 4.25f * hudSpeedometer.font->getSize();
+		hudSpeedometer.bounds.h = 1.50f * hudSpeedometer.font->getSize();
 		hudSpeedometer.disableBackground = false;
 		hudSpeedometer.displayColor = Color::GREEN;
 		hudSpeedometer.borderThickness = hudGearDisplay.borderThickness;
@@ -426,8 +426,8 @@ void Pseudo3DRaceState::onEnter()
 	else  // numeric-display-only speedometer
 	{
 		hudSpeedometer.font->setSize(fs(24));
-		hudSpeedometer.bounds.w = 3*0.04*displayHeight;
-		hudSpeedometer.bounds.h = 1.7*1.5 * fontSmall->getTextHeight();
+		hudSpeedometer.bounds.w = 3.7f * hudSpeedometer.font->getSize();
+		hudSpeedometer.bounds.h = 1.4f * hudSpeedometer.font->getSize();
 		hudSpeedometer.disableBackground = true;
 		hudSpeedometer.displayColor = Color::WHITE;
 		hudSpeedometer.borderThickness = 0;
@@ -447,7 +447,7 @@ void Pseudo3DRaceState::onEnter()
 			hudDialTachometer.bounds.y = 0.96f * displayHeight - hudDialTachometer.bounds.h;
 			hudDialTachometer.compile();
 
-			hudSpeedometer.bounds.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
+			hudSpeedometer.bounds.x = hudDialTachometer.bounds.x - hudSpeedometer.bounds.w;
 			hudSpeedometer.bounds.y = hudDialTachometer.bounds.y + 0.7f * hudDialTachometer.bounds.h;
 			posSpeedUnit.x = hudSpeedometer.bounds.x + hudSpeedometer.bounds.w - fontSmall->getTextWidth("xph");
 			posSpeedUnit.y = hudSpeedometer.bounds.y + 0.75f * hudSpeedometer.bounds.h;
@@ -461,7 +461,7 @@ void Pseudo3DRaceState::onEnter()
 			hudBarTachometer.bounds.x = 0.99f * displayWidth - hudBarTachometer.bounds.w;
 			hudBarTachometer.bounds.y = 0.85f * displayHeight;
 
-			hudSpeedometer.bounds.x = hudBarTachometer.bounds.x + hudBarTachometer.bounds.w - hudSpeedometer.font->getTextWidth("000");
+			hudSpeedometer.bounds.x = hudBarTachometer.bounds.x + hudBarTachometer.bounds.w - hudSpeedometer.bounds.w;
 			hudSpeedometer.bounds.y = hudBarTachometer.bounds.y + hudBarTachometer.bounds.h + 0.01f * displayHeight;
 			posSpeedUnit.x = hudSpeedometer.bounds.x + hudSpeedometer.bounds.w - fontSmall->getTextWidth("xph");
 			posSpeedUnit.y = hudSpeedometer.bounds.y + 0.75f * hudSpeedometer.bounds.h;

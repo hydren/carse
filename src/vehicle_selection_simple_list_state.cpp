@@ -120,10 +120,10 @@ void VehicleSelectionSimpleListState::onEnter()
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
 		const FontSizer fs(display.getHeight());
-		fontMain->setFontSize(fs(28));
-		fontSub->setFontSize(fs(36));
-		fontInfo->setFontSize(fs(12));
-		menu.getFont().setFontSize(fs(18));
+		fontMain->setSize(fs(28));
+		fontSub->setSize(fs(36));
+		fontInfo->setSize(fs(12));
+		menu.getFont().setSize(fs(18));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}
@@ -171,12 +171,12 @@ void VehicleSelectionSimpleListState::onEnter()
 	backButton.bounds.x = 0.875*dw;
 	backButton.bounds.y = 0.025*dh;
 	backButton.bounds.w = menu.getFont().getTextWidth(" Back ");
-	backButton.bounds.h = menu.getFont().getHeight();
+	backButton.bounds.h = menu.getFont().getTextHeight();
 
 	selectButton.bounds.w = menu.getFont().getTextWidth(" Select ");
 	selectButton.bounds.x = 0.70*dw - selectButton.bounds.w/2;
 	selectButton.bounds.y = 0.90*dh;
-	selectButton.bounds.h = menu.getFont().getHeight();
+	selectButton.bounds.h = menu.getFont().getTextHeight();
 }
 
 void VehicleSelectionSimpleListState::onLeave()
@@ -405,25 +405,25 @@ void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, 
 	                           + (vehicle.engineValvetrain.empty()? "" : vehicle.engineValvetrain + " ")
 	                           + (vehicle.engineValveCount == 0?    "" : to_string(vehicle.engineValveCount) + "-valve ")
 	                           + (vehicle.engineConfiguration.empty()? "" : vehicle.engineConfiguration);
-	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtPowerInfo = "Power:  " +to_string(vehicle.engineMaximumPower) + "hp @" + to_string((int)vehicle.engineMaximumPowerRpm)+"rpm";
-	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtTorqueInfo = "Torque: " +toStrRounded(vehicle.engineMaximumTorque) + "Nm @" + to_string((int)vehicle.engineMaximumTorqueRpm)+"rpm";
-	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtTransmissionInfo = to_string(vehicle.engineGearCount)+"-speed transmission";
-	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtWeightInfo = "Weight: "+to_string(vehicle.mass) + "kg";
-	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtDrivetrainInfo = "Drivetrain: "+(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ALL? "AWD"
 	                                            : (  vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_FRONT? "F"
 	                                            :    vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_REAR? "R" : "M")
 	                                        + string(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
-	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 }
 
 void VehicleSelectionSimpleListState::changeSprite(bool forward)

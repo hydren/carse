@@ -208,11 +208,11 @@ void Pseudo3DRaceState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != displayWidth or lastDisplaySize.y != displayHeight)
 	{
-		fontSmall->setFontSize(fs(10));
-		fontTiny->setFontSize(fs(8));
-		fontCountdown->setFontSize(fs(36));
-		fontTimers->setFontSize(fs(24));
-		hudSpeedometer.font->setFontSize(fs(24));
+		fontSmall->setSize(fs(10));
+		fontTiny->setSize(fs(8));
+		fontCountdown->setSize(fs(36));
+		fontTimers->setSize(fs(24));
+		hudSpeedometer.font->setSize(fs(24));
 		lastDisplaySize.x = displayWidth;
 		lastDisplaySize.y = displayHeight;
 	}
@@ -326,7 +326,7 @@ void Pseudo3DRaceState::onEnter()
 
 	// ------------------- set-up gear indicator -------------------
 	hudGearDisplay.bounds.w = 0.04 * displayHeight;
-	hudGearDisplay.bounds.h = 1.5f * fontSmall->getHeight();
+	hudGearDisplay.bounds.h = 1.5f * fontSmall->getTextHeight();
 	hudGearDisplay.borderThickness = 0.01f * displayHeight;
 	if(settings.hudType != HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO)
 	{
@@ -416,18 +416,18 @@ void Pseudo3DRaceState::onEnter()
 			hudDialSpeedometer.pointerOffset = 45;
 		}
 
-		hudSpeedometer.font->setFontSize(fs(13));
+		hudSpeedometer.font->setSize(fs(13));
 		hudSpeedometer.bounds.w = hudSpeedometer.font->getTextWidth("0000");
-		hudSpeedometer.bounds.h = 1.75f * hudSpeedometer.font->getHeight();
+		hudSpeedometer.bounds.h = 1.75f * hudSpeedometer.font->getTextHeight();
 		hudSpeedometer.disableBackground = false;
 		hudSpeedometer.displayColor = Color::GREEN;
 		hudSpeedometer.borderThickness = hudGearDisplay.borderThickness;
 	}
 	else  // numeric-display-only speedometer
 	{
-		hudSpeedometer.font->setFontSize(fs(24));
+		hudSpeedometer.font->setSize(fs(24));
 		hudSpeedometer.bounds.w = 3*0.04*displayHeight;
-		hudSpeedometer.bounds.h = 1.7*1.5 * fontSmall->getHeight();
+		hudSpeedometer.bounds.h = 1.7*1.5 * fontSmall->getTextHeight();
 		hudSpeedometer.disableBackground = true;
 		hudSpeedometer.displayColor = Color::WHITE;
 		hudSpeedometer.borderThickness = 0;
@@ -495,17 +495,17 @@ void Pseudo3DRaceState::onEnter()
 	bounds.x = displayWidth - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
 	bounds.y = displayHeight - 0.5f*gaugeSize;
 	bounds.w = 3 * 0.04 * displayHeight;
-	bounds.h = 1.7 * 1.5 * fontSmall->getHeight();
+	bounds.h = 1.7 * 1.5 * fontSmall->getTextHeight();
 
 	hudTimerCurrentLap.bounds = bounds;
 	hudTimerCurrentLap.bounds.y = displayHeight * 0.01;
 	hudTimerCurrentLap.valueScale = 1000;
 
 	hudTimerBestLap.bounds = bounds;
-	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + fontTimers->getHeight()*1.05;
+	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + fontTimers->getTextHeight()*1.05;
 
 	hudCurrentLap.bounds = bounds;
-	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + fontTimers->getHeight()*1.05;
+	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + fontTimers->getTextHeight()*1.05;
 	hudCurrentLap.bounds.w = hudCurrentLap.font->getTextWidth("999");
 
 	hudLapCountGoal.bounds = bounds;
@@ -521,9 +521,9 @@ void Pseudo3DRaceState::onEnter()
 	stopwatchIconBounds.y = hudTimerCurrentLap.bounds.y;
 
 	posHudCountdown.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("0"));
-	posHudCountdown.y = 0.4f*(displayHeight - fontCountdown->getHeight());
+	posHudCountdown.y = 0.4f*(displayHeight - fontCountdown->getTextHeight());
 	posHudFinishedCaption.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("FINISHED"));
-	posHudFinishedCaption.y = 0.4f*(displayHeight - fontCountdown->getHeight());
+	posHudFinishedCaption.y = 0.4f*(displayHeight - fontCountdown->getTextHeight());
 
 	// functor to cache gauge
 	struct { void operator()(Hud::DialGauge<float>& gauge)
@@ -713,7 +713,7 @@ void Pseudo3DRaceState::drawDebugInfo()
 {
 	static char buffer[DEBUG_BUFFER_SIZE]; static const unsigned size = DEBUG_BUFFER_SIZE;
 	static string text;
-	const float spacing = fontDev->getHeight(), spacingBig = 1.4f * spacing;
+	const float spacing = fontDev->getTextHeight(), spacingBig = 1.4f * spacing;
 	Point offset = {spacing/2, spacing/2};
 
 	fontDev->drawText("FPS:", offset.x, offset.y, fgeal::Color::WHITE);

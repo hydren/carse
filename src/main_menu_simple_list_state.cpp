@@ -65,8 +65,8 @@ void MainMenuSimpleListState::onEnter()
 	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
 	{
 		const FontSizer fs(display.getHeight());
-		fntTitle->setFontSize(fs(32));
-		menu.getFont().setFontSize(fs(18));
+		fntTitle->setSize(fs(32));
+		menu.getFont().setSize(fs(18));
 		lastDisplaySize.x = display.getWidth();
 		lastDisplaySize.y = display.getHeight();
 	}
@@ -86,7 +86,7 @@ void MainMenuSimpleListState::render()
 	Display& display = game.getDisplay();
 	display.clear();
 	imgBackground->drawScaled(0, 0, scaledToSize(imgBackground, display));
-	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.05*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
+	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.05*(display.getHeight() - fntTitle->getTextHeight()), Color::WHITE);
 	menu.draw();
 	game.sharedResources->fontDev.drawText(strVersion, 4, 4, Color::CREAM);
 }

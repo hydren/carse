@@ -83,8 +83,8 @@ void MainMenuRetroLayoutState::onEnter()
 	if(lastDisplaySize.x != w or lastDisplaySize.y != h)
 	{
 		const FontSizer fs(display.getHeight());
-		fntTitle->setFontSize(fs(32));
-		fntMain->setFontSize(fs(18));
+		fntTitle->setSize(fs(32));
+		fntMain->setSize(fs(18));
 		lastDisplaySize.x = w;
 		lastDisplaySize.y = h;
 	}
@@ -183,7 +183,7 @@ void MainMenuRetroLayoutState::render()
 				imgExitScaleY = 0.75f*slotMenuItemExit.h/imgExit->getHeight();
 	imgExit->drawScaled(imgExitX, imgExitY, imgExitScaleX, imgExitScaleY);
 
-	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.1*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
+	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.1*(display.getHeight() - fntTitle->getTextHeight()), Color::WHITE);
 
 	game.sharedResources->fontDev.drawText(strVersion, 4, 4, Color::CREAM);
 }

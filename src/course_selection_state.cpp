@@ -127,18 +127,18 @@ void CourseSelectionState::onEnter()
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
 		const FontSizer fs(display.getHeight());
-		fontMain->setFontSize(fs(28));
-		fontInfo->setFontSize(fs(14));
-		fontSmall->setFontSize(fs(10));
-		menuCourse.getFont().setFontSize(fs(12));
+		fontMain->setSize(fs(28));
+		fontInfo->setSize(fs(14));
+		fontSmall->setSize(fs(10));
+		menuCourse.getFont().setSize(fs(12));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}
 
 	paneBounds.x = (1/64.f)*dw;
-	paneBounds.y = (3/64.f)*dh + fontMain->getHeight();
+	paneBounds.y = (3/64.f)*dh + fontMain->getTextHeight();
 	paneBounds.w = (62/64.f)*dw;
-	paneBounds.h = dh - fontMain->getHeight() - (1/16.f)*dh;
+	paneBounds.h = dh - fontMain->getTextHeight() - (1/16.f)*dh;
 
 	portraitBounds.x = paneBounds.x + (1/64.f)*paneBounds.w;
 	portraitBounds.y = paneBounds.y + (1/64.f)*paneBounds.h;
@@ -196,14 +196,14 @@ void CourseSelectionState::onEnter()
 	courseMapViewer.bounds = courseMapBounds;
 
 	backButton.bounds.x = 0.03*dw;
-	backButton.bounds.y = 0.95*dh - fontInfo->getHeight();
+	backButton.bounds.y = 0.95*dh - fontInfo->getTextHeight();
 	backButton.bounds.w = fontInfo->getTextWidth(" Back ");
-	backButton.bounds.h = fontInfo->getHeight();
+	backButton.bounds.h = fontInfo->getTextHeight();
 
 	selectButton.bounds.x = 0.85*dw;
-	selectButton.bounds.y = 0.95*dh - fontInfo->getHeight();
+	selectButton.bounds.y = 0.95*dh - fontInfo->getTextHeight();
 	selectButton.bounds.w = fontInfo->getTextWidth(" Select ");
-	selectButton.bounds.h = fontInfo->getHeight();
+	selectButton.bounds.h = fontInfo->getTextHeight();
 
 	focus = FOCUS_ON_COURSE_LIST_SELECTION;
 	canceledChanges = false;
@@ -241,7 +241,7 @@ void CourseSelectionState::render()
 
 	// draw title
 	fontMain->drawText(TITLE_TEXT, (1/32.f)*dw, (1/32.f)*dh, Color::WHITE);
-	Graphics::drawLine(paneBounds.x, fontMain->getHeight()+(1/32.f)*dh, paneBounds.x + paneBounds.w, fontMain->getHeight()+(1/32.f)*dh, Color::WHITE);
+	Graphics::drawLine(paneBounds.x, fontMain->getTextHeight()+(1/32.f)*dh, paneBounds.x + paneBounds.w, fontMain->getTextHeight()+(1/32.f)*dh, Color::WHITE);
 
 	// portrait frame
 	fgeal::Graphics::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
@@ -261,14 +261,14 @@ void CourseSelectionState::render()
 		const Pseudo3DCourse::Spec& course = game.logic.getCourseList()[menuCourse.getSelectedIndex() - 2];
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
-		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getHeight(), Color::WHITE);
+		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getTextHeight(), Color::WHITE);
 		courseMapViewer.drawMap(0);
 	}
 
 	// draw course editor portrait
 	imgCourseEditor->drawScaled(courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, scaledToRect(imgCourseEditor, courseEditorPortraitBounds));
 	fontSmall->drawText("Course", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, Color::WHITE);
-	fontSmall->drawText("  editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y+fontSmall->getHeight(), Color::WHITE);
+	fontSmall->drawText("  editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y+fontSmall->getTextHeight(), Color::WHITE);
 	if(focus == FOCUS_ON_COURSE_EDITOR_PORTRAIT and blinkCycle)
 		fgeal::Graphics::drawRectangle(courseEditorPortraitBounds.getSpacedOutline(focusSpacing), Color::RED);
 

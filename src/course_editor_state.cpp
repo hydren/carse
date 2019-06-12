@@ -125,7 +125,7 @@ void CourseEditorState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		font->setFontSize(FontSizer(dh)(15));
+		font->setSize(FontSizer(dh)(15));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}
@@ -156,7 +156,7 @@ void CourseEditorState::onEnter()
 	presetsTabButton.bounds.y += widgetSpacing;
 	presetsTabButton.bounds.w /= 2;
 	presetsTabButton.bounds.w -= 2*widgetSpacing;
-	presetsTabButton.bounds.h = std::max(1.2f*presetsTabButton.font->getHeight(), 2*widgetSpacing);
+	presetsTabButton.bounds.h = std::max(1.2f*presetsTabButton.font->getTextHeight(), 2*widgetSpacing);
 	presetsTabButton.highlighted = false;
 
 	propertiesTabButton.bounds = presetsTabButton.bounds;
@@ -174,16 +174,16 @@ void CourseEditorState::onEnter()
 	courseNameTextField.content.clear();
 	courseNameTextField.caretPosition = 0;
 	courseNameTextField.bounds.x = propertiesTabPanelBounds.x + widgetSpacing;
-	courseNameTextField.bounds.y = propertiesTabPanelBounds.y + font->getHeight() + widgetSpacing;
+	courseNameTextField.bounds.y = propertiesTabPanelBounds.y + font->getTextHeight() + widgetSpacing;
 	courseNameTextField.bounds.w = propertiesTabPanelBounds.w - 2*widgetSpacing;
-	courseNameTextField.bounds.h = 1.1f*courseNameTextField.font->getHeight();
+	courseNameTextField.bounds.h = 1.1f*courseNameTextField.font->getTextHeight();
 
 	landscapeTextField.bounds = courseNameTextField.bounds;
-	landscapeTextField.bounds.y += courseNameTextField.bounds.h + font->getHeight() + widgetSpacing;
+	landscapeTextField.bounds.y += courseNameTextField.bounds.h + font->getTextHeight() + widgetSpacing;
 	landscapeTextField.bounds.w *= 0.75;
 
 	roadstyleTextField.bounds = landscapeTextField.bounds;
-	roadstyleTextField.bounds.y += landscapeTextField.bounds.h + font->getHeight() + widgetSpacing;
+	roadstyleTextField.bounds.y += landscapeTextField.bounds.h + font->getTextHeight() + widgetSpacing;
 
 	landscapeChangeButton.bounds.x = landscapeTextField.bounds.x + landscapeTextField.bounds.w + widgetSpacing;
 	landscapeChangeButton.bounds.y = landscapeTextField.bounds.y;
@@ -226,10 +226,10 @@ void CourseEditorState::onEnter()
 	fileMenu.bounds.x = loadDialogBounds.x + widgetSpacing;
 	fileMenu.bounds.y = loadDialogBounds.y + widgetSpacing;
 	fileMenu.bounds.w = loadDialogBounds.w - widgetSpacing*2;
-	fileMenu.bounds.h = loadDialogBounds.h - widgetSpacing*2 - font->getHeight();
+	fileMenu.bounds.h = loadDialogBounds.h - widgetSpacing*2 - font->getTextHeight();
 
 	loadDialogSelectButton.bounds.w = 1.1*font->getTextWidth("Select");
-	loadDialogSelectButton.bounds.h = 1.1*font->getHeight();
+	loadDialogSelectButton.bounds.h = 1.1*font->getTextHeight();
 	loadDialogSelectButton.bounds.x = 0.5*(loadDialogBounds.x + loadDialogBounds.w - loadDialogSelectButton.bounds.w);
 	loadDialogSelectButton.bounds.y = loadDialogBounds.y + loadDialogBounds.h - 1.2*loadDialogSelectButton.bounds.h;
 	loadDialogSelectButton.highlightSpacing = newButton.highlightSpacing;
@@ -245,9 +245,9 @@ void CourseEditorState::onEnter()
 	saveDialogBounds.y = 0.5*(dh - saveDialogBounds.h);
 
 	saveDialogTextField.bounds.x = saveDialogBounds.x + widgetSpacing;
-	saveDialogTextField.bounds.y = saveDialogBounds.y + widgetSpacing + font->getHeight();
+	saveDialogTextField.bounds.y = saveDialogBounds.y + widgetSpacing + font->getTextHeight();
 	saveDialogTextField.bounds.w = saveDialogBounds.w - 2*widgetSpacing;
-	saveDialogTextField.bounds.h = 1.1*font->getHeight();
+	saveDialogTextField.bounds.h = 1.1*font->getTextHeight();
 	saveDialogTextField.content.clear();
 	saveDialogTextField.caretPosition = 0;
 
@@ -327,12 +327,12 @@ void CourseEditorState::render()
 	{
 		Graphics::drawFilledRectangle(propertiesTabPanelBounds, Color::GREY);
 		courseNameTextField.draw();
-		font->drawText("name:", courseNameTextField.bounds.x, courseNameTextField.bounds.y - font->getHeight());
+		font->drawText("name:", courseNameTextField.bounds.x, courseNameTextField.bounds.y - font->getTextHeight());
 		landscapeTextField.draw();
-		font->drawText("landscape:", landscapeTextField.bounds.x, landscapeTextField.bounds.y - font->getHeight());
+		font->drawText("landscape:", landscapeTextField.bounds.x, landscapeTextField.bounds.y - font->getTextHeight());
 		landscapeChangeButton.draw();
 		roadstyleTextField.draw();
-		font->drawText("road style:", roadstyleTextField.bounds.x, roadstyleTextField.bounds.y - font->getHeight());
+		font->drawText("road style:", roadstyleTextField.bounds.x, roadstyleTextField.bounds.y - font->getTextHeight());
 		roadstyleChangeButton.draw();
 	}
 

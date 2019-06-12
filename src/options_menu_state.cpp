@@ -135,7 +135,7 @@ void OptionsMenuState::render()
 	else
 		menu.draw();
 
-	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getHeight(), Color::WHITE);
+	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getTextHeight(), Color::WHITE);
 }
 
 void OptionsMenuState::onKeyPressed(Keyboard::Key key)
@@ -323,7 +323,7 @@ void OptionsMenuState::setResolution()
 	Display& display = game.getDisplay();
 	display.setSize(resolution.width, resolution.height);
 	const FontSizer fs(display.getHeight());
-	font->setFontSize(fs(16));
-	fontTitle->setFontSize(fs(48));
+	font->setSize(fs(16));
+	fontTitle->setSize(fs(48));
 	isResolutionMenuActive = false;
 }

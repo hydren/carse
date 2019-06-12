@@ -181,7 +181,7 @@ namespace Hud
 					{
 						const std::string str(futil::to_string(g * graduationValueScale));
 						graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + graduationValuePositionOffset*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
-																					   center.y + graduationValuePositionOffset*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
+																					   center.y + graduationValuePositionOffset*bounds.h*cos(gAngle) - 0.5*graduationFont->getTextHeight()));
 					}
 
 					if(not offsetApplied)

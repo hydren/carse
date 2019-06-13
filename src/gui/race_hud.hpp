@@ -377,6 +377,9 @@ namespace Hud
 		/** this widget's dimensions and position. */
 		fgeal::Rectangle bounds;
 
+		/** the minimum spacing between the border and the text. */
+		fgeal::Vector2D padding;
+
 		/** The background color. */
 		fgeal::Color backgroundColor;
 
@@ -409,7 +412,7 @@ namespace Hud
 		public:
 
 		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds=fgeal::Rectangle(), fgeal::Font* font=null)
-		: value(var), valueScale(1.0), bounds(bounds),
+		: value(var), valueScale(1.0), bounds(bounds), padding({1, 1}),
 		  backgroundColor(fgeal::Color::WHITE), disableBackground(false),
 		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK), displayColor(fgeal::Color::GREEN),
 		  font(font), fontIsShared(false)
@@ -431,13 +434,27 @@ namespace Hud
 			}
 
 			if(specialCases.count(value))
-				font->drawText(specialCases[value], bounds.x + borderThickness, bounds.y + borderThickness, displayColor);
+				font->drawText(specialCases[value], bounds.x + borderThickness + padding.x, bounds.y + borderThickness + padding.y, displayColor);
 			else
 			{
 				sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
-				font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + borderThickness, displayColor);
+				font->drawText(std::string(stringBuffer), bounds.x + borderThickness + padding.x, bounds.y + borderThickness + padding.y, displayColor);
 			}
+		}
 
+		void pack(unsigned char digitCount=1)
+		{
+			if(font != null)
+			{
+				const std::string sampleValue(digitCount, '9');
+				bounds.w = font->getTextWidth(sampleValue) + 2*(borderThickness + padding.x);
+				bounds.h = font->getTextHeight() + 2*(borderThickness + padding.y);
+			}
+		}
+
+		inline void packToValue(NumberType maxValue)
+		{
+			pack(maxValue == 0? 1 : log10(maxValue*valueScale) + 1);
 		}
 	};
 

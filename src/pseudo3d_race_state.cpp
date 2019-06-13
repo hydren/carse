@@ -325,9 +325,9 @@ void Pseudo3DRaceState::onEnter()
 	spriteSmoke->scale.x = spriteSmoke->scale.y = displayWidth * GLOBAL_VEHICLE_SCALE_FACTOR*0.75f;
 
 	// ------------------- set-up gear indicator -------------------
-	hudGearDisplay.bounds.w = 1.50f * fontSmall->getSize();
-	hudGearDisplay.bounds.h = 1.75f * fontSmall->getSize();
 	hudGearDisplay.borderThickness = 0.005f * displayHeight;
+	hudGearDisplay.pack();
+	hudGearDisplay.bounds.w = hudGearDisplay.bounds.h = std::max(hudGearDisplay.bounds.w, hudGearDisplay.bounds.h);  // force square shape
 	if(settings.hudType != HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO)
 	{
 		hudGearDisplay.borderColor = Color::LIGHT_GREY;
@@ -417,20 +417,21 @@ void Pseudo3DRaceState::onEnter()
 		}
 
 		hudSpeedometer.font->setSize(fs(13));
-		hudSpeedometer.bounds.w = 4.25f * hudSpeedometer.font->getSize();
-		hudSpeedometer.bounds.h = 1.50f * hudSpeedometer.font->getSize();
+		hudSpeedometer.borderThickness = hudGearDisplay.borderThickness;
+		hudSpeedometer.padding.x = 4;
+		hudSpeedometer.padding.y = 4;
+		hudSpeedometer.pack(3);
 		hudSpeedometer.disableBackground = false;
 		hudSpeedometer.displayColor = Color::GREEN;
-		hudSpeedometer.borderThickness = hudGearDisplay.borderThickness;
 	}
 	else  // numeric-display-only speedometer
 	{
 		hudSpeedometer.font->setSize(fs(24));
-		hudSpeedometer.bounds.w = 3.7f * hudSpeedometer.font->getSize();
-		hudSpeedometer.bounds.h = 1.4f * hudSpeedometer.font->getSize();
+		hudSpeedometer.borderThickness = 0;
+		hudSpeedometer.padding.y = 1;
+		hudSpeedometer.pack(3);
 		hudSpeedometer.disableBackground = true;
 		hudSpeedometer.displayColor = Color::WHITE;
-		hudSpeedometer.borderThickness = 0;
 	}
 	if(hudDialSpeedometer.backgroundImage != null)
 		delete hudDialSpeedometer.backgroundImage;

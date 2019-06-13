@@ -396,9 +396,9 @@ void Pseudo3DRaceState::onEnter()
 		hudDialSpeedometer.bounds.w = 1.33 * gaugeSize;
 		hudDialSpeedometer.bounds.h = 1.33 * gaugeSize;
 		hudDialSpeedometer.graduationLevel = 2;
-		hudDialSpeedometer.graduationPrimarySize = 20 / hudDialSpeedometer.graduationValueScale;
+		hudDialSpeedometer.graduationPrimarySize = 10 * (static_cast<int>(hudDialSpeedometer.graduationValueScale * hudDialSpeedometer.max/120) + 1) / hudDialSpeedometer.graduationValueScale;
 		hudDialSpeedometer.graduationPrimaryLineSize = 0.25;
-		hudDialSpeedometer.graduationSecondarySize = 10 / hudDialSpeedometer.graduationValueScale;
+		hudDialSpeedometer.graduationSecondarySize = hudDialSpeedometer.graduationPrimarySize/2;
 		hudDialSpeedometer.graduationSecondaryLineSize = 0.4;
 		hudDialSpeedometer.graduationValuePositionOffset = 0.375;
 		hudDialSpeedometer.backgroundImage = null;

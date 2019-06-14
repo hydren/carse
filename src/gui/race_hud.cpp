@@ -215,11 +215,13 @@ void Hud::GenericBarGauge::draw(float fillRatio)
 }
 
 Hud::GenericNumericalDisplay::GenericNumericalDisplay(const Rectangle& bounds, Font* font)
-: valueScale(1.0), bounds(bounds), padding({1, 1}),
+: valueScale(1.0), bounds(bounds), padding(),
   backgroundColor(fgeal::Color::WHITE), disableBackground(false),
   borderThickness(2.0f), borderColor(fgeal::Color::BLACK), displayColor(fgeal::Color::GREEN),
   font(font), fontIsShared(false)
-{}
+{
+	padding.x = padding.y = 1;
+}
 
 Hud::GenericNumericalDisplay::~GenericNumericalDisplay()
 {

@@ -63,8 +63,10 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Button landscapeChangeButton, roadstyleChangeButton;
 
 	// load dialog
-	fgeal::Menu fileMenu;
 	fgeal::Rectangle loadDialogBounds;
+	fgeal::Menu fileMenu;
+	fgeal::Image* imgMenuCourseArrow;
+	fgeal::Rectangle imgMenuCourseArrowUpBounds, imgMenuCourseArrowDownBounds;
 	fgeal::Button loadDialogSelectButton, loadDialogCancelButton;
 
 	// save dialog

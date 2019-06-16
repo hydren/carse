@@ -37,7 +37,7 @@ CourseEditorState::CourseEditorState(CarseGame* game)
   newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
   isPresetsTabActive(),
   selectedLandscapeIndex(), selectedRoadstyleIndex(), landscapeChangeButton(), roadstyleChangeButton(),
-  loadDialogSelectButton(), loadDialogCancelButton(),
+  imgMenuCourseArrow(null), loadDialogSelectButton(), loadDialogCancelButton(),
   saveDialogSaveButton(), saveDialogCancelButton()
 {}
 
@@ -48,6 +48,7 @@ CourseEditorState::~CourseEditorState()
 
 void CourseEditorState::initialize()
 {
+	imgMenuCourseArrow = new Image("assets/arrow-blue.png");
 	font = new Font(game.sharedResources->font1Path);
 
 	fileMenu.setFont(font);
@@ -228,6 +229,13 @@ void CourseEditorState::onEnter()
 	fileMenu.bounds.w = loadDialogBounds.w - widgetSpacing*2;
 	fileMenu.bounds.h = loadDialogBounds.h - widgetSpacing*2 - font->getTextHeight();
 
+	imgMenuCourseArrowUpBounds.w = imgMenuCourseArrowUpBounds.h = dh*0.04;
+	imgMenuCourseArrowUpBounds.x = fileMenu.bounds.x + fileMenu.bounds.w - imgMenuCourseArrowUpBounds.w;
+	imgMenuCourseArrowUpBounds.y = fileMenu.bounds.y;
+
+	imgMenuCourseArrowDownBounds = imgMenuCourseArrowUpBounds;
+	imgMenuCourseArrowDownBounds.y = fileMenu.bounds.y + fileMenu.bounds.h - imgMenuCourseArrowDownBounds.h;
+
 	loadDialogSelectButton.bounds.w = 1.1*font->getTextWidth("Select");
 	loadDialogSelectButton.bounds.h = 1.1*font->getTextHeight();
 	loadDialogSelectButton.bounds.x = 0.5*(loadDialogBounds.x + loadDialogBounds.w - loadDialogSelectButton.bounds.w);
@@ -358,6 +366,15 @@ void CourseEditorState::render()
 		Graphics::drawRoundedRectangle(loadDialogBounds, 10, Color::DARK_GREY);
 
 		fileMenu.draw();
+
+		{
+			const Rectangle& bounds = imgMenuCourseArrowUpBounds;
+			imgMenuCourseArrow->drawScaledRotated(bounds.x+bounds.w/4, bounds.y+bounds.h*0.8, scaledToRect(imgMenuCourseArrow, bounds), M_PI/2, bounds.w/2, bounds.h/2);
+		}
+		{
+			const Rectangle& bounds = imgMenuCourseArrowDownBounds;
+			imgMenuCourseArrow->drawScaledRotated(bounds.x+bounds.w/4, bounds.y+bounds.h*0.8, scaledToRect(imgMenuCourseArrow, bounds), M_PI/2, bounds.w/2, bounds.h/2, Image::FLIP_HORIZONTAL);
+		}
 
 		loadDialogSelectButton.highlighted = blinkCycle and loadDialogSelectButton.bounds.contains(mousePosition);
 		loadDialogSelectButton.draw();
@@ -559,7 +576,19 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	}
 	else if(focus == ON_FILE_MENU)
 	{
-		if(fileMenu.bounds.contains(x, y))
+		if(imgMenuCourseArrowUpBounds.contains(x, y))
+		{
+			sndCursorMove->play();
+			fileMenu.moveCursorUp();
+		}
+
+		else if(imgMenuCourseArrowDownBounds.contains(x, y))
+		{
+			sndCursorMove->play();
+			fileMenu.moveCursorDown();
+		}
+
+		else if(fileMenu.bounds.contains(x, y))
 		{
 			sndCursorMove->play();
 			fileMenu.setSelectedIndexByLocation(x, y);

@@ -268,7 +268,7 @@ void VehicleSelectionShowroomLayoutState::render()
 	{
 		const unsigned i = index == 0? menu.getEntries().size()-1 : index-1;
 		const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[i] == -1? vehicles[i].sprite : vehicles[i].alternateSprites[previewAltIndex[i]];
-		drawVehiclePreview(previewPreviousSprite, spriteSpec, (0.2-doff)*dw, (0.5-doffp)*dh, 1.05-0.05*fabs(trans), trans < -0.5? 0 : -1);
+		drawVehiclePreview(previewPreviousSprite, spriteSpec, (0.2-doff)*dw, (0.6-doffp)*dh, 1.05-0.05*fabs(trans), trans < -0.5? 0 : -1);
 	}
 
 	// draw next vehicle
@@ -276,7 +276,7 @@ void VehicleSelectionShowroomLayoutState::render()
 	{
 		const unsigned i = index == menu.getEntries().size()-1? 0 : index+1;
 		const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[i] == -1? vehicles[i].sprite : vehicles[i].alternateSprites[previewAltIndex[i]];
-		drawVehiclePreview(previewNextSprite, spriteSpec, (0.8-doff)*dw, (0.5-doffn)*dh, 1.05-0.05*fabs(trans), trans > 0.5? 0 : +1);
+		drawVehiclePreview(previewNextSprite, spriteSpec, (0.8-doff)*dw, (0.6-doffn)*dh, 1.05-0.05*fabs(trans), trans > 0.5? 0 : +1);
 	}
 
 	// darkening other vehicles
@@ -284,7 +284,7 @@ void VehicleSelectionShowroomLayoutState::render()
 
 	// draw current vehicle
 	const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[index] == -1? vehicles[index].sprite : vehicles[index].alternateSprites[previewAltIndex[index]];
-	drawVehiclePreview(previewCurrentSprite, spriteSpec, (0.5-doff)*dw, (0.45-doffc)*dh, 1.0+0.05*fabs(trans), trans > 0.5? -1 : trans < -0.5? +1 : 0);
+	drawVehiclePreview(previewCurrentSprite, spriteSpec, (0.5-doff)*dw, (0.55-doffc)*dh, 1.0+0.05*fabs(trans), trans > 0.5? -1 : trans < -0.5? +1 : 0);
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
@@ -455,8 +455,8 @@ void VehicleSelectionShowroomLayoutState::drawVehiclePreview(Image* sprite, cons
 	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);
 	const float scalex = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.x,
 				scaley = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.y,
-				posX = x - 0.5*spriteSpec.frameWidth * scalex,
-				posY = y - 0.5*spriteSpec.frameHeight * scaley,
+				posX = x - scalex * 0.5*spriteSpec.frameWidth,
+				posY = y - scaley * (spriteSpec.frameHeight - spriteSpec.contactOffset),
 				offsetY = (angleType == 0? 0 : spriteSpec.frameHeight * (spriteSpec.stateCount/2));
 
 	sprite->drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);

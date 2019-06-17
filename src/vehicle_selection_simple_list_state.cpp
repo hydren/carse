@@ -222,7 +222,7 @@ void VehicleSelectionSimpleListState::render()
 	menuDownButton.draw();
 	fgeal::Graphics::drawFilledTriangle(menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3, menu.focusedEntryFontColor);
 
-	drawVehiclePreview(0.7*dw, 0.35*dh);
+	drawVehiclePreview(0.7*dw, 0.5*dh);
 	drawVehicleSpec((4/9.f)*dw, 0.6*dh);
 
 	const fgeal::Point skinArrowLeft1 =  { 0.52f*dw, 0.45f*dh }, skinArrowLeft2  = { 0.53f*dw, 0.44f*dh }, skinArrowLeft3 =  { 0.53f*dw, 0.46f*dh};
@@ -386,8 +386,8 @@ void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float
 	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);
 	const float scalex = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.x,
 				scaley = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.y,
-				posX = x - 0.5*spriteSpec.frameWidth * scalex,
-				posY = y - 0.5*spriteSpec.frameHeight * scaley,
+				posX = x - scalex * 0.5*spriteSpec.frameWidth,
+				posY = y - scaley * (spriteSpec.frameHeight - spriteSpec.contactOffset),
 				offsetY = (angleType == 0? 0 : spriteSpec.frameHeight * (spriteSpec.stateCount/2));
 
 	previewSprite->drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);

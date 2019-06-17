@@ -80,6 +80,7 @@ void VehicleSelectionSimpleListState::initialize()
 	menu.setFont(new Font(game.sharedResources->font1Path), false);
 	menu.setColor(Color::WHITE);
 	menu.cursorWrapAroundEnabled = true;
+	menu.entryClippingAtBeginning = true;
 	menu.bgColor = Color::AZURE;
 	menu.focusedEntryFontColor = Color::NAVY;
 

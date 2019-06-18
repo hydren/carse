@@ -160,19 +160,19 @@ void Pseudo3DCourse::draw(int pos, int posX)
 		const CourseSpec::Segment& l = spec.lines[n%N];
 		const ScreenCoordCache& lt = lts[n%N];
 
-		if(l.spriteID != -1)
+		if(l.propIndex != -1)
 		{
-			Image& s = *sprites[l.spriteID];
+			Image& s = *sprites[l.propIndex];
 			const int w = s.getWidth(),
 					  h = s.getHeight();
 
 			const float scale = lt.W/150,
 				  destW = w*scale,
 				  destH = h*scale;
-			float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
+			float destX = lt.X + lt.scale * l.propX * drawAreaWidth/2;
 			float destY = lt.Y + 4;
 
-			destX += destW * l.spriteX;  // offsetX
+			destX += destW * l.propX;  // offsetX
 			destY += destH * (-1);  // offsetY
 
 			float clipH = destY+destH-l.clip;
@@ -232,7 +232,7 @@ void Pseudo3DCourse::Spec::loadFromFile(const string& filename)
 void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 {
 	const string specFilename = filename + ".properties", segmentsFilename = filename + ".csv";
-	this->saveProperties(specFilename, segmentsFilename);
+	this->storeProperties(specFilename, segmentsFilename);
 	this->saveSegments(segmentsFilename);
 }
 
@@ -399,8 +399,8 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segment
 		if(i > 500 && i < 700) line.curve = -0.3;
 		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
-		if(i % 17==0) { line.spriteX=2.0; line.spriteID=0; }
-		if(i % 17==1) { line.spriteX=-3.0; line.spriteID=0; }
+		if(i % 17==0) { line.propX=2.0; line.propIndex=0; }
+		if(i % 17==1) { line.propX=-3.0; line.propIndex=0; }
 		spec.lines.push_back(line);
 	}
 	spec.spritesFilenames.push_back("assets/bush.png");  // type 0
@@ -482,18 +482,18 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 
 		if(rand() % 10 == 0)
 		{
-			line.spriteID = 0;
-			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.5, 3.0);
+			line.propIndex = 0;
+			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.5, 3.0);
 		}
 		else if(rand() % 100 == 0)
 		{
-			line.spriteID = 1;
-			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
+			line.propIndex = 1;
+			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
 		else if(rand() % 1000 == 0)
 		{
-			line.spriteID = 2;
-			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
+			line.propIndex = 2;
+			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
 
 		spec.lines.push_back(line);

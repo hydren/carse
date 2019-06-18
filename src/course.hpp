@@ -74,7 +74,7 @@ struct Pseudo3DCourse
 		private:
 		void parseProperties(const std::string& filename);
 		void loadSegments(const std::string& filename);
-		void saveProperties(const std::string& specFile, const std::string& segmentsFile);
+		void storeProperties(const std::string& specFile, const std::string& segmentsFile);
 		void saveSegments(const std::string& filename);
 	};
 

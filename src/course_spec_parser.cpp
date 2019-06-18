@@ -85,18 +85,21 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 	colorLandscape = prop.getParsedCStrAllowDefault<Color, parseColor>("landscape_color", Color(136,204,238));
 	colorHorizon = prop.getParsedCStrAllowDefault<Color, parseColor>("horizon_color", colorOffRoadPrimary);
 
-	int spriteMaxId = prop.getParsedCStrAllowDefault<int, atoi>("sprite_max_id", DEFAULT_SPRITE_COUNT);
-	for(int id = 0; id <= spriteMaxId; id++)
+	const int propMaxIndex = prop.getParsedCStrAllowDefault<int, atoi>("prop_max_id", DEFAULT_SPRITE_COUNT);
+	for(int id = 0; id <= propMaxIndex; id++)
 	{
-		const string specifiedSpriteFilename = prop.get("sprite" + to_string(id));
+		const string specifiedSpriteFilename = prop.get("prop" + to_string(id) + "_sprite");
 		if(not specifiedSpriteFilename.empty())
 		{
 			const string spriteFilename = getContextualizedFilename(specifiedSpriteFilename, baseDir, "assets/");
 			if(spriteFilename.empty())
-				cout << "warning: could not load sprite for ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". ID will be treated as unspecified!" << endl;
+				cout << "warning: could not load sprite for prop ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". Prop sprite will be left unspecified!" << endl;
 			spritesFilenames.push_back(spriteFilename);
 		}
 		else spritesFilenames.push_back(string());
+
+		props.push_back(Prop());
+		props.back().blocking = (prop.get("prop" + to_string(id) + "_blocking") == string("true"));
 	}
 
 	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
@@ -151,12 +154,12 @@ void Pseudo3DCourse::Spec::loadSegments(const string& segmentFilename)
 
 		if(tokens.size() >= 6)
 		{
-			line.spriteID = atoi(tokens[4].c_str());
-			line.spriteX = atof(tokens[5].c_str());
+			line.propIndex = atoi(tokens[4].c_str());
+			line.propX = atof(tokens[5].c_str());
 
-			if(line.spriteID != -1 and
-			  (line.spriteID + 1 > (int) spritesFilenames.size() or spritesFilenames[line.spriteID].empty()))
-				throw std::logic_error("Course indicates usage of an unspecified sprite ID (#" + to_string(line.spriteID) + "), specified by \"" + segmentFilename+"\"");
+			if(line.propIndex != -1 and
+			  (line.propIndex + 1 > (int) spritesFilenames.size() or spritesFilenames[line.propIndex].empty()))
+				throw std::logic_error("Course indicates usage of an unspecified prop ID (#" + to_string(line.propIndex) + "), specified by \"" + segmentFilename+"\"");
 		}
 
 		if(tokens.size() == 5 or tokens.size() > 6)
@@ -166,7 +169,7 @@ void Pseudo3DCourse::Spec::loadSegments(const string& segmentFilename)
 	stream.close();
 }
 
-void Pseudo3DCourse::Spec::saveProperties(const string& filename, const string& segmentsFilename)
+void Pseudo3DCourse::Spec::storeProperties(const string& filename, const string& segmentsFilename)
 {
 	Properties prop;
 	prop.put("name", name);
@@ -194,10 +197,13 @@ void Pseudo3DCourse::Spec::saveProperties(const string& filename, const string& 
 		prop.put("music", musicFilename);
 
 	if(spritesFilenames.size() > DEFAULT_SPRITE_COUNT)
-		prop.put("sprite_max_id", to_string(spritesFilenames.size()-1));
+		prop.put("prop_max_id", to_string(spritesFilenames.size()-1));
 
 	for(unsigned i = 0; i < spritesFilenames.size(); i++)
-		prop.put("sprite"+to_string(i), spritesFilenames[i]);
+	{
+		prop.put("prop"+to_string(i)+"_sprite", spritesFilenames[i]);
+		prop.put("prop"+to_string(i)+"_blocking", to_string(props[i].blocking));
+	}
 
 	prop.store(filename);
 }
@@ -215,8 +221,8 @@ void Pseudo3DCourse::Spec::saveSegments(const string& filename)
 	{
 		const Segment& line = lines[i];
 		stream << line.x << ',' << line.y << ',' << line.curve << ',' << line.slope;
-		if(line.spriteID != -1)
-			stream << ',' << line.spriteID << ',' << line.spriteX;
+		if(line.propIndex != -1)
+			stream << ',' << line.propIndex << ',' << line.propX;
 		stream << endl;
 	}
 

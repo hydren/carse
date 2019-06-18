@@ -12,6 +12,10 @@
 
 using std::vector;
 
+#include <iostream>
+using std::cout; using std::endl;
+// XXX DEBUG
+
 /* Tire coefficients
  *
  *          Rolling resist. | Peak static frict. | Kinetic frict.
@@ -136,6 +140,27 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		playerVehicle.verticalPosition = courseSegment.y;
 	}
 
+	// verify for prop collision
+	if(courseSegment.propIndex != -1)
+	{
+		const CourseSpec::Prop& prop = course.spec.props[courseSegment.propIndex];
+		if(prop.blocking)
+		{
+			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,
+						px = playerVehicle.horizontalPosition * coursePositionFactor - 0.5f*pw,
+						tx = courseSegment.propX * coursePositionFactor * 10;
+
+			cout << "pw=" << pw << " px=" << px << " tx=" << tx << endl;
+			if(not (px + pw < tx or px > tx))
+			{
+				cout << "collided with prop" << endl;
+				playerVehicle.position += (1.f - playerVehicle.body.speed) * delta;  // revert progress and pushes back the car a little bit
+				playerVehicle.body.speed = -1;
+			}
+		}
+	}
+
+	// verify for traffic collision
 	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
 	{
 		trafficVehicle.body.rollingResistanceFactor = ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;

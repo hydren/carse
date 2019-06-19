@@ -148,7 +148,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		{
 			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,
 						px = playerVehicle.horizontalPosition * coursePositionFactor - 0.5f*pw,
-						tx = courseSegment.propX * coursePositionFactor * 10;
+						tx = courseSegment.propX * coursePositionFactor * 10;  // FIXME fix this formula because it does not behave correctly for different sized props
 
 			cout << "pw=" << pw << " px=" << px << " tx=" << tx << endl;
 			if(not (px + pw < tx or px > tx))
@@ -156,6 +156,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 				cout << "collided with prop" << endl;
 				playerVehicle.position += (1.f - playerVehicle.body.speed) * delta;  // revert progress and pushes back the car a little bit
 				playerVehicle.body.speed = -1;
+				playerVehicle.isCrashing = true;
 			}
 		}
 	}

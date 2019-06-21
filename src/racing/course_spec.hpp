@@ -18,6 +18,8 @@ struct CourseSpec
 	struct Prop
 	{
 		bool blocking;  // indicates whether this prop blocks vehicles when colliding
+
+		Prop(bool blocking=false) : blocking(blocking) {}
 	};
 
 	/** an object that describes a single road segment (its position, props, ...) */

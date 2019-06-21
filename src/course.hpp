@@ -26,6 +26,8 @@ struct Pseudo3DCourse
 		std::string name, author, credits, comments;
 		std::string previewFilename;
 
+		std::string presetSceneryName, presetRoadStyleName;
+
 		std::string landscapeFilename;
 		fgeal::Color colorLandscape, colorHorizon,
 					 colorRoadPrimary, colorRoadSecondary,
@@ -66,7 +68,7 @@ struct Pseudo3DCourse
 
 		static struct LandscapeSettings {
 			fgeal::Color terrainPrimary, terrainSecondary, sky;
-			std::string landscapeBgFilename, sprite1, sprite2, sprite3, name;
+			std::string landscapeBgFilename, sprite1, sprite2, sprite3, name;  // todo create blocking flag
 		}
 		presetLandscapeSettings[];
 		static unsigned presetLandscapeSettingsSize;

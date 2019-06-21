@@ -403,6 +403,7 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segment
 		if(i % 17==1) { line.propX=-3.0; line.propIndex=0; }
 		spec.lines.push_back(line);
 	}
+	spec.props.push_back(Prop());  // type 0
 	spec.spritesFilenames.push_back("assets/bush.png");  // type 0
 	spec.landscapeFilename = "assets/bg.png";
 	spec.colorRoadPrimary =      Color( 64, 80, 80);
@@ -504,8 +505,11 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 		li = futil::random_between(0, presetLandscapeSettingsSize);
 
 	spec.spritesFilenames.push_back("assets/"+presetLandscapeSettings[li].sprite1);
+	spec.props.push_back(Prop());
 	spec.spritesFilenames.push_back("assets/"+presetLandscapeSettings[li].sprite2);
+	spec.props.push_back(Prop(true));
 	spec.spritesFilenames.push_back("assets/"+presetLandscapeSettings[li].sprite3);
+	spec.props.push_back(Prop(true));
 	spec.landscapeFilename = "assets/"+presetLandscapeSettings[li].landscapeBgFilename;
 
 	spec.colorRoadPrimary = presetRoadColors[ri].primary;

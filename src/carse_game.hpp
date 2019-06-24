@@ -107,9 +107,6 @@ class CarseGame extends public fgeal::Game
 		bool isJumpSimulationEnabled();
 		void setJumpSimulationEnabled(bool enabled=true);
 
-		// spec. loading functions
-		void loadVehicleSpec(Pseudo3DVehicle::Spec& spec, const futil::Properties& properties);
-
 		// special locations
 		const static std::string
 			COURSES_FOLDER,

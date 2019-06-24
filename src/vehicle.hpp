@@ -9,8 +9,9 @@
 #define PSEUDO3D_VEHICLE_HPP_
 #include <ciso646>
 
-#include "pseudo3d/vehicle_gfx.hpp"
 #include "automotive/vehicle_spec.hpp"
+#include "automotive/engine_sound.hpp"
+#include "pseudo3d/vehicle_gfx.hpp"
 #include "fgeal/extra/sprite.hpp"
 
 #include <string>
@@ -25,6 +26,9 @@ struct Pseudo3DVehicle
 
 		// additional alternate graphics data (optional)
 		std::vector<Pseudo3DVehicleAnimationSpec> alternateSprites;
+
+		// sound data (optional)
+		EngineSoundProfile soundProfile;
 
 		/* Loads data from the given filename, parse its vehicle spec data and store in this object. */
 		void loadFromFile(const std::string& filename);

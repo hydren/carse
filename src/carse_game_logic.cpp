@@ -73,12 +73,12 @@ void CarseGame::Logic::onStatesListInitFinished()
 	}
 }
 
-EngineSoundProfile& CarseGame::Logic::getPresetEngineSoundProfile(const std::string presetName)
+const EngineSoundProfile& CarseGame::Logic::getPresetEngineSoundProfile(const std::string presetName) const
 {
 	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
-		return presetEngineSoundProfiles[presetName];
+		return presetEngineSoundProfiles.find(presetName)->second;
 	else
-		return presetEngineSoundProfiles["default"];
+		return presetEngineSoundProfiles.find("default")->second;
 }
 
 void CarseGame::Logic::updateCourseList()

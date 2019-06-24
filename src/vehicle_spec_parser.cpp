@@ -17,7 +17,6 @@
 #include "futil/round.h"
 
 #include <exception>
-#include <algorithm>
 #include <cstdlib>
 #include <cmath>
 
@@ -64,7 +63,7 @@ static const float
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
-void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
+void Pseudo3DVehicle::Spec::loadFromFile(const string& filename, const CarseGameLogicInstance& logic)
 {
 	Properties prop;
 	prop.load(filename);
@@ -109,8 +108,10 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 
 	// read sound data if a custom one is specified
 	key = "sound";
-	if(prop.containsKey(key) and prop.get(key) == "custom")
-		soundProfile = createEngineSoundProfileFromFile(filename);
+	if(prop.get(key) == "custom")
+		soundProfile = CarseGame::Logic::createEngineSoundProfileFromFile(filename);
+	else if(prop.get(key) != "no")
+		soundProfile = logic.instance.getPresetEngineSoundProfile(prop.get(key));
 
 	// sprite data
 	prop.put("filename", filename);  // done so we can later get properties filename
@@ -804,95 +805,4 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 		spec.shadowPositions.push_back(shadowPosition);
 	}
-}
-
-// ========================================================================================================================
-
-EngineSoundProfile Pseudo3DVehicle::Spec::createEngineSoundProfileFromFile(const string& filename)
-{
-	EngineSoundProfile profile;
-	Properties prop;
-	prop.load(filename);
-
-	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
-	const short maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", 7000);
-	profile.allowRpmPitching = true;
-
-	const string baseKey = "sound";
-	if(prop.containsKey(baseKey))
-	{
-		if(prop.get(baseKey) == "none")
-		{
-			profile.ranges.clear();
-		}
-		else if(prop.get(baseKey) == "custom")
-		{
-			string key = baseKey + "_rpm_pitching";
-			if(isValueSpecified(prop, key))
-			{
-				string value = futil::trim(prop.get(key));
-				if(value == "false" or value == "no")
-					profile.allowRpmPitching = false;
-			}
-
-			key = baseKey + "_count";
-			unsigned soundCount = prop.getParsedCStrAllowDefault<int, atoi>(key, 16);
-
-			for(unsigned i = 0; i < soundCount; i++)
-			{
-				const string subBaseKey = baseKey + futil::to_string(i);
-				if(prop.containsKey(subBaseKey))
-				{
-					const string sndFilename = getContextualizedFilename(prop.get(subBaseKey), baseDir, CarseGame::Logic::VEHICLES_FOLDER+"/", CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
-					if(sndFilename.empty())
-						cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
-						<< " (specified by \"" << filename << "\")" << endl;
-
-					// now try to read _rpm property
-					key = subBaseKey + "_rpm";
-					short rpm = -1;
-					if(prop.containsKey(key))
-						rpm = atoi(prop.get(key).c_str());
-
-					// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
-					if(rpm < 0)
-					{
-						if(i == 0) rpm = 0;
-						else       rpm = (maxRpm - profile.ranges.rbegin()->startRpm)/2;
-					}
-
-					key = subBaseKey + "_depicted_rpm";
-					short depictedRpm = -1;
-					if(prop.containsKey(key))
-						depictedRpm = atoi(prop.get(key).c_str());
-
-					key = subBaseKey + "_pitch_factor";
-					if(prop.containsKey(key))
-					{
-						const double pitchFactor = atof(prop.get(key).c_str());
-						if(pitchFactor > 0)
-							depictedRpm = rpm*pitchFactor;
-					}
-
-					if(depictedRpm < 0)
-						depictedRpm = rpm;
-
-					if(depictedRpm == 0)
-						depictedRpm = 1;  // to avoid division by zero
-
-					// save filename and settings for given rpm
-					const EngineSoundProfile::RangeProfile range = {rpm, depictedRpm, sndFilename};
-					profile.ranges.push_back(range);
-				}
-				else cout << "warning: missing expected entry \"" << subBaseKey << "\" (specified by \"" << filename << "\")" << endl;
-			}
-
-			struct RangeProfileCompare { static bool function(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2) { return p1.startRpm < p2.startRpm; } };
-			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), RangeProfileCompare::function);
-		}
-		else
-			throw std::logic_error("properties specify a preset profile instead of a custom one");
-	}
-
-	return profile;
 }

@@ -28,9 +28,6 @@
 
 extern const std::string CARSE_VERSION;
 
-// fwd decl
-class Vehicle;
-
 class CarseGame extends public fgeal::Game
 {
 	public:
@@ -81,8 +78,11 @@ class CarseGame extends public fgeal::Game
 
 		int currentMainMenuStateId, currentVehicleSelectionStateId;
 
-		// gets one of the built-in engine sound presets, by name
-		EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName);
+		/* Creates a engine sound profile by loading and parsing the data in the given filename. */
+		static EngineSoundProfile createEngineSoundProfileFromFile(const std::string& filename);
+
+		// Returns the correct preset according to the specified preset-name gets from one of the built-in engine sound presets; if the given preset name is not present on the map, returns the default preset
+		const EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName) const;
 
 		void updateCourseList();
 		const std::vector<Pseudo3DCourse::Spec>& getCourseList();
@@ -141,5 +141,8 @@ class CarseGame extends public fgeal::Game
 	~CarseGame();
 	virtual void initialize();
 };
+
+// kludge needed to allow forward declaring of inner class CarseGame::Logic
+struct CarseGameLogicInstance { CarseGame::Logic& instance; CarseGameLogicInstance(CarseGame::Logic* instance) : instance(*instance) {} };
 
 #endif /* CARSE_GAME_HPP_ */

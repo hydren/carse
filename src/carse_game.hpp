@@ -143,6 +143,11 @@ class CarseGame extends public fgeal::Game
 };
 
 // kludge needed to allow forward declaring of inner class CarseGame::Logic
-struct CarseGameLogicInstance { CarseGame::Logic& instance; CarseGameLogicInstance(CarseGame::Logic* instance) : instance(*instance) {} };
+struct CarseGameLogicInstance
+{
+	CarseGame::Logic& instance;
+	CarseGameLogicInstance(CarseGame::Logic* instance) : instance(*instance) {}
+	CarseGameLogicInstance(CarseGame::Logic& instance) : instance(instance) {}
+};
 
 #endif /* CARSE_GAME_HPP_ */

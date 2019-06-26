@@ -654,6 +654,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 				course.spec.name = saveDialogTextField.content;
 			try
 			{
+				course.spec.comments = "Generated using carse v" + CARSE_VERSION;
 				course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogTextField.content);
 				game.logic.updateCourseList();
 				reloadFileList();

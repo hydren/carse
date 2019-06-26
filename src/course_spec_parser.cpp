@@ -103,7 +103,7 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 				presetRoadStyle = &presetRoadColors[i];
 	}
 	const LandscapeSettings *presetScenery = null, &defaultScenery = presetLandscapeSettings[0];
-	presetSceneryName = to_lower(trim(prop.get("preset_scenery")));
+	presetSceneryName = to_lower(trim(prop.get("preset_landscape_style")));
 	if(not presetSceneryName.empty())
 	{
 		for(unsigned i = 0; i < presetLandscapeSettingsSize and presetScenery == null; i++)
@@ -246,7 +246,7 @@ void Pseudo3DCourse::Spec::storeProperties(const string& filename, const string&
 	prop.put("course_length", to_string(lines.size()));
 
 	if(not presetSceneryName.empty())
-		prop.put("preset_scenery", presetSceneryName);
+		prop.put("preset_landscape_style", presetSceneryName);
 
 	if(not presetRoadStyleName.empty())
 		prop.put("preset_road_style", presetRoadStyleName);

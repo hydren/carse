@@ -81,8 +81,8 @@ class CarseGame extends public fgeal::Game
 		/* Creates a engine sound profile by loading and parsing the data in the given filename. */
 		static EngineSoundProfile createEngineSoundProfileFromFile(const std::string& filename);
 
-		// Returns the correct preset according to the specified preset-name gets from one of the built-in engine sound presets; if the given preset name is not present on the map, returns the default preset
-		const EngineSoundProfile& getPresetEngineSoundProfile(const std::string presetName) const;
+		// Returns the correct preset according to the specified preset-name from one of the built-in presets; if the given preset name is not present on the map, returns the default preset
+		const EngineSoundProfile& getPresetEngineSoundProfile(const std::string& presetName) const;
 
 		void updateCourseList();
 		const std::vector<Pseudo3DCourse::Spec>& getCourseList();

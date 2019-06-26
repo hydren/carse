@@ -25,14 +25,6 @@ using futil::Properties;
 // to reduce typing is good
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
 
-// returns true if the given properties requests a preset sound profile instead of specifying a custom one.
-static bool isEngineSoundProfileRequestingPreset(const Properties& prop)
-{
-	return prop.containsKey("sound") and prop.get("sound") != "custom" and prop.get("sound") != "no";
-}
-
-// ========================================================================================================================
-
 const string
 	CarseGame::Logic::COURSES_FOLDER = "data/courses",
 	CarseGame::Logic::VEHICLES_FOLDER = "data/vehicles",

@@ -254,9 +254,15 @@ void Pseudo3DCourse::Spec::storeProperties(const string& filename, const string&
 {
 	Properties prop;
 	prop.put("name", name);
-	prop.put("author", author);
-	prop.put("credits", credits);
-	prop.put("comments", comments);
+
+	if(not author.empty())
+		prop.put("author", author);
+
+	if(not credits.empty())
+		prop.put("credits", credits);
+
+	if(not comments.empty())
+		prop.put("comments", comments);
 
 	prop.put("segment_file", segmentsFilename);
 	prop.put("segment_length", to_string(roadSegmentLength));

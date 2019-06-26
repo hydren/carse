@@ -265,8 +265,8 @@ void Pseudo3DCourse::Spec::storeProperties(const string& filename, const string&
 		prop.put("comments", comments);
 
 	prop.put("segment_file", segmentsFilename);
-	prop.put("segment_length", to_string(roadSegmentLength));
-	prop.put("road_width", to_string(roadWidth));
+	prop.put("segment_length", to_string((int)roadSegmentLength));
+	prop.put("road_width", to_string((int)roadWidth));
 	prop.put("course_length", to_string(lines.size()));
 
 	if(not musicFilename.empty())

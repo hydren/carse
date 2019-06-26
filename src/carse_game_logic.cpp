@@ -10,7 +10,10 @@
 #include "pseudo3d_race_state.hpp"
 #include "course_selection_state.hpp"
 
+#include "futil/random.h"
+
 using std::vector;
+using std::map;
 using std::string;
 
 // logic constructor, booooooring!
@@ -27,6 +30,7 @@ CarseGame::Logic::Logic()
 void CarseGame::Logic::initialize()
 {
 	this->loadPresetEngineSoundProfiles();
+	this->loadPresetCourseStyles();
 	this->loadCourses();
 	this->loadVehicles();
 	this->loadTrafficVehicles();
@@ -81,6 +85,52 @@ const EngineSoundProfile& CarseGame::Logic::getPresetEngineSoundProfile(const st
 		return presetEngineSoundProfiles.find("default")->second;
 }
 
+const Pseudo3DCourse::Spec::LandscapeSettings& CarseGame::Logic::getPresetLandscapeStyle(const std::string& presetName) const
+{
+	if(presetLandscapeStyles.find(presetName) != presetLandscapeStyles.end())
+		return presetLandscapeStyles.find(presetName)->second;
+	else
+		return presetLandscapeStyles.find("default")->second;
+}
+
+const Pseudo3DCourse::Spec::RoadColorSet& CarseGame::Logic::getPresetRoadStyle(const std::string& presetName) const
+{
+	if(presetRoadStyles.find(presetName) != presetRoadStyles.end())
+		return presetRoadStyles.find(presetName)->second;
+	else
+		return presetRoadStyles.find("default")->second;
+}
+
+vector<string> CarseGame::Logic::getPresetRoadStylesNames() const
+{
+	vector<string> names(presetRoadStyles.size()); int i = 0;
+	for(map<string, Pseudo3DCourse::Spec::RoadColorSet>::const_iterator it = presetRoadStyles.begin(); it != presetRoadStyles.end(); ++it)
+		names[i++] = it->first;
+	return names;
+}
+
+vector<string> CarseGame::Logic::getPresetLandscapeStylesNames() const
+{
+	vector<string> names(presetLandscapeStyles.size()); int i = 0;
+	for(map<string, Pseudo3DCourse::Spec::LandscapeSettings>::const_iterator it = presetLandscapeStyles.begin(); it != presetLandscapeStyles.end(); ++it)
+		names[i++] = it->first;
+	return names;
+}
+
+const Pseudo3DCourse::Spec::LandscapeSettings& CarseGame::Logic::getRandomPresetLandscapeStyle() const
+{
+	map<string, Pseudo3DCourse::Spec::LandscapeSettings>::const_iterator it = presetLandscapeStyles.begin();
+	std::advance(it, futil::random_between(0, presetLandscapeStyles.size()));
+	return it->second;
+}
+
+const Pseudo3DCourse::Spec::RoadColorSet& CarseGame::Logic::getRandomPresetRoadStyle() const
+{
+	map<string, Pseudo3DCourse::Spec::RoadColorSet>::const_iterator it = presetRoadStyles.begin();
+	std::advance(it, futil::random_between(0, presetRoadStyles.size()));
+	return it->second;
+}
+
 void CarseGame::Logic::updateCourseList()
 {
 	courses.clear();
@@ -105,6 +155,8 @@ void CarseGame::Logic::setNextCourse(const Pseudo3DCourse::Spec& c)
 void CarseGame::Logic::setNextCourseRandom()
 {
 	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+	nextMatchCourseSpec.assignStyle(this->getRandomPresetRoadStyle());
+	nextMatchCourseSpec.assignStyle(this->getRandomPresetLandscapeStyle());
 }
 
 void CarseGame::Logic::setNextCourseDebug()

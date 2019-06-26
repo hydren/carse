@@ -26,7 +26,7 @@ struct Pseudo3DCourse
 		std::string name, author, credits, comments;
 		std::string previewFilename;
 
-		std::string presetSceneryName, presetRoadStyleName;
+		std::string presetLandscapeStyleName, presetRoadStyleName;
 
 		std::string landscapeFilename;
 		fgeal::Color colorLandscape, colorHorizon,
@@ -45,13 +45,13 @@ struct Pseudo3DCourse
 		inline operator std::string() const { return this->toString(); }
 
 		/* Loads data from the given filename, parse its course spec data and store in this object. */
-		void loadFromFile(const std::string& filename);
+		void loadFromFile(const std::string& filename, const CarseGameLogicInstance&);
 
 		/* Saves this course spec. to the given filename. */
 		void saveToFile(const std::string& filename);
 
 		/* Creates a course spec. by loading and parsing the data in the given filename. */
-		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
+		inline static Spec createFromFile(const std::string& filename, const CarseGameLogicInstance& logic) { Spec spec(0, 0); spec.loadFromFile(filename, logic); return spec; }
 
 		/* Generates a debug course spec. */
 		static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
@@ -59,22 +59,48 @@ struct Pseudo3DCourse
 		/* Generates a random course spec, with given length and curveness factor. */
 		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
 
-		static struct RoadColorSet {
+		struct RoadColorSet {
 			fgeal::Color primary, secondary, humblePrimary, humbleSecondary;
 			std::string name;
-		}
-		presetRoadColors[];
-		static unsigned presetRoadColorsSize;
+			void loadFromFile(const std::string& filename, const std::string& name=std::string());
+			static const RoadColorSet DEFAULT;
+		};
 
-		static struct LandscapeSettings {
+		struct LandscapeSettings {
 			fgeal::Color terrainPrimary, terrainSecondary, sky;
 			std::string landscapeBgFilename, sprite1, sprite2, sprite3, name;  // todo create blocking flag
+			void loadFromFile(const std::string& filename, const std::string& name=std::string());
+			static const LandscapeSettings DEFAULT;
+		};
+
+		inline void assignStyle(const RoadColorSet& style)
+		{
+			presetRoadStyleName = style.name;
+			colorRoadPrimary = style.primary;
+			colorRoadSecondary = style.secondary;
+			colorHumblePrimary = style.humblePrimary;
+			colorHumbleSecondary = style.humbleSecondary;
 		}
-		presetLandscapeSettings[];
-		static unsigned presetLandscapeSettingsSize;
+
+		inline void assignStyle(const LandscapeSettings& style)
+		{
+			presetLandscapeStyleName = style.name;
+			colorOffRoadPrimary = style.terrainPrimary;
+			colorOffRoadSecondary = style.terrainSecondary;
+			colorLandscape = style.sky;
+			colorHorizon = style.terrainPrimary;
+			landscapeFilename = style.landscapeBgFilename;
+			if(spritesFilenames.size() < 3) spritesFilenames.resize(3);
+			spritesFilenames[0] = style.sprite1;
+			spritesFilenames[1] = style.sprite2;
+			spritesFilenames[2] = style.sprite3;
+			if(props.size() < 3) props.resize(3);  // todo use blocking flag from preset (when ready)
+			props[0].blocking = false;
+			props[1].blocking = props[2].blocking = true;
+		}
 
 		private:
-		void parseProperties(const std::string& filename);
+		void parseProperties(const std::string& filename, const CarseGameLogicInstance&);
 		void loadSegments(const std::string& filename);
 		void storeProperties(const std::string& specFile, const std::string& segmentsFile);
 		void saveSegments(const std::string& filename);

@@ -12,6 +12,8 @@
 #include "util.hpp"
 
 #include "futil/string_actions.hpp"
+#include "futil/random.h"
+#include "futil/collection_actions.hpp"
 
 using fgeal::Display;
 using fgeal::Color;
@@ -281,10 +283,10 @@ void CourseEditorState::onEnter()
 	focus = ON_EDITOR;
 	setPresetsTabActive();
 
-	setLandscapeSettings(Pseudo3DCourse::Spec::presetLandscapeSettings[0]);
-	setRoadStyle(Pseudo3DCourse::Spec::presetRoadColors[0]);
 	selectedLandscapeIndex = selectedRoadstyleIndex = 0;
-	inferLandscapeAndRoadStyle();
+	landscapeTextField.content = roadstyleTextField.content = "default";
+	course.spec.assignStyle(Pseudo3DCourse::Spec::RoadColorSet::DEFAULT);
+	course.spec.assignStyle(Pseudo3DCourse::Spec::LandscapeSettings::DEFAULT);
 
 	map.roadColor = Color::RED;
 	map.roadContrastColorEnabled = true;
@@ -490,7 +492,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		if(key == Keyboard::KEY_ENTER)
 		{
 			sndCursorIn->play();
-			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
+			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label, CarseGameLogicInstance(game.logic)));
 			focus = ON_EDITOR;
 		}
 	}
@@ -523,22 +525,26 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			if(landscapeChangeButton.bounds.contains(x, y))
 			{
+				vector<string> presetLandscaleStylesNames = game.logic.getPresetLandscapeStylesNames();
 				selectedLandscapeIndex++;
-				if(selectedLandscapeIndex >= (int) Pseudo3DCourse::Spec::presetLandscapeSettingsSize)
+				if(selectedLandscapeIndex >= (int) presetLandscaleStylesNames.size())
 					selectedLandscapeIndex = 0;
 
-				landscapeTextField.content = Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex].name;
-				this->setLandscapeSettings(Pseudo3DCourse::Spec::presetLandscapeSettings[selectedLandscapeIndex]);
+				landscapeTextField.content = presetLandscaleStylesNames[selectedLandscapeIndex];
+				course.spec.props.clear();
+				course.spec.spritesFilenames.clear();
+				course.spec.assignStyle(game.logic.getPresetLandscapeStyle(landscapeTextField.content));
 				course.loadSpec(course.spec);  // reloads its own spec so it reload the new sprites
 			}
 			if(roadstyleChangeButton.bounds.contains(x, y))
 			{
+				vector<string> presetLandscaleStylesNames = game.logic.getPresetRoadStylesNames();
 				selectedRoadstyleIndex++;
-				if(selectedRoadstyleIndex >= (int) Pseudo3DCourse::Spec::presetRoadColorsSize)
+				if(selectedRoadstyleIndex >= (int) presetLandscaleStylesNames.size())
 					selectedRoadstyleIndex = 0;
 
-				roadstyleTextField.content = Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex].name;
-				this->setRoadStyle(Pseudo3DCourse::Spec::presetRoadColors[selectedRoadstyleIndex]);
+				roadstyleTextField.content = presetLandscaleStylesNames[selectedRoadstyleIndex];
+				course.spec.assignStyle(game.logic.getPresetRoadStyle(roadstyleTextField.content));
 			}
 		}
 
@@ -546,7 +552,8 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec(200, 3000));
-			this->inferLandscapeAndRoadStyle();
+			selectedLandscapeIndex = selectedRoadstyleIndex = 0;
+			landscapeTextField.content = roadstyleTextField.content = "default";
 		}
 
 		if(loadButton.bounds.contains(x, y))
@@ -564,8 +571,19 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(generateButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourseSpec(Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5));
-			this->inferLandscapeAndRoadStyle();
+			Pseudo3DCourse::Spec spec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+
+			const vector<string> roadStyleList = game.logic.getPresetRoadStylesNames();
+			selectedRoadstyleIndex = futil::random_between(0, roadStyleList.size());
+			roadstyleTextField.content = roadStyleList[selectedRoadstyleIndex];
+			spec.assignStyle(game.logic.getPresetRoadStyle(roadstyleTextField.content));
+
+			const vector<string> landscapeStyleList = game.logic.getPresetLandscapeStylesNames();
+			selectedLandscapeIndex = futil::random_between(0, landscapeStyleList.size());
+			landscapeTextField.content = landscapeStyleList[selectedLandscapeIndex];
+			spec.assignStyle(game.logic.getPresetLandscapeStyle(landscapeTextField.content));
+
+			this->loadCourseSpec(spec);
 		}
 
 		if(exitButton.bounds.contains(x, y))
@@ -597,8 +615,27 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(loadDialogSelectButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
-			this->inferLandscapeAndRoadStyle();
+			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label, CarseGameLogicInstance(game.logic)));
+			if(course.spec.presetRoadStyleName.empty())
+			{
+				roadstyleTextField.content = "custom";
+				selectedRoadstyleIndex = -1;
+			}
+			else
+			{
+				roadstyleTextField.content = course.spec.presetRoadStyleName;
+				selectedRoadstyleIndex = futil::index_of(game.logic.getPresetRoadStylesNames(), roadstyleTextField.content);
+			}
+			if(course.spec.presetLandscapeStyleName.empty())
+			{
+				landscapeTextField.content = "custom";
+				selectedLandscapeIndex = -1;
+			}
+			else
+			{
+				landscapeTextField.content = course.spec.presetLandscapeStyleName;
+				selectedLandscapeIndex = futil::index_of(game.logic.getPresetLandscapeStylesNames(), landscapeTextField.content);
+			}
 			focus = ON_EDITOR;
 		}
 
@@ -654,61 +691,6 @@ void CourseEditorState::setPresetsTabActive(bool choice)
 	selectedButton.textColor = Color::BLACK;
 	unselectedButton.bgColor = Color(112, 112, 112);
 	unselectedButton.textColor = Color::DARK_GREY.getDarker();
-}
-
-void CourseEditorState::inferLandscapeAndRoadStyle()
-{
-	selectedRoadstyleIndex = -1;
-	roadstyleTextField.content = "custom";
-	for(unsigned i = 0; i < Pseudo3DCourse::Spec::presetRoadColorsSize; i++)
-	{
-		const Pseudo3DCourse::Spec::RoadColorSet& roadColors = Pseudo3DCourse::Spec::presetRoadColors[i];
-		if( roadColors.primary == course.spec.colorRoadPrimary and roadColors.secondary == course.spec.colorRoadSecondary
-		and roadColors.humblePrimary == course.spec.colorHumblePrimary and roadColors.humbleSecondary == course.spec.colorHumbleSecondary)
-		{
-			selectedRoadstyleIndex = i;
-			roadstyleTextField.content = roadColors.name;
-			break;
-		}
-	}
-
-	selectedLandscapeIndex = -1;
-	landscapeTextField.content = "custom";
-	for(unsigned i = 0; i < Pseudo3DCourse::Spec::presetLandscapeSettingsSize; i++)
-	{
-		const Pseudo3DCourse::Spec::LandscapeSettings& landscape = Pseudo3DCourse::Spec::presetLandscapeSettings[i];
-		if( landscape.terrainPrimary == course.spec.colorOffRoadPrimary and landscape.terrainSecondary == course.spec.colorOffRoadSecondary
-		and landscape.sky == course.spec.colorLandscape and "assets/"+landscape.landscapeBgFilename == course.spec.landscapeFilename
-		and ((landscape.sprite1.empty() and course.spec.spritesFilenames.size() == 0) or (not landscape.sprite1.empty() and course.spec.spritesFilenames.size() > 0 and "assets/"+landscape.sprite1 == course.spec.spritesFilenames[0]))
-		and ((landscape.sprite2.empty() and course.spec.spritesFilenames.size() <= 1) or (not landscape.sprite2.empty() and course.spec.spritesFilenames.size() > 1 and "assets/"+landscape.sprite2 == course.spec.spritesFilenames[1]))
-		and ((landscape.sprite3.empty() and course.spec.spritesFilenames.size() <= 2) or (not landscape.sprite3.empty() and course.spec.spritesFilenames.size() > 2 and "assets/"+landscape.sprite3 == course.spec.spritesFilenames[2])))
-		{
-			selectedLandscapeIndex = i;
-			landscapeTextField.content = landscape.name;
-			break;
-		}
-	}
-}
-
-void CourseEditorState::setLandscapeSettings(Pseudo3DCourse::Spec::LandscapeSettings landscape)
-{
-	course.spec.spritesFilenames.clear();
-	course.spec.spritesFilenames.push_back("assets/"+landscape.sprite1);
-	course.spec.spritesFilenames.push_back("assets/"+landscape.sprite2);
-	course.spec.spritesFilenames.push_back("assets/"+landscape.sprite3);
-	course.spec.landscapeFilename = "assets/"+landscape.landscapeBgFilename;
-	course.spec.colorOffRoadPrimary = landscape.terrainPrimary;
-	course.spec.colorOffRoadSecondary = landscape.terrainSecondary;
-	course.spec.colorLandscape = landscape.sky;
-	course.spec.colorHorizon = course.spec.colorOffRoadPrimary;
-}
-
-void CourseEditorState::setRoadStyle(Pseudo3DCourse::Spec::RoadColorSet roadColors)
-{
-	course.spec.colorRoadPrimary = roadColors.primary;
-	course.spec.colorRoadSecondary = roadColors.secondary;
-	course.spec.colorHumblePrimary = roadColors.humblePrimary;
-	course.spec.colorHumbleSecondary = roadColors.humbleSecondary;
 }
 
 void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)

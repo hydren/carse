@@ -40,6 +40,8 @@ class CarseGame extends public fgeal::Game
 		std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 		std::vector<Pseudo3DCourse::Spec> courses;
 		std::vector<Pseudo3DVehicle::Spec> vehicles, trafficVehicles;
+		std::map<std::string, Pseudo3DCourse::Spec::LandscapeSettings> presetLandscapeStyles;
+		std::map<std::string, Pseudo3DCourse::Spec::RoadColorSet> presetRoadStyles;
 
 		// parameters for next match
 		Pseudo3DRaceState::RaceSettings nextMatchRaceSettings;
@@ -69,6 +71,9 @@ class CarseGame extends public fgeal::Game
 		// intended to run on startup, loads all traffic vehicles in the data/traffic folder
 		void loadTrafficVehicles();
 
+		// intended to run on startup, loads all course style presets in data/courses/styles/
+		void loadPresetCourseStyles();
+
 		public:
 		bool raceOnlyMode, raceOnlyDebug, raceOnlyRandomCourse;
 		unsigned raceOnlyCourseIndex, raceOnlyPlayerVehicleIndex;
@@ -83,6 +88,24 @@ class CarseGame extends public fgeal::Game
 
 		// Returns the correct preset according to the specified preset-name from one of the built-in presets; if the given preset name is not present on the map, returns the default preset
 		const EngineSoundProfile& getPresetEngineSoundProfile(const std::string& presetName) const;
+
+		// Returns the correct preset according to the specified preset-name from one of the built-in presets; if the given preset name is not present on the map, returns the default preset
+		const Pseudo3DCourse::Spec::RoadColorSet& getPresetRoadStyle(const std::string& presetName) const;
+
+		// Returns a random preset from one of the built-in presets
+		const Pseudo3DCourse::Spec::RoadColorSet& getRandomPresetRoadStyle() const;
+
+		// Returns a list of available preset styles names
+		std::vector<std::string> getPresetRoadStylesNames() const;
+
+		// Returns the correct preset according to the specified preset-name from one of the built-in presets; if the given preset name is not present on the map, returns the default preset
+		const Pseudo3DCourse::Spec::LandscapeSettings& getPresetLandscapeStyle(const std::string& presetName) const;
+
+		// Returns a random preset from one of the built-in presets
+		const Pseudo3DCourse::Spec::LandscapeSettings& getRandomPresetLandscapeStyle() const;
+
+		// Returns a list of available preset styles names
+		std::vector<std::string> getPresetLandscapeStylesNames() const;
 
 		void updateCourseList();
 		const std::vector<Pseudo3DCourse::Spec>& getCourseList();
@@ -112,7 +135,8 @@ class CarseGame extends public fgeal::Game
 			COURSES_FOLDER,
 			VEHICLES_FOLDER,
 			TRAFFIC_FOLDER,
-			PRESET_ENGINE_SOUND_PROFILES_FOLDER;
+			PRESET_ENGINE_SOUND_PROFILES_FOLDER,
+			PRESET_COURSE_STYLES_FOLDER;
 	} logic;
 
 	/** Wrapper to resources shared between states. */

@@ -9,6 +9,8 @@
 
 #include "util.hpp"
 
+#include "carse_game.hpp"
+
 #include "futil/properties.hpp"
 #include "futil/string_actions.hpp"
 #include "futil/string_split.hpp"
@@ -22,6 +24,7 @@ using std::string;
 using std::vector;
 using std::cout;
 using std::endl;
+using std::to_string;
 using fgeal::Color;
 using fgeal::Display;
 using fgeal::Image;
@@ -31,7 +34,6 @@ using futil::trim;
 using futil::to_lower;
 using futil::starts_with;
 
-using std::to_string;
 
 static const unsigned DEFAULT_SPRITE_COUNT = 32;
 
@@ -41,40 +43,68 @@ namespace  // static
 	{
 		return Color::parseCStr(str.c_str());
 	}
+}
 
-	inline string passString(const string& str)
+// -------------------------------------------------------------------------------------------------------------------------------------
+void Pseudo3DCourse::Spec::RoadColorSet::loadFromFile(const string& filename, const string& presetName)
+{
+	Properties prop;
+	prop.load(filename);
+	name = presetName;
+	primary = prop.getParsedAllowDefault<Color, parseColor>("road_color_primary", DEFAULT.primary);
+	secondary = prop.getParsedAllowDefault<Color, parseColor>("road_color_secondary", DEFAULT.secondary);
+	humblePrimary = prop.getParsedAllowDefault<Color, parseColor>("humble_color_primary", DEFAULT.humblePrimary);
+	humbleSecondary = prop.getParsedAllowDefault<Color, parseColor>("humble_color_secondary", DEFAULT.humbleSecondary);
+}
+
+void Pseudo3DCourse::Spec::LandscapeSettings::loadFromFile(const string& filename, const string& presetName)
+{
+	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
+	Properties prop;
+	prop.load(filename);
+
+	name = presetName;
+	terrainPrimary = prop.getParsedAllowDefault<Color, parseColor>("offroad_color_primary", DEFAULT.terrainPrimary);
+	terrainSecondary = prop.getParsedAllowDefault<Color, parseColor>("offroad_color_secondary", DEFAULT.terrainSecondary);
+	sky = prop.getParsedAllowDefault<Color, parseColor>("landscape_color", DEFAULT.sky);
+
+	landscapeBgFilename = getContextualizedFilename(prop.get("landscape_image"), baseDir, "assets/");
+	if(landscapeBgFilename.empty())
 	{
-		return str;
+		cout << "warning: image file specified in \"landscape_image\" entry could not be found" << ", specified by \"" << filename << "\". using default instead..." << endl;
+		landscapeBgFilename = DEFAULT.landscapeBgFilename;
 	}
 
-	template<typename PresetType, typename FieldType, FieldType (*parseFunction) (const std::string&)>
-	inline FieldType decideValue(Properties& prop, string key, FieldType PresetType::*field, const PresetType* preset, const PresetType& defaultPreset)
+	// TODO rewrite this code once presets have support for any number of props
+	sprite1 = getContextualizedFilename(prop.get("prop0_sprite"), baseDir, "assets/");
+	sprite2 = getContextualizedFilename(prop.get("prop1_sprite"), baseDir, "assets/");
+	sprite3 = getContextualizedFilename(prop.get("prop2_sprite"), baseDir, "assets/");
+
+	if(not presetName.empty())  // only care about sprite field correctness if loading an actual preset
 	{
-		if(not prop.containsKey(key) and preset != null)
-			return preset->*field;
-
-		else if(prop.containsKey(key) and prop.get(key) != "default")
-			return parseFunction(prop.get(key));
-
-		else return defaultPreset.*field;
-	}
-
-	template<typename PresetType>
-	inline Color decideColor(Properties& prop, string key, Color PresetType::*colorField, const PresetType* preset, const PresetType& defaultPreset)
-	{
-		return decideValue<PresetType, Color, parseColor>(prop, key, colorField, preset, defaultPreset);
-	}
-
-	template<typename PresetType>
-	inline string decideString(Properties& prop, string key, string PresetType::*stringField, const PresetType* preset, const PresetType& defaultPreset)
-	{
-		return decideValue<PresetType, string, passString>(prop, key, stringField, preset, defaultPreset);
+		if(sprite1.empty())
+		{
+			cout << "warning: image file specified in \"propX_sprite\" entry could not be found" << ", specified by \"" << filename << "\". using default instead..." << endl;
+			sprite1 = DEFAULT.sprite1;
+		}
+		if(sprite2.empty())
+		{
+			cout << "warning: image file specified in \"propX_sprite\" entry could not be found" << ", specified by \"" << filename << "\". using default instead..." << endl;
+			sprite2 = DEFAULT.sprite2;
+		}
+		if(sprite3.empty())
+		{
+			cout << "warning: image file specified in \"propX_sprite\" entry could not be found" << ", specified by \"" << filename << "\". using default instead..." << endl;
+			sprite3 = DEFAULT.sprite3;
+		}
 	}
 }
 
-void Pseudo3DCourse::Spec::parseProperties(const string& filename)
+// -------------------------------------------------------------------------------------------------------------------------------------
+void Pseudo3DCourse::Spec::parseProperties(const string& filename, const CarseGameLogicInstance& logic)
 {
 	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
+	string key;
 
 	*this = Spec(0, 0);  // resets all data in this object
 
@@ -90,80 +120,68 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 	comments = prop.get("comments");
 	this->filename = filename;
 
-	musicFilename = trim(prop.get("music"));
+	musicFilename = prop.get("music");
 	if(musicFilename.empty()) musicFilename = "assets/music_sample.ogg";  // todo remove this line
 
-	// check if preset specified
-	const RoadColorSet *presetRoadStyle = null, &defaultRoadStyle = presetRoadColors[0];
-	presetRoadStyleName = to_lower(trim(prop.get("preset_road_style")));
-	if(not presetRoadStyleName.empty())
+	key = "preset_road_style";
+	if(prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "custom")
 	{
-		for(unsigned i = 0; i < presetRoadColorsSize and presetRoadStyle == null; i++)
-			if(presetRoadStyleName == presetRoadColors[i].name)
-				presetRoadStyle = &presetRoadColors[i];
+		// attempts to set a preset style and, if not found or unspecified, set the default
+		assignStyle(logic.instance.getPresetRoadStyle(prop.get(key)));
+		presetRoadStyleName = prop.get(key);
 	}
-	const LandscapeSettings *presetScenery = null, &defaultScenery = presetLandscapeSettings[0];
-	presetSceneryName = to_lower(trim(prop.get("preset_landscape_style")));
-	if(not presetSceneryName.empty())
+	else  // reads style from course spec
 	{
-		for(unsigned i = 0; i < presetLandscapeSettingsSize and presetScenery == null; i++)
-		if(presetSceneryName == presetLandscapeSettings[i].name)
+		RoadColorSet customRoadStyle;
+		customRoadStyle.loadFromFile(filename);
+		assignStyle(customRoadStyle);
+	}
+
+	key = "preset_landscape_style";
+	if(prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "custom")
+	{
+		// attempts to set a preset style and, if not found or unspecified, set the default
+		assignStyle(logic.instance.getPresetLandscapeStyle(prop.get(key)));
+		presetLandscapeStyleName = prop.get(key);
+	}
+	else  // reads style from course spec
+	{
+		LandscapeSettings customLandscapeStyle;
+		customLandscapeStyle.loadFromFile(filename);
+		assignStyle(customLandscapeStyle);
+
+		// clear these so we can build them using custom specs (landscape preset loader doesn't support prop count other than 3)
+		props.clear();
+		spritesFilenames.clear();
+
+		// read custom prop definitions
+		const int propMaxIndex = prop.getParsedCStrAllowDefault<int, atoi>("prop_max_id", DEFAULT_SPRITE_COUNT);
+		for(int id = 0; id <= propMaxIndex; id++)
 		{
-			const LandscapeSettings& landscape = presetLandscapeSettings[i];
+			string specifiedSpriteFilename = prop.get("prop" + to_string(id) + "_sprite"), spriteFilename;
+			if(not specifiedSpriteFilename.empty())
+			{
+				spriteFilename = getContextualizedFilename(specifiedSpriteFilename, baseDir, "assets/");
+				if(spriteFilename.empty())
+					cout << "warning: could not load sprite for prop ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". Prop sprite will be left unspecified!" << endl;
+			}
 
-			props.push_back(Prop());
-			spritesFilenames.push_back("assets/"+landscape.sprite1);
-			props.push_back(Prop(true));
-			spritesFilenames.push_back("assets/"+landscape.sprite2);
-			props.push_back(Prop(true));
-			spritesFilenames.push_back("assets/"+landscape.sprite3);
+			if(id + 1 > (int) spritesFilenames.size())
+				spritesFilenames.push_back(spriteFilename);
+			else if(not spriteFilename.empty())
+				spritesFilenames[id] = spriteFilename;
 
-			presetScenery = &presetLandscapeSettings[i];
+			const string blockingFlagStr = to_lower(trim(prop.get("prop" + to_string(id) + "_blocking")));
+
+			if(id + 1 > (int) props.size())
+				props.push_back(Prop());
+
+			if(not blockingFlagStr.empty())
+				props[id].blocking = (blockingFlagStr == "true");
 		}
 	}
 
-	// decide some values between preset and custom defined
-	colorRoadPrimary = decideColor(prop, "road_color_primary", &RoadColorSet::primary, presetRoadStyle, defaultRoadStyle);
-	colorRoadSecondary = decideColor(prop, "road_color_secondary", &RoadColorSet::secondary, presetRoadStyle, defaultRoadStyle);
-	colorOffRoadPrimary = decideColor(prop, "offroad_color_primary", &LandscapeSettings::terrainPrimary, presetScenery, defaultScenery);
-	colorOffRoadSecondary = decideColor(prop, "offroad_color_secondary", &LandscapeSettings::terrainSecondary, presetScenery, defaultScenery);
-	colorHumblePrimary = decideColor(prop, "humble_color_primary", &RoadColorSet::humblePrimary, presetRoadStyle, defaultRoadStyle);
-	colorHumbleSecondary = decideColor(prop, "humble_color_secondary", &RoadColorSet::humbleSecondary, presetRoadStyle, defaultRoadStyle);
-	colorLandscape = decideColor(prop, "landscape_color", &LandscapeSettings::sky, presetScenery, defaultScenery);
-	colorHorizon = decideColor(prop, "horizon_color", &LandscapeSettings::terrainPrimary, presetScenery, defaultScenery);
-
-	landscapeFilename = getContextualizedFilename(decideString(prop, "landscape_image", &LandscapeSettings::landscapeBgFilename, presetScenery, defaultScenery), baseDir, "assets/");
-	if(landscapeFilename.empty())
-	{
-		cout << "warning: image file specified in \"landscape_image\" entry could not be found" << ", specified by \"" << filename << "\". using default instead..." << endl;
-		landscapeFilename = defaultScenery.landscapeBgFilename;
-	}
-
-	const int propMaxIndex = prop.getParsedCStrAllowDefault<int, atoi>("prop_max_id", DEFAULT_SPRITE_COUNT);
-	for(int id = 0; id <= propMaxIndex; id++)
-	{
-		string specifiedSpriteFilename = prop.get("prop" + to_string(id) + "_sprite"), spriteFilename;
-		if(not specifiedSpriteFilename.empty())
-		{
-			spriteFilename = getContextualizedFilename(specifiedSpriteFilename, baseDir, "assets/");
-			if(spriteFilename.empty())
-				cout << "warning: could not load sprite for prop ID #" << id << ": missing file \"" << specifiedSpriteFilename << "\". Prop sprite will be left unspecified!" << endl;
-		}
-
-		if(id + 1 > (int) spritesFilenames.size())
-			spritesFilenames.push_back(spriteFilename);
-		else if(not spriteFilename.empty())
-			spritesFilenames[id] = spriteFilename;
-
-		const string blockingFlagStr = to_lower(trim(prop.get("prop" + to_string(id) + "_blocking")));
-
-		if(id + 1 > (int) props.size())
-			props.push_back(Prop());
-
-		if(not blockingFlagStr.empty())
-			props[id].blocking = (blockingFlagStr == "true");
-	}
-
+	colorHorizon = prop.getParsedAllowDefault<Color, parseColor>("horizon_color", colorOffRoadPrimary);
 
 	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
 	lines.resize(length);
@@ -245,33 +263,39 @@ void Pseudo3DCourse::Spec::storeProperties(const string& filename, const string&
 	prop.put("road_width", to_string(roadWidth));
 	prop.put("course_length", to_string(lines.size()));
 
-	if(not presetSceneryName.empty())
-		prop.put("preset_landscape_style", presetSceneryName);
-
-	if(not presetRoadStyleName.empty())
-		prop.put("preset_road_style", presetRoadStyleName);
-
-	if(not landscapeFilename.empty())
-		prop.put("landscape_image", landscapeFilename);
-	prop.put("landscape_color", colorLandscape.toRgbString());
-	prop.put("horizon_color", colorHorizon.toRgbString());
-	prop.put("road_color_primary", colorRoadPrimary.toRgbString());
-	prop.put("road_color_secondary", colorRoadSecondary.toRgbString());
-	prop.put("offroad_color_primary", colorOffRoadPrimary.toRgbString());
-	prop.put("offroad_color_secondary", colorOffRoadSecondary.toRgbString());
-	prop.put("humble_color_primary", colorHumblePrimary.toRgbString());
-	prop.put("humble_color_secondary", colorHumbleSecondary.toRgbString());
-
 	if(not musicFilename.empty())
 		prop.put("music", musicFilename);
 
-	if(spritesFilenames.size() > DEFAULT_SPRITE_COUNT)
-		prop.put("prop_max_id", to_string(spritesFilenames.size()-1));
-
-	for(unsigned i = 0; i < spritesFilenames.size(); i++)
+	if(not presetRoadStyleName.empty())
+		prop.put("preset_road_style", presetRoadStyleName);
+	else
 	{
-		prop.put("prop"+to_string(i)+"_sprite", spritesFilenames[i]);
-		prop.put("prop"+to_string(i)+"_blocking", to_string(props[i].blocking));
+		prop.put("road_color_primary", colorRoadPrimary.toRgbString());
+		prop.put("road_color_secondary", colorRoadSecondary.toRgbString());
+		prop.put("humble_color_primary", colorHumblePrimary.toRgbString());
+		prop.put("humble_color_secondary", colorHumbleSecondary.toRgbString());
+	}
+
+	if(not presetLandscapeStyleName.empty())
+		prop.put("preset_landscape_style", presetLandscapeStyleName);
+	else
+	{
+		prop.put("offroad_color_primary", colorOffRoadPrimary.toRgbString());
+		prop.put("offroad_color_secondary", colorOffRoadSecondary.toRgbString());
+		prop.put("landscape_color", colorLandscape.toRgbString());
+		prop.put("horizon_color", colorHorizon.toRgbString());
+
+		if(not landscapeFilename.empty())
+			prop.put("landscape_image", landscapeFilename);
+
+		for(unsigned i = 0; i < spritesFilenames.size(); i++)
+		{
+			prop.put("prop"+to_string(i)+"_sprite", spritesFilenames[i]);
+			prop.put("prop"+to_string(i)+"_blocking", to_string(props[i].blocking));
+		}
+
+		if(spritesFilenames.size() > DEFAULT_SPRITE_COUNT)
+			prop.put("prop_max_id", to_string(spritesFilenames.size()-1));
 	}
 
 	prop.store(filename);

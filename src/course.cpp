@@ -223,9 +223,9 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 // #################### Pseudo3D Course Spec. methods #####################################################
 
-void Pseudo3DCourse::Spec::loadFromFile(const string& filename)
+void Pseudo3DCourse::Spec::loadFromFile(const string& filename, const CarseGameLogicInstance& logic)
 {
-	this->parseProperties(filename);
+	this->parseProperties(filename, logic);
 	this->loadSegments(segmentFilename);
 }
 
@@ -385,6 +385,13 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 }
 
 // ========================================================================================================================
+
+const Pseudo3DCourse::Spec::RoadColorSet Pseudo3DCourse::Spec::RoadColorSet::DEFAULT = {
+		Color(64, 80, 80), Color(40, 64, 64), Color(200, 200, 200), Color(152, 0, 0), "default" };
+
+const Pseudo3DCourse::Spec::LandscapeSettings Pseudo3DCourse::Spec::LandscapeSettings::DEFAULT = {
+		Color(0, 112, 0), Color(0, 88, 0), Color(136, 204, 238), "assets/bg.png", "assets/bush.png", "assets/tree.png", "assets/redbarn.png", "default" };
+
 // ====================== built-in generators =============================================================================
 
 //static
@@ -420,28 +427,6 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segment
 
 	return spec;
 }
-
-Pseudo3DCourse::Spec::RoadColorSet Pseudo3DCourse::Spec::presetRoadColors[] = {
-		{ Color( 64, 80, 80), Color( 40, 64, 64), Color(200,200,200), Color(152,  0,  0), "racetrack 1" },
-		{ Color( 64, 80, 80), Color( 40, 64, 64), Color(222,219,222), Color( 15, 16,221), "racetrack 2" },
-		{ Color(146,146,146), Color(154,154,154), Color(243,243,243), Color(154,154,154), "road 1" },
-		{ Color(104,108,104), Color(144,144,144), Color(248,252,248), Color(144,144,144), "road 2" },
-		{ Color( 12, 28, 12), Color( 31, 28, 31), Color( 12, 28, 12), Color( 31, 28, 31), "countryside" }
-};
-
-unsigned Pseudo3DCourse::Spec::presetRoadColorsSize = sizeof(presetRoadColors)/sizeof(RoadColorSet);
-
-Pseudo3DCourse::Spec::LandscapeSettings Pseudo3DCourse::Spec::presetLandscapeSettings[] = {
-		{ Color(  0,112,  0), Color(  0, 88,  0), Color(136,204,238), "bg.png", "bush.png", "tree.png", "redbarn.png", "grasslands" },
-		{ Color( 31, 85,  0), Color( 31, 68,  0), Color(173,201,152), "bg_forest.jpg", "bush.png", "tree.png", "talltree.png", "forest" },
-		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 35, 31, 32), "bg_nightcity.jpg", "bush.png", "streetlight_double.png", "buildings.png", "night city" },
-		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 51, 51,102), "bg_sunsetcity.jpg", "bush.png", "streetlight_double.png", "buildings.png", "sunset city" },
-		{ Color(220,170,139), Color(188,137,106), Color(248,156, 31), "bg_desert.jpg", "rock.png", "cactus.png", "cliff.png", "desert" },
-		{ Color(190,229,246), Color(159,198,213), Color(123,138,155), "bg_montains.jpg", "bush_snow.png", "talltree.png", "cliff_alpine.png", "snow" },
-		{ Color(227,211,195), Color(235,219,203), Color( 22, 88,229), "bg_ocean.jpg", "bush.png", "palmtree.png", "talltree.png", "beach 1" },
-};
-
-unsigned Pseudo3DCourse::Spec::presetLandscapeSettingsSize = sizeof(presetLandscapeSettings)/sizeof(LandscapeSettings);
 
 //static
 Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness)
@@ -500,29 +485,25 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 		spec.lines.push_back(line);
 	}
 
-	const unsigned
-		ri = futil::random_between(0, presetRoadColorsSize),
-		li = futil::random_between(0, presetLandscapeSettingsSize);
-
-	spec.spritesFilenames.push_back("assets/"+presetLandscapeSettings[li].sprite1);
+	spec.spritesFilenames.push_back(string());
 	spec.props.push_back(Prop());
-	spec.spritesFilenames.push_back("assets/"+presetLandscapeSettings[li].sprite2);
+	spec.spritesFilenames.push_back(string());
 	spec.props.push_back(Prop(true));
-	spec.spritesFilenames.push_back("assets/"+presetLandscapeSettings[li].sprite3);
+	spec.spritesFilenames.push_back(string());
 	spec.props.push_back(Prop(true));
-	spec.landscapeFilename = "assets/"+presetLandscapeSettings[li].landscapeBgFilename;
+	spec.landscapeFilename = "";
 
-	spec.colorRoadPrimary = presetRoadColors[ri].primary;
-	spec.colorRoadSecondary = presetRoadColors[ri].secondary;
-	spec.colorOffRoadPrimary = presetLandscapeSettings[li].terrainPrimary;
-	spec.colorOffRoadSecondary = presetLandscapeSettings[li].terrainSecondary;
-	spec.colorHumblePrimary = presetRoadColors[ri].humblePrimary;
-	spec.colorHumbleSecondary = presetRoadColors[ri].humbleSecondary;
+	spec.colorRoadPrimary = Color(32, 32, 32);
+	spec.colorRoadSecondary = Color(64, 64, 64);
+	spec.colorOffRoadPrimary = Color(96, 96, 96);
+	spec.colorOffRoadSecondary = Color(128, 128, 128);
+	spec.colorHumblePrimary = Color(255, 255, 255);
+	spec.colorHumbleSecondary = Color(240, 240, 240);
 
-	spec.colorLandscape = presetLandscapeSettings[li].sky;
+	spec.colorLandscape = Color(0, 255, 255);
 	spec.colorHorizon = spec.colorOffRoadPrimary;
 
-	spec.musicFilename = "assets/music_sample.ogg";
+	spec.musicFilename = "";
 
 	return spec;
 }

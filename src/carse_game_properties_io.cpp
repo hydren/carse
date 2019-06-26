@@ -21,6 +21,7 @@ using std::string;
 using std::vector;
 using futil::ends_with;
 using futil::Properties;
+using fgeal::Color;
 
 // to reduce typing is good
 #define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
@@ -29,7 +30,8 @@ const string
 	CarseGame::Logic::COURSES_FOLDER = "data/courses",
 	CarseGame::Logic::VEHICLES_FOLDER = "data/vehicles",
 	CarseGame::Logic::TRAFFIC_FOLDER = "data/traffic",
-	CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine";
+	CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine",
+	CarseGame::Logic::PRESET_COURSE_STYLES_FOLDER = "data/courses/styles";
 
 void CarseGame::Logic::loadPresetEngineSoundProfiles()
 {
@@ -108,7 +110,7 @@ void CarseGame::Logic::loadCourses()
 	{
 		if(ends_with(courseFiles[i], ".properties"))
 		{
-			try { courses.push_back(Pseudo3DCourse::Spec::createFromFile(courseFiles[i])); }
+			try { courses.push_back(Pseudo3DCourse::Spec::createFromFile(courseFiles[i], CarseGameLogicInstance(this))); }
 			catch(const std::exception& e) { cout << "error while reading course specification: " << e.what() << endl; continue; }
 			cout << "read course specification: " << courseFiles[i] << endl;
 		}
@@ -186,6 +188,123 @@ void CarseGame::Logic::loadTrafficVehicles()
 				cout << "read traffic specification: " << filename << endl;
 			}
 		}
+	}
+}
+
+void CarseGame::Logic::loadPresetCourseStyles()
+{
+	cout << "reading preset course styles..." << endl;
+	presetLandscapeStyles["default"] = Pseudo3DCourse::Spec::LandscapeSettings::DEFAULT;
+	presetRoadStyles["default"] = Pseudo3DCourse::Spec::RoadColorSet::DEFAULT;
+	vector<string> pendingRoadStylePresetFiles, pendingLandscapePresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::PRESET_COURSE_STYLES_FOLDER);
+	for(unsigned i = 0; i < presetFiles.size(); i++)
+	{
+		string& filename = presetFiles[i];
+		if(ends_with(filename, ".properties"))
+		{
+			Properties prop;
+			prop.load(filename);
+
+			const string
+				filenameWithoutPath = filename.substr(filename.find_last_of("/\\")+1),
+				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
+				presetName = filenameWithoutExtension;
+
+			if(prop.containsKey("preset_road_style") and not prop.get("preset_road_style").empty())
+			{
+				if(prop.get("preset_road_style") != "custom")
+				{
+					pendingRoadStylePresetFiles.push_back(filename);
+					cout << "read course road style: " << presetName << " (alias)" << endl;
+				}
+				else
+				{
+					presetRoadStyles[presetName].loadFromFile(filename, presetName);
+					cout << "read course road style: " << presetName << endl;
+				}
+			}
+
+			if(prop.containsKey("preset_landscape_style") and not prop.get("preset_landscape_style").empty())
+			{
+				if(prop.get("preset_landscape_style") != "custom")
+				{
+					pendingLandscapePresetFiles.push_back(filename);
+					cout << "read course landscape style: " << presetName << " (alias)" << endl;
+				}
+				else
+				{
+					presetLandscapeStyles[presetName].loadFromFile(filename, presetName);
+					cout << "read course landscape style: " << presetName << endl;
+				}
+			}
+		}
+	}
+
+	unsigned previousCount = pendingRoadStylePresetFiles.size();
+	while(not pendingRoadStylePresetFiles.empty())
+	{
+		for(unsigned i = 0; i < pendingRoadStylePresetFiles.size(); i++)
+		{
+			string filename = pendingRoadStylePresetFiles[i];
+			Properties prop;
+			prop.load(filename);
+
+			const string
+				basePresetName = prop.get("preset_road_style"),
+				filenameWithoutPath = filename.substr(filename.find_last_of("/\\")+1),
+				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
+				presetName = filenameWithoutExtension;
+
+			if(presetRoadStyles.find(basePresetName) != presetRoadStyles.end())
+			{
+				presetRoadStyles[presetName] = presetRoadStyles[basePresetName];
+				cout << "copied profile \"" << presetName << "\" from \"" << basePresetName << "\"" << endl;
+				pendingRoadStylePresetFiles.erase(pendingRoadStylePresetFiles.begin() + i);
+				i--;
+			}
+		}
+		if(pendingRoadStylePresetFiles.size() == previousCount)
+		{
+			cout << "circular dependency or unresolved reference detected when loading preset road style. skipping resolution." << endl;
+			cout << "the following preset road style could not be loaded: " << endl;
+			for(unsigned i = 0; i < pendingRoadStylePresetFiles.size(); i++)
+				cout << pendingRoadStylePresetFiles[i] << endl;
+			break;
+		}
+		else previousCount = pendingRoadStylePresetFiles.size();
+	}
+	previousCount = pendingLandscapePresetFiles.size();
+	while(not pendingLandscapePresetFiles.empty())
+	{
+		for(unsigned i = 0; i < pendingLandscapePresetFiles.size(); i++)
+		{
+			string filename = pendingLandscapePresetFiles[i];
+			Properties prop;
+			prop.load(filename);
+
+			const string
+				basePresetName = prop.get("preset_landscape_style"),
+				filenameWithoutPath = filename.substr(filename.find_last_of("/\\")+1),
+				filenameWithoutExtension = filenameWithoutPath.substr(0, filenameWithoutPath.find_last_of(".")),
+				presetName = filenameWithoutExtension;
+
+			if(presetLandscapeStyles.find(basePresetName) != presetLandscapeStyles.end())
+			{
+				presetLandscapeStyles[presetName] = presetLandscapeStyles[basePresetName];
+				cout << "copied profile \"" << presetName << "\" from \"" << basePresetName << "\"" << endl;
+				pendingLandscapePresetFiles.erase(pendingLandscapePresetFiles.begin() + i);
+				i--;
+			}
+		}
+		if(pendingLandscapePresetFiles.size() == previousCount)
+		{
+			cout << "circular dependency or unresolved reference detected when loading preset landscape style. skipping resolution." << endl;
+			cout << "the following preset landscape style could not be loaded: " << endl;
+			for(unsigned i = 0; i < pendingLandscapePresetFiles.size(); i++)
+				cout << pendingLandscapePresetFiles[i] << endl;
+			break;
+		}
+		else previousCount = pendingLandscapePresetFiles.size();
 	}
 }
 

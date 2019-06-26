@@ -98,9 +98,6 @@ class CourseEditorState extends public fgeal::Game::State
 	private:
 	void reloadFileList();
 	void setPresetsTabActive(bool choice=true);
-	void inferLandscapeAndRoadStyle();
-	void setLandscapeSettings(Pseudo3DCourse::Spec::LandscapeSettings settings);
-	void setRoadStyle(Pseudo3DCourse::Spec::RoadColorSet roadColors);
 	void loadCourseSpec(const Pseudo3DCourse::Spec&);
 };
 

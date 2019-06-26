@@ -59,37 +59,37 @@ struct Pseudo3DCourse
 		/* Generates a random course spec, with given length and curveness factor. */
 		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
 
-		struct RoadColorSet {
-			fgeal::Color primary, secondary, humblePrimary, humbleSecondary;
+		struct RoadStyle {
+			fgeal::Color roadPrimary, roadSecondary, humblePrimary, humbleSecondary;
 			std::string name;
 			void loadFromFile(const std::string& filename, const std::string& name=std::string());
-			static const RoadColorSet DEFAULT;
+			static const RoadStyle DEFAULT;
 		};
 
-		struct LandscapeSettings {
-			fgeal::Color terrainPrimary, terrainSecondary, sky;
-			std::string landscapeBgFilename, sprite1, sprite2, sprite3, name;  // todo create blocking flag
+		struct LandscapeStyle {
+			fgeal::Color terrarinPrimary, terrainSecondary, landscape;
+			std::string landscapeBackgroundFilename, sprite1, sprite2, sprite3, name;  // todo create blocking flag
 			void loadFromFile(const std::string& filename, const std::string& name=std::string());
-			static const LandscapeSettings DEFAULT;
+			static const LandscapeStyle DEFAULT;
 		};
 
-		inline void assignStyle(const RoadColorSet& style)
+		inline void assignStyle(const RoadStyle& style)
 		{
 			presetRoadStyleName = style.name;
-			colorRoadPrimary = style.primary;
-			colorRoadSecondary = style.secondary;
+			colorRoadPrimary = style.roadPrimary;
+			colorRoadSecondary = style.roadSecondary;
 			colorHumblePrimary = style.humblePrimary;
 			colorHumbleSecondary = style.humbleSecondary;
 		}
 
-		inline void assignStyle(const LandscapeSettings& style)
+		inline void assignStyle(const LandscapeStyle& style)
 		{
 			presetLandscapeStyleName = style.name;
-			colorOffRoadPrimary = style.terrainPrimary;
+			colorOffRoadPrimary = style.terrarinPrimary;
 			colorOffRoadSecondary = style.terrainSecondary;
-			colorLandscape = style.sky;
-			colorHorizon = style.terrainPrimary;
-			landscapeFilename = style.landscapeBgFilename;
+			colorLandscape = style.landscape;
+			colorHorizon = style.terrarinPrimary;
+			landscapeFilename = style.landscapeBackgroundFilename;
 			if(spritesFilenames.size() < 3) spritesFilenames.resize(3);
 			spritesFilenames[0] = style.sprite1;
 			spritesFilenames[1] = style.sprite2;

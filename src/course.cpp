@@ -386,10 +386,10 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 
 // ========================================================================================================================
 
-const Pseudo3DCourse::Spec::RoadColorSet Pseudo3DCourse::Spec::RoadColorSet::DEFAULT = {
+const Pseudo3DCourse::Spec::RoadStyle Pseudo3DCourse::Spec::RoadStyle::DEFAULT = {
 		Color(64, 80, 80), Color(40, 64, 64), Color(200, 200, 200), Color(152, 0, 0), "default" };
 
-const Pseudo3DCourse::Spec::LandscapeSettings Pseudo3DCourse::Spec::LandscapeSettings::DEFAULT = {
+const Pseudo3DCourse::Spec::LandscapeStyle Pseudo3DCourse::Spec::LandscapeStyle::DEFAULT = {
 		Color(0, 112, 0), Color(0, 88, 0), Color(136, 204, 238), "assets/bg.png", "assets/bush.png", "assets/tree.png", "assets/redbarn.png", "default" };
 
 // ====================== built-in generators =============================================================================

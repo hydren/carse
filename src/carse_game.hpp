@@ -40,8 +40,8 @@ class CarseGame extends public fgeal::Game
 		std::map<std::string, EngineSoundProfile> presetEngineSoundProfiles;
 		std::vector<Pseudo3DCourse::Spec> courses;
 		std::vector<Pseudo3DVehicle::Spec> vehicles, trafficVehicles;
-		std::map<std::string, Pseudo3DCourse::Spec::LandscapeSettings> presetLandscapeStyles;
-		std::map<std::string, Pseudo3DCourse::Spec::RoadColorSet> presetRoadStyles;
+		std::map<std::string, Pseudo3DCourse::Spec::LandscapeStyle> presetLandscapeStyles;
+		std::map<std::string, Pseudo3DCourse::Spec::RoadStyle> presetRoadStyles;
 
 		// parameters for next match
 		Pseudo3DRaceState::RaceSettings nextMatchRaceSettings;
@@ -90,19 +90,19 @@ class CarseGame extends public fgeal::Game
 		const EngineSoundProfile& getPresetEngineSoundProfile(const std::string& presetName) const;
 
 		// Returns the correct preset according to the specified preset-name from one of the built-in presets; if the given preset name is not present on the map, returns the default preset
-		const Pseudo3DCourse::Spec::RoadColorSet& getPresetRoadStyle(const std::string& presetName) const;
+		const Pseudo3DCourse::Spec::RoadStyle& getPresetRoadStyle(const std::string& presetName) const;
 
 		// Returns a random preset from one of the built-in presets
-		const Pseudo3DCourse::Spec::RoadColorSet& getRandomPresetRoadStyle() const;
+		const Pseudo3DCourse::Spec::RoadStyle& getRandomPresetRoadStyle() const;
 
 		// Returns a list of available preset styles names
 		std::vector<std::string> getPresetRoadStylesNames() const;
 
 		// Returns the correct preset according to the specified preset-name from one of the built-in presets; if the given preset name is not present on the map, returns the default preset
-		const Pseudo3DCourse::Spec::LandscapeSettings& getPresetLandscapeStyle(const std::string& presetName) const;
+		const Pseudo3DCourse::Spec::LandscapeStyle& getPresetLandscapeStyle(const std::string& presetName) const;
 
 		// Returns a random preset from one of the built-in presets
-		const Pseudo3DCourse::Spec::LandscapeSettings& getRandomPresetLandscapeStyle() const;
+		const Pseudo3DCourse::Spec::LandscapeStyle& getRandomPresetLandscapeStyle() const;
 
 		// Returns a list of available preset styles names
 		std::vector<std::string> getPresetLandscapeStylesNames() const;

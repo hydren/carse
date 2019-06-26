@@ -46,33 +46,33 @@ namespace  // static
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------
-void Pseudo3DCourse::Spec::RoadColorSet::loadFromFile(const string& filename, const string& presetName)
+void Pseudo3DCourse::Spec::RoadStyle::loadFromFile(const string& filename, const string& presetName)
 {
 	Properties prop;
 	prop.load(filename);
 	name = presetName;
-	primary = prop.getParsedAllowDefault<Color, parseColor>("road_color_primary", DEFAULT.primary);
-	secondary = prop.getParsedAllowDefault<Color, parseColor>("road_color_secondary", DEFAULT.secondary);
+	roadPrimary = prop.getParsedAllowDefault<Color, parseColor>("road_color_primary", DEFAULT.roadPrimary);
+	roadSecondary = prop.getParsedAllowDefault<Color, parseColor>("road_color_secondary", DEFAULT.roadSecondary);
 	humblePrimary = prop.getParsedAllowDefault<Color, parseColor>("humble_color_primary", DEFAULT.humblePrimary);
 	humbleSecondary = prop.getParsedAllowDefault<Color, parseColor>("humble_color_secondary", DEFAULT.humbleSecondary);
 }
 
-void Pseudo3DCourse::Spec::LandscapeSettings::loadFromFile(const string& filename, const string& presetName)
+void Pseudo3DCourse::Spec::LandscapeStyle::loadFromFile(const string& filename, const string& presetName)
 {
 	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
 	Properties prop;
 	prop.load(filename);
 
 	name = presetName;
-	terrainPrimary = prop.getParsedAllowDefault<Color, parseColor>("offroad_color_primary", DEFAULT.terrainPrimary);
+	terrarinPrimary = prop.getParsedAllowDefault<Color, parseColor>("offroad_color_primary", DEFAULT.terrarinPrimary);
 	terrainSecondary = prop.getParsedAllowDefault<Color, parseColor>("offroad_color_secondary", DEFAULT.terrainSecondary);
-	sky = prop.getParsedAllowDefault<Color, parseColor>("landscape_color", DEFAULT.sky);
+	landscape = prop.getParsedAllowDefault<Color, parseColor>("landscape_color", DEFAULT.landscape);
 
-	landscapeBgFilename = getContextualizedFilename(prop.get("landscape_image"), baseDir, "assets/");
-	if(landscapeBgFilename.empty())
+	landscapeBackgroundFilename = getContextualizedFilename(prop.get("landscape_image"), baseDir, "assets/");
+	if(landscapeBackgroundFilename.empty())
 	{
 		cout << "warning: image file specified in \"landscape_image\" entry could not be found" << ", specified by \"" << filename << "\". using default instead..." << endl;
-		landscapeBgFilename = DEFAULT.landscapeBgFilename;
+		landscapeBackgroundFilename = DEFAULT.landscapeBackgroundFilename;
 	}
 
 	// TODO rewrite this code once presets have support for any number of props
@@ -132,7 +132,7 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename, const CarseGa
 	}
 	else  // reads style from course spec
 	{
-		RoadColorSet customRoadStyle;
+		RoadStyle customRoadStyle;
 		customRoadStyle.loadFromFile(filename);
 		assignStyle(customRoadStyle);
 	}
@@ -146,7 +146,7 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename, const CarseGa
 	}
 	else  // reads style from course spec
 	{
-		LandscapeSettings customLandscapeStyle;
+		LandscapeStyle customLandscapeStyle;
 		customLandscapeStyle.loadFromFile(filename);
 		assignStyle(customLandscapeStyle);
 

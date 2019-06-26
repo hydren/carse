@@ -38,7 +38,7 @@ CourseEditorState::CourseEditorState(CarseGame* game)
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
   isPresetsTabActive(),
-  selectedLandscapeIndex(), selectedRoadstyleIndex(), landscapeChangeButton(), roadstyleChangeButton(),
+  selectedLandscapeStyleIndex(), selectedRoadStyleIndex(), landscapeStyleChangeButton(), roadStyleChangeButton(),
   imgMenuCourseArrow(null), loadDialogSelectButton(), loadDialogCancelButton(),
   saveDialogSaveButton(), saveDialogCancelButton()
 {}
@@ -72,17 +72,17 @@ void CourseEditorState::initialize()
 	propertiesTabButton = presetsTabButton;
 	propertiesTabButton.label = "Proper.";
 
-	landscapeTextField = courseNameTextField = saveDialogTextField;
-	landscapeTextField.caretPosition = 9999;
+	landscapeStyleTextField = courseNameTextField = saveDialogTextField;
+	landscapeStyleTextField.caretPosition = 9999;
 
-	roadstyleTextField = landscapeTextField;
+	roadStyleTextField = landscapeStyleTextField;
 
-	landscapeChangeButton = presetsTabButton;
-	landscapeChangeButton.shape = Button::SHAPE_RECTANGULAR;
-	landscapeChangeButton.bgColor = Color::LIGHT_GREY;
-	landscapeChangeButton.label = ">>";
+	landscapeStyleChangeButton = presetsTabButton;
+	landscapeStyleChangeButton.shape = Button::SHAPE_RECTANGULAR;
+	landscapeStyleChangeButton.bgColor = Color::LIGHT_GREY;
+	landscapeStyleChangeButton.label = ">>";
 
-	roadstyleChangeButton = landscapeChangeButton;
+	roadStyleChangeButton = landscapeStyleChangeButton;
 
 	newButton = presetsTabButton;
 	newButton.shape = Button::SHAPE_RECTANGULAR;
@@ -181,21 +181,21 @@ void CourseEditorState::onEnter()
 	courseNameTextField.bounds.w = propertiesTabPanelBounds.w - 2*widgetSpacing;
 	courseNameTextField.bounds.h = 1.1f*courseNameTextField.font->getTextHeight();
 
-	landscapeTextField.bounds = courseNameTextField.bounds;
-	landscapeTextField.bounds.y += courseNameTextField.bounds.h + font->getTextHeight() + widgetSpacing;
-	landscapeTextField.bounds.w *= 0.75;
+	landscapeStyleTextField.bounds = courseNameTextField.bounds;
+	landscapeStyleTextField.bounds.y += courseNameTextField.bounds.h + font->getTextHeight() + widgetSpacing;
+	landscapeStyleTextField.bounds.w *= 0.75;
 
-	roadstyleTextField.bounds = landscapeTextField.bounds;
-	roadstyleTextField.bounds.y += landscapeTextField.bounds.h + font->getTextHeight() + widgetSpacing;
+	roadStyleTextField.bounds = landscapeStyleTextField.bounds;
+	roadStyleTextField.bounds.y += landscapeStyleTextField.bounds.h + font->getTextHeight() + widgetSpacing;
 
-	landscapeChangeButton.bounds.x = landscapeTextField.bounds.x + landscapeTextField.bounds.w + widgetSpacing;
-	landscapeChangeButton.bounds.y = landscapeTextField.bounds.y;
-	landscapeChangeButton.bounds.w = propertiesTabPanelBounds.w - landscapeTextField.bounds.w - 3*widgetSpacing;
-	landscapeChangeButton.bounds.h = presetsTabButton.bounds.h;
+	landscapeStyleChangeButton.bounds.x = landscapeStyleTextField.bounds.x + landscapeStyleTextField.bounds.w + widgetSpacing;
+	landscapeStyleChangeButton.bounds.y = landscapeStyleTextField.bounds.y;
+	landscapeStyleChangeButton.bounds.w = propertiesTabPanelBounds.w - landscapeStyleTextField.bounds.w - 3*widgetSpacing;
+	landscapeStyleChangeButton.bounds.h = presetsTabButton.bounds.h;
 
-	roadstyleChangeButton = landscapeChangeButton;
-	roadstyleChangeButton.bounds.x = roadstyleTextField.bounds.x + roadstyleTextField.bounds.w + widgetSpacing;
-	roadstyleChangeButton.bounds.y = roadstyleTextField.bounds.y;
+	roadStyleChangeButton = landscapeStyleChangeButton;
+	roadStyleChangeButton.bounds.x = roadStyleTextField.bounds.x + roadStyleTextField.bounds.w + widgetSpacing;
+	roadStyleChangeButton.bounds.y = roadStyleTextField.bounds.y;
 
 	newButton.bounds.x = presetsTabPanelBounds.x;
 	newButton.bounds.y = presetsTabPanelBounds.y + presetsTabPanelBounds.h + widgetSpacing;
@@ -283,10 +283,10 @@ void CourseEditorState::onEnter()
 	focus = ON_EDITOR;
 	setPresetsTabActive();
 
-	selectedLandscapeIndex = selectedRoadstyleIndex = 0;
-	landscapeTextField.content = roadstyleTextField.content = "default";
-	course.spec.assignStyle(Pseudo3DCourse::Spec::RoadColorSet::DEFAULT);
-	course.spec.assignStyle(Pseudo3DCourse::Spec::LandscapeSettings::DEFAULT);
+	selectedLandscapeStyleIndex = selectedRoadStyleIndex = 0;
+	landscapeStyleTextField.content = roadStyleTextField.content = "default";
+	course.spec.assignStyle(Pseudo3DCourse::Spec::RoadStyle::DEFAULT);
+	course.spec.assignStyle(Pseudo3DCourse::Spec::LandscapeStyle::DEFAULT);
 
 	map.roadColor = Color::RED;
 	map.roadContrastColorEnabled = true;
@@ -338,12 +338,12 @@ void CourseEditorState::render()
 		Graphics::drawFilledRectangle(propertiesTabPanelBounds, Color::GREY);
 		courseNameTextField.draw();
 		font->drawText("name:", courseNameTextField.bounds.x, courseNameTextField.bounds.y - font->getTextHeight());
-		landscapeTextField.draw();
-		font->drawText("landscape:", landscapeTextField.bounds.x, landscapeTextField.bounds.y - font->getTextHeight());
-		landscapeChangeButton.draw();
-		roadstyleTextField.draw();
-		font->drawText("road style:", roadstyleTextField.bounds.x, roadstyleTextField.bounds.y - font->getTextHeight());
-		roadstyleChangeButton.draw();
+		landscapeStyleTextField.draw();
+		font->drawText("landscape:", landscapeStyleTextField.bounds.x, landscapeStyleTextField.bounds.y - font->getTextHeight());
+		landscapeStyleChangeButton.draw();
+		roadStyleTextField.draw();
+		font->drawText("road style:", roadStyleTextField.bounds.x, roadStyleTextField.bounds.y - font->getTextHeight());
+		roadStyleChangeButton.draw();
 	}
 
 	newButton.highlighted = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
@@ -523,28 +523,28 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 
 		if(not isPresetsTabActive)
 		{
-			if(landscapeChangeButton.bounds.contains(x, y))
+			if(landscapeStyleChangeButton.bounds.contains(x, y))
 			{
 				vector<string> presetLandscaleStylesNames = game.logic.getPresetLandscapeStylesNames();
-				selectedLandscapeIndex++;
-				if(selectedLandscapeIndex >= (int) presetLandscaleStylesNames.size())
-					selectedLandscapeIndex = 0;
+				selectedLandscapeStyleIndex++;
+				if(selectedLandscapeStyleIndex >= (int) presetLandscaleStylesNames.size())
+					selectedLandscapeStyleIndex = 0;
 
-				landscapeTextField.content = presetLandscaleStylesNames[selectedLandscapeIndex];
+				landscapeStyleTextField.content = presetLandscaleStylesNames[selectedLandscapeStyleIndex];
 				course.spec.props.clear();
 				course.spec.spritesFilenames.clear();
-				course.spec.assignStyle(game.logic.getPresetLandscapeStyle(landscapeTextField.content));
+				course.spec.assignStyle(game.logic.getPresetLandscapeStyle(landscapeStyleTextField.content));
 				course.loadSpec(course.spec);  // reloads its own spec so it reload the new sprites
 			}
-			if(roadstyleChangeButton.bounds.contains(x, y))
+			if(roadStyleChangeButton.bounds.contains(x, y))
 			{
 				vector<string> presetLandscaleStylesNames = game.logic.getPresetRoadStylesNames();
-				selectedRoadstyleIndex++;
-				if(selectedRoadstyleIndex >= (int) presetLandscaleStylesNames.size())
-					selectedRoadstyleIndex = 0;
+				selectedRoadStyleIndex++;
+				if(selectedRoadStyleIndex >= (int) presetLandscaleStylesNames.size())
+					selectedRoadStyleIndex = 0;
 
-				roadstyleTextField.content = presetLandscaleStylesNames[selectedRoadstyleIndex];
-				course.spec.assignStyle(game.logic.getPresetRoadStyle(roadstyleTextField.content));
+				roadStyleTextField.content = presetLandscaleStylesNames[selectedRoadStyleIndex];
+				course.spec.assignStyle(game.logic.getPresetRoadStyle(roadStyleTextField.content));
 			}
 		}
 
@@ -552,8 +552,8 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorIn->play();
 			this->loadCourseSpec(Pseudo3DCourse::Spec(200, 3000));
-			selectedLandscapeIndex = selectedRoadstyleIndex = 0;
-			landscapeTextField.content = roadstyleTextField.content = "default";
+			selectedLandscapeStyleIndex = selectedRoadStyleIndex = 0;
+			landscapeStyleTextField.content = roadStyleTextField.content = "default";
 		}
 
 		if(loadButton.bounds.contains(x, y))
@@ -574,14 +574,14 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			Pseudo3DCourse::Spec spec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
 
 			const vector<string> roadStyleList = game.logic.getPresetRoadStylesNames();
-			selectedRoadstyleIndex = futil::random_between(0, roadStyleList.size());
-			roadstyleTextField.content = roadStyleList[selectedRoadstyleIndex];
-			spec.assignStyle(game.logic.getPresetRoadStyle(roadstyleTextField.content));
+			selectedRoadStyleIndex = futil::random_between(0, roadStyleList.size());
+			roadStyleTextField.content = roadStyleList[selectedRoadStyleIndex];
+			spec.assignStyle(game.logic.getPresetRoadStyle(roadStyleTextField.content));
 
 			const vector<string> landscapeStyleList = game.logic.getPresetLandscapeStylesNames();
-			selectedLandscapeIndex = futil::random_between(0, landscapeStyleList.size());
-			landscapeTextField.content = landscapeStyleList[selectedLandscapeIndex];
-			spec.assignStyle(game.logic.getPresetLandscapeStyle(landscapeTextField.content));
+			selectedLandscapeStyleIndex = futil::random_between(0, landscapeStyleList.size());
+			landscapeStyleTextField.content = landscapeStyleList[selectedLandscapeStyleIndex];
+			spec.assignStyle(game.logic.getPresetLandscapeStyle(landscapeStyleTextField.content));
 
 			this->loadCourseSpec(spec);
 		}
@@ -618,23 +618,23 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label, CarseGameLogicInstance(game.logic)));
 			if(course.spec.presetRoadStyleName.empty())
 			{
-				roadstyleTextField.content = "custom";
-				selectedRoadstyleIndex = -1;
+				roadStyleTextField.content = "custom";
+				selectedRoadStyleIndex = -1;
 			}
 			else
 			{
-				roadstyleTextField.content = course.spec.presetRoadStyleName;
-				selectedRoadstyleIndex = futil::index_of(game.logic.getPresetRoadStylesNames(), roadstyleTextField.content);
+				roadStyleTextField.content = course.spec.presetRoadStyleName;
+				selectedRoadStyleIndex = futil::index_of(game.logic.getPresetRoadStylesNames(), roadStyleTextField.content);
 			}
 			if(course.spec.presetLandscapeStyleName.empty())
 			{
-				landscapeTextField.content = "custom";
-				selectedLandscapeIndex = -1;
+				landscapeStyleTextField.content = "custom";
+				selectedLandscapeStyleIndex = -1;
 			}
 			else
 			{
-				landscapeTextField.content = course.spec.presetLandscapeStyleName;
-				selectedLandscapeIndex = futil::index_of(game.logic.getPresetLandscapeStylesNames(), landscapeTextField.content);
+				landscapeStyleTextField.content = course.spec.presetLandscapeStyleName;
+				selectedLandscapeStyleIndex = futil::index_of(game.logic.getPresetLandscapeStylesNames(), landscapeStyleTextField.content);
 			}
 			focus = ON_EDITOR;
 		}

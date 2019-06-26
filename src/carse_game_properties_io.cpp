@@ -194,8 +194,8 @@ void CarseGame::Logic::loadTrafficVehicles()
 void CarseGame::Logic::loadPresetCourseStyles()
 {
 	cout << "reading preset course styles..." << endl;
-	presetLandscapeStyles["default"] = Pseudo3DCourse::Spec::LandscapeSettings::DEFAULT;
-	presetRoadStyles["default"] = Pseudo3DCourse::Spec::RoadColorSet::DEFAULT;
+	presetLandscapeStyles["default"] = Pseudo3DCourse::Spec::LandscapeStyle::DEFAULT;
+	presetRoadStyles["default"] = Pseudo3DCourse::Spec::RoadStyle::DEFAULT;
 	vector<string> pendingRoadStylePresetFiles, pendingLandscapePresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::PRESET_COURSE_STYLES_FOLDER);
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{

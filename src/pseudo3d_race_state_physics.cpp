@@ -45,13 +45,14 @@ static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
 
 				   PSEUDO_ANGLE_MAX = 1.0,
 				   STEERING_SPEED = 2.0,
-				   MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
+				   MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0,  // == 1kph
+				   MINIMUM_SPEED_CORNERING_LEECH = 10;  // == 36kph
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const unsigned courseSegmentIndex = static_cast<int>(playerVehicle.position * coursePositionFactor / course.spec.roadSegmentLength) % course.spec.lines.size();
 	const CourseSpec::Segment& courseSegment = course.spec.lines[courseSegmentIndex];
-	const float corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5),
+	const float corneringForceLeechFactor = playerVehicle.body.speed > MINIMUM_SPEED_CORNERING_LEECH? (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5) : 0,
 				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
 				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * playerVehicle.corneringStiffness;
 

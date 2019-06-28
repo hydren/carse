@@ -186,6 +186,7 @@ void CarseGame::Logic::loadTrafficVehicles()
 				try { trafficVehicles.push_back(Pseudo3DVehicle::Spec()); trafficVehicles.back().loadFromFile(filename, CarseGameLogicInstance(this)); }
 				catch(const std::exception& e) { cout << "error while reading traffic specification: " << e.what() << endl; continue; }
 				cout << "read traffic specification: " << filename << endl;
+				trafficVehicles.back().soundProfile = EngineSoundProfile();  // force no sound for traffic FIXME remove this line and deal with engine sound sharing properly between traffic vehicles
 			}
 		}
 	}

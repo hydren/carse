@@ -146,7 +146,7 @@ void CarseGame::Logic::loadVehicles()
 			prop.load(filename);
 			if(prop.containsKey("definition") and prop.get("definition") == "vehicle")
 			{
-				try { vehicles.push_back(Pseudo3DVehicle::Spec()); vehicles.back().loadFromFile(filename, CarseGameLogicInstance(this)); }
+				try { vehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename, CarseGameLogicInstance(this))); }
 				catch(const std::exception& e) { cout << "error while reading vehicle specification: " << e.what() << endl; continue; }
 				cout << "read vehicle specification: " << filename << endl;
 			}
@@ -183,7 +183,7 @@ void CarseGame::Logic::loadTrafficVehicles()
 			prop.load(filename);
 			if(prop.containsKey("definition") and prop.get("definition") == "vehicle")
 			{
-				try { trafficVehicles.push_back(Pseudo3DVehicle::Spec()); trafficVehicles.back().loadFromFile(filename, CarseGameLogicInstance(this)); }
+				try { trafficVehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename, CarseGameLogicInstance(this))); }
 				catch(const std::exception& e) { cout << "error while reading traffic specification: " << e.what() << endl; continue; }
 				cout << "read traffic specification: " << filename << endl;
 				trafficVehicles.back().soundProfile = EngineSoundProfile();  // force no sound for traffic FIXME remove this line and deal with engine sound sharing properly between traffic vehicles

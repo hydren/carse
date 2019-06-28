@@ -52,7 +52,7 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const unsigned courseSegmentIndex = static_cast<int>(playerVehicle.position * coursePositionFactor / course.spec.roadSegmentLength) % course.spec.lines.size();
 	const CourseSpec::Segment& courseSegment = course.spec.lines[courseSegmentIndex];
-	const float corneringForceLeechFactor = playerVehicle.body.speed > MINIMUM_SPEED_CORNERING_LEECH? (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5) : 0,
+	const float corneringForceLeechFactor = playerVehicle.body.speed > MINIMUM_SPEED_CORNERING_LEECH? (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.4 : 0.5) : 0,
 				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
 				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * playerVehicle.corneringStiffness;
 

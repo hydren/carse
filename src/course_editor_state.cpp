@@ -72,10 +72,10 @@ void CourseEditorState::initialize()
 	propertiesTabButton = presetsTabButton;
 	propertiesTabButton.label = "Proper.";
 
-	landscapeStyleTextField = courseNameTextField = saveDialogTextField;
-	landscapeStyleTextField.caretPosition = 9999;
+	courseNameTextField = saveDialogTextField;
+	courseNameTextField.caretHidden = true;
 
-	roadStyleTextField = landscapeStyleTextField;
+	roadStyleTextField = landscapeStyleTextField = courseNameTextField;
 
 	landscapeStyleChangeButton = presetsTabButton;
 	landscapeStyleChangeButton.shape = Button::SHAPE_RECTANGULAR;
@@ -176,6 +176,7 @@ void CourseEditorState::onEnter()
 
 	courseNameTextField.content.clear();
 	courseNameTextField.caretPosition = 0;
+	courseNameTextField.caretHidden = true;
 	courseNameTextField.bounds.x = propertiesTabPanelBounds.x + widgetSpacing;
 	courseNameTextField.bounds.y = propertiesTabPanelBounds.y + font->getTextHeight() + widgetSpacing;
 	courseNameTextField.bounds.w = propertiesTabPanelBounds.w - 2*widgetSpacing;
@@ -506,7 +507,10 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	else if(focus == ON_NAME_TEXTFIELD)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
+		{
 			focus = ON_EDITOR;
+			courseNameTextField.caretHidden = true;
+		}
 		else
 			courseNameTextField.onKeyPressed(key);
 	}
@@ -554,7 +558,10 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 				course.spec.assignStyle(game.logic.getPresetRoadStyle(roadStyleTextField.content));
 			}
 			if(courseNameTextField.bounds.contains(x, y))
+			{
 				focus = ON_NAME_TEXTFIELD;
+				courseNameTextField.caretHidden = false;
+			}
 		}
 
 		if(newButton.bounds.contains(x, y))
@@ -679,7 +686,10 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	else if(focus == ON_NAME_TEXTFIELD)
 	{
 		if(not courseNameTextField.bounds.contains(x, y))
+		{
 			focus = ON_EDITOR;
+			courseNameTextField.caretHidden = true;
+		}
 	}
 }
 

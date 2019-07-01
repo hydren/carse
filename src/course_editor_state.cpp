@@ -468,7 +468,10 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	if(focus == ON_EDITOR)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
+		{
+			sndCursorOut->play();
 			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+		}
 	}
 	else if(focus == ON_FILE_MENU)
 	{
@@ -500,19 +503,29 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	else if(focus == ON_SAVE_DIALOG)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
+		{
+			sndCursorOut->play();
 			focus = ON_EDITOR;
+		}
 		else
+		{
 			saveDialogTextField.onKeyPressed(key);
+			sndCursorMove->play();
+		}
 	}
 	else if(focus == ON_NAME_TEXTFIELD)
 	{
 		if(key == Keyboard::KEY_ESCAPE)
 		{
+			sndCursorOut->play();
 			focus = ON_EDITOR;
 			courseNameTextField.caretHidden = true;
 		}
 		else
+		{
 			courseNameTextField.onKeyPressed(key);
+			sndCursorMove->play();
+		}
 	}
 }
 
@@ -536,6 +549,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			if(landscapeStyleChangeButton.bounds.contains(x, y))
 			{
+				sndCursorIn->play();
 				vector<string> presetLandscaleStylesNames = game.logic.getPresetLandscapeStylesNames();
 				selectedLandscapeStyleIndex++;
 				if(selectedLandscapeStyleIndex >= (int) presetLandscaleStylesNames.size())
@@ -549,6 +563,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			}
 			if(roadStyleChangeButton.bounds.contains(x, y))
 			{
+				sndCursorIn->play();
 				vector<string> presetLandscaleStylesNames = game.logic.getPresetRoadStylesNames();
 				selectedRoadStyleIndex++;
 				if(selectedRoadStyleIndex >= (int) presetLandscaleStylesNames.size())
@@ -559,6 +574,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			}
 			if(courseNameTextField.bounds.contains(x, y))
 			{
+				sndCursorIn->play();
 				focus = ON_NAME_TEXTFIELD;
 				courseNameTextField.caretHidden = false;
 			}
@@ -687,6 +703,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 	{
 		if(not courseNameTextField.bounds.contains(x, y))
 		{
+			sndCursorOut->play();
 			focus = ON_EDITOR;
 			courseNameTextField.caretHidden = true;
 		}

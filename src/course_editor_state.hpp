@@ -32,6 +32,7 @@ class CourseEditorState extends public fgeal::Game::State
 		ON_EDITOR,
 		ON_FILE_MENU,
 		ON_SAVE_DIALOG,
+		ON_NAME_TEXTFIELD
 	}
 	focus;
 

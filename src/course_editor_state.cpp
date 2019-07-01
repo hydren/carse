@@ -498,10 +498,17 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 	}
 	else if(focus == ON_SAVE_DIALOG)
 	{
-		if(key== Keyboard::KEY_ESCAPE)
+		if(key == Keyboard::KEY_ESCAPE)
 			focus = ON_EDITOR;
 		else
 			saveDialogTextField.onKeyPressed(key);
+	}
+	else if(focus == ON_NAME_TEXTFIELD)
+	{
+		if(key == Keyboard::KEY_ESCAPE)
+			focus = ON_EDITOR;
+		else
+			courseNameTextField.onKeyPressed(key);
 	}
 }
 
@@ -546,6 +553,8 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 				roadStyleTextField.content = presetLandscaleStylesNames[selectedRoadStyleIndex];
 				course.spec.assignStyle(game.logic.getPresetRoadStyle(roadStyleTextField.content));
 			}
+			if(courseNameTextField.bounds.contains(x, y))
+				focus = ON_NAME_TEXTFIELD;
 		}
 
 		if(newButton.bounds.contains(x, y))
@@ -650,16 +659,14 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(saveDialogSaveButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			if(course.spec.name.empty())
-				course.spec.name = saveDialogTextField.content;
-			try
-			{
-				course.spec.comments = "Generated using carse v" + CARSE_VERSION;
-				course.spec.saveToFile(CarseLogic::COURSES_FOLDER+"/"+saveDialogTextField.content);
-				game.logic.updateCourseList();
-				reloadFileList();
-			}
+			course.spec.name = courseNameTextField.content.empty()? saveDialogTextField.content : courseNameTextField.content;
+			course.spec.comments = "Generated using carse v" + CARSE_VERSION;
+
+			try { course.spec.saveToFile(CarseLogic::COURSES_FOLDER+"/"+saveDialogTextField.content); }
 			catch(const std::exception& e) { /* TODO show error dialog */ }
+
+			game.logic.updateCourseList();
+			reloadFileList();
 			focus = ON_EDITOR;
 		}
 
@@ -668,6 +675,11 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			sndCursorIn->play();
 			focus = ON_EDITOR;
 		}
+	}
+	else if(focus == ON_NAME_TEXTFIELD)
+	{
+		if(not courseNameTextField.bounds.contains(x, y))
+			focus = ON_EDITOR;
 	}
 }
 

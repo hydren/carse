@@ -187,9 +187,10 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 		const_foreach(const Pseudo3DVehicle*, vehicle, vector<const Pseudo3DVehicle*>, vehicles)
 	    {
-			if((static_cast<unsigned>(vehicle->position * lengthScale / spec.roadSegmentLength))%N == n)
+			const float vehiclePosition = vehicle->position * lengthScale / spec.roadSegmentLength;
+			if(((unsigned) vehiclePosition) % N == n)
 			{
-				const float ltprop = fractional_part(vehicle->position * lengthScale / spec.roadSegmentLength), lt2prop = 1 - ltprop;
+				const float ltprop = fractional_part(vehiclePosition), lt2prop = 1 - ltprop;
 
 				const ScreenCoordCache& lt2 = lts[(n-1)%N];
 				const float ltW = lt.W * ltprop + lt2.W * lt2prop,

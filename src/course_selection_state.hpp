@@ -9,8 +9,6 @@
 #define COURSE_SELECTION_STATE_HPP_
 #include <ciso646>
 
-#include <vector>
-
 #include "carse_game.hpp"
 
 #include "course.hpp"
@@ -19,8 +17,9 @@
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
 #include "fgeal/extra/gui.hpp"
-
 #include "futil/language.hpp"
+
+#include <vector>
 
 class CourseSelectionState extends public fgeal::Game::State
 {

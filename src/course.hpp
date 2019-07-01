@@ -9,11 +9,11 @@
 #define PSEUDO3D_COURSE_HPP_
 #include <ciso646>
 
+#include "vehicle.hpp"
+
 #include "racing/course_spec.hpp"
 
 #include "fgeal/fgeal.hpp"
-
-#include "vehicle.hpp"
 
 #include <vector>
 

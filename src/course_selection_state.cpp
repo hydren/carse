@@ -7,11 +7,9 @@
 
 #include "course_selection_state.hpp"
 
-#include "futil/string_actions.hpp"
-
-#include "util.hpp"
-
 #include "pseudo3d_race_state.hpp"
+#include "util.hpp"
+#include "futil/string_actions.hpp"
 
 #include <cmath>
 

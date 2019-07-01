@@ -9,7 +9,6 @@
 
 #include "carse_game.hpp"
 
-using std::string;
 using fgeal::Display;
 using fgeal::Image;
 using fgeal::Menu;
@@ -17,6 +16,7 @@ using fgeal::Font;
 using fgeal::Color;
 using fgeal::Keyboard;
 using fgeal::Mouse;
+using std::string;
 
 int MainMenuSimpleListState::getId() { return CarseGame::MAIN_MENU_SIMPLE_LIST_STATE_ID; }
 

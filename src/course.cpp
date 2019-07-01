@@ -223,9 +223,9 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 // #################### Pseudo3D Course Spec. methods #####################################################
 
-void Pseudo3DCourse::Spec::loadFromFile(const string& filename, const CarseGameLogicInstance& logic)
+void Pseudo3DCourse::Spec::loadFromFile(const string& filename)
 {
-	this->parseProperties(filename, logic);
+	this->parseProperties(filename);
 	this->loadSegments(segmentFilename);
 }
 

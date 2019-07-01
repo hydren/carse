@@ -492,7 +492,7 @@ void CourseEditorState::onKeyPressed(Keyboard::Key key)
 		if(key == Keyboard::KEY_ENTER)
 		{
 			sndCursorIn->play();
-			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label, CarseGameLogicInstance(game.logic)));
+			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 			focus = ON_EDITOR;
 		}
 	}
@@ -615,7 +615,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(loadDialogSelectButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label, CarseGameLogicInstance(game.logic)));
+			this->loadCourseSpec(Pseudo3DCourse::Spec::createFromFile(fileMenu.getSelectedEntry().label));
 			if(course.spec.presetRoadStyleName.empty())
 			{
 				roadStyleTextField.content = "custom";
@@ -655,7 +655,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			try
 			{
 				course.spec.comments = "Generated using carse v" + CARSE_VERSION;
-				course.spec.saveToFile(CarseGame::Logic::COURSES_FOLDER+"/"+saveDialogTextField.content);
+				course.spec.saveToFile(CarseLogic::COURSES_FOLDER+"/"+saveDialogTextField.content);
 				game.logic.updateCourseList();
 				reloadFileList();
 			}

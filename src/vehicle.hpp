@@ -17,9 +17,6 @@
 #include <string>
 #include <vector>
 
-// forward declared
-class CarseGameLogicInstance;
-
 struct Pseudo3DVehicle
 {
 	struct Spec extends VehicleSpec
@@ -34,10 +31,10 @@ struct Pseudo3DVehicle
 		EngineSoundProfile soundProfile;
 
 		/* Loads data from the given filename, parse its vehicle spec data and store in this object. */
-		void loadFromFile(const std::string& filename, const CarseGameLogicInstance&);
+		void loadFromFile(const std::string& filename);
 
 		/* Creates a vehicle spec. by loading and parsing the data in the given filename. */
-		inline static Spec createFromFile(const std::string& filename, const CarseGameLogicInstance& logic) { Spec spec; spec.loadFromFile(filename, logic); return spec; }
+		inline static Spec createFromFile(const std::string& filename) { Spec spec; spec.loadFromFile(filename); return spec; }
 	};
 
 	// physics simulation

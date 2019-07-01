@@ -7,7 +7,7 @@
 
 #include "vehicle.hpp"
 
-#include "carse_game.hpp"
+#include "carse_logic.hpp"
 
 #include "util.hpp"
 
@@ -63,8 +63,9 @@ static const float
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
-void Pseudo3DVehicle::Spec::loadFromFile(const string& filename, const CarseGameLogicInstance& logic)
+void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 {
+	CarseLogic& logic = CarseLogic::getInstance();
 	Properties prop;
 	prop.load(filename);
 
@@ -109,9 +110,9 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename, const CarseGame
 	// read sound data if a custom one is specified
 	key = "sound";
 	if(prop.get(key) == "custom")
-		soundProfile = CarseGame::Logic::createEngineSoundProfileFromFile(filename);
+		soundProfile = CarseLogic::createEngineSoundProfileFromFile(filename);
 	else if(prop.get(key) != "no")
-		soundProfile = logic.instance.getPresetEngineSoundProfile(prop.get(key));
+		soundProfile = logic.getPresetEngineSoundProfile(prop.get(key));
 
 	// sprite data
 	prop.put("filename", filename);  // done so we can later get properties filename
@@ -124,7 +125,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename, const CarseGame
 		key = "alternate_sprite_sheet" + futil::to_string(i) + "_definition_file";
 		if(isValueSpecified(prop, key))
 		{
-			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 			if(alternateSpritePropFile.empty())
 			{
 				cout << "warning: alternate sprite sheet " << i << " definition file could not be found!"
@@ -150,7 +151,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename, const CarseGame
 			key = "alternate_sprite_sheet" + futil::to_string(i) + "_file";
 			if(isValueSpecified(prop, key))
 			{
-				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 				if(alternateSpriteSheetFile.empty())
 				{
 					cout << "warning: alternate sprite sheet " << i << " file could not be found!"
@@ -410,7 +411,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
 
 	if(not spec.sheetFilename.empty() and spec.sheetFilename != "default")
-		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 	if(spec.sheetFilename == "default" or spec.sheetFilename.empty())
 	{
@@ -664,7 +665,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 	else if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "none")
 	{
-		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 		if(spec.brakelightsSheetFilename.empty())
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
@@ -775,7 +776,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 	else if(not spec.shadowSheetFilename.empty())
 	{
-		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 		if(spec.shadowSheetFilename.empty())
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"

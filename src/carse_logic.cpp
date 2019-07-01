@@ -1,42 +1,260 @@
 /*
- * carse_game_properties_io.cpp
+ * carse_game_logic.cpp
  *
- *  Created on: 9 de jan de 2018
+ *  Created on: 1 de dez de 2017
  *      Author: carlosfaruolo
  */
+
+#include "carse_logic.hpp"
 
 #include "carse_game.hpp"
 
 #include "util.hpp"
 
+#include "futil/random.h"
 #include "futil/string_actions.hpp"
 #include "futil/properties.hpp"
 
 #include <iostream>
 #include <algorithm>
 
-using std::cout;
-using std::endl;
+// to reduce typing is good
+#define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
+
 using std::string;
 using std::vector;
+using std::map;
+using std::cout;
+using std::endl;
 using futil::ends_with;
 using futil::Properties;
 using fgeal::Color;
 
-// to reduce typing is good
-#define isValueSpecified(prop, key) (prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "default")
-
 const string
-	CarseGame::Logic::COURSES_FOLDER = "data/courses",
-	CarseGame::Logic::VEHICLES_FOLDER = "data/vehicles",
-	CarseGame::Logic::TRAFFIC_FOLDER = "data/traffic",
-	CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine",
-	CarseGame::Logic::PRESET_COURSE_STYLES_FOLDER = "data/courses/styles";
+	CarseLogic::COURSES_FOLDER = "data/courses",
+	CarseLogic::VEHICLES_FOLDER = "data/vehicles",
+	CarseLogic::TRAFFIC_FOLDER = "data/traffic",
+	CarseLogic::PRESET_ENGINE_SOUND_PROFILES_FOLDER = "assets/sound/engine",
+	CarseLogic::PRESET_COURSE_STYLES_FOLDER = "data/courses/styles";
 
-void CarseGame::Logic::loadPresetEngineSoundProfiles()
+CarseLogic* CarseLogic::instance = null;
+
+// logic constructor, booooooring!
+CarseLogic::CarseLogic()
+: nextMatchRaceSettings(), nextMatchSimulationType(), nextMatchJumpSimulationEnabled(),
+  nextMatchCourseSpec(0, 0), nextMatchPlayerVehicleSpecAlternateSpriteIndex(-1),
+  raceOnlyMode(false), raceOnlyDebug(false), raceOnlyRandomCourse(false), raceOnlyCourseIndex(0), raceOnlyPlayerVehicleIndex(0),
+  raceOnlyPlayerVehicleAlternateSpriteIndex(-1), raceOnlyRaceType(-1), raceOnlyLapCount(2),
+  masterVolume(1.f),
+  currentMainMenuStateId(CarseGame::MAIN_MENU_CLASSIC_LAYOUT_STATE_ID),
+  currentVehicleSelectionStateId(CarseGame::VEHICLE_SELECTION_SHOWROOM_LAYOUT_STATE_ID)
+{}
+
+void CarseLogic::initialize()
+{
+	this->loadPresetEngineSoundProfiles();
+	this->loadPresetCourseStyles();
+	this->loadCourses();
+	this->loadVehicles();
+	this->loadTrafficVehicles();
+}
+
+void CarseLogic::onStatesListInitFinished()
+{
+	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
+	nextMatchRaceSettings.lapCountGoal = 2;    // set default lap count
+	nextMatchRaceSettings.trafficDensity = 0;  // by default, no traffic
+	nextMatchRaceSettings.isImperialUnit = false;
+	nextMatchRaceSettings.hudType = Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO;
+	nextMatchRaceSettings.useCachedDialGauge = false;
+	nextMatchRaceSettings.hudDialGaugePointerImageFilename.clear();
+	nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
+	nextMatchJumpSimulationEnabled = false;
+
+	if(raceOnlyMode)
+	{
+		if(raceOnlyDebug)
+			this->setNextCourseDebug();
+		else if(raceOnlyRandomCourse)
+			this->setNextCourseRandom();
+		else
+			nextMatchCourseSpec = courses[raceOnlyCourseIndex < courses.size()? raceOnlyCourseIndex : courses.size()-1];
+
+		if(raceOnlyRaceType < 0)
+			nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;
+		else if(raceOnlyRaceType < Pseudo3DRaceState::RACE_TYPE_COUNT)
+			nextMatchRaceSettings.raceType = (Pseudo3DRaceState::RaceType) raceOnlyRaceType;
+		else
+			nextMatchRaceSettings.raceType = (Pseudo3DRaceState::RaceType) (Pseudo3DRaceState::RACE_TYPE_COUNT - 1);
+
+		if(Pseudo3DRaceState::isRaceTypeLoop(nextMatchRaceSettings.raceType))
+			nextMatchRaceSettings.lapCountGoal = raceOnlyLapCount;
+
+		nextMatchPlayerVehicleSpec = vehicles[raceOnlyPlayerVehicleIndex < vehicles.size()? raceOnlyPlayerVehicleIndex : vehicles.size()-1];
+		nextMatchPlayerVehicleSpecAlternateSpriteIndex = raceOnlyPlayerVehicleAlternateSpriteIndex < (int) nextMatchPlayerVehicleSpec.alternateSprites.size()? raceOnlyPlayerVehicleAlternateSpriteIndex : nextMatchPlayerVehicleSpec.alternateSprites.size()-1;
+	}
+	else
+	{
+		this->setNextCourseRandom();  // set default course
+		this->setPickedVehicle(vehicles[0]);  // set default vehicle
+	}
+}
+
+const EngineSoundProfile& CarseLogic::getPresetEngineSoundProfile(const std::string& presetName) const
+{
+	if(presetEngineSoundProfiles.find(presetName) != presetEngineSoundProfiles.end())
+		return presetEngineSoundProfiles.find(presetName)->second;
+	else
+		return presetEngineSoundProfiles.find("default")->second;
+}
+
+const Pseudo3DCourse::Spec::LandscapeStyle& CarseLogic::getPresetLandscapeStyle(const std::string& presetName) const
+{
+	if(presetLandscapeStyles.find(presetName) != presetLandscapeStyles.end())
+		return presetLandscapeStyles.find(presetName)->second;
+	else
+		return presetLandscapeStyles.find("default")->second;
+}
+
+const Pseudo3DCourse::Spec::RoadStyle& CarseLogic::getPresetRoadStyle(const std::string& presetName) const
+{
+	if(presetRoadStyles.find(presetName) != presetRoadStyles.end())
+		return presetRoadStyles.find(presetName)->second;
+	else
+		return presetRoadStyles.find("default")->second;
+}
+
+vector<string> CarseLogic::getPresetRoadStylesNames() const
+{
+	vector<string> names(presetRoadStyles.size()); int i = 0;
+	for(map<string, Pseudo3DCourse::Spec::RoadStyle>::const_iterator it = presetRoadStyles.begin(); it != presetRoadStyles.end(); ++it)
+		names[i++] = it->first;
+	return names;
+}
+
+vector<string> CarseLogic::getPresetLandscapeStylesNames() const
+{
+	vector<string> names(presetLandscapeStyles.size()); int i = 0;
+	for(map<string, Pseudo3DCourse::Spec::LandscapeStyle>::const_iterator it = presetLandscapeStyles.begin(); it != presetLandscapeStyles.end(); ++it)
+		names[i++] = it->first;
+	return names;
+}
+
+const Pseudo3DCourse::Spec::LandscapeStyle& CarseLogic::getRandomPresetLandscapeStyle() const
+{
+	map<string, Pseudo3DCourse::Spec::LandscapeStyle>::const_iterator it = presetLandscapeStyles.begin();
+	std::advance(it, futil::random_between(0, presetLandscapeStyles.size()));
+	return it->second;
+}
+
+const Pseudo3DCourse::Spec::RoadStyle& CarseLogic::getRandomPresetRoadStyle() const
+{
+	map<string, Pseudo3DCourse::Spec::RoadStyle>::const_iterator it = presetRoadStyles.begin();
+	std::advance(it, futil::random_between(0, presetRoadStyles.size()));
+	return it->second;
+}
+
+void CarseLogic::updateCourseList()
+{
+	courses.clear();
+	this->loadCourses();
+}
+
+const vector<Pseudo3DCourse::Spec>& CarseLogic::getCourseList()
+{
+	return courses;
+}
+
+void CarseLogic::setNextCourse(unsigned courseIndex)
+{
+	nextMatchCourseSpec = courses[courseIndex];
+}
+
+void CarseLogic::setNextCourse(const Pseudo3DCourse::Spec& c)
+{
+	nextMatchCourseSpec = c;
+}
+
+void CarseLogic::setNextCourseRandom()
+{
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+	nextMatchCourseSpec.assignStyle(this->getRandomPresetRoadStyle());
+	nextMatchCourseSpec.assignStyle(this->getRandomPresetLandscapeStyle());
+}
+
+void CarseLogic::setNextCourseDebug()
+{
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateDebugCourseSpec(200, 3000);
+	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
+}
+
+const Pseudo3DCourse::Spec& CarseLogic::getNextCourse()
+{
+	return nextMatchCourseSpec;
+}
+
+Pseudo3DRaceState::RaceSettings& CarseLogic::getNextRaceSettings()
+{
+	return nextMatchRaceSettings;
+}
+
+const vector<Pseudo3DVehicle::Spec>& CarseLogic::getVehicleList()
+{
+	return vehicles;
+}
+
+const Pseudo3DVehicle::Spec& CarseLogic::getPickedVehicle()
+{
+	return nextMatchPlayerVehicleSpec;
+}
+
+const int CarseLogic::getPickedVehicleAlternateSpriteIndex()
+{
+	return nextMatchPlayerVehicleSpecAlternateSpriteIndex;
+}
+
+void CarseLogic::setPickedVehicle(unsigned vehicleIndex, int altSpriteIndex)
+{
+	nextMatchPlayerVehicleSpec = vehicles[vehicleIndex];
+	nextMatchPlayerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+}
+
+void CarseLogic::setPickedVehicle(const Pseudo3DVehicle::Spec& vspec, int altSpriteIndex)
+{
+	nextMatchPlayerVehicleSpec = vspec;
+	nextMatchPlayerVehicleSpecAlternateSpriteIndex = altSpriteIndex;
+}
+
+const vector<Pseudo3DVehicle::Spec>& CarseLogic::getTrafficVehicleList()
+{
+	return trafficVehicles;
+}
+
+Mechanics::SimulationType CarseLogic::getSimulationType()
+{
+	return nextMatchSimulationType;
+}
+
+void CarseLogic::setSimulationType(Mechanics::SimulationType type)
+{
+	nextMatchSimulationType = type;
+}
+
+bool CarseLogic::isJumpSimulationEnabled()
+{
+	return nextMatchJumpSimulationEnabled;
+}
+
+void CarseLogic::setJumpSimulationEnabled(bool enabled)
+{
+	nextMatchJumpSimulationEnabled = enabled;
+}
+
+//===============================================================================================================================================
+void CarseLogic::loadPresetEngineSoundProfiles()
 {
 	cout << "reading preset engine sound profiles..." << endl;
-	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER);
+	vector<string> pendingPresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseLogic::PRESET_ENGINE_SOUND_PROFILES_FOLDER);
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
 		string& filename = presetFiles[i];
@@ -101,29 +319,29 @@ void CarseGame::Logic::loadPresetEngineSoundProfiles()
 	}
 }
 
-void CarseGame::Logic::loadCourses()
+void CarseLogic::loadCourses()
 {
 	cout << "reading courses..." << endl;
 
-	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::COURSES_FOLDER);
+	vector<string> courseFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseLogic::COURSES_FOLDER);
 	for(unsigned i = 0; i < courseFiles.size(); i++)
 	{
 		if(ends_with(courseFiles[i], ".properties"))
 		{
-			try { courses.push_back(Pseudo3DCourse::Spec::createFromFile(courseFiles[i], CarseGameLogicInstance(this))); }
+			try { courses.push_back(Pseudo3DCourse::Spec::createFromFile(courseFiles[i])); }
 			catch(const std::exception& e) { cout << "error while reading course specification: " << e.what() << endl; continue; }
 			cout << "read course specification: " << courseFiles[i] << endl;
 		}
 	}
 }
 
-void CarseGame::Logic::loadVehicles()
+void CarseLogic::loadVehicles()
 {
 	cout << "reading vehicles specs..." << endl;
 
 	// create a list of files inside the vehicles folder and inside its subfolders (but not recursively)
 	vector<string> possibleVehiclePropertiesFilenames;
-	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::VEHICLES_FOLDER);
+	const vector<string> vehiclesFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CarseLogic::VEHICLES_FOLDER);
 	for(unsigned i = 0; i < vehiclesFolderFilenames.size(); i++)
 	{
 		const string& filename = vehiclesFolderFilenames[i];
@@ -146,7 +364,7 @@ void CarseGame::Logic::loadVehicles()
 			prop.load(filename);
 			if(prop.containsKey("definition") and prop.get("definition") == "vehicle")
 			{
-				try { vehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename, CarseGameLogicInstance(this))); }
+				try { vehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename)); }
 				catch(const std::exception& e) { cout << "error while reading vehicle specification: " << e.what() << endl; continue; }
 				cout << "read vehicle specification: " << filename << endl;
 			}
@@ -154,13 +372,13 @@ void CarseGame::Logic::loadVehicles()
 	}
 }
 
-void CarseGame::Logic::loadTrafficVehicles()
+void CarseLogic::loadTrafficVehicles()
 {
 	cout << "reading traffic vehicles specs..." << endl;
 
 	// create a list of files inside the traffic folder and inside its subfolders (but not recursively)
 	vector<string> possibleTrafficPropertiesFilenames;
-	const vector<string> trafficFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::TRAFFIC_FOLDER);
+	const vector<string> trafficFolderFilenames = fgeal::filesystem::getFilenamesWithinDirectory(CarseLogic::TRAFFIC_FOLDER);
 	for(unsigned i = 0; i < trafficFolderFilenames.size(); i++)
 	{
 		const string& filename = trafficFolderFilenames[i];
@@ -183,7 +401,7 @@ void CarseGame::Logic::loadTrafficVehicles()
 			prop.load(filename);
 			if(prop.containsKey("definition") and prop.get("definition") == "vehicle")
 			{
-				try { trafficVehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename, CarseGameLogicInstance(this))); }
+				try { trafficVehicles.push_back(Pseudo3DVehicle::Spec::createFromFile(filename)); }
 				catch(const std::exception& e) { cout << "error while reading traffic specification: " << e.what() << endl; continue; }
 				cout << "read traffic specification: " << filename << endl;
 				trafficVehicles.back().soundProfile = EngineSoundProfile();  // force no sound for traffic FIXME remove this line and deal with engine sound sharing properly between traffic vehicles
@@ -192,12 +410,12 @@ void CarseGame::Logic::loadTrafficVehicles()
 	}
 }
 
-void CarseGame::Logic::loadPresetCourseStyles()
+void CarseLogic::loadPresetCourseStyles()
 {
 	cout << "reading preset course styles..." << endl;
 	presetLandscapeStyles["default"] = Pseudo3DCourse::Spec::LandscapeStyle::DEFAULT;
 	presetRoadStyles["default"] = Pseudo3DCourse::Spec::RoadStyle::DEFAULT;
-	vector<string> pendingRoadStylePresetFiles, pendingLandscapePresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseGame::Logic::PRESET_COURSE_STYLES_FOLDER);
+	vector<string> pendingRoadStylePresetFiles, pendingLandscapePresetFiles, presetFiles = fgeal::filesystem::getFilenamesWithinDirectory(CarseLogic::PRESET_COURSE_STYLES_FOLDER);
 	for(unsigned i = 0; i < presetFiles.size(); i++)
 	{
 		string& filename = presetFiles[i];
@@ -310,7 +528,7 @@ void CarseGame::Logic::loadPresetCourseStyles()
 }
 
 // ========================================================================================================================
-EngineSoundProfile CarseGame::Logic::createEngineSoundProfileFromFile(const string& filename)
+EngineSoundProfile CarseLogic::createEngineSoundProfileFromFile(const string& filename)
 {
 	EngineSoundProfile profile;
 	Properties prop;
@@ -345,7 +563,7 @@ EngineSoundProfile CarseGame::Logic::createEngineSoundProfileFromFile(const stri
 				const string subBaseKey = baseKey + futil::to_string(i);
 				if(prop.containsKey(subBaseKey))
 				{
-					const string sndFilename = getContextualizedFilename(prop.get(subBaseKey), baseDir, CarseGame::Logic::VEHICLES_FOLDER+"/", CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
+					const string sndFilename = getContextualizedFilename(prop.get(subBaseKey), baseDir, CarseLogic::VEHICLES_FOLDER+"/", CarseLogic::PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
 					if(sndFilename.empty())
 						cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
 						<< " (specified by \"" << filename << "\")" << endl;
@@ -398,3 +616,4 @@ EngineSoundProfile CarseGame::Logic::createEngineSoundProfileFromFile(const stri
 
 	return profile;
 }
+

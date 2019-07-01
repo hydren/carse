@@ -101,8 +101,9 @@ void Pseudo3DCourse::Spec::LandscapeStyle::loadFromFile(const string& filename, 
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------
-void Pseudo3DCourse::Spec::parseProperties(const string& filename, const CarseGameLogicInstance& logic)
+void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 {
+	CarseLogic& logic = CarseLogic::getInstance();
 	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
 	string key;
 
@@ -127,7 +128,7 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename, const CarseGa
 	if(prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "custom")
 	{
 		// attempts to set a preset style and, if not found or unspecified, set the default
-		assignStyle(logic.instance.getPresetRoadStyle(prop.get(key)));
+		assignStyle(logic.getPresetRoadStyle(prop.get(key)));
 		presetRoadStyleName = prop.get(key);
 	}
 	else  // reads style from course spec
@@ -141,7 +142,7 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename, const CarseGa
 	if(prop.containsKey(key) and not prop.get(key).empty() and prop.get(key) != "custom")
 	{
 		// attempts to set a preset style and, if not found or unspecified, set the default
-		assignStyle(logic.instance.getPresetLandscapeStyle(prop.get(key)));
+		assignStyle(logic.getPresetLandscapeStyle(prop.get(key)));
 		presetLandscapeStyleName = prop.get(key);
 	}
 	else  // reads style from course spec

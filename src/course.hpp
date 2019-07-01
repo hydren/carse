@@ -45,13 +45,13 @@ struct Pseudo3DCourse
 		inline operator std::string() const { return this->toString(); }
 
 		/* Loads data from the given filename, parse its course spec data and store in this object. */
-		void loadFromFile(const std::string& filename, const CarseGameLogicInstance&);
+		void loadFromFile(const std::string& filename);
 
 		/* Saves this course spec. to the given filename. */
 		void saveToFile(const std::string& filename);
 
 		/* Creates a course spec. by loading and parsing the data in the given filename. */
-		inline static Spec createFromFile(const std::string& filename, const CarseGameLogicInstance& logic) { Spec spec(0, 0); spec.loadFromFile(filename, logic); return spec; }
+		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
 
 		/* Generates a debug course spec. */
 		static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
@@ -100,7 +100,7 @@ struct Pseudo3DCourse
 		}
 
 		private:
-		void parseProperties(const std::string& filename, const CarseGameLogicInstance&);
+		void parseProperties(const std::string& filename);
 		void loadSegments(const std::string& filename);
 		void storeProperties(const std::string& specFile, const std::string& segmentsFile);
 		void saveSegments(const std::string& filename);

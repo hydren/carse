@@ -434,16 +434,9 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 {
 	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
 
-	float currentCurve = 0;
-
-	const bool range1 = true,//rand()%2,
-			   range2 = true,//rand;()%2,
-			   range3 = true;//rand;()%2;
-	const float range1size = random_between_decimal(0, 1500),
-				range2size = random_between_decimal(0, 1500),
-				range3size = random_between_decimal(0, 1500);
-
 	// generating random course
+	float currentCurve = 0, currentSlopeScale = 0;
+	unsigned currentSlopeStart = 0, currentSlopeCycle = 1;
 	for(unsigned i = 0; i < length; i++)
 	{
 		CourseSpec::Segment line;
@@ -456,16 +449,24 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 			else if(rand() % 50 == 0)
 				currentCurve = random_between_decimal(-curveness, curveness);
 		}
-
 		else if(currentCurve != 0 and rand() % 100 == 0)
 			currentCurve = 0;
 
 		line.curve = currentCurve;
 
-		// fixme this should be parametrized, or at least random
-		if(i > 750 and i < 1510 and range1) line.y = sin(i/30.0)*range1size;
-		if(i > 1510 and i < 2270 and range2) line.y = sin(i/30.0)*range2size;
-		if(i > 2270 and i < 3030 and range3) line.y = sin(i/30.0)*range3size;
+		if(currentSlopeScale == 0)
+		{
+			if(rand() % 500 == 0)
+			{
+				currentSlopeScale = random_between_decimal(0, 1500);
+				currentSlopeCycle = 20 * currentSlopeScale / segmentLength;
+				currentSlopeStart = i;
+			}
+		}
+		else if(currentSlopeScale != 0 and (i - currentSlopeStart) % currentSlopeCycle == 0 and rand()%2 == 0)
+			currentSlopeScale = 0;
+
+		line.y = currentSlopeScale != 0? currentSlopeScale * sin(M_PI * (i - currentSlopeStart)/(float) currentSlopeCycle) : 0;
 
 		if(rand() % 10 == 0)
 		{

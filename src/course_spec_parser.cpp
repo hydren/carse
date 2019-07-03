@@ -184,8 +184,13 @@ void Pseudo3DCourse::Spec::parseProperties(const string& filename)
 
 	colorHorizon = prop.getParsedAllowDefault<Color, parseColor>("horizon_color", colorOffRoadPrimary);
 
-	float length = prop.getParsedCStrAllowDefault<double, atof>("course_length", 6400);
-	lines.resize(length);
+	unsigned segmentCount = prop.getParsedCStrAllowDefault<int, atoi>("segment_count", 6400);
+	if(prop.containsKey("course_length") and not prop.get("course_length").empty())
+	{
+		segmentCount = prop.getParsedCStrAllowDefault<double, atof>("course_length", (double) segmentCount);
+		cout << "warning: usage of \"course_length\" property is deprecated; use \"segment_count\" property instead." << endl;
+	}
+	lines.resize(segmentCount);
 
 	const string specifiedSegmentFilename = prop.getIfContains("segment_file", "Missing segment file for course!");
 	segmentFilename = getContextualizedFilename(specifiedSegmentFilename, baseDir);
@@ -268,7 +273,7 @@ void Pseudo3DCourse::Spec::storeProperties(const string& filename, const string&
 	prop.put("segment_file", segmentsFilename);
 	prop.put("segment_length", to_string((int)roadSegmentLength));
 	prop.put("road_width", to_string((int)roadWidth));
-	prop.put("course_length", to_string(lines.size()));
+	prop.put("segment_count", to_string(lines.size()));
 
 	if(not musicFilename.empty())
 		prop.put("music", musicFilename);

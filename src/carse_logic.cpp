@@ -184,7 +184,7 @@ void CarseLogic::setNextCourseRandom()
 
 void CarseLogic::setNextCourseDebug()
 {
-	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateDebugCourseSpec(200, 3000);
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateDebugCourseSpec();
 	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 

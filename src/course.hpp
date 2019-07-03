@@ -54,7 +54,7 @@ struct Pseudo3DCourse
 		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
 
 		/* Generates a debug course spec. */
-		static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
+		static Spec generateDebugCourseSpec();
 
 		/* Generates a random course spec, with given length and curveness factor. */
 		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);

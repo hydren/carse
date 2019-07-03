@@ -396,9 +396,9 @@ const Pseudo3DCourse::Spec::LandscapeStyle Pseudo3DCourse::Spec::LandscapeStyle:
 // ====================== built-in generators =============================================================================
 
 //static
-Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segmentLength, float roadWidth)
+Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec()
 {
-	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
+	Pseudo3DCourse::Spec spec(200, 3000);
 	for(unsigned i = 0; i < 1600; i++)  // generating hardcoded course
 	{
 		CourseSpec::Segment line;

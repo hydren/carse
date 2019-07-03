@@ -458,7 +458,7 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 		{
 			if(rand() % 500 == 0)
 			{
-				currentSlopeScale = random_between_decimal(0, 1500);
+				currentSlopeScale = random_between_decimal(0.1 * segmentLength, 1500);
 				currentSlopeCycle = 20 * currentSlopeScale / segmentLength;
 				currentSlopeStart = i;
 			}

@@ -56,8 +56,8 @@ struct Pseudo3DCourse
 		/* Generates a debug course spec. */
 		static Spec generateDebugCourseSpec();
 
-		/* Generates a random course spec, with given length and curveness factor. */
-		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
+		/* Generates a random course spec using the given parameters. Note: course length will be equal to (segment lentgh x segment count) */
+		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, unsigned segmentCount, float curveness);
 
 		struct RoadStyle {
 			fgeal::Color roadPrimary, roadSecondary, humblePrimary, humbleSecondary;

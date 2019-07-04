@@ -603,7 +603,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		if(generateButton.bounds.contains(x, y))
 		{
 			sndCursorIn->play();
-			Pseudo3DCourse::Spec spec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+			Pseudo3DCourse::Spec spec = Pseudo3DCourse::Spec::createRandom(200, 3000, 6400, 1.5);
 
 			const vector<string> roadStyleList = game.logic.getPresetRoadStylesNames();
 			selectedRoadStyleIndex = futil::random_between(0, roadStyleList.size());

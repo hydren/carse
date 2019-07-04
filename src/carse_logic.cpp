@@ -177,14 +177,14 @@ void CarseLogic::setNextCourse(const Pseudo3DCourse::Spec& c)
 
 void CarseLogic::setNextCourseRandom()
 {
-	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateRandomCourseSpec(200, 3000, 6400, 1.5);
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::createRandom(200, 3000, 6400, 1.5);
 	nextMatchCourseSpec.assignStyle(this->getRandomPresetRoadStyle());
 	nextMatchCourseSpec.assignStyle(this->getRandomPresetLandscapeStyle());
 }
 
 void CarseLogic::setNextCourseDebug()
 {
-	nextMatchCourseSpec = Pseudo3DCourse::Spec::generateDebugCourseSpec();
+	nextMatchCourseSpec = Pseudo3DCourse::Spec::createDebug();
 	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 }
 

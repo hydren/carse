@@ -54,10 +54,10 @@ struct Pseudo3DCourse
 		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
 
 		/* Generates a debug course spec. */
-		static Spec generateDebugCourseSpec();
+		static Spec createDebug();
 
 		/* Generates a random course spec using the given parameters. Note: course length will be equal to (segment lentgh x segment count) */
-		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, unsigned segmentCount, float curveness);
+		static Spec createRandom(float segmentLength, float roadWidth, unsigned segmentCount, float curveness);
 
 		struct RoadStyle {
 			fgeal::Color roadPrimary, roadSecondary, humblePrimary, humbleSecondary;

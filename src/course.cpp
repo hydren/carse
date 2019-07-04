@@ -430,17 +430,18 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec()
 }
 
 //static
-Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmentLength, float roadWidth, unsigned length, float curveness)
+Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmentLength, float roadWidth, unsigned segmentCount, float curveness)
 {
-	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
+	Spec spec(segmentLength, roadWidth);
+	spec.lines.resize(segmentCount);
 
 	// generating random course
 	float currentCurve = 0, currentSlopeScale = 0;
 	unsigned currentSlopeStart = 0, currentSlopeCycle = 1;
-	for(unsigned i = 0; i < length; i++)
+	for(unsigned i = 0; i < segmentCount; i++)
 	{
-		CourseSpec::Segment line;
-		line.z = i*spec.roadSegmentLength;
+		Segment& line = spec.lines[i];
+		line.z = i*segmentLength;
 
 		if(currentCurve == 0)
 		{
@@ -483,8 +484,6 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 			line.propIndex = 2;
 			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
-
-		spec.lines.push_back(line);
 	}
 
 	spec.spritesFilenames.push_back(string());

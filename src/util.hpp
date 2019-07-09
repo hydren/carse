@@ -11,6 +11,7 @@
 #include "fgeal/filesystem.hpp"
 
 #include <string>
+#include <cmath>
 
 #define scaledToSize(imgPtr, size) (size).getWidth()/(float)((imgPtr)->getWidth()), (size).getHeight()/(float)((imgPtr)->getHeight())
 #define scaledToRect(imgPtr, rect) (rect).w/(float)((imgPtr)->getWidth()), (rect).h/(float)((imgPtr)->getHeight())

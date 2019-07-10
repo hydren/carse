@@ -465,7 +465,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 		and (isValueSpecified(prop, key2) or isValueSpecified(prop, key3)))  // ratios can be obtained by specifing height or ratio itself
 		{
 			// adjust scale factor to account for width/height ratio discrepancies
-			const float spriteVehicleHeight = atoi(prop.get(key).c_str()),  // the vehicle width on the sprite, in pixels
+			const float spriteVehicleHeight = atoi(prop.get(key).c_str()),  // the vehicle height on the sprite, in pixels
 						spriteWHRatio = ((float) spec.depictedVehicleWidth) / spriteVehicleHeight;  // sprite width/height (WH) ratio
 
 			// the real-life vehicle height (if available), in mm.
@@ -484,10 +484,17 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 			spec.scale.y = (vehicleWidth / fixedDepictedVehicleWidth) * (24.0/895.0);
 			spec.scale.x = spec.scale.y * ratioFixFactor;
 		}
-		else  // no data about vehicle height or width/height ratio given; assume no no width/height ratio discrepancies between real-life
+		else  // no data about vehicle height or width/height ratio given; assume no width/height ratio discrepancies between real-life
 		{
 			spec.scale.x = spec.scale.y = (vehicleWidth /(float) spec.depictedVehicleWidth) * (24.0/895.0);  // recommended scale factor assuming no width/height ratio discrepancies
 		}
+	}
+	else if(isValueSpecified(prop, "vehicle_height") and isValueSpecified(prop, "sprite_vehicle_height"))
+	{
+		const float vehicleHeight = atof(prop.get("vehicle_height").c_str()),  // the real-life vehicle height, in mm
+					spriteVehicleHeight = atoi(prop.get("sprite_vehicle_height").c_str());  // the vehicle height on the sprite, in pixels
+
+		spec.scale.x = spec.scale.y = (vehicleHeight / spriteVehicleHeight) * (24.0/895.0);  // recommended scale factor assuming no width/height ratio discrepancies
 	}
 
 	key = "sprite_scale";

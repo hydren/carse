@@ -63,6 +63,8 @@ static const float
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
+static const float SPRITE_WORLD_SCALE_FACTOR = 24.0/895.0;
+
 void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 {
 	CarseLogic& logic = CarseLogic::getInstance();
@@ -188,7 +190,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 	if(isValueSpecified(prop, key))
 		centerOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
 	else
-		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a 300ZX Z32
+		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * (sprite.scale.x / SPRITE_WORLD_SCALE_FACTOR);  // proportion aprox. of a 300ZX Z32
 
 	key = "center_of_gravity_height";
 	if(isValueSpecified(prop, key))
@@ -216,7 +218,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 
 		if(wheelbase == -1)
 		{
-			wheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a 300ZX Z32
+			wheelbase = 2.5251f * sprite.depictedVehicleWidth * (sprite.scale.x / SPRITE_WORLD_SCALE_FACTOR);  // proportion aprox. of a 300ZX Z32
 		}
 	}
 }
@@ -476,12 +478,12 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 						ratioFixFactor = vehicleWHRatio / spriteWHRatio;  // multiplier that makes the sprite width/height ratio match the real-life width/height ratio
 
 			// recommended scale factors, making sprite width/height ratio match the real-life width/height ratio
-			spec.scale.x = (vehicleWidth / spec.depictedVehicleWidth) * (24.0/895.0);
+			spec.scale.x = (vehicleWidth / spec.depictedVehicleWidth) * SPRITE_WORLD_SCALE_FACTOR;
 			spec.scale.y = spec.scale.x / ratioFixFactor;
 		}
 		else  // no data about vehicle height or width/height ratio given; assume no width/height ratio discrepancies between real-life
 		{
-			spec.scale.x = spec.scale.y = (vehicleWidth / spec.depictedVehicleWidth) * (24.0/895.0);  // recommended scale factor assuming no width/height ratio discrepancies
+			spec.scale.x = spec.scale.y = (vehicleWidth / spec.depictedVehicleWidth) * SPRITE_WORLD_SCALE_FACTOR;  // recommended scale factor assuming no width/height ratio discrepancies
 		}
 	}
 	else if(isValueSpecified(prop, "vehicle_height") and isValueSpecified(prop, "sprite_vehicle_height"))  // otherwise if vehicle height is available, compute recommended scale factor
@@ -496,12 +498,12 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 						ratioFixFactor = vehicleWHRatio / spriteWHRatio;  // multiplier that makes the sprite width/height ratio match the real-life width/height ratio
 
 			// recommended scale factors, making sprite width/height ratio match the real-life width/height ratio
-			spec.scale.y = (vehicleHeight / spriteVehicleHeight) * (24.0/895.0);
+			spec.scale.y = (vehicleHeight / spriteVehicleHeight) * SPRITE_WORLD_SCALE_FACTOR;
 			spec.scale.x = spec.scale.y * ratioFixFactor;
 		}
 		else  // no data about vehicle width/height ratio given; assume no width/height ratio discrepancies between real-life
 		{
-			spec.scale.x = spec.scale.y = (vehicleHeight / spriteVehicleHeight) * (24.0/895.0);  // recommended scale factor assuming no width/height ratio discrepancies
+			spec.scale.x = spec.scale.y = (vehicleHeight / spriteVehicleHeight) * SPRITE_WORLD_SCALE_FACTOR;  // recommended scale factor assuming no width/height ratio discrepancies
 		}
 	}
 

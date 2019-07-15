@@ -7,7 +7,7 @@
 
 #include "vehicle.hpp"
 
-#include "carse_game.hpp"
+#include "carse_logic.hpp"
 
 #include "util.hpp"
 
@@ -17,7 +17,6 @@
 #include "futil/round.h"
 
 #include <exception>
-#include <algorithm>
 #include <cstdlib>
 #include <cmath>
 
@@ -64,8 +63,11 @@ static const float
 	// for the time being, assume 70% efficiency
 	DEFAULT_TRANSMISSION_EFFICIENCY = 0.7;
 
+static const float SPRITE_WORLD_SCALE_FACTOR = 24.0/895.0;
+
 void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 {
+	CarseLogic& logic = CarseLogic::getInstance();
 	Properties prop;
 	prop.load(filename);
 
@@ -109,8 +111,10 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 
 	// read sound data if a custom one is specified
 	key = "sound";
-	if(prop.containsKey(key) and prop.get(key) == "custom")
-		soundProfile = createEngineSoundProfileFromFile(filename);
+	if(prop.get(key) == "custom")
+		soundProfile = CarseLogic::createEngineSoundProfileFromFile(filename);
+	else if(prop.get(key) != "no")
+		soundProfile = logic.getPresetEngineSoundProfile(prop.get(key));
 
 	// sprite data
 	prop.put("filename", filename);  // done so we can later get properties filename
@@ -123,7 +127,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 		key = "alternate_sprite_sheet" + futil::to_string(i) + "_definition_file";
 		if(isValueSpecified(prop, key))
 		{
-			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+			const string alternateSpritePropFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 			if(alternateSpritePropFile.empty())
 			{
 				cout << "warning: alternate sprite sheet " << i << " definition file could not be found!"
@@ -149,7 +153,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 			key = "alternate_sprite_sheet" + futil::to_string(i) + "_file";
 			if(isValueSpecified(prop, key))
 			{
-				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+				const string alternateSpriteSheetFile = getContextualizedFilename(prop.get(key), prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 				if(alternateSpriteSheetFile.empty())
 				{
 					cout << "warning: alternate sprite sheet " << i << " file could not be found!"
@@ -186,7 +190,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 	if(isValueSpecified(prop, key))
 		centerOfGravityHeight = 0.5f*atof(prop.get(key).c_str());  // aprox. half the height
 	else
-		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a 300ZX Z32
+		centerOfGravityHeight = 0.3506f * sprite.depictedVehicleWidth * (sprite.scale.x / SPRITE_WORLD_SCALE_FACTOR);  // proportion aprox. of a 300ZX Z32
 
 	key = "center_of_gravity_height";
 	if(isValueSpecified(prop, key))
@@ -214,7 +218,7 @@ void Pseudo3DVehicle::Spec::loadFromFile(const string& filename)
 
 		if(wheelbase == -1)
 		{
-			wheelbase = 2.5251f * sprite.depictedVehicleWidth * sprite.scale.x * 895.0/24.0;  // proportion aprox. of a 300ZX Z32
+			wheelbase = 2.5251f * sprite.depictedVehicleWidth * (sprite.scale.x / SPRITE_WORLD_SCALE_FACTOR);  // proportion aprox. of a 300ZX Z32
 		}
 	}
 }
@@ -409,7 +413,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
 
 	if(not spec.sheetFilename.empty() and spec.sheetFilename != "default")
-		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+		spec.sheetFilename = getContextualizedFilename(spec.sheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 	if(spec.sheetFilename == "default" or spec.sheetFilename.empty())
 	{
@@ -453,38 +457,53 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 			keepAspectRatio = true;
 	}
 
-	key = "vehicle_width";
-	if(isValueSpecified(prop, key))  // if vehicle width is available, compute recommended scale factor
+	if(isValueSpecified(prop, "vehicle_width"))  // if vehicle width is available, compute recommended scale factor
 	{
-		const float vehicleWidth = atoi(prop.get(key).c_str());  // the real-life vehicle width, in mm
+		const float vehicleWidth = atof(prop.get("vehicle_width").c_str());  // the real-life vehicle width, in mm
 
 		key = "sprite_vehicle_height"; key2 = "vehicle_height"; key3 = "vehicle_width_height_ratio";
 		if(not keepAspectRatio and isValueSpecified(prop, key)  // if vehicle height (both real-life and in sprite) are available, adjust scale factor (if allowed)
 		and (isValueSpecified(prop, key2) or isValueSpecified(prop, key3)))  // ratios can be obtained by specifing height or ratio itself
 		{
 			// adjust scale factor to account for width/height ratio discrepancies
-			const float spriteVehicleHeight = atoi(prop.get(key).c_str()),  // the vehicle width on the sprite, in pixels
-						spriteWHRatio = ((float) spec.depictedVehicleWidth) / spriteVehicleHeight;  // sprite width/height (WH) ratio
+			const float spriteVehicleHeight = atoi(prop.get(key).c_str()),  // the vehicle height on the sprite, in pixels
+						spriteWHRatio = spec.depictedVehicleWidth / spriteVehicleHeight,  // sprite width/height (WH) ratio
+						vehicleHeight = isValueSpecified(prop, key2)? atof(prop.get(key2).c_str()) : -1;  // the real-life vehicle height (if available), in mm.
 
-			// the real-life vehicle height (if available), in mm.
-			const float vehicleHeight = isValueSpecified(prop, key2)? atoi(prop.get(key2).c_str()) : -1;
-
-			if(vehicleHeight == 0)
-				throw std::invalid_argument("vehicle height is zero!");
+			if(vehicleHeight == 0 and not isValueSpecified(prop, key3))
+				throw std::invalid_argument("vehicle height must not be specified as zero");
 
 			const float vehicleWHRatio = isValueSpecified(prop, key3)? atof(prop.get(key3).c_str())  // if real-life width/height ratio is available, prefer to use it
-															   : (vehicleWidth / vehicleHeight);  // otherwise calculate it from the available real-life width and height
-
-			const float ratioFixFactor = vehicleWHRatio / spriteWHRatio,  // multiplier that makes the sprite width/height ratio match the real-life width/height ratio
-						fixedDepictedVehicleWidth = spec.depictedVehicleWidth * ratioFixFactor;  // corrected in-sprite width
+																	: (vehicleWidth / vehicleHeight),  // otherwise calculate it from the available real-life width and height
+						ratioFixFactor = vehicleWHRatio / spriteWHRatio;  // multiplier that makes the sprite width/height ratio match the real-life width/height ratio
 
 			// recommended scale factors, making sprite width/height ratio match the real-life width/height ratio
-			spec.scale.y = (vehicleWidth / fixedDepictedVehicleWidth) * (24.0/895.0);
+			spec.scale.x = (vehicleWidth / spec.depictedVehicleWidth) * SPRITE_WORLD_SCALE_FACTOR;
+			spec.scale.y = spec.scale.x / ratioFixFactor;
+		}
+		else  // no data about vehicle height or width/height ratio given; assume no width/height ratio discrepancies between real-life
+		{
+			spec.scale.x = spec.scale.y = (vehicleWidth / spec.depictedVehicleWidth) * SPRITE_WORLD_SCALE_FACTOR;  // recommended scale factor assuming no width/height ratio discrepancies
+		}
+	}
+	else if(isValueSpecified(prop, "vehicle_height") and isValueSpecified(prop, "sprite_vehicle_height"))  // otherwise if vehicle height is available, compute recommended scale factor
+	{
+		const float vehicleHeight = atof(prop.get("vehicle_height").c_str()),  // the real-life vehicle height, in mm
+					spriteVehicleHeight = atoi(prop.get("sprite_vehicle_height").c_str());  // the vehicle height on the sprite, in pixels
+
+		if(not keepAspectRatio and isValueSpecified(prop, "vehicle_width_height_ratio"))
+		{
+			const float vehicleWHRatio = atof(prop.get("vehicle_width_height_ratio").c_str()),  // vehicle width/height (WH) ratio
+						spriteWHRatio = spec.depictedVehicleWidth / spriteVehicleHeight,  // sprite width/height (WH) ratio
+						ratioFixFactor = vehicleWHRatio / spriteWHRatio;  // multiplier that makes the sprite width/height ratio match the real-life width/height ratio
+
+			// recommended scale factors, making sprite width/height ratio match the real-life width/height ratio
+			spec.scale.y = (vehicleHeight / spriteVehicleHeight) * SPRITE_WORLD_SCALE_FACTOR;
 			spec.scale.x = spec.scale.y * ratioFixFactor;
 		}
-		else  // no data about vehicle height or width/height ratio given; assume no no width/height ratio discrepancies between real-life
+		else  // no data about vehicle width/height ratio given; assume no width/height ratio discrepancies between real-life
 		{
-			spec.scale.x = spec.scale.y = (vehicleWidth /(float) spec.depictedVehicleWidth) * (24.0/895.0);  // recommended scale factor assuming no width/height ratio discrepancies
+			spec.scale.x = spec.scale.y = (vehicleHeight / spriteVehicleHeight) * SPRITE_WORLD_SCALE_FACTOR;  // recommended scale factor assuming no width/height ratio discrepancies
 		}
 	}
 
@@ -637,7 +656,19 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 
 	key = "sprite_frame_duration";
-	spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.25;
+	if(prop.get(key) == "dynamic")
+	{
+		spec.frameDurationProportionalToSpeed = true;
+		spec.frameDuration = -1;
+	}
+	else
+	{
+		spec.frameDurationProportionalToSpeed = false;
+		spec.frameDuration = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 0.25;
+	}
+
+	key = "sprite_animation_speed_factor";
+	spec.animationSpeedFactor = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : 1.0;
 
 	key = "brakelights_sprite_filename";
 	spec.brakelightsSheetFilename = prop.get(key);
@@ -651,7 +682,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 	}
 	else if(not spec.brakelightsSheetFilename.empty() and spec.brakelightsSheetFilename != "none")
 	{
-		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+		spec.brakelightsSheetFilename = getContextualizedFilename(spec.brakelightsSheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 		if(spec.brakelightsSheetFilename.empty())
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
@@ -762,7 +793,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 	else if(not spec.shadowSheetFilename.empty())
 	{
-		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CarseGame::Logic::VEHICLES_FOLDER+"/");
+		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 		if(spec.shadowSheetFilename.empty())
 			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
@@ -792,95 +823,4 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 
 		spec.shadowPositions.push_back(shadowPosition);
 	}
-}
-
-// ========================================================================================================================
-
-EngineSoundProfile Pseudo3DVehicle::Spec::createEngineSoundProfileFromFile(const string& filename)
-{
-	EngineSoundProfile profile;
-	Properties prop;
-	prop.load(filename);
-
-	const string baseDir = filename.substr(0, filename.find_last_of("/\\")+1);
-	const short maxRpm = prop.getParsedCStrAllowDefault<int, atoi>("engine_maximum_rpm", 7000);
-	profile.allowRpmPitching = true;
-
-	const string baseKey = "sound";
-	if(prop.containsKey(baseKey))
-	{
-		if(prop.get(baseKey) == "none")
-		{
-			profile.ranges.clear();
-		}
-		else if(prop.get(baseKey) == "custom")
-		{
-			string key = baseKey + "_rpm_pitching";
-			if(isValueSpecified(prop, key))
-			{
-				string value = futil::trim(prop.get(key));
-				if(value == "false" or value == "no")
-					profile.allowRpmPitching = false;
-			}
-
-			key = baseKey + "_count";
-			unsigned soundCount = prop.getParsedCStrAllowDefault<int, atoi>(key, 16);
-
-			for(unsigned i = 0; i < soundCount; i++)
-			{
-				const string subBaseKey = baseKey + futil::to_string(i);
-				if(prop.containsKey(subBaseKey))
-				{
-					const string sndFilename = getContextualizedFilename(prop.get(subBaseKey), baseDir, CarseGame::Logic::VEHICLES_FOLDER+"/", CarseGame::Logic::PRESET_ENGINE_SOUND_PROFILES_FOLDER+"/");
-					if(sndFilename.empty())
-						cout << "warning: sound file \"" << prop.get(subBaseKey) << "\" could not be found!"  // todo use default sound?
-						<< " (specified by \"" << filename << "\")" << endl;
-
-					// now try to read _rpm property
-					key = subBaseKey + "_rpm";
-					short rpm = -1;
-					if(prop.containsKey(key))
-						rpm = atoi(prop.get(key).c_str());
-
-					// if rpm < 0, either rpm wasn't specified, or was intentionally left -1 (or other negative number)
-					if(rpm < 0)
-					{
-						if(i == 0) rpm = 0;
-						else       rpm = (maxRpm - profile.ranges.rbegin()->startRpm)/2;
-					}
-
-					key = subBaseKey + "_depicted_rpm";
-					short depictedRpm = -1;
-					if(prop.containsKey(key))
-						depictedRpm = atoi(prop.get(key).c_str());
-
-					key = subBaseKey + "_pitch_factor";
-					if(prop.containsKey(key))
-					{
-						const double pitchFactor = atof(prop.get(key).c_str());
-						if(pitchFactor > 0)
-							depictedRpm = rpm*pitchFactor;
-					}
-
-					if(depictedRpm < 0)
-						depictedRpm = rpm;
-
-					if(depictedRpm == 0)
-						depictedRpm = 1;  // to avoid division by zero
-
-					// save filename and settings for given rpm
-					const EngineSoundProfile::RangeProfile range = {rpm, depictedRpm, sndFilename};
-					profile.ranges.push_back(range);
-				}
-				else cout << "warning: missing expected entry \"" << subBaseKey << "\" (specified by \"" << filename << "\")" << endl;
-			}
-
-			struct RangeProfileCompare { static bool function(const EngineSoundProfile::RangeProfile& p1, const EngineSoundProfile::RangeProfile& p2) { return p1.startRpm < p2.startRpm; } };
-			std::stable_sort(profile.ranges.begin(), profile.ranges.end(), RangeProfileCompare::function);
-		}
-		else
-			throw std::logic_error("properties specify a preset profile instead of a custom one");
-	}
-
-	return profile;
 }

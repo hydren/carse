@@ -11,7 +11,6 @@
 
 #include "motor.hpp"
 #include "mechanics.hpp"
-#include "engine_sound.hpp"
 
 struct VehicleSpec
 {
@@ -76,9 +75,6 @@ struct VehicleSpec
 	std::string engineConfiguration, engineAspiration, engineValvetrain;
 	unsigned engineDisplacement, engineValveCount;
 	float engineMaximumPower, engineMaximumPowerRpm, engineMaximumTorqueRpm;
-
-	// sound data
-	EngineSoundProfile soundProfile;
 };
 
 #endif /* AUTOMOTIVE_VEHICLE_SPEC_HPP_ */

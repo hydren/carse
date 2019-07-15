@@ -18,7 +18,7 @@
 #include "course_editor_state.hpp"
 
 CarseGame::CarseGame()
-: Game("Carse", null, 800, 600), logic(), sharedResources(null)
+: Game("Carse", null, 800, 600), logic(CarseLogic::getInstance()), sharedResources(null)
 {
 	this->maxFps = 60;
 }

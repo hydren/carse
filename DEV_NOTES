@@ -1,8 +1,5 @@
 # to do
 
-- Add inline-5 engine sound profile;
-- Fix traffic behind the player vehicle not being drawn over it;
-- Fix behavior when changing height: horizon should move, not just back ground;
 - Add opponent cars;
 - Add option to specify custom vehicle portrait;
 - Add option to specify custom vehicle rotating sprite (for showroom);
@@ -14,7 +11,7 @@
 - Add option for vehicle to specify custom smoke;
 - Add gear shifting sounds;
 - Add option for vehicle to specify custom gear shifting sound;
-- Re-attempt to create jumping physics. Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite;
+- Try to find a solution to the problem regarding the vehicle's shadow being fixed on the sprite when jumping;
 - Add transition effects to each game state (fade in / fade out);
 - Introduce dynamic horizontal and vertical tilt when making turns or passing slopes, for a better animation;
 - Introduce dynamic zoom perturbations to give a fake sense of depth when accelerating or braking, for a better animation;
@@ -30,25 +27,58 @@
 
 # bugs
 
-- Fix incorrect tire animation speed.
+- Fix traffic behind the player vehicle not being drawn over it;
+- Fix behavior when changing height or going through slopes: horizon should move, not just background (actually, 3 different camera behaviors can be implemented, see notes on it)
 - Fix the game's physics calculations regarding torque/power. Currently, torque is incorrect most of the time.
 - Fix power at lower RPMs, as RPM is being set as its minimum before power computation
 - Test specifying custom shadow sprite/layer positions.
 
 # misc.
 
-A formula to calculate jumping trajectory/speed:
+## On "jumping" slopes
 
-When (PosY > segment.y) immediately after a step with (PosY <= segment.y)
-verticalSpeed = vehicle.body.speed * sin(slopeAngle)
-PosY += verticalSpeed * dt   
+Previous notes mentioned formula regarding the speed needed to jump of a slope, but these calculations are surpassed by actually implementing vertical speed (in slopes) and acceleration (gravity, basically).
 
-Then while (PosY > segment.y), update:
-verticalSpeed += gravity * dt
-PosY += verticalSpeed * dt
+## On camera/background behavior on slopes
 
-from https://physics.stackexchange.com/questions/175381/speed-needed-to-make-a-car-jump-from-a-ramp
+By doing research, it was noted that there are 3 distinct camera/background behaviors on slopes on most pseudo-3D racing games:
+
+#### Type 1: constant 90-degree camera polar angle, constant camera height, constant background height, with leaned vehicle sprites (Road Rash, tutorials, etc). 
+
+In this scheme, the camera's polar angle is fixed at 90 degrees and its height also stays constant during slope ups and downs. The background stays at constant height as well and leaned vehicle sprites are
+needed/recommended during slopes. The only thing that changes is the road and vehicle height, with varies with the road's actual altitude. Also, the road right beneath the vehicle should appear slopped/curved 
+on slopes. This is the simplest approach, but has obvious problems when trying to implement anything more than simple hills. When trying to depict roads too high or too low, it gets outside the screen.
+
+#### Type 2: constant 90-degree camera polar angle, quasi-constant camera height, quasi-constant background height, with leaned sprites (arcade versions of Out Run, Chase H.Q, etc).
+
+In this scheme, the camera's polar angle is fixed at 90 degrees and its height also stays constant during slope ups and downs. However, the camera height will change slightly as the road's altitude changes.
+But since this altitute-related change is small, the camera height will stay roughly the same during most of the gameplay. The background height also stays constant during ups and down and changes (slightly) 
+only with road altitude. Leaned vehicle sprites are needed/recommended during slopes. Vehicle/road height, however, stays constant, as if they follow road altitude. Also, the road right beneath the vehicle 
+should appear slopped/curved on slopes This is also a simple approach, and fixes the altitude problems with the Type 1 scheme. The downside is, together with the Type 1, that additional leaned vehicle sprites
+are needed/recommended to get better visual results and besides, long slopes have a less immersive effect (like a following helicopter). 
+
+#### Type 3: camera polar angle perpendicular to the ground slope, "dynamic" camera height, dynamic background height, with no leaned vehicle sprites (Lotus series, Top Gear series, etc).
+
+In this scheme, the camera's polar angle is always perpendicular to the ground slope, as if the camera leaned as well. The camera height changes to stay at a constant distance to the ground. The background
+height changes dynamically, both according to the camera polar angle and (optionally) to the road altitude, aiding the visual effect of actually being behicle the player's vehicle. In this scheme, no leaned
+vehicle sprites are necessary, since the player is never supposed to see the vehicle from other polar angles (not to be confused with azimuth angles). The road's height (and hence, the vehicle's) stays the
+same on screen, since the camera is following it. Also, the road right beneath the vehicle should appear flat at all times. This is a more complex approach, since it involves changing the geometry of road 
+segment drawing, according to the vehicle's slope/leaning angle. The upside of this approach is that it does not require additional leaned vehicle sprites to get better visual results and besides, have a 
+more immersive effect (like a following camera). Other game examples: Lamborghini American Challenge, Jaguar XJ220, Hang On
+
+##### Note that Types 2 and 3 can be combined to create a even more dynamic and immersive effect (as seen in the arcade version of Special Criminal Investivation, Hot Chase, Full Throttle).
+
+##### Table with comparison:
+
+  Type |            Camera polar angle             |             Background height             |               Camera height               | Vehicle/Road height | leaned sprites |     Game examples      
+ ------|-------------------------------------------|-------------------------------------------|-------------------------------------------|---------------------|----------------|------------------------ 
+  A    | constant 90-degree                        | constant                                  | constant to the world                     | dynamic             | yes            | Road Rash              
+  B    | constant 90-degree                        | quasi-constant, varies with road altitude | quasi-constant, varies with road altitude | constant            | yes            | Out Run, Chase HQ      
+  C    | dynamic, perpendicular to the slope angle | dynamic                                   | constant to the ground                    | constant            | no             | Top Gear, Lotus series 
+
+####
 
 # brainstorm
 
 Speedometer design with dynamic backlight: lights up circular disc behind the speedometer's pointer.
+Toggle icons on vehicle selection state that indicates whether the sprite support multi-states, multi-frames, asymetrical sprites, leaned sprites, custom shadow, etc... 

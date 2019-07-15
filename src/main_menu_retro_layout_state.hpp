@@ -9,12 +9,12 @@
 #define MAIN_MENU_CLASSIC_LAYOUT_STATE_HPP_
 #include <ciso646>
 
+#include "util.hpp"
+
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 
 #include "futil/language.hpp"
-
-#include "util.hpp"
 
 class CarseGame;
 

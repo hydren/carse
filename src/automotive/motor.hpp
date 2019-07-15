@@ -44,8 +44,8 @@ struct Engine
 			POWER_BAND_TORQUEY,       // peak power at 73.2% of RPM range / peak torque at 55.1% of RPM range
 			POWER_BAND_SEMI_TORQUEY,  // peak power at 84.3% of RPM range / peak torque at 54.4% of RPM range
 			POWER_BAND_WIDE,          // peak power at 97.6% of RPM range / peak torque at 55.1% of RPM range
-			//POWER_BAND_QUASIFLAT      // peak power at 100% of RPM range / constant torque from 1000 RPM on
-			//POWER_BAND_TYPICAL_ELECTRIC
+//			POWER_BAND_QUASIFLAT      // peak power at 100% of RPM range / constant torque from 1000 RPM on
+//			POWER_BAND_TYPICAL_ELECTRIC
 		};
 
 		/** Returns the preficted fraction of the maximum torque output in the given RPM. */
@@ -63,9 +63,6 @@ struct Engine
 		 *  If 'rpmMaxPowerPtr' is not null, stores the RPM of maximum power on the variable.
 		 *  If 'maxPowerPtr' is not null, stores the maximum normalized power on the variable. */
 		static TorqueCurveProfile createAsSingleQuadratic(float maxRpm, PowerBandType powerBandtype, float* rpmMaxPowerPtr=null, float* maxNormPowerPtr=null);
-
-		private:
-		static void queryParameters(Engine::TorqueCurveProfile::PowerBandType type, float& initialTorqueFactor, float& redlineTorqueFactor);
 	};
 
 	Engine(float maxRpm=7000, float maxPower=300, TorqueCurveProfile::PowerBandType powerBand=TorqueCurveProfile::POWER_BAND_TYPICAL, unsigned gearCount=5);
@@ -76,7 +73,7 @@ struct Engine
 	void reset();
 
 	/** Returns this engine's torque in the current RPM. */
-	float getCurrentTorque();
+	inline float getCurrentTorque() { return this->getTorqueAt(this->rpm); }
 
 	/** Returns this engine's torque in the given RPM. */
 	float getTorqueAt(float rpm);

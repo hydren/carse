@@ -9,8 +9,9 @@
 #define PSEUDO3D_VEHICLE_HPP_
 #include <ciso646>
 
-#include "pseudo3d/vehicle_gfx.hpp"
 #include "automotive/vehicle_spec.hpp"
+#include "automotive/engine_sound.hpp"
+#include "pseudo3d/vehicle_gfx.hpp"
 #include "fgeal/extra/sprite.hpp"
 
 #include <string>
@@ -26,23 +27,24 @@ struct Pseudo3DVehicle
 		// additional alternate graphics data (optional)
 		std::vector<Pseudo3DVehicleAnimationSpec> alternateSprites;
 
+		// sound data (optional)
+		EngineSoundProfile soundProfile;
+
 		/* Loads data from the given filename, parse its vehicle spec data and store in this object. */
 		void loadFromFile(const std::string& filename);
 
 		/* Creates a vehicle spec. by loading and parsing the data in the given filename. */
 		inline static Spec createFromFile(const std::string& filename) { Spec spec; spec.loadFromFile(filename); return spec; }
-
-		/* Creates a engine sound profile by loading and parsing the data in the given filename. */
-		static EngineSoundProfile createEngineSoundProfileFromFile(const std::string& filename);
 	};
 
 	// physics simulation
 	Mechanics body;
 
 	// logic data
-	float position, horizontalPosition, verticalPosition;
-	float pseudoAngle, strafeSpeed, curvePull, corneringStiffness;
-	float verticalSpeed;
+	float position, horizontalPosition, verticalPosition;  // positions
+	float strafeSpeed, verticalSpeed;  // velocities ("forward" speed is in body class)
+	float pseudoAngle, corneringStiffness, curvePull;  // "curving" variables
+	float virtualOrientation;  // "virtual" vehicle orientation angle in the map (which direction is pointing in map)
 	bool onAir, onLongAir;
 	bool isTireBurnoutOccurring, isCrashing;
 

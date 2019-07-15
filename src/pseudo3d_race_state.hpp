@@ -33,8 +33,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	fgeal::Vector2D lastDisplaySize;
 
-	fgeal::Font* fontSmall, *fontCountdown, *font3, *fontDev;
-	fgeal::Image* imgBackground, *imgCacheTachometer, *imgStopwatch;
+	fgeal::Font* fontSmall, *fontTiny, *fontCountdown, *fontTimers, *fontDev;
+	fgeal::Image* imgStopwatch;
 	fgeal::Music* music;
 
 	fgeal::Sound* sndWheelspinBurnoutIntro, *sndWheelspinBurnoutLoop,
@@ -44,10 +44,9 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 				 *sndCountdownBuzzer, *sndCountdownBuzzerFinal;
 
 	fgeal::Color bgColor, bgColorHorizon;
-	fgeal::Sprite* spriteSmoke;
+	fgeal::Sprite* spriteSmoke, *spriteBackground;
 
-	fgeal::Point parallax;
-	float backgroundScale;
+	float verticalBackgroundParallax;
 
 	// value used to convert physics position to course segment position
 	float coursePositionFactor;
@@ -124,15 +123,23 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 			or type == RACE_TYPE_POINT_TO_POINT_TIME_TRIAL;
 	}
 
+	enum HudType
+	{
+		HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO,
+		HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO,
+		HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO,
+		HUD_TYPE_COUNT
+	};
+
 	struct RaceSettings
 	{
 		RaceType raceType;
 		unsigned lapCountGoal;
 		float trafficDensity;
 		bool isImperialUnit;
-		bool useBarTachometer;
-		bool useCachedTachometer;
-		std::string hudTachometerPointerImageFilename;
+		HudType hudType;
+		bool useCachedDialGauge;
+		std::string hudDialGaugePointerImageFilename;
 	};
 
 	private:
@@ -156,7 +163,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	// HUD stuff --------------------------------------------------------------
 	Pseudo3DCourse::Map minimap;
 
-	Hud::DialGauge<float> hudDialTachometer;
+	Hud::DialGauge<float> hudDialTachometer, hudDialSpeedometer;
 	Hud::BarGauge<float> hudBarTachometer;
 	Hud::NumericalDisplay<float> hudSpeedometer;
 	Hud::NumericalDisplay<int> hudGearDisplay;
@@ -166,7 +173,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 	fgeal::Color hudMiniMapBgColor;
 
 	float rightHudMargin, offsetHudLapGoal;
-	fgeal::Point posHudCountdown, posHudFinishedCaption;
+	fgeal::Point posSpeedUnit, posHudCountdown, posHudFinishedCaption;
 
 	fgeal::Rectangle stopwatchIconBounds;
 
@@ -231,6 +238,7 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 
 	private:
 	void handlePhysics(float delta);
+	void drawDebugInfo();
 
 	void shiftGear(int gear);
 

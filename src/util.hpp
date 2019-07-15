@@ -11,25 +11,39 @@
 #include "fgeal/filesystem.hpp"
 
 #include <string>
+#include <cmath>
 
 #define scaledToSize(imgPtr, size) (size).getWidth()/(float)((imgPtr)->getWidth()), (size).getHeight()/(float)((imgPtr)->getHeight())
 #define scaledToRect(imgPtr, rect) (rect).w/(float)((imgPtr)->getWidth()), (rect).h/(float)((imgPtr)->getHeight())
 
-// device-independent pixel (size based on a 480px tall display); can only be used if there is a 'display' instance in the scope
-#define dip(px) (px*(display.getHeight()/480.0))
-
-// returns a spaced outline, like a margin or something
-inline fgeal::Rectangle getSpacedOutline(const fgeal::Rectangle& bounds, float spacing)
+// functor to produce a resolution-relative size (size based on a 480px tall display)
+struct FontSizer
 {
-	const fgeal::Rectangle outline = {
-		bounds.x - spacing,
-		bounds.y - spacing,
-		bounds.w + 2*spacing,
-		bounds.h + 2*spacing
-	};
+	const unsigned referenceSize;
+	FontSizer(unsigned rs) : referenceSize(rs) {}
+	inline unsigned operator()(unsigned size) const { return size * referenceSize / 480.f; }
+};
 
-	return outline;
+template <typename T>
+inline int sgn(T val)
+{
+    return (T(0) < val) - (val < T(0));
 }
+
+template <typename T>
+static inline T pow2(T val)
+{
+	return val*val;
+}
+
+inline float fractional_part(float value)
+{
+	return value - (int) value;
+}
+
+#if __cplusplus < 201103L
+	inline double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
+#endif
 
 /** Attempt to get a contextualized filename.
  *  First it attempts to check if "baseDir1 + specifiedFilename" is a valid file and returns it if true.

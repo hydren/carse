@@ -8,20 +8,13 @@
 #include "pseudo3d_race_state.hpp"
 
 #include "carse_game.hpp"
+#include "util.hpp"
 
 using std::vector;
 
-template <typename T>
-static inline int sgn(T val)
-{
-    return (T(0) < val) - (val < T(0));
-}
-
-template <typename T>
-static inline T pow2(T val)
-{
-	return val*val;
-}
+#include <iostream>
+using std::cout; using std::endl;
+// XXX DEBUG
 
 /* Tire coefficients
  *
@@ -52,13 +45,14 @@ static const float TIRE_FRICTION_COEFFICIENT_DRY_ASPHALT = 0.85,
 
 				   PSEUDO_ANGLE_MAX = 1.0,
 				   STEERING_SPEED = 2.0,
-				   MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0;  // == 1kph
+				   MINIMUM_SPEED_ALLOW_TURN = 1.0/36.0,  // == 1kph
+				   MINIMUM_SPEED_CORNERING_LEECH = 10;  // == 36kph
 
 void Pseudo3DRaceState::handlePhysics(float delta)
 {
 	const unsigned courseSegmentIndex = static_cast<int>(playerVehicle.position * coursePositionFactor / course.spec.roadSegmentLength) % course.spec.lines.size();
 	const CourseSpec::Segment& courseSegment = course.spec.lines[courseSegmentIndex];
-	const float corneringForceLeechFactor = (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.25 : 0.5),
+	const float corneringForceLeechFactor = playerVehicle.body.speed > MINIMUM_SPEED_CORNERING_LEECH? (playerVehicle.body.vehicleType == Mechanics::TYPE_BIKE? 0.4 : 0.5) : 0,
 				wheelAngleFactor = 1 - corneringForceLeechFactor*fabs(playerVehicle.pseudoAngle)/PSEUDO_ANGLE_MAX,
 				maxStrafeSpeed = MAXIMUM_STRAFE_SPEED_FACTOR * playerVehicle.corneringStiffness;
 
@@ -115,6 +109,9 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 	// update strafe position
 	playerVehicle.horizontalPosition += (playerVehicle.strafeSpeed - playerVehicle.curvePull)*delta;
 
+	// update "virtual" orientation
+	playerVehicle.virtualOrientation += courseSegment.curve * playerVehicle.body.speed * delta;  // FIXME get a proper formula for this, instead of this rough approximation
+
 	if(enableJumpSimulation)
 	{
 		if(playerVehicle.onAir)
@@ -137,7 +134,6 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 			if(playerVehicle.verticalPosition - courseSegment.y > 500)
 				playerVehicle.onLongAir = true;
 		}
-
 	}
 	else
 	{
@@ -145,16 +141,28 @@ void Pseudo3DRaceState::handlePhysics(float delta)
 		playerVehicle.verticalPosition = courseSegment.y;
 	}
 
-	// update bg parallax
-	parallax.x -= courseSegment.curve*playerVehicle.body.speed*0.025;
-	parallax.y -= 2*playerVehicle.body.slopeAngle;
+	// verify for prop collision
+	if(courseSegment.propIndex != -1)
+	{
+		const CourseSpec::Prop& prop = course.spec.props[courseSegment.propIndex];
+		if(prop.blocking)
+		{
+			const float pw = playerVehicle.spriteSpec.depictedVehicleWidth * playerVehicle.sprites.back()->scale.x * 7,
+						px = playerVehicle.horizontalPosition * coursePositionFactor - 0.5f*pw,
+						tx = courseSegment.propX * coursePositionFactor * 10;  // FIXME fix this formula because it does not behave correctly for different sized props
 
-	if(parallax.x < -(2.0f*imgBackground->getWidth()-game.getDisplay().getWidth()))
-		parallax.x += imgBackground->getWidth();
+			cout << "pw=" << pw << " px=" << px << " tx=" << tx << endl;
+			if(not (px + pw < tx or px > tx))
+			{
+				cout << "collided with prop" << endl;
+				playerVehicle.position += (1.f - playerVehicle.body.speed) * delta;  // revert progress and pushes back the car a little bit
+				playerVehicle.body.speed = -1;
+				playerVehicle.isCrashing = true;
+			}
+		}
+	}
 
-	if(parallax.x > 0)
-		parallax.x -= imgBackground->getWidth();
-
+	// verify for traffic collision
 	foreach(Pseudo3DVehicle&, trafficVehicle, vector<Pseudo3DVehicle>, trafficVehicles)
 	{
 		trafficVehicle.body.rollingResistanceFactor = ROLLING_RESISTANCE_COEFFICIENT_DRY_ASPHALT;

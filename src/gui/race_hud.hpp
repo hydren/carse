@@ -28,18 +28,8 @@ namespace Hud
 {
 	/** A generic dial-type gauge. Can drawn either custom images or native primitives.
 	 *  To drawn using custom images, the image's fields must be non-null. Otherwise native versions will be drawn. */
-	template <typename NumberType>
-	struct DialGauge
+	struct GenericDialGauge
 	{
-		/** the value to measure. */
-		const NumberType& value;
-
-		/** the minimum and maximum expected values. */
-		NumberType min, max;
-
-		/** the grade's size. */
-		NumberType graduationPrimarySize, graduationSecondarySize, graduationTertiarySize;
-
 		/** this widget's dimensions and position. */
 		fgeal::Rectangle bounds;
 
@@ -72,6 +62,12 @@ namespace Hud
 
 		/** The font used to display graduation values. If null, no graduation values are shown. */
 		fgeal::Font* graduationFont;
+
+		/** an optional, relative offset, from the center, to the position of graduation values, in the range ]0, 1] */
+		float graduationValuePositionOffset;
+
+		/** the (non-zero) size of the line of each graduation level, in the range ]0, 1] */
+		float graduationPrimaryLineSize, graduationSecondaryLineSize, graduationTertiaryLineSize;
 
 		/** An optional scaling factor for the graduation values shown. It's better used if set power of 10, like 0.1, 0.01, 0.001, etc. */
 		float graduationValueScale;
@@ -114,30 +110,39 @@ namespace Hud
 
 		public:
 
-		DialGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
-		: value(var), min(min), max(max),
-		  graduationPrimarySize(), graduationSecondarySize(), graduationTertiarySize(),
-		  bounds(bounds), angleMin(0.25*M_PI), angleMax(1.75*M_PI),
-		  backgroundColor(fgeal::Color::WHITE),
-		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
-		  needleThickness(2.0f), needleColor(fgeal::Color::RED),
-		  boltRadius(16.0f), boltColor(fgeal::Color::BLACK),
-		  graduationColor(fgeal::Color::BLACK), graduationFont(null),
-		  graduationValueScale(1.0), graduationLevel(1),
-		  fixationOffset(0), pointerOffset(0), pointerSizeScale(1.0),
-		  backgroundImage(null), foregroundImage(null), pointerImage(null), imagesAreShared(false)
+		GenericDialGauge(const fgeal::Rectangle& bounds=fgeal::Rectangle());
+		~GenericDialGauge();
+
+		void compile(float min, float max, float graduationPrimarySize, float graduationSecondarySize, float graduationTertiarySize, float graduationValueOffset);
+		void draw(float angle);
+		void drawBackground();
+	};
+
+	/** A value-typed version of the GenericDialGauge. It holds value parameters and a reference to the main value to measure.
+	 *  Note that the type must be able to be cast to float, support arithmetic operations and support comparations. */
+	template <typename NumberType>
+	struct DialGauge extends public GenericDialGauge
+	{
+		/** the value to measure. */
+		const NumberType& value;
+
+		/** the minimum and maximum expected values. */
+		NumberType min, max;
+
+		/** the grade's size. */
+		NumberType graduationPrimarySize, graduationSecondarySize, graduationTertiarySize;
+
+		/** an optional value that is offset'd from each graduation interval (except the first). */
+		NumberType graduationValueOffset;
+
+		public:
+
+		DialGauge(const NumberType& var, NumberType min=NumberType(), NumberType max=NumberType(), const fgeal::Rectangle& bounds=fgeal::Rectangle())
+		: GenericDialGauge(bounds),
+		  value(var), min(min), max(max),
+		  graduationPrimarySize(), graduationSecondarySize(), graduationTertiarySize(), graduationValueOffset(0)
 		{
 			setRecommendedGraduationSizes();
-		}
-
-		~DialGauge()
-		{
-			if(not imagesAreShared)
-			{
-				if(pointerImage != null)    delete pointerImage;
-				if(backgroundImage != null) delete backgroundImage;
-				if(foregroundImage != null) delete foregroundImage;
-			}
 		}
 
 		void setRecommendedGraduationSizes()
@@ -149,135 +154,19 @@ namespace Hud
 
 		void compile()
 		{
-			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
-
-			graduationPrimaryCache.clear();
-			graduationPrimaryNumericCache.clear();
-			graduationSecondaryCache.clear();
-			graduationTertiaryCache.clear();
-
-			if(graduationLevel >= 1)  // primary graduation
-			for(NumberType g = min; graduationLevel > 0 and g <= max; g += graduationPrimarySize)
-			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				graduationPrimaryCache.push_back(Line(center.x + 0.4*bounds.w*sin(gAngle), center.y + 0.4*bounds.h*cos(gAngle),
-				                                      center.x + 0.5*bounds.w*sin(gAngle), center.y + 0.5*bounds.h*cos(gAngle)));
-
-				// numerical graduation
-				if(graduationFont != null)
-				{
-					const std::string str = futil::to_string(g * graduationValueScale);
-					graduationPrimaryNumericCache.push_back(NumericGraduation(str, center.x + 0.35*bounds.w*sin(gAngle) - 0.5*graduationFont->getTextWidth(str),
-							                                                       center.y + 0.35*bounds.h*cos(gAngle) - 0.5*graduationFont->getHeight()));
-				}
-			}
-
-			if(graduationLevel >= 2)  // secondary graduation
-			for(NumberType g = min; g <= max; g += graduationSecondarySize)
-			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				graduationSecondaryCache.push_back(Line(center.x + 0.44*bounds.w*sin(gAngle), center.y + 0.44*bounds.h*cos(gAngle),
-								                        center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
-			}
-
-			if(graduationLevel >= 3)  // tertiary graduation
-			for(NumberType g = min; g <= max; g += graduationTertiarySize)
-			{
-				const float gAngle = -((angleMax-angleMin)*g + angleMin*max - angleMax*min)/(max-min);
-				graduationTertiaryCache.push_back(Line(center.x + 0.46*bounds.w*sin(gAngle), center.y + 0.46*bounds.h*cos(gAngle),
-								                       center.x + 0.50*bounds.w*sin(gAngle), center.y + 0.50*bounds.h*cos(gAngle)));
-			}
-
-			if(backgroundImage != null)
-			{
-				backgroundImageScale.x = bounds.w/backgroundImage->getWidth();
-				backgroundImageScale.y = bounds.h/backgroundImage->getHeight();
-			}
-
-			if(foregroundImage != null)
-			{
-				foregroundImageScale.x = bounds.w/foregroundImage->getWidth();
-				foregroundImageScale.y = bounds.h/foregroundImage->getHeight();
-			}
-
-			if(pointerImage != null)
-				pointerImageScale.x = pointerImageScale.y = 0.5*pointerSizeScale*bounds.h/pointerImage->getHeight();
-		}
-
-		void drawBackground()
-		{
-			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
-
-			if(backgroundImage != null)
-				backgroundImage->drawScaled(bounds.x, bounds.y, backgroundImageScale.x, backgroundImageScale.y);
-			else
-			{
-				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*bounds.w, 0.5*bounds.h, borderColor);
-				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*(bounds.w-borderThickness), 0.5*(bounds.h-borderThickness), backgroundColor);
-			}
-
-			if(graduationLevel >= 1)  // primary graduation
-			for(unsigned i = 0; i < graduationPrimaryCache.size(); i++)
-			{
-				const Line& line = graduationPrimaryCache[i];
-				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
-				// numerical graduation
-				if(graduationFont != null and i < graduationPrimaryNumericCache.size())
-				{
-					const NumericGraduation& grad = graduationPrimaryNumericCache[i];
-					graduationFont->drawText(grad.str, grad.x, grad.y, graduationColor);
-				}
-			}
-
-			if(graduationLevel >= 2)  // secondary graduation
-			for(unsigned i = 0; i < graduationSecondaryCache.size(); i++)
-			{
-				const Line& line = graduationSecondaryCache[i];
-				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
-			}
-
-			if(graduationLevel >= 3)  // tertiary graduation
-			for(unsigned i = 0; i < graduationTertiaryCache.size(); i++)
-			{
-				const Line& line = graduationTertiaryCache[i];
-				fgeal::Graphics::drawLine(line.x1, line.y1, line.x2, line.y2, graduationColor);
-			}
+			GenericDialGauge::compile(min, max, graduationPrimarySize, graduationSecondarySize, graduationTertiarySize, graduationValueOffset);
 		}
 
 		void draw()
 		{
-			this->drawBackground();
-
-			const fgeal::Point center = {bounds.x + 0.5f*bounds.w, bounds.y + 0.5f*bounds.h};
-			const float angle = -((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min);
-
-			if(pointerImage != null)
-				pointerImage->drawScaledRotated(bounds.x + 0.5*bounds.w, bounds.y + 0.5*bounds.h + fixationOffset, pointerImageScale.x, pointerImageScale.y, angle, 0.5*pointerImage->getWidth(), pointerOffset);
-
-			else  // draw built-in, gfx-primitives-based needle as pointer
-			{
-				fgeal::Graphics::drawLine(
-						center.x + pointerOffset*sin(angle), center.y + pointerOffset*cos(angle) + fixationOffset,
-						center.x + 0.4*(pointerSizeScale*bounds.w+pointerOffset)*sin(angle), center.y + 0.4*(pointerSizeScale*bounds.h+pointerOffset)*cos(angle), needleColor);
-				fgeal::Graphics::drawFilledEllipse(center.x, center.y, 0.5*boltRadius*bounds.w/bounds.h, 0.5*boltRadius*bounds.h/bounds.w, boltColor);
-			}
-
-			if(foregroundImage != null)
-				foregroundImage->drawScaled(bounds.x, bounds.y, foregroundImageScale.x, foregroundImageScale.y);
+			GenericDialGauge::draw(-((angleMax-angleMin)*value + angleMin*max - angleMax*min)/(max-min));
 		}
 	};
 
 	// todo improve BarGauge with more options
-	/** A bar-type gauge */
-	template <typename NumberType>
-	struct BarGauge
+	/** A generic bar-type gauge */
+	struct GenericBarGauge
 	{
-		/** the value to measure. */
-		const NumberType& value;
-
-		/** the minimum and maximum expected values. */
-		NumberType min, max;
-
 		/** this widget's dimensions and position. */
 		fgeal::Rectangle bounds;
 
@@ -293,37 +182,43 @@ namespace Hud
 		/** The needle's color. */
 		fgeal::Color fillColor;
 
-		BarGauge(const NumberType& var, NumberType min, NumberType max, const fgeal::Rectangle& bounds)
-		: value(var), min(min), max(max),
-		  bounds(bounds),
-		  backgroundColor(fgeal::Color::WHITE),
-		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK),
-		  fillColor(fgeal::Color::RED)
+		GenericBarGauge(const fgeal::Rectangle& bounds=fgeal::Rectangle());
+		void draw(float fillRatio);
+	};
+
+	/** A value-typed version of the GenericBarGauge class. It holds value parameters and a reference to the main value to measure.
+	 *  Note that the type must be able to be cast to float, support arithmetic operations and support comparations */
+	template <typename NumberType>
+	struct BarGauge extends public GenericBarGauge
+	{
+		/** the value to measure. */
+		const NumberType& value;
+
+		/** the minimum and maximum expected values. */
+		NumberType min, max;
+
+		BarGauge(const NumberType& var, NumberType min=NumberType(), NumberType max=NumberType(), const fgeal::Rectangle& bounds=fgeal::Rectangle())
+		: GenericBarGauge(bounds),
+		  value(var), min(min), max(max)
 		{}
 
 		void draw()
 		{
-			const float fillRatio = (value-min)/(max-min);
-			fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
-			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-											  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
-			fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-											  fillRatio*(bounds.w - borderThickness), bounds.h - borderThickness, fillColor);
+			GenericBarGauge::draw((std::min(value, max)-min)/(max-min));
 		}
 	};
 
-	/** A widget that displays a numeric value, possibly stylised. Note: 32-char max; value will be cast to int. */
-	template <typename NumberType>
-	struct NumericalDisplay
+	/** A widget that displays a numeric/text value, possibly stylised. */
+	struct GenericNumericalDisplay
 	{
-		/** the value to show. */
-		const NumberType& value;
-
 		/** An optional scaling factor for the value shown. */
 		float valueScale;
 
 		/** this widget's dimensions and position. */
 		fgeal::Rectangle bounds;
+
+		/** the minimum spacing between the border and the text. */
+		fgeal::Vector2D padding;
 
 		/** The background color. */
 		fgeal::Color backgroundColor;
@@ -346,54 +241,52 @@ namespace Hud
 		/** If true, indicates that the font is shared, and thus, should not be deleted when this display is deleted. */
 		bool fontIsShared;
 
+		GenericNumericalDisplay(const fgeal::Rectangle& bounds=fgeal::Rectangle(), fgeal::Font* font=null);
+		~GenericNumericalDisplay();
+
+		void draw(const std::string& valueStr);
+		void pack(unsigned char digitCount=1);
+	};
+
+	/** A value-typed version of the GenericNumericalDisplay class. Note that the type must be able to be cast to int.
+	 *  Also, this class has a 32-char max. */
+	template <typename NumberType>
+	struct NumericalDisplay extends public GenericNumericalDisplay
+	{
+		/** the value to show. */
+		const NumberType& value;
+
 		/** Optional mapping of specific values to its string representations. */
 		std::map<NumberType, std::string> specialCases;
 
-		protected:
-
-		/** A buffer to convert value to string. */
-		char stringBuffer[32];
-
-		public:
-
-		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
-		: value(var), valueScale(1.0), bounds(bounds),
-		  backgroundColor(fgeal::Color::WHITE), disableBackground(false),
-		  borderThickness(2.0f), borderColor(fgeal::Color::BLACK), displayColor(fgeal::Color::GREEN),
-		  font(font), fontIsShared(false)
+		NumericalDisplay(const NumberType& var, const fgeal::Rectangle& bounds=fgeal::Rectangle(), fgeal::Font* font=null)
+		: GenericNumericalDisplay(bounds, font),
+		  value(var)
 		{}
-
-		~NumericalDisplay()
-		{
-			if(font != null and not fontIsShared)
-				delete font;
-		}
 
 		void draw()
 		{
-			if(not disableBackground)
-			{
-				fgeal::Graphics::drawFilledRectangle(bounds.x, bounds.y, bounds.w, bounds.h, borderColor);
-				fgeal::Graphics::drawFilledRectangle(bounds.x + 0.5*borderThickness, bounds.y + 0.5*borderThickness,
-												  bounds.w - borderThickness, bounds.h - borderThickness, backgroundColor);
-			}
-
 			if(specialCases.count(value))
-				font->drawText(specialCases[value], bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+				GenericNumericalDisplay::draw(specialCases[value]);
 			else
 			{
-				sprintf(stringBuffer, "%d", static_cast<int>(value*valueScale));
-				font->drawText(std::string(stringBuffer), bounds.x + borderThickness, bounds.y + 0.5*borderThickness, displayColor);
+				static char buffer[32];
+				sprintf(buffer, "%d", static_cast<int>(value*valueScale));
+				GenericNumericalDisplay::draw(buffer);
 			}
+		}
 
+		inline void packToValue(NumberType maxValue)
+		{
+			pack(maxValue == 0? 1 : log10(maxValue*valueScale) + 1);
 		}
 	};
 
 	/** A widget that displays a time, possibly stylised. The variable is expected to be in millisec. If not, assign a proper value scale to match. */
 	template<typename TimeType>
-	struct TimerDisplay extends NumericalDisplay<TimeType>
+	struct TimerDisplay extends public NumericalDisplay<TimeType>
 	{
-		TimerDisplay(const TimeType& var, const fgeal::Rectangle& bounds, fgeal::Font* font)
+		TimerDisplay(const TimeType& var, const fgeal::Rectangle& bounds=fgeal::Rectangle(), fgeal::Font* font=null)
 		: NumericalDisplay<TimeType>(var, bounds, font),
 		  showMillisec(false)
 		{}
@@ -412,8 +305,9 @@ namespace Hud
 			int timeMs = this->value*this->valueScale;
 			int timeSec = timeMs/1000; timeMs -= timeSec*1000;
 			int timeMin = timeSec/60; timeSec -= timeMin*60;
-			sprintf(this->stringBuffer, "%02d:%02d:%03d", timeMin, timeSec, timeMs);
-			this->font->drawText(std::string(this->stringBuffer), this->bounds.x + this->borderThickness, this->bounds.y + 0.5*this->borderThickness, this->displayColor);
+			static char buffer[32];
+			sprintf(buffer, "%02d:%02d:%03d", timeMin, timeSec, timeMs);
+			this->font->drawText(buffer, this->bounds.x + this->borderThickness, this->bounds.y + 0.5*this->borderThickness, this->displayColor);
 		}
 	};
 }

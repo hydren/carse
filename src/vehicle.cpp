@@ -22,8 +22,10 @@ using fgeal::Sprite;
 Pseudo3DVehicle::Pseudo3DVehicle()
 : body(Engine(), Mechanics::TYPE_OTHER),
   position(), horizontalPosition(), verticalPosition(),
-  pseudoAngle(), strafeSpeed(), curvePull(), corneringStiffness(),
-  verticalSpeed(0), onAir(false), onLongAir(false),
+  strafeSpeed(), verticalSpeed(),
+  pseudoAngle(), corneringStiffness(), curvePull(),
+  virtualOrientation(),
+  onAir(false), onLongAir(false),
   isTireBurnoutOccurring(false), isCrashing(false),
   engineSound(), spriteSpec(), sprites(), brakelightSprite(null), shadowSprite(null), smokeSprite(null),
   spriteAssetsAreShared(false), soundAssetsAreShared(false)
@@ -79,9 +81,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData()
 	for(unsigned i = 0; i < spriteSpec.stateCount; i++)
 	{
 		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
-									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
-									0, i*spriteSpec.frameHeight);
-
+				spriteSpec.frameDurationProportionalToSpeed? 1.0 : spriteSpec.frameDuration, spriteSpec.stateFrameCount[i], 0, i*spriteSpec.frameHeight);
 		sprite->scale = spriteSpec.scale;
 		sprites.push_back(sprite);
 	}
@@ -89,9 +89,7 @@ void Pseudo3DVehicle::loadGraphicAssetsData()
 	if(spriteSpec.asymmetrical) for(unsigned i = 1; i < spriteSpec.stateCount; i++)
 	{
 		fgeal::Sprite* sprite = new fgeal::Sprite(sheet, spriteSpec.frameWidth, spriteSpec.frameHeight,
-									spriteSpec.frameDuration, spriteSpec.stateFrameCount[i],
-									0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
-
+				spriteSpec.frameDurationProportionalToSpeed? 1.0 : spriteSpec.frameDuration, spriteSpec.stateFrameCount[i], 0, (spriteSpec.stateCount-1 + i)*spriteSpec.frameHeight);
 		sprite->scale = spriteSpec.scale;
 		sprites.push_back(sprite);
 	}
@@ -204,9 +202,8 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 
 	Sprite& sprite = *sprites[animationIndex];
 	sprite.flipmode = isLeanRight and not spriteSpec.asymmetrical? Image::FLIP_HORIZONTAL : Image::FLIP_NONE;
-//	sprite.duration = body.speed != 0? 0.1*400.0/(body.speed*sprite.numberOfFrames) : 999;  // sometimes work, sometimes don't
-	sprite.duration = spriteSpec.frameDuration / sqrt(body.speed);  // this formula doesn't present good tire animation results.
-//	sprite.duration = body.speed != 0? 2.0*M_PI*body.tireRadius/(body.speed*sprite.numberOfFrames) : -1;  // this formula should be the physically correct, but still not good visually.
+	if(spriteSpec.frameDurationProportionalToSpeed)
+		sprite.frameDuration = body.wheelAngularSpeed != 0? spriteSpec.animationSpeedFactor * 2.0*M_PI / (body.wheelAngularSpeed * sprite.frameSequence.size()) : -1;
 	sprite.computeCurrentFrame();
 
 	const Vector2D originalSpriteScale = sprite.scale;
@@ -223,7 +220,7 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 		shadowSprite->scale *= distanceScale;
 
 		const Point& shadowPosition = spriteSpec.shadowPositions[animationIndex];
-		shadowSprite->currentFrameSequenceIndex = animationIndex;
+		shadowSprite->frameSequenceCurrentIndex = animationIndex;
 		shadowSprite->flipmode = sprite.flipmode;
 
 		shadowSprite->draw(
@@ -244,7 +241,7 @@ void Pseudo3DVehicle::draw(float x, float y, float angle, float distanceScale, f
 		brakelightSprite->scale *= distanceScale;
 
 		if(spriteSpec.brakelightsMultipleSprites)
-			brakelightSprite->currentFrameSequenceIndex = animationIndex;
+			brakelightSprite->frameSequenceCurrentIndex = animationIndex;
 
 		const float scaledBrakelightPositionX = spriteSpec.brakelightsPositions[animationIndex].x * sprite.scale.x,
 					scaledBrakelightPositionY = spriteSpec.brakelightsPositions[animationIndex].y * sprite.scale.y,

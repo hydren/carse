@@ -72,7 +72,6 @@ void MainMenuRetroLayoutState::initialize()
 void MainMenuRetroLayoutState::onEnter()
 {
 	Display& display = game.getDisplay();
-
 	const float w = display.getWidth(),
 				h = display.getHeight(),
 				titleHeaderHeight = 0.2 * w,
@@ -83,8 +82,9 @@ void MainMenuRetroLayoutState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != w or lastDisplaySize.y != h)
 	{
-		fntTitle->setFontSize(dip(32));
-		fntMain->setFontSize(dip(18));
+		const FontSizer fs(display.getHeight());
+		fntTitle->setSize(fs(32));
+		fntMain->setSize(fs(18));
 		lastDisplaySize.x = w;
 		lastDisplaySize.y = h;
 	}
@@ -130,13 +130,13 @@ void MainMenuRetroLayoutState::onEnter()
 	);
 
 	imgVehicle = new Image(vspec.sheetFilename);
-	scaleVehiclePreview.x = vspec.scale.x * display.getWidth() * 0.0037;
-	scaleVehiclePreview.y = vspec.scale.y * display.getWidth() * 0.0037;
+	scaleVehiclePreview.x = vspec.scale.x * display.getWidth() * 0.0037f;
+	scaleVehiclePreview.y = vspec.scale.y * display.getWidth() * 0.0037f;
 	rtSrcVehiclePreview.x = rtSrcVehiclePreview.y = 0;
 	rtSrcVehiclePreview.w = vspec.frameWidth;
 	rtSrcVehiclePreview.h = vspec.frameHeight;
-	ptVehiclePreview.x = slotMenuItemVehicle.x + 0.500*slotMenuItemVehicle.w - 0.5*vspec.frameWidth  * scaleVehiclePreview.x;
-	ptVehiclePreview.y = slotMenuItemVehicle.y + 0.625*slotMenuItemVehicle.h - 0.5*vspec.frameHeight * scaleVehiclePreview.y;
+	ptVehiclePreview.x = slotMenuItemVehicle.x + 0.5f * slotMenuItemVehicle.w - scaleVehiclePreview.x * 0.5f * vspec.frameWidth;
+	ptVehiclePreview.y = slotMenuItemVehicle.y + 0.8f * slotMenuItemVehicle.h - scaleVehiclePreview.y * (vspec.frameHeight - vspec.contactOffset);
 }
 
 void MainMenuRetroLayoutState::onLeave()
@@ -183,7 +183,7 @@ void MainMenuRetroLayoutState::render()
 				imgExitScaleY = 0.75f*slotMenuItemExit.h/imgExit->getHeight();
 	imgExit->drawScaled(imgExitX, imgExitY, imgExitScaleX, imgExitScaleY);
 
-	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.1*(display.getHeight() - fntTitle->getHeight()), Color::WHITE);
+	fntTitle->drawText(strTitle, 0.5*(display.getWidth() - fntTitle->getTextWidth(strTitle)), 0.1*(display.getHeight() - fntTitle->getTextHeight()), Color::WHITE);
 
 	game.sharedResources->fontDev.drawText(strVersion, 4, 4, Color::CREAM);
 }

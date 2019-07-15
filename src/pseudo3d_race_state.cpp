@@ -12,6 +12,7 @@
 #include "util.hpp"
 
 #include "futil/random.h"
+#include "futil/snprintf.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -22,6 +23,8 @@
 using std::string;
 using std::map;
 using std::vector;
+
+using futil::snprintf;
 
 using fgeal::Display;
 using fgeal::Graphics;
@@ -35,6 +38,7 @@ using fgeal::Sound;
 using fgeal::Music;
 using fgeal::Sprite;
 using fgeal::Point;
+using fgeal::Vector2D;
 using fgeal::Joystick;
 using fgeal::Rectangle;
 
@@ -44,11 +48,11 @@ const float Pseudo3DRaceState::MAXIMUM_STRAFE_SPEED_FACTOR = 30;  // undefined u
 
 static const float MINIMUM_SPEED_TO_SIDESLIP = 5.5556,  // == 20kph
 		GLOBAL_VEHICLE_SCALE_FACTOR = 0.0048828125,
-		BACKGROUND_POSITION_FACTOR = 0.509375;
-
-#if __cplusplus < 201103L
-	double trunc(double d){ return (d>0) ? floor(d) : ceil(d) ; }
-#endif
+		HORIZON_DISTANCE = 7.14,  // == 7.14km TODO use camera height instead in the horizon formula: 3.57*sqrt(cameraHeightInMeters)
+		BACKGROUND_HORIZONTAL_PARALLAX_FACTOR = 0.35 * HORIZON_DISTANCE,
+		BACKGROUND_VERTICAL_PARALLAX_FACTOR = 0.509375,
+		MPS_TO_MPH = 2.236936,  // m/s to mph conversion factor
+		MPS_TO_KPH = 3.6;  // m/s to km/h conversion factor
 
 // -------------------------------------------------------------------------------
 
@@ -56,8 +60,8 @@ int Pseudo3DRaceState::getId(){ return CarseGame::RACE_STATE_ID; }
 
 Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(),
-  fontSmall(null), fontCountdown(null), font3(null), fontDev(null),
-  imgBackground(null), imgCacheTachometer(null), imgStopwatch(null),
+  fontSmall(null), fontTiny(null), fontCountdown(null), fontTimers(null), fontDev(null),
+  imgStopwatch(null),
   music(null),
   sndWheelspinBurnoutIntro(null), sndWheelspinBurnoutLoop(null),
   sndSideslipBurnoutIntro(null), sndSideslipBurnoutLoop(null),
@@ -66,9 +70,7 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
   sndCountdownBuzzer(null), sndCountdownBuzzerFinal(null),
 
   bgColor(), bgColorHorizon(),
-  spriteSmoke(null),
-
-  parallax(), backgroundScale(),
+  spriteSmoke(null), spriteBackground(null), verticalBackgroundParallax(),
 
   coursePositionFactor(500), playerVehicleProjectionOffset(4), courseStartPositionOffset(0), simulationType(), enableJumpSimulation(),
   onSceneIntro(), onSceneFinish(), timerSceneIntro(), timerSceneFinish(), countdownBuzzerCounter(), settings(),
@@ -78,14 +80,15 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 
   showLegacyPlayerSprite(false),
 
-  hudDialTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
-  hudBarTachometer(playerVehicle.body.engine.rpm, 0, 0, Rectangle()),
-  hudSpeedometer(playerVehicle.body.speed, Rectangle(), null),
-  hudGearDisplay(playerVehicle.body.engine.gear, Rectangle(), null),
-  hudTimerCurrentLap(lapTimeCurrent, Rectangle(), null),
-  hudTimerBestLap(lapTimeBest, Rectangle(), null),
-  hudCurrentLap(lapCurrent, Rectangle(), null),
-  hudLapCountGoal(settings.lapCountGoal, Rectangle(), null),
+  hudDialTachometer(playerVehicle.body.engine.rpm),
+  hudDialSpeedometer(playerVehicle.body.speed),
+  hudBarTachometer(playerVehicle.body.engine.rpm),
+  hudSpeedometer(playerVehicle.body.speed),
+  hudGearDisplay(playerVehicle.body.engine.gear),
+  hudTimerCurrentLap(lapTimeCurrent),
+  hudTimerBestLap(lapTimeBest),
+  hudCurrentLap(lapCurrent),
+  hudLapCountGoal(settings.lapCountGoal),
 
   rightHudMargin(), offsetHudLapGoal(), posHudCountdown(), posHudFinishedCaption(),
 
@@ -107,11 +110,11 @@ Pseudo3DRaceState::Pseudo3DRaceState(CarseGame* game)
 Pseudo3DRaceState::~Pseudo3DRaceState()
 {
 	if(fontSmall != null) delete fontSmall;
+	if(fontTiny != null) delete fontTiny;
 	if(fontCountdown != null) delete fontCountdown;
-	if(font3 != null) delete font3;
+	if(fontTimers != null) delete fontTimers;
 
-	if(imgBackground != null) delete imgBackground;
-	if(imgCacheTachometer != null) delete imgCacheTachometer;
+	if(spriteBackground != null) delete spriteBackground;
 	if(imgStopwatch != null) delete imgStopwatch;
 	if(music != null) delete music;
 
@@ -132,8 +135,9 @@ Pseudo3DRaceState::~Pseudo3DRaceState()
 void Pseudo3DRaceState::initialize()
 {
 	fontSmall = new Font(game.sharedResources->font1Path);
+	fontTiny = new Font(game.sharedResources->font1Path);
 	fontCountdown = new Font(game.sharedResources->font2Path);
-	font3 = new Font(game.sharedResources->font1Path);
+	fontTimers = new Font(game.sharedResources->font1Path);
 
 	imgStopwatch = new Image("assets/stopwatch.png");
 
@@ -147,48 +151,43 @@ void Pseudo3DRaceState::initialize()
 	sndCountdownBuzzer = new Sound("assets/sound/countdown-buzzer.ogg", 0.8 * game.logic.masterVolume);
 	sndCountdownBuzzerFinal = new Sound("assets/sound/countdown-buzzer-final.ogg", 0.8 * game.logic.masterVolume);
 
-	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.25, true);
+	spriteSmoke = new Sprite(new Image("assets/smoke-sprite.png"), 32, 32, 0.036, true);
 
-	hudDialTachometer.borderThickness = 6;
-	hudDialTachometer.graduationLevel = 2;
-	hudDialTachometer.graduationPrimarySize = 1000;
-	hudDialTachometer.graduationSecondarySize = 100;
 	hudDialTachometer.graduationValueScale = 0.001;
 	hudDialTachometer.graduationFont = fontSmall;
 
-	hudBarTachometer.borderThickness = 6;
+	hudDialSpeedometer.graduationFont = fontTiny;
+	hudDialSpeedometer.angleMax = 1.5*M_PI;
+
 	hudBarTachometer.fillColor = Color::RED;
+	hudBarTachometer.backgroundColor = Color::_TRANSPARENT;
 
 	hudGearDisplay.font = fontSmall;
 	hudGearDisplay.fontIsShared = true;
-	hudGearDisplay.borderThickness = 6;
-	hudGearDisplay.borderColor = Color::LIGHT_GREY;
-	hudGearDisplay.backgroundColor = Color::BLACK;
 	hudGearDisplay.specialCases[0] = "N";
 	hudGearDisplay.specialCases[-1] = "R";
 
 	hudSpeedometer.font = new Font(game.sharedResources->font2Path);
 	hudSpeedometer.fontIsShared = false;
-	hudSpeedometer.disableBackground = true;
-	hudSpeedometer.displayColor = Color::WHITE;
-	hudSpeedometer.borderThickness = 0;
+	hudSpeedometer.borderColor = Color::LIGHT_GREY;
+	hudSpeedometer.backgroundColor = Color::BLACK;
 
-	hudCurrentLap.font = font3;
+	hudCurrentLap.font = fontTimers;
 	hudCurrentLap.fontIsShared = true;
 	hudCurrentLap.disableBackground = true;
 	hudCurrentLap.displayColor = Color::WHITE;
 
-	hudLapCountGoal.font = font3;
+	hudLapCountGoal.font = fontTimers;
 	hudLapCountGoal.fontIsShared = true;
 	hudLapCountGoal.disableBackground = true;
 	hudLapCountGoal.displayColor = Color::WHITE;
 
-	hudTimerCurrentLap.font = font3;
+	hudTimerCurrentLap.font = fontTimers;
 	hudTimerCurrentLap.fontIsShared = true;
 	hudTimerCurrentLap.disableBackground = true;
 	hudTimerCurrentLap.displayColor = Color::WHITE;
 
-	hudTimerBestLap.font = font3;
+	hudTimerBestLap.font = fontTimers;
 	hudTimerBestLap.fontIsShared = true;
 	hudTimerBestLap.disableBackground = true;
 	hudTimerBestLap.displayColor = Color::WHITE;
@@ -204,16 +203,20 @@ void Pseudo3DRaceState::initialize()
 void Pseudo3DRaceState::onEnter()
 {
 	Display& display = game.getDisplay();
+	const FontSizer fs(display.getHeight());
+	const float displayWidth = display.getWidth(),
+				displayHeight = display.getHeight();
 
 	// reload fonts if display size changed
-	if(lastDisplaySize.x != display.getWidth() or lastDisplaySize.y != display.getHeight())
+	if(lastDisplaySize.x != displayWidth or lastDisplaySize.y != displayHeight)
 	{
-		fontSmall->setFontSize(dip(10));
-		fontCountdown->setFontSize(dip(36));
-		font3->setFontSize(dip(24));
-		hudSpeedometer.font->setFontSize(dip(24));
-		lastDisplaySize.x = display.getWidth();
-		lastDisplaySize.y = display.getHeight();
+		fontSmall->setSize(fs(10));
+		fontTiny->setSize(fs(8));
+		fontCountdown->setSize(fs(36));
+		fontTimers->setSize(fs(24));
+		hudSpeedometer.font->setSize(fs(24));
+		lastDisplaySize.x = displayWidth;
+		lastDisplaySize.y = displayHeight;
 	}
 
 	settings = game.logic.getNextRaceSettings();
@@ -221,8 +224,8 @@ void Pseudo3DRaceState::onEnter()
 	enableJumpSimulation = game.logic.isJumpSimulationEnabled();
 
 	course.loadSpec(game.logic.getNextCourse());
-	course.drawAreaWidth = display.getWidth();
-	course.drawAreaHeight = display.getHeight();
+	course.drawAreaWidth = displayWidth;
+	course.drawAreaHeight = displayHeight;
 	course.drawDistance = 300;
 	course.cameraDepth = 0.84;
 	course.lengthScale = coursePositionFactor;
@@ -230,12 +233,12 @@ void Pseudo3DRaceState::onEnter()
 
 	minimap = Pseudo3DCourse::Map(course.spec);
 
-	if(imgBackground != null)
-		delete imgBackground;
+	if(spriteBackground != null)
+		delete spriteBackground;
 
-	imgBackground = new Image(course.spec.landscapeFilename);
-
-	backgroundScale = 0.2 * display.getHeight() / (float) imgBackground->getHeight();
+	Image* imgBackground = new Image(course.spec.landscapeFilename);
+	spriteBackground = new Sprite(imgBackground, imgBackground->getWidth(), imgBackground->getHeight(), 0.25, true);
+	spriteBackground->scale *= 0.2 * displayHeight / spriteBackground->height;
 
 	bgColor = course.spec.colorLandscape;
 	bgColorHorizon = course.spec.colorHorizon;
@@ -324,114 +327,247 @@ void Pseudo3DRaceState::onEnter()
 
 	spriteSmoke->scale.x = spriteSmoke->scale.y = GLOBAL_VEHICLE_SCALE_FACTOR * 0.75f;
 
-	float gaugeDiameter = 0.15*std::max(display.getWidth(), display.getHeight());
-	Rectangle gaugeSize = { display.getWidth() - 1.1f*gaugeDiameter, display.getHeight() - 1.2f*gaugeDiameter, gaugeDiameter, gaugeDiameter };
+	// ------------------- set-up gear indicator -------------------
+	hudGearDisplay.borderThickness = 0.005f * displayHeight;
+	hudGearDisplay.pack();
+	hudGearDisplay.bounds.w = hudGearDisplay.bounds.h = std::max(hudGearDisplay.bounds.w, hudGearDisplay.bounds.h);  // force square shape
+	if(settings.hudType != HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO)
+	{
+		hudGearDisplay.borderColor = Color::LIGHT_GREY;
+		hudGearDisplay.backgroundColor = Color::BLACK;
+		hudGearDisplay.displayColor = Color::GREEN;
+	}
+	else
+	{
+		hudGearDisplay.borderColor = Color::BLACK;
+		hudGearDisplay.backgroundColor = Color::BLACK;
+		hudGearDisplay.displayColor = Color::RED;
+	}
 
-	hudDialTachometer.min = playerVehicle.body.engine.minRpm;
-//	hudTachometer.max = playerVehicle.body.engine.maxRpm;
-	hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
-	hudDialTachometer.bounds = gaugeSize;
-	hudDialTachometer.graduationLevel = 2;
+	const float gaugeSize = 0.2f * std::min(displayWidth, displayHeight);
+
+	// ------------------- set-up tachometer -------------------
+	if(settings.hudType == HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO or settings.hudType == HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO)
+	{
+		hudDialTachometer.min = playerVehicle.body.engine.minRpm;
+	//	hudDialTachometer.max = playerVehicle.body.engine.maxRpm;
+		hudDialTachometer.max = 1000.f * static_cast<int>((playerVehicle.body.engine.maxRpm+1000.f)/1000.f);
+		hudDialTachometer.bounds.w = hudDialTachometer.bounds.h = gaugeSize;
+		hudDialTachometer.graduationLevel = 3;
+		hudDialTachometer.graduationPrimarySize = 1000.f * static_cast<int>(1+hudDialTachometer.max/13000.f);
+		hudDialTachometer.graduationPrimaryLineSize = 0.5;
+		hudDialTachometer.graduationValueOffset = (hudDialTachometer.graduationPrimarySize > 1000.f? -0.5f * hudDialTachometer.graduationPrimarySize : 0);
+		hudDialTachometer.graduationSecondarySize = 0.5 * hudDialTachometer.graduationPrimarySize;
+		hudDialTachometer.graduationSecondaryLineSize = 0.55;
+		hudDialTachometer.graduationTertiarySize = 0.1 * hudDialTachometer.graduationPrimarySize;
+		hudDialTachometer.graduationTertiaryLineSize = 0.3;
+		hudDialTachometer.backgroundImage = null;
+		hudDialTachometer.borderThickness = 0.01 * displayHeight;
+		hudDialTachometer.boltRadius = 0.025 * displayHeight;
+		if(hudDialTachometer.pointerImage != null)
+		{
+			delete hudDialTachometer.pointerImage;
+			hudDialTachometer.pointerImage = null;
+			hudDialTachometer.pointerOffset = 0;
+		}
+		if(not settings.hudDialGaugePointerImageFilename.empty())
+		{
+			hudDialTachometer.pointerImage = new Image(settings.hudDialGaugePointerImageFilename);
+			hudDialTachometer.pointerOffset = 45;
+		}
+	}
+	else
+	{
+		hudBarTachometer.min = playerVehicle.body.engine.minRpm;
+		hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
+		hudBarTachometer.bounds.w = 1.75f * gaugeSize;
+		hudBarTachometer.bounds.h = hudGearDisplay.bounds.h;
+		hudBarTachometer.borderThickness = hudGearDisplay.borderThickness/2;
+	}
+	if(hudDialTachometer.backgroundImage != null)
+		delete hudDialTachometer.backgroundImage;
+
 	hudDialTachometer.backgroundImage = null;
-	if(hudDialTachometer.pointerImage != null)
+
+	// ------------------- set-up speedometer -------------------
+	hudSpeedometer.valueScale = settings.isImperialUnit? MPS_TO_MPH : MPS_TO_KPH;
+	if(settings.hudType == HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO)
 	{
-		delete hudDialTachometer.pointerImage;
-		hudDialTachometer.pointerImage = null;
-		hudDialTachometer.pointerOffset = 0;
+		hudDialSpeedometer.graduationValueScale = settings.isImperialUnit? MPS_TO_MPH : MPS_TO_KPH;
+		hudDialSpeedometer.min = 0;
+		hudDialSpeedometer.max = (((playerVehicle.body.getMaximumWheelAngularSpeed() * playerVehicle.body.tireRadius * hudDialSpeedometer.graduationValueScale) / 10 + 1) * 10) / hudDialSpeedometer.graduationValueScale;
+		hudDialSpeedometer.bounds.w = 1.33 * gaugeSize;
+		hudDialSpeedometer.bounds.h = 1.33 * gaugeSize;
+		hudDialSpeedometer.graduationLevel = 2;
+		hudDialSpeedometer.graduationPrimarySize = 10 * (static_cast<int>(hudDialSpeedometer.graduationValueScale * hudDialSpeedometer.max/120) + 1) / hudDialSpeedometer.graduationValueScale;
+		hudDialSpeedometer.graduationPrimaryLineSize = 0.25;
+		hudDialSpeedometer.graduationSecondarySize = hudDialSpeedometer.graduationPrimarySize/2;
+		hudDialSpeedometer.graduationSecondaryLineSize = 0.4;
+		hudDialSpeedometer.graduationValuePositionOffset = 0.375;
+		hudDialSpeedometer.backgroundImage = null;
+		hudDialSpeedometer.borderThickness = 0.01 * displayHeight;
+		hudDialSpeedometer.boltRadius = 0.025 * displayHeight;
+		if(hudDialSpeedometer.pointerImage != null)
+		{
+			delete hudDialSpeedometer.pointerImage;
+			hudDialSpeedometer.pointerImage = null;
+			hudDialSpeedometer.pointerOffset = 0;
+		}
+		if(not settings.hudDialGaugePointerImageFilename.empty())
+		{
+			hudDialSpeedometer.pointerImage = new Image(settings.hudDialGaugePointerImageFilename);
+			hudDialSpeedometer.pointerOffset = 45;
+		}
+
+		hudSpeedometer.font->setSize(fs(13));
+		hudSpeedometer.borderThickness = hudGearDisplay.borderThickness;
+		hudSpeedometer.padding.x = 4;
+		hudSpeedometer.padding.y = 4;
+		hudSpeedometer.pack(3);
+		hudSpeedometer.disableBackground = false;
+		hudSpeedometer.displayColor = Color::GREEN;
 	}
-	if(not settings.hudTachometerPointerImageFilename.empty())
+	else  // numeric-display-only speedometer
 	{
-		hudDialTachometer.pointerImage = new Image(settings.hudTachometerPointerImageFilename);
-		hudDialTachometer.pointerOffset = 45;
+		hudSpeedometer.font->setSize(fs(24));
+		hudSpeedometer.borderThickness = 0;
+		hudSpeedometer.padding.y = 1;
+		hudSpeedometer.pack(3);
+		hudSpeedometer.disableBackground = true;
+		hudSpeedometer.displayColor = Color::WHITE;
 	}
-	hudDialTachometer.compile();
+	if(hudDialSpeedometer.backgroundImage != null)
+		delete hudDialSpeedometer.backgroundImage;
 
-	hudBarTachometer.min = playerVehicle.body.engine.minRpm;
-	hudBarTachometer.max = playerVehicle.body.engine.maxRpm;
-	hudBarTachometer.bounds = gaugeSize;
-	hudBarTachometer.bounds.x *= 0.8;
-	hudBarTachometer.bounds.y *= 1.15;
-	hudBarTachometer.bounds.w *= 2;
-	hudBarTachometer.bounds.h *= 0.125;
+	hudDialSpeedometer.backgroundImage = null;
 
-	gaugeSize.y = gaugeSize.y + 0.7*gaugeSize.h;
-	gaugeSize.x = gaugeSize.x + 0.4*gaugeSize.w;
-	gaugeSize.w = 24;
-	gaugeSize.h = 1.5 * fontSmall->getHeight();
-	hudGearDisplay.bounds = gaugeSize;
+	// ------------------- set-up hud elements' position -------------------
+	switch(settings.hudType)
+	{
+		default:
+		case HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO:
+		{
+			hudDialTachometer.bounds.x = 0.985f * displayWidth - hudDialTachometer.bounds.w;
+			hudDialTachometer.bounds.y = 0.96f * displayHeight - hudDialTachometer.bounds.h;
+			hudDialTachometer.compile();
 
-	gaugeSize.x = hudDialTachometer.bounds.x - hudSpeedometer.font->getTextWidth("000");
-	gaugeSize.w *= 3;
-	gaugeSize.h *= 1.7;
-	hudSpeedometer.bounds = gaugeSize;
-	hudSpeedometer.valueScale = settings.isImperialUnit? 2.25 : 3.6;
+			hudSpeedometer.bounds.x = hudDialTachometer.bounds.x - hudSpeedometer.bounds.w;
+			hudSpeedometer.bounds.y = hudDialTachometer.bounds.y + 0.7f * hudDialTachometer.bounds.h;
+			posSpeedUnit.x = hudSpeedometer.bounds.x + hudSpeedometer.bounds.w - fontSmall->getTextWidth("xph");
+			posSpeedUnit.y = hudSpeedometer.bounds.y + 0.75f * hudSpeedometer.bounds.h;
 
-	gaugeSize.x = display.getWidth() - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
-	hudTimerCurrentLap.bounds = gaugeSize;
-	hudTimerCurrentLap.bounds.y = display.getHeight() * 0.01;
+			hudGearDisplay.bounds.x = hudDialTachometer.bounds.x + 0.5f * (hudDialTachometer.bounds.w - hudGearDisplay.bounds.w);
+			hudGearDisplay.bounds.y = hudDialTachometer.bounds.y + 0.7f * hudDialTachometer.bounds.h;
+			break;
+		}
+		case HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO:
+		{
+			hudBarTachometer.bounds.x = 0.99f * displayWidth - hudBarTachometer.bounds.w;
+			hudBarTachometer.bounds.y = 0.85f * displayHeight;
+
+			hudSpeedometer.bounds.x = hudBarTachometer.bounds.x + hudBarTachometer.bounds.w - hudSpeedometer.bounds.w;
+			hudSpeedometer.bounds.y = hudBarTachometer.bounds.y + hudBarTachometer.bounds.h + 0.01f * displayHeight;
+			posSpeedUnit.x = hudSpeedometer.bounds.x + hudSpeedometer.bounds.w - fontSmall->getTextWidth("xph");
+			posSpeedUnit.y = hudSpeedometer.bounds.y + 0.75f * hudSpeedometer.bounds.h;
+
+			hudGearDisplay.bounds.x = hudBarTachometer.bounds.x - hudGearDisplay.bounds.w;
+			hudGearDisplay.bounds.y = hudBarTachometer.bounds.y;
+			break;
+		}
+		case HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO:
+		{
+			hudDialTachometer.bounds.x = 0.845f * displayWidth - hudDialTachometer.bounds.w;
+			hudDialTachometer.bounds.y = 0.99f * displayHeight - hudDialTachometer.bounds.h;
+			hudDialTachometer.compile();
+
+			hudDialSpeedometer.bounds.x = 0.985f * displayWidth - hudDialSpeedometer.bounds.w;
+			hudDialSpeedometer.bounds.y = 0.85f * displayHeight - hudDialSpeedometer.bounds.h;
+			hudDialSpeedometer.compile();
+
+			hudSpeedometer.bounds.x = hudDialSpeedometer.bounds.x + 0.425f * hudDialSpeedometer.bounds.w;
+			hudSpeedometer.bounds.y = hudDialSpeedometer.bounds.y + 0.6f * hudDialSpeedometer.bounds.h;
+			posSpeedUnit.x = hudDialSpeedometer.bounds.x + 0.5f * (hudDialSpeedometer.bounds.w - fontSmall->getTextWidth("xph"));
+			posSpeedUnit.y = hudDialSpeedometer.bounds.y + 0.3f * hudDialSpeedometer.bounds.h;
+
+			hudGearDisplay.bounds.x = hudDialTachometer.bounds.x + 0.5f * (hudDialTachometer.bounds.w - hudGearDisplay.bounds.w);
+			hudGearDisplay.bounds.y = hudDialTachometer.bounds.y + 0.7f * hudDialTachometer.bounds.h;
+			break;
+		}
+	}
+
+	Rectangle bounds;
+	bounds.x = displayWidth - 1.1*hudTimerCurrentLap.font->getTextWidth("00:00:000");
+	bounds.y = displayHeight - 0.5f*gaugeSize;
+	bounds.w = 3 * 0.04 * displayHeight;
+	bounds.h = 1.7 * 1.5 * fontSmall->getTextHeight();
+
+	hudTimerCurrentLap.bounds = bounds;
+	hudTimerCurrentLap.bounds.y = displayHeight * 0.01;
 	hudTimerCurrentLap.valueScale = 1000;
 
-	hudTimerBestLap.bounds = gaugeSize;
-	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + font3->getHeight()*1.05;
+	hudTimerBestLap.bounds = bounds;
+	hudTimerBestLap.bounds.y = hudTimerCurrentLap.bounds.y + fontTimers->getTextHeight()*1.05;
 
-	hudCurrentLap.bounds = gaugeSize;
-	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + font3->getHeight()*1.05;
+	hudCurrentLap.bounds = bounds;
+	hudCurrentLap.bounds.y = hudTimerBestLap.bounds.y + fontTimers->getTextHeight()*1.05;
 	hudCurrentLap.bounds.w = hudCurrentLap.font->getTextWidth("999");
 
-	hudLapCountGoal.bounds = gaugeSize;
+	hudLapCountGoal.bounds = bounds;
 	hudLapCountGoal.bounds.x = hudCurrentLap.bounds.x + hudCurrentLap.bounds.w + hudCurrentLap.font->getTextWidth("/");
 	hudLapCountGoal.bounds.y = hudCurrentLap.bounds.y;
 
-	rightHudMargin = hudCurrentLap.bounds.x - font3->getTextWidth("999/999");
-	offsetHudLapGoal = font3->getTextWidth("Laps: 999");
+	rightHudMargin = hudCurrentLap.bounds.x - fontTimers->getTextWidth("999/999");
+	offsetHudLapGoal = fontTimers->getTextWidth("Laps: 999");
 
-	stopwatchIconBounds.w = 0.032*display.getWidth();
+	stopwatchIconBounds.w = 0.032*displayWidth;
 	stopwatchIconBounds.h = imgStopwatch->getHeight()*(stopwatchIconBounds.w/imgStopwatch->getWidth());
 	stopwatchIconBounds.x = rightHudMargin - 1.2*stopwatchIconBounds.w;
 	stopwatchIconBounds.y = hudTimerCurrentLap.bounds.y;
 
-	posHudCountdown.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("0"));
-	posHudCountdown.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
-	posHudFinishedCaption.x = 0.5f*(display.getWidth() - fontCountdown->getTextWidth("FINISHED"));
-	posHudFinishedCaption.y = 0.4f*(display.getHeight() - fontCountdown->getHeight());
+	posHudCountdown.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("0"));
+	posHudCountdown.y = 0.4f*(displayHeight - fontCountdown->getTextHeight());
+	posHudFinishedCaption.x = 0.5f*(displayWidth - fontCountdown->getTextWidth("FINISHED"));
+	posHudFinishedCaption.y = 0.4f*(displayHeight - fontCountdown->getTextHeight());
 
-	if(settings.useCachedTachometer and not settings.useBarTachometer)
+	// functor to cache gauge
+	struct { void operator()(Hud::DialGauge<float>& gauge)
 	{
-		if(imgCacheTachometer != null)
-		{
-			delete imgCacheTachometer;
-			imgCacheTachometer = null;
-		}
-
-		imgCacheTachometer = new Image(hudDialTachometer.bounds.w, hudDialTachometer.bounds.h);
-		Graphics::setDrawTarget(imgCacheTachometer);
-		Graphics::drawFilledRectangle(0, 0, imgCacheTachometer->getWidth(), imgCacheTachometer->getHeight(), Color::_TRANSPARENT);
-		float oldx = hudDialTachometer.bounds.x, oldy = hudDialTachometer.bounds.y;
-		hudDialTachometer.bounds.x = 0;
-		hudDialTachometer.bounds.y = 0;
-		hudDialTachometer.compile();
-		hudDialTachometer.drawBackground();
+		Image* imgCache = new Image(gauge.bounds.w, gauge.bounds.h);
+		Graphics::setDrawTarget(imgCache);
+		Graphics::drawFilledRectangle(0, 0, imgCache->getWidth(), imgCache->getHeight(), Color::_TRANSPARENT);
+		float oldx = gauge.bounds.x, oldy = gauge.bounds.y;
+		gauge.bounds.x = 0;
+		gauge.bounds.y = 0;
+		gauge.compile();
+		gauge.drawBackground();
 		Graphics::setDefaultDrawTarget();
-		hudDialTachometer.backgroundImage = imgCacheTachometer;
-		hudDialTachometer.imagesAreShared = true;
-		hudDialTachometer.graduationLevel = 0;
-		hudDialTachometer.bounds.x = oldx;
-		hudDialTachometer.bounds.y = oldy;
+		gauge.backgroundImage = imgCache;
+		gauge.graduationLevel = 0;
+		gauge.bounds.x = oldx;
+		gauge.bounds.y = oldy;
 	}
-	else
+	} cacheDialGague;
+
+	if(settings.hudType != HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO and settings.useCachedDialGauge)
 	{
-		hudDialTachometer.backgroundImage = null;
+		cacheDialGague(hudDialTachometer);
+		hudDialTachometer.compile();
 	}
-	hudDialTachometer.compile();
+
+	if(settings.hudType == HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO and settings.useCachedDialGauge)
+	{
+		cacheDialGague(hudDialSpeedometer);
+		hudDialSpeedometer.compile();
+	}
 
 	minimap.roadColor = Color::GREY;
 	minimap.bounds.x = hudTimerCurrentLap.bounds.x;
-	minimap.bounds.y = 0.3*display.getHeight();
-	minimap.bounds.w = 0.1*display.getWidth();
-	minimap.bounds.h = 0.1*display.getWidth();
+	minimap.bounds.y = 0.3*displayHeight;
+	minimap.bounds.w = 0.1*displayWidth;
+	minimap.bounds.h = 0.1*displayWidth;
 	minimap.scale = fgeal::Vector2D();
 	minimap.segmentHighlightColor = Color::YELLOW;
-	minimap.segmentHighlightSize = 0.005f*display.getWidth();
+	minimap.segmentHighlightSize = 0.005f*displayWidth;
 	minimap.geometryOtimizationEnabled = true;
 
 	if(settings.raceType != RACE_TYPE_DEBUG)
@@ -450,10 +586,11 @@ void Pseudo3DRaceState::onEnter()
 
 	playerVehicle.corneringStiffness = 0.575 + 0.575/(1+exp(-0.4*(10.0 - (playerVehicle.body.mass*GRAVITY_ACCELERATION)/1000.0)));
 
-	parallax.x = parallax.y = 0;
+	verticalBackgroundParallax = 0;
 	playerVehicle.position = courseStartPositionOffset;
 	playerVehicle.horizontalPosition = playerVehicle.verticalPosition = 0;
-	playerVehicle.verticalSpeed = 0;
+	playerVehicle.verticalSpeed = playerVehicle.strafeSpeed = 0;
+	playerVehicle.virtualOrientation = 0;
 	playerVehicle.body.simulationType = simulationType;
 	playerVehicle.body.reset();
 	playerVehicle.body.automaticShiftingEnabled = true;
@@ -488,14 +625,16 @@ void Pseudo3DRaceState::render()
 
 	game.getDisplay().clear();
 
-	const float parallaxAbsoluteY = parallax.y + BACKGROUND_POSITION_FACTOR*displayHeight - imgBackground->getHeight()*backgroundScale,
+	const Vector2D backgroundSize = { spriteBackground->width * spriteBackground->scale.x, spriteBackground->height * spriteBackground->scale.y };
+	const float parallaxAbsoluteX = playerVehicle.virtualOrientation * BACKGROUND_HORIZONTAL_PARALLAX_FACTOR,
+				parallaxAbsoluteY = verticalBackgroundParallax - backgroundSize.y + BACKGROUND_VERTICAL_PARALLAX_FACTOR * displayHeight,
 				courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
 
 	Graphics::drawFilledRectangle(0, 0, displayWidth, displayHeight, bgColor);
-	Graphics::drawFilledRectangle(0, parallaxAbsoluteY + imgBackground->getHeight()*backgroundScale, displayWidth, displayHeight, bgColorHorizon);
+	Graphics::drawFilledRectangle(0, parallaxAbsoluteY + backgroundSize.y, displayWidth, displayHeight, bgColorHorizon);
 
-	for(float bg = 0; bg < 3*displayWidth; bg += imgBackground->getWidth())
-		imgBackground->drawScaled(parallax.x + bg, parallaxAbsoluteY, 1, backgroundScale);
+	for(float bgx = -backgroundSize.x * fractional_part(fabs(parallaxAbsoluteX)/backgroundSize.x); bgx < displayWidth; bgx += backgroundSize.x)
+		spriteBackground->draw(bgx, parallaxAbsoluteY);
 
 //	float cameraPosition = playerVehicle.position;  // gives better visual results regarding cornering, but causes glitch in collision, making it occur on visually wrong positions
 	float cameraPosition = playerVehicle.position - playerVehicleProjectionOffset;
@@ -521,41 +660,51 @@ void Pseudo3DRaceState::render()
 	minimap.drawMap(playerVehicle.position*coursePositionFactor/course.spec.roadSegmentLength);
 
 	imgStopwatch->drawScaled(stopwatchIconBounds.x, stopwatchIconBounds.y, scaledToRect(imgStopwatch, stopwatchIconBounds));
-	font3->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
+	fontTimers->drawText("Time:", rightHudMargin, hudTimerCurrentLap.bounds.y, Color::WHITE);
 	hudTimerCurrentLap.draw();
 
 	if(isRaceTypeLoop(settings.raceType))
 	{
-		font3->drawText("Lap", rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
+		fontTimers->drawText("Lap", rightHudMargin, hudCurrentLap.bounds.y, Color::WHITE);
 		hudCurrentLap.draw();
 
 		if(settings.raceType == RACE_TYPE_LOOP_TIME_ATTACK)
 		{
-			font3->drawText("/", 1.025*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
+			fontTimers->drawText("/", 1.025*rightHudMargin + offsetHudLapGoal, hudCurrentLap.bounds.y, Color::WHITE);
 			hudLapCountGoal.draw();
 		}
 
-		font3->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
+		fontTimers->drawText("Best:", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 		if(lapTimeBest == 0)
-			font3->drawText("--", hudTimerBestLap.bounds.x, hudTimerBestLap.bounds.y, Color::WHITE);
+			fontTimers->drawText("--", hudTimerBestLap.bounds.x, hudTimerBestLap.bounds.y, Color::WHITE);
 		else
 			hudTimerBestLap.draw();
 	}
 	else if(isRaceTypePointToPoint(settings.raceType))
 	{
-		const float progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));
-		font3->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
+		const float progress = onSceneFinish? 100 : trunc(100.0 * (playerVehicle.position / courseLength));  // @suppress("Function cannot be resolved")
+		fontTimers->drawText("Complete " + futil::to_string(progress) + "%", rightHudMargin, hudTimerBestLap.bounds.y, Color::WHITE);
 	}
 
-	hudSpeedometer.draw();
-	fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", (hudSpeedometer.bounds.x + hudDialTachometer.bounds.x)/2, hudSpeedometer.bounds.y+hudSpeedometer.font->getHeight()*1.2f, fgeal::Color::WHITE);
-
-	if(settings.useBarTachometer)
+	if(settings.hudType == HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO)
 		hudBarTachometer.draw();
 	else
+	{
 		hudDialTachometer.draw();
+		fontTiny->drawText("rpm", hudGearDisplay.bounds.x, hudDialTachometer.bounds.y + 0.3f * hudDialTachometer.bounds.h, Color::BLACK);
+	}
 
 	hudGearDisplay.draw();
+
+	if(settings.hudType == HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO)
+	{
+		hudDialSpeedometer.draw();
+		fontTiny->drawText(settings.isImperialUnit? "mph" : "kph", posSpeedUnit, Color::BLACK);
+	}
+	else
+		fontSmall->drawText(settings.isImperialUnit? "mph" : "kph", posSpeedUnit, Color::WHITE);
+
+	hudSpeedometer.draw();
 
 	if(onSceneIntro)
 	{
@@ -571,164 +720,178 @@ void Pseudo3DRaceState::render()
 
 	// DEBUG
 	if(debugMode)
+		drawDebugInfo();
+}
+
+#define DEBUG_BUFFER_SIZE 512
+void Pseudo3DRaceState::drawDebugInfo()
+{
+	static char buffer[DEBUG_BUFFER_SIZE]; static const unsigned size = DEBUG_BUFFER_SIZE;
+	static string text;
+	const float spacing = fontDev->getTextHeight(), spacingBig = 1.4f * spacing;
+	Point offset = {spacing/2, spacing/2};
+
+	fontDev->drawText("FPS:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%d", game.getFpsCount());
+	fontDev->drawText(text=buffer, offset.x+30, offset.y, fgeal::Color::WHITE);
+
+
+	offset.y += spacingBig;
+	fontDev->drawText("Position:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm", playerVehicle.position);
+	fontDev->drawText(text=buffer, offset.x+65, offset.y, fgeal::Color::WHITE);
+
+	fontDev->drawText("Horiz. position: ", offset.x+150, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm", playerVehicle.horizontalPosition);
+	fontDev->drawText(text=buffer, offset.x+265, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Speed:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fkm/h", playerVehicle.body.speed*3.6);
+	fontDev->drawText(text=buffer, offset.x+65, offset.y, fgeal::Color::WHITE);
+
+	fontDev->drawText("0-60mph: ", offset.x+150, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fs", acc0to60time);
+	fontDev->drawText(text=buffer, offset.x+225, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Acc.:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm/s^2", playerVehicle.body.acceleration);
+	fontDev->drawText(text=buffer, offset.x+65, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacingBig;
+	fontDev->drawText("Height:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm", playerVehicle.verticalPosition);
+	fontDev->drawText(text=buffer, offset.x+65, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Vertical speed:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm/s", playerVehicle.verticalSpeed);
+	fontDev->drawText(text=buffer, offset.x+115, offset.y, fgeal::Color::WHITE);
+
+	fontDev->drawText(playerVehicle.onAir? "(On air)" : "(On ground)", offset.x+195, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacingBig;
+	fontDev->drawText("Wheel turn pseudo angle:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2f", playerVehicle.pseudoAngle);
+	fontDev->drawText(text=buffer, offset.x+225, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Slope angle:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2f", playerVehicle.body.slopeAngle);
+	fontDev->drawText(text=buffer, offset.x+225, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Strafe speed:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm/s", playerVehicle.strafeSpeed);
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+
+	offset.y += spacingBig;
+	fontDev->drawText("Curve pull:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm/s", playerVehicle.curvePull);
+	fontDev->drawText(text=buffer, offset.x+175, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Slope pull:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fm/s^2", playerVehicle.body.slopePullForce);
+	fontDev->drawText(text=buffer, offset.x+175, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Braking friction:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", playerVehicle.body.brakingForce);
+	fontDev->drawText(text=buffer, offset.x+175, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Rolling friction:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", playerVehicle.body.rollingResistanceForce);
+	fontDev->drawText(text=buffer, offset.x+175, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Air friction:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", playerVehicle.body.airDragForce);
+	fontDev->drawText(text=buffer, offset.x+175, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Combined friction:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", (playerVehicle.curvePull + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
+	fontDev->drawText(text=buffer, offset.x+175, offset.y, fgeal::Color::WHITE);
+
+
+	offset.y += spacingBig;
+	fontDev->drawText("Drive force:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", playerVehicle.body.getDriveForce());
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Torque:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fNm", playerVehicle.body.engine.getCurrentTorque());
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Torque proportion:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2f%%", 100.f*playerVehicle.body.engine.getCurrentTorque()/playerVehicle.body.engine.maximumTorque);
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Power:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fhp", (playerVehicle.body.engine.getCurrentTorque()*playerVehicle.body.engine.rpm)/(5252.0 * 1.355818));
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+
+	offset.y += spacingBig;
+	fontDev->drawText("Driven tires load:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", playerVehicle.body.getDrivenWheelsWeightLoad());
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Downforce:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2fN", -playerVehicle.body.downforce);
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacingBig;
+	fontDev->drawText("Wheel Ang. Speed:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2frad/s", playerVehicle.body.wheelAngularSpeed);
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("RPM:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.f", playerVehicle.body.engine.rpm);
+	fontDev->drawText(text=buffer, offset.x+30, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacing;
+	fontDev->drawText("Gear:", offset.x, offset.y, fgeal::Color::WHITE);
+	const char* autoLabelTxt = (playerVehicle.body.automaticShiftingEnabled? " (auto)":"");
+	snprintf(buffer, size, "%d %s", playerVehicle.body.engine.gear, autoLabelTxt);
+	fontDev->drawText(text=buffer, offset.x+35, offset.y, fgeal::Color::WHITE);
+
+	offset.y += spacingBig;
+	fontDev->drawText("Slip ratio:", offset.x, offset.y, fgeal::Color::WHITE);
+	snprintf(buffer, size, "%2.2f%%", 100*playerVehicle.body.slipRatio);
+	fontDev->drawText(text=buffer, offset.x+155, offset.y, fgeal::Color::WHITE);
+
+
+	unsigned currentRangeIndex = playerVehicle.engineSound.getRangeIndex(playerVehicle.body.engine.rpm);
+	for(unsigned i = 0; i < playerVehicle.engineSound.getSoundData().size(); i++)
 	{
-		char buffer[512];
-		float offset = 25;
-		fontDev->drawText("FPS:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%d", game.getFpsCount());
-		fontSmall->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
-
-
-		offset += 25;
-		fontDev->drawText("Position:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", playerVehicle.position);
-		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
-
-		fontDev->drawText("Horiz. position: ", 175, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", playerVehicle.horizontalPosition);
-		fontSmall->drawText(std::string(buffer), 290, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fkm/h", playerVehicle.body.speed*3.6);
-		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
-
-		fontDev->drawText("0-60mph: ", 175, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fs", acc0to60time);
-		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Acc.:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.acceleration);
-		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDev->drawText("Height:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm", playerVehicle.verticalPosition);
-		fontSmall->drawText(std::string(buffer), 90, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Vertical speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", playerVehicle.verticalSpeed);
-		fontSmall->drawText(std::string(buffer), 140, offset, fgeal::Color::WHITE);
-
-		fontDev->drawText(playerVehicle.onAir? "(On air)" : "(On ground)", 220, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDev->drawText("Wheel turn pseudo angle:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", playerVehicle.pseudoAngle);
-		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Slope angle:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f", playerVehicle.body.slopeAngle);
-		fontSmall->drawText(std::string(buffer), 250, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Strafe speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", playerVehicle.strafeSpeed);
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-
-		offset += 25;
-		fontDev->drawText("Curve pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s", playerVehicle.curvePull);
-		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Slope pull:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fm/s^2", playerVehicle.body.slopePullForce);
-		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Braking friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", playerVehicle.body.brakingForce);
-		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Rolling friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", playerVehicle.body.rollingResistanceForce);
-		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Air friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", playerVehicle.body.airDragForce);
-		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Combined friction:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", (playerVehicle.curvePull + playerVehicle.body.slopePullForce + playerVehicle.body.brakingForce + playerVehicle.body.rollingResistanceForce + playerVehicle.body.airDragForce));
-		fontSmall->drawText(std::string(buffer), 200, offset, fgeal::Color::WHITE);
-
-
-		offset += 25;
-		fontDev->drawText("Drive force:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", playerVehicle.body.getDriveForce());
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Torque:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fNm", playerVehicle.body.engine.getCurrentTorque());
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Torque proportion:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100.f*playerVehicle.body.engine.getCurrentTorque()/playerVehicle.body.engine.maximumTorque);
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Power:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fhp", (playerVehicle.body.engine.getCurrentTorque()*playerVehicle.body.engine.rpm)/(5252.0 * 1.355818));
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-
-		offset += 25;
-		fontDev->drawText("Driven tires load:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", playerVehicle.body.getDrivenWheelsWeightLoad());
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Downforce:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2fN", -playerVehicle.body.downforce);
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDev->drawText("Wheel Ang. Speed:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2frad/s", playerVehicle.body.wheelAngularSpeed);
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("RPM:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.f", playerVehicle.body.engine.rpm);
-		fontSmall->drawText(std::string(buffer), 55, offset, fgeal::Color::WHITE);
-
-		offset += 18;
-		fontDev->drawText("Gear:", 25, offset, fgeal::Color::WHITE);
-		const char* autoLabelTxt = (playerVehicle.body.automaticShiftingEnabled? " (auto)":"");
-		sprintf(buffer, "%d %s", playerVehicle.body.engine.gear, autoLabelTxt);
-		fontSmall->drawText(std::string(buffer), 60, offset, fgeal::Color::WHITE);
-
-		offset += 25;
-		fontDev->drawText("Slip ratio:", 25, offset, fgeal::Color::WHITE);
-		sprintf(buffer, "%2.2f%%", 100*playerVehicle.body.slipRatio);
-		fontSmall->drawText(std::string(buffer), 180, offset, fgeal::Color::WHITE);
-
-
-		unsigned currentRangeIndex = playerVehicle.engineSound.getRangeIndex(playerVehicle.body.engine.rpm);
-		for(unsigned i = 0; i < playerVehicle.engineSound.getSoundData().size(); i++)
-		{
-			const std::string format = std::string(playerVehicle.engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
-			sprintf(buffer, format.c_str(), i, playerVehicle.engineSound.getSoundData()[i]->getVolume(), playerVehicle.engineSound.getSoundData()[i]->getPlaybackSpeed());
-			fontSmall->drawText(std::string(buffer), displayWidth - 200, displayHeight/2.0 - i*fontSmall->getHeight(), fgeal::Color::WHITE);
-		}
+		const std::string format = std::string(playerVehicle.engineSound.getSoundData()[i]->isPlaying()==false? " s%u " : currentRangeIndex==i? "[s%u]" : "(s%u)") + " vol: %2.2f pitch: %2.2f";
+		snprintf(buffer, size, format.c_str(), i, playerVehicle.engineSound.getSoundData()[i]->getVolume(), playerVehicle.engineSound.getSoundData()[i]->getPlaybackSpeed());
+		fontDev->drawText(text=buffer, game.getDisplay().getWidth() - 200, game.getDisplay().getHeight()/2.0 - i*spacing, fgeal::Color::WHITE);
 	}
 }
 
-static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2;  // 20%
+static const float LONGITUDINAL_SLIP_RATIO_BURN_RUBBER = 0.2,  // 20%
+		MAXIMUM_PHYSICS_DELTA_TIME = 0.01;
 
 void Pseudo3DRaceState::update(float delta)
 {
-	handlePhysics(delta);
+	float physicsDelta = delta;
+	while(physicsDelta > MAXIMUM_PHYSICS_DELTA_TIME)  // process delta too large in smaller delta steps
+	{
+		handlePhysics(MAXIMUM_PHYSICS_DELTA_TIME);
+		physicsDelta -= MAXIMUM_PHYSICS_DELTA_TIME;
+	}
+	handlePhysics(physicsDelta);
 
 	// course looping control
 	const float courseLength = course.spec.lines.size() * course.spec.roadSegmentLength / coursePositionFactor;
@@ -738,6 +901,9 @@ void Pseudo3DRaceState::update(float delta)
 
 	while(playerVehicle.position < 0)  // negative position is not allowed, take backwards position modulus
 		playerVehicle.position += courseLength;
+
+	// update bg parallax
+	verticalBackgroundParallax -= 2*playerVehicle.body.slopeAngle;
 
 	// scene control
 	if(onSceneIntro)
@@ -756,7 +922,7 @@ void Pseudo3DRaceState::update(float delta)
 		if(timerSceneIntro < 1)
 		{
 			onSceneIntro = false;
-			playerVehicle.body.engine.gear = 1;
+			playerVehicle.body.shiftGear(1);
 			sndCountdownBuzzerFinal->play();
 		}
 	}
@@ -927,7 +1093,7 @@ void Pseudo3DRaceState::onKeyPressed(Keyboard::Key key)
 			playerVehicle.verticalSpeed = 0;
 			playerVehicle.body.reset();
 			playerVehicle.pseudoAngle = 0;
-			parallax.x = parallax.y = 0;
+			verticalBackgroundParallax = 0;
 			lapTimeCurrent = 0;
 			lapCurrent = 1;
 			onSceneIntro = true;

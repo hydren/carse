@@ -80,6 +80,7 @@ void VehicleSelectionSimpleListState::initialize()
 	menu.setFont(new Font(game.sharedResources->font1Path), false);
 	menu.setColor(Color::WHITE);
 	menu.cursorWrapAroundEnabled = true;
+	menu.entryClippingAtBeginning = true;
 	menu.bgColor = Color::AZURE;
 	menu.focusedEntryFontColor = Color::NAVY;
 
@@ -119,10 +120,11 @@ void VehicleSelectionSimpleListState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		fontMain->setFontSize(dip(28));
-		fontSub->setFontSize(dip(36));
-		fontInfo->setFontSize(dip(12));
-		menu.getFont().setFontSize(dip(18));
+		const FontSizer fs(display.getHeight());
+		fontMain->setSize(fs(28));
+		fontSub->setSize(fs(36));
+		fontInfo->setSize(fs(12));
+		menu.getFont().setSize(fs(18));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}
@@ -170,12 +172,12 @@ void VehicleSelectionSimpleListState::onEnter()
 	backButton.bounds.x = 0.875*dw;
 	backButton.bounds.y = 0.025*dh;
 	backButton.bounds.w = menu.getFont().getTextWidth(" Back ");
-	backButton.bounds.h = menu.getFont().getHeight();
+	backButton.bounds.h = menu.getFont().getTextHeight();
 
 	selectButton.bounds.w = menu.getFont().getTextWidth(" Select ");
 	selectButton.bounds.x = 0.70*dw - selectButton.bounds.w/2;
 	selectButton.bounds.y = 0.90*dh;
-	selectButton.bounds.h = menu.getFont().getHeight();
+	selectButton.bounds.h = menu.getFont().getTextHeight();
 }
 
 void VehicleSelectionSimpleListState::onLeave()
@@ -220,7 +222,7 @@ void VehicleSelectionSimpleListState::render()
 	menuDownButton.draw();
 	fgeal::Graphics::drawFilledTriangle(menuDownButtonArrow1, menuDownButtonArrow2, menuDownButtonArrow3, menu.focusedEntryFontColor);
 
-	drawVehiclePreview(0.7*dw, 0.35*dh);
+	drawVehiclePreview(0.7*dw, 0.5*dh);
 	drawVehicleSpec((4/9.f)*dw, 0.6*dh);
 
 	const fgeal::Point skinArrowLeft1 =  { 0.52f*dw, 0.45f*dh }, skinArrowLeft2  = { 0.53f*dw, 0.44f*dh }, skinArrowLeft3 =  { 0.53f*dw, 0.46f*dh};
@@ -384,8 +386,8 @@ void VehicleSelectionSimpleListState::drawVehiclePreview(float x, float y, float
 	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);
 	const float scalex = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.x,
 				scaley = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.y,
-				posX = x - 0.5*spriteSpec.frameWidth * scalex,
-				posY = y - 0.5*spriteSpec.frameHeight * scaley,
+				posX = x - scalex * 0.5*spriteSpec.frameWidth,
+				posY = y - scaley * (spriteSpec.frameHeight - spriteSpec.contactOffset),
 				offsetY = (angleType == 0? 0 : spriteSpec.frameHeight * (spriteSpec.stateCount/2));
 
 	previewSprite->drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
@@ -404,25 +406,25 @@ void VehicleSelectionSimpleListState::drawVehicleSpec(float infoX, float infoY, 
 	                           + (vehicle.engineValvetrain.empty()? "" : vehicle.engineValvetrain + " ")
 	                           + (vehicle.engineValveCount == 0?    "" : to_string(vehicle.engineValveCount) + "-valve ")
 	                           + (vehicle.engineConfiguration.empty()? "" : vehicle.engineConfiguration);
-	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtPowerInfo = "Power:  " +to_string(vehicle.engineMaximumPower) + "hp @" + to_string((int)vehicle.engineMaximumPowerRpm)+"rpm";
-	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtTorqueInfo = "Torque: " +toStrRounded(vehicle.engineMaximumTorque) + "Nm @" + to_string((int)vehicle.engineMaximumTorqueRpm)+"rpm";
-	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtTransmissionInfo = to_string(vehicle.engineGearCount)+"-speed transmission";
-	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtWeightInfo = "Weight: "+to_string(vehicle.mass) + "kg";
-	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtDrivetrainInfo = "Drivetrain: "+(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ALL? "AWD"
 	                                            : (  vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_FRONT? "F"
 	                                            :    vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_REAR? "R" : "M")
 	                                        + string(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
-	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 }
 
 void VehicleSelectionSimpleListState::changeSprite(bool forward)

@@ -31,8 +31,8 @@ enum MenuItem
 	MENU_ITEM_UNIT,
 	MENU_ITEM_SIMULATION_TYPE,
 	MENU_ITEM_ENABLE_JUMP,
-	MENU_ITEM_TACHOMETER_TYPE,
-	MENU_ITEM_TACHOMETER_POINTER_TYPE,
+	MENU_ITEM_HUD_TYPE,
+	MENU_ITEM_DIAL_GAUGE_POINTER_TYPE,
 	MENU_ITEM_CACHE_TACHOMETER,
 	MENU_ITEM_COUNT
 };
@@ -56,9 +56,10 @@ OptionsMenuState::~OptionsMenuState()
 void OptionsMenuState::initialize()
 {
 	Display& display = game.getDisplay();
+	const FontSizer fs(display.getHeight());
 	background = new Image("assets/options-bg.jpg");
-	fontTitle = new Font(game.sharedResources->font2Path, dip(48));
-	font = new Font(game.sharedResources->font1Path, dip(16));
+	fontTitle = new Font(game.sharedResources->font2Path, fs(48));
+	font = new Font(game.sharedResources->font1Path, fs(16));
 
 	menu.setFont(font);
 	menu.titleColor = Color(16, 24, 192);
@@ -74,9 +75,9 @@ void OptionsMenuState::initialize()
 	menu.addEntry("Unit: ");
 	menu.addEntry("Simulation mode: ");
 	menu.addEntry("Enable jumps (experimental): ");
-	menu.addEntry("Tachometer type: ");
-	menu.addEntry("Tachometer pointer type: ");
-	menu.addEntry("Use cached tachometer (experimental): ");
+	menu.addEntry("HUD type: ");
+	menu.addEntry("Dial gauge pointer type: ");
+	menu.addEntry("Cached gauge texture (experimental): ");
 	menu.addEntry("Back to main menu");
 
 	menuResolution.setFont(font);
@@ -134,7 +135,7 @@ void OptionsMenuState::render()
 	else
 		menu.draw();
 
-	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getHeight(), Color::WHITE);
+	fontTitle->drawText("Options", 0.5*(display.getWidth()-fontTitle->getTextWidth("Options")), 0.2*display.getHeight()-fontTitle->getTextHeight(), Color::WHITE);
 }
 
 void OptionsMenuState::onKeyPressed(Keyboard::Key key)
@@ -243,19 +244,19 @@ void OptionsMenuState::onMenuSelect()
 	if(menu.getSelectedIndex() == MENU_ITEM_ENABLE_JUMP)
 		game.logic.setJumpSimulationEnabled(!game.logic.isJumpSimulationEnabled());
 
-	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_TYPE)
-		game.logic.getNextRaceSettings().useBarTachometer = !game.logic.getNextRaceSettings().useBarTachometer;
+	if(menu.getSelectedIndex() == MENU_ITEM_HUD_TYPE)
+		game.logic.getNextRaceSettings().hudType = static_cast<Pseudo3DRaceState::HudType>((game.logic.getNextRaceSettings().hudType+1)%Pseudo3DRaceState::HUD_TYPE_COUNT);
 
-	if(menu.getSelectedIndex() == MENU_ITEM_TACHOMETER_POINTER_TYPE)
+	if(menu.getSelectedIndex() == MENU_ITEM_DIAL_GAUGE_POINTER_TYPE)
 	{
-		if(game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty())
-			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename = "assets/pointer.png";
+		if(game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.empty())
+			game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename = "assets/pointer.png";
 		else
-			game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.clear();
+			game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.clear();
 	}
 
 	if(menu.getSelectedIndex() == MENU_ITEM_CACHE_TACHOMETER)
-		game.logic.getNextRaceSettings().useCachedTachometer = !game.logic.getNextRaceSettings().useCachedTachometer;
+		game.logic.getNextRaceSettings().useCachedDialGauge = !game.logic.getNextRaceSettings().useCachedDialGauge;
 
 	if(menu.getSelectedIndex() == menu.getEntries().size()-1)
 		game.enterState(game.logic.currentMainMenuStateId);
@@ -270,19 +271,26 @@ void OptionsMenuState::updateLabels()
 	setMenuItemValueText(MENU_ITEM_FULLSCREEN, display.isFullscreen()? "yes" : "no");
 	setMenuItemValueText(MENU_ITEM_UNIT, game.logic.getNextRaceSettings().isImperialUnit? "imperial" : "metric");
 
-	string strSimType;
+	string auxStr;
 	switch(game.logic.getSimulationType())
 	{
 		default:
-		case Mechanics::SIMULATION_TYPE_SLIPLESS:       strSimType = "slipless"; break;
-		case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: strSimType = "slipless with wheel-load-capped power"; break;
-		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  strSimType = "longitudinal-only slip (Pacejka)"; break;
+		case Mechanics::SIMULATION_TYPE_SLIPLESS:       auxStr = "slipless"; break;
+		case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: auxStr = "slipless with wheel-load-capped power"; break;
+		case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  auxStr = "longitudinal-only slip (Pacejka)"; break;
 	}
-	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, strSimType);
+	setMenuItemValueText(MENU_ITEM_SIMULATION_TYPE, auxStr);
 	setMenuItemValueText(MENU_ITEM_ENABLE_JUMP, game.logic.isJumpSimulationEnabled()? "enabled" : "disabled");
-	setMenuItemValueText(MENU_ITEM_TACHOMETER_TYPE, game.logic.getNextRaceSettings().useBarTachometer? "bar" : "dial gauge");
-	setMenuItemValueText(MENU_ITEM_TACHOMETER_POINTER_TYPE, game.logic.getNextRaceSettings().hudTachometerPointerImageFilename.empty()? "built-in" : "custom");
-	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedTachometer? "yes" : "no");
+	switch(game.logic.getNextRaceSettings().hudType)
+	{
+		default:
+		case Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO: auxStr = "dial tacho / numeric speedometer"; break;
+		case Pseudo3DRaceState::HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO:       auxStr = "bar tacho / numeric speedometer"; break;
+		case Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO:     auxStr = "dial tacho / dial speedometer"; break;
+	}
+	setMenuItemValueText(MENU_ITEM_HUD_TYPE, auxStr);
+	setMenuItemValueText(MENU_ITEM_DIAL_GAUGE_POINTER_TYPE, game.logic.getNextRaceSettings().hudDialGaugePointerImageFilename.empty()? "built-in" : "custom");
+	setMenuItemValueText(MENU_ITEM_CACHE_TACHOMETER, game.logic.getNextRaceSettings().useCachedDialGauge? "yes" : "no");
 }
 
 void OptionsMenuState::updateOnResolutionMenu(Keyboard::Key key)
@@ -314,7 +322,8 @@ void OptionsMenuState::setResolution()
 	Display::Mode resolution = Display::Mode::getList()[menuResolution.getSelectedIndex()];
 	Display& display = game.getDisplay();
 	display.setSize(resolution.width, resolution.height);
-	font->setFontSize(dip(16));
-	fontTitle->setFontSize(dip(48));
+	const FontSizer fs(display.getHeight());
+	font->setSize(fs(16));
+	fontTitle->setSize(fs(48));
 	isResolutionMenuActive = false;
 }

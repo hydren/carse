@@ -27,10 +27,9 @@
 #define BRAKE_PAD_TORQUE_ARBITRARY_ADJUST 7500
 #define ROLLING_RESISTANCE_TORQUE_ARBITRARY_ADJUST 0.25
 
-const float Mechanics::GRAVITY_ACCELERATION = 9.8066; // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
-
-static const float AIR_DENSITY = 1.2041,  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
-                   RAD_TO_RPM = (30.0/M_PI);  // 60/2pi conversion to RPM
+const float Mechanics::GRAVITY_ACCELERATION = 9.8066, // standard gravity (actual value varies with altitude, from 9.7639 to 9.8337)
+			Mechanics::RAD_TO_RPM = (30.0/M_PI),  // 60/2pi conversion to RPM
+			Mechanics::AIR_DENSITY = 1.2041;  // air density at sea level, 20ºC (68ºF) (but actually varies significantly with altitude, temperature and humidity)
 
 Mechanics::Mechanics(const Engine& eng, VehicleType type, float dragArea, float liftArea)
 : simulationType(SIMULATION_TYPE_WHEEL_LOAD_CAP), vehicleType(type), engine(eng),
@@ -258,7 +257,6 @@ void Mechanics::updateByPacejkaScheme(float delta)
 	const float wheelMass = AVERAGE_WHEEL_DENSITY * pow2(tireRadius);  // m = d*r^2, assuming wheel width = 1/PI
 	const float drivenWheelsInertia = drivenWheelsCount * wheelMass * pow2(tireRadius) * 0.5;  // I = (mr^2)/2
 
-//	const float tractionForce = unstable? 0 : getNormalizedTractionForce() * getDrivenWheelsTireLoad();  // assume zero traction when unstable
 	const float tractionForce = getNormalizedTractionForce() * tireFrictionFactor * getDrivenWheelsWeightLoad();
 	const float tractionTorque = tractionForce * tireRadius;
 
@@ -280,21 +278,17 @@ float Mechanics::getDriveForceByPacejkaScheme()
 	return getNormalizedTractionForce() * getDrivenWheelsWeightLoad() * tireFrictionFactor;
 }
 
-// increasing this constant degrades simulation quality
-static const double LOWEST_STABLE_SLIP = 500.0*DBL_EPSILON;  //@suppress("Unused variable declaration in file scope")
-
 void Mechanics::updateSlipRatio(float delta)
 {
+	// slip ratio computation don't work properly on low speeds due to numerical instability when dividing by values closer and closer to zero
+	// in an attempt to attenuate the issue, we follow an approach suggested by Bernard and Clover in [SAE950311]
 	static const double B_CONSTANT = 0.91,     // constant
 						TAU_CONSTANT = 0.02,   // oscillation period (experimental)
 						LOWEST_STABLE_SPEED = 5.0f;
 
-	if(engine.gear == 0)
-		engine.gear = 0;
-
 	// approach suggested by Bernard and Clover in [SAE950311].
-	double deltaRatio = ((double) wheelAngularSpeed * (double) tireRadius - (double) speed) - fabs((double) speed)* differentialSlipRatio;
-	delta /= B_CONSTANT;
+	double deltaRatio = ((double) wheelAngularSpeed * (double) tireRadius - (double) speed) - fabs((double) speed) * differentialSlipRatio;
+	deltaRatio /= B_CONSTANT;
 	differentialSlipRatio += deltaRatio * delta;
 
 	// The differential equation tends to oscillate at low speeds.
@@ -302,20 +296,16 @@ void Mechanics::updateSlipRatio(float delta)
 	//
 	//   SR = SR + Tau * d SR/dt, where Tau is close to the oscillation period
 	//
-	// (Thanks to Gregor Veble in r.a.s.)
+	// (Thanks to Gregor Veble in rec.autos.simulators)
 	if(speed < LOWEST_STABLE_SPEED)
 		slipRatio = differentialSlipRatio + TAU_CONSTANT * deltaRatio;
 	else
 		slipRatio = differentialSlipRatio;
-
-//	slipRatio = fabs(speed)==0? 0 : (engine.getAngularSpeed()*tireRadius)/fabs(speed) - 1.0;
-//	slipRatio = fabs(speed)==0? 0 : ((double) engine.getAngularSpeed() * (double) tireRadius - (double) speed)/fabs(speed);
 }
 
 float Mechanics::getNormalizedTractionForce()
 {
-	// based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
-	// this formula don't work properly on low speeds (numerical instability)
+	// approximation/simplification based on a simplified Pacejka's formula from Marco Monster's website "Car Physics for Games".
 	return slipRatio < 0.06? (20.0*slipRatio)  // 0 to 6% slip ratio gives traction from 0 up to 120%
 		 : slipRatio < 0.20? (9.0 - 10.0*slipRatio)/7.0  // 6 to 20% slip ratio gives traction from 120% up to 100%
 		 : slipRatio < 1.00? (1.075 - 0.375*slipRatio)  // 20% to 100% slip ratio gives traction from 100 down to 70%

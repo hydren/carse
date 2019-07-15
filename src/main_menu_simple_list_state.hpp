@@ -9,13 +9,13 @@
 #define MAIN_MENU_SIMPLE_LIST_STATE_HPP_
 #include <ciso646>
 
+#include "util.hpp"
+
 #include "fgeal/fgeal.hpp"
 #include "fgeal/extra/game.hpp"
 #include "fgeal/extra/menu.hpp"
 
 #include "futil/language.hpp"
-
-#include "util.hpp"
 
 class CarseGame;
 

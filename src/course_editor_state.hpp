@@ -32,6 +32,7 @@ class CourseEditorState extends public fgeal::Game::State
 		ON_EDITOR,
 		ON_FILE_MENU,
 		ON_SAVE_DIALOG,
+		ON_NAME_TEXTFIELD
 	}
 	focus;
 
@@ -53,12 +54,20 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Rectangle courseViewBounds;
 
 	// tools panel stuff
-	fgeal::Rectangle toolsPanelBounds, presetsPanelBounds;
-	fgeal::Button newButton, loadButton, saveButton, generateButton, exitButton;
+	fgeal::Rectangle toolsPanelBounds, presetsTabPanelBounds, propertiesTabPanelBounds;
+	fgeal::Button presetsTabButton, propertiesTabButton, newButton, loadButton, saveButton, generateButton, exitButton;
+	bool isPresetsTabActive;
+
+	// properties tab stuff
+	fgeal::TextField landscapeStyleTextField, roadStyleTextField, courseNameTextField;
+	int selectedLandscapeStyleIndex, selectedRoadStyleIndex;
+	fgeal::Button landscapeStyleChangeButton, roadStyleChangeButton;
 
 	// load dialog
-	fgeal::Menu fileMenu;
 	fgeal::Rectangle loadDialogBounds;
+	fgeal::Menu fileMenu;
+	fgeal::Image* imgMenuCourseArrow;
+	fgeal::Rectangle imgMenuCourseArrowUpBounds, imgMenuCourseArrowDownBounds;
 	fgeal::Button loadDialogSelectButton, loadDialogCancelButton;
 
 	// save dialog
@@ -89,6 +98,7 @@ class CourseEditorState extends public fgeal::Game::State
 
 	private:
 	void reloadFileList();
+	void setPresetsTabActive(bool choice=true);
 	void loadCourseSpec(const Pseudo3DCourse::Spec&);
 };
 

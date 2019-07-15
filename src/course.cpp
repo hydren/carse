@@ -31,11 +31,9 @@ Pseudo3DCourse::Pseudo3DCourse()
   lengthScale(1)
 {}
 
-template <typename T>
-inline static T modf(T x)
+inline static float fractional_part(float value)
 {
-	static T t;
-	return std::modf(x, &t);
+	return value - (int) value;
 }
 
 Pseudo3DCourse::~Pseudo3DCourse()
@@ -162,19 +160,19 @@ void Pseudo3DCourse::draw(int pos, int posX)
 		const CourseSpec::Segment& l = spec.lines[n%N];
 		const ScreenCoordCache& lt = lts[n%N];
 
-		if(l.spriteID != -1)
+		if(l.propIndex != -1)
 		{
-			Image& s = *sprites[l.spriteID];
+			Image& s = *sprites[l.propIndex];
 			const int w = s.getWidth(),
 					  h = s.getHeight();
 
 			const float scale = lt.W/150,
 				  destW = w*scale,
 				  destH = h*scale;
-			float destX = lt.X + lt.scale * l.spriteX * drawAreaWidth/2;
+			float destX = lt.X + lt.scale * l.propX * drawAreaWidth/2;
 			float destY = lt.Y + 4;
 
-			destX += destW * l.spriteX;  // offsetX
+			destX += destW * l.propX;  // offsetX
 			destY += destH * (-1);  // offsetY
 
 			float clipH = destY+destH-l.clip;
@@ -189,9 +187,10 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 		const_foreach(const Pseudo3DVehicle*, vehicle, vector<const Pseudo3DVehicle*>, vehicles)
 	    {
-			if((static_cast<unsigned>(vehicle->position * lengthScale / spec.roadSegmentLength))%N == n)
+			const float vehiclePosition = vehicle->position * lengthScale / spec.roadSegmentLength;
+			if(((unsigned) vehiclePosition) % N == n)
 			{
-				const float ltprop = modf(vehicle->position * lengthScale / spec.roadSegmentLength), lt2prop = 1 - ltprop;
+				const float ltprop = fractional_part(vehiclePosition), lt2prop = 1 - ltprop;
 
 				const ScreenCoordCache& lt2 = lts[(n-1)%N];
 				const float ltW = lt.W * ltprop + lt2.W * lt2prop,
@@ -234,7 +233,7 @@ void Pseudo3DCourse::Spec::loadFromFile(const string& filename)
 void Pseudo3DCourse::Spec::saveToFile(const string& filename)
 {
 	const string specFilename = filename + ".properties", segmentsFilename = filename + ".csv";
-	this->saveProperties(specFilename, segmentsFilename);
+	this->storeProperties(specFilename, segmentsFilename);
 	this->saveSegments(segmentsFilename);
 }
 
@@ -387,12 +386,19 @@ void Pseudo3DCourse::Map::drawMap(unsigned highlightedSegment)
 }
 
 // ========================================================================================================================
+
+const Pseudo3DCourse::Spec::RoadStyle Pseudo3DCourse::Spec::RoadStyle::DEFAULT = {
+		Color(64, 80, 80), Color(40, 64, 64), Color(200, 200, 200), Color(152, 0, 0), "default" };
+
+const Pseudo3DCourse::Spec::LandscapeStyle Pseudo3DCourse::Spec::LandscapeStyle::DEFAULT = {
+		Color(0, 112, 0), Color(0, 88, 0), Color(136, 204, 238), "assets/bg.png", "assets/bush.png", "assets/tree.png", "assets/redbarn.png", "default" };
+
 // ====================== built-in generators =============================================================================
 
 //static
-Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segmentLength, float roadWidth)
+Pseudo3DCourse::Spec Pseudo3DCourse::Spec::createDebug()
 {
-	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
+	Pseudo3DCourse::Spec spec(200, 3000);
 	for(unsigned i = 0; i < 1600; i++)  // generating hardcoded course
 	{
 		CourseSpec::Segment line;
@@ -401,10 +407,11 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segment
 		if(i > 500 && i < 700) line.curve = -0.3;
 		if(i > 900 && i < 1300) line.curve = -2.2;
 		if(i > 750) line.y = sin(i/30.0)*1500;
-		if(i % 17==0) { line.spriteX=2.0; line.spriteID=0; }
-		if(i % 17==1) { line.spriteX=-3.0; line.spriteID=0; }
+		if(i % 17==0) { line.propX=2.0; line.propIndex=0; }
+		if(i % 17==1) { line.propX=-3.0; line.propIndex=0; }
 		spec.lines.push_back(line);
 	}
+	spec.props.push_back(Prop());  // type 0
 	spec.spritesFilenames.push_back("assets/bush.png");  // type 0
 	spec.landscapeFilename = "assets/bg.png";
 	spec.colorRoadPrimary =      Color( 64, 80, 80);
@@ -423,24 +430,18 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateDebugCourseSpec(float segment
 }
 
 //static
-Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness)
+Pseudo3DCourse::Spec Pseudo3DCourse::Spec::createRandom(float segmentLength, float roadWidth, unsigned segmentCount, float curveness)
 {
-	Pseudo3DCourse::Spec spec(segmentLength, roadWidth);
-
-	float currentCurve = 0;
-
-	const bool range1 = true,//rand()%2,
-			   range2 = true,//rand;()%2,
-			   range3 = true;//rand;()%2;
-	const float range1size = random_between_decimal(0, 1500),
-				range2size = random_between_decimal(0, 1500),
-				range3size = random_between_decimal(0, 1500);
+	Spec spec(segmentLength, roadWidth);
+	spec.lines.resize(segmentCount);
 
 	// generating random course
-	for(unsigned i = 0; i < length; i++)
+	float currentCurve = 0, currentSlopeScale = 0;
+	unsigned currentSlopeStart = 0, currentSlopeCycle = 1;
+	for(unsigned i = 0; i < segmentCount; i++)
 	{
-		CourseSpec::Segment line;
-		line.z = i*spec.roadSegmentLength;
+		Segment& line = spec.lines[i];
+		line.z = i*segmentLength;
 
 		if(currentCurve == 0)
 		{
@@ -449,76 +450,61 @@ Pseudo3DCourse::Spec Pseudo3DCourse::Spec::generateRandomCourseSpec(float segmen
 			else if(rand() % 50 == 0)
 				currentCurve = random_between_decimal(-curveness, curveness);
 		}
-
 		else if(currentCurve != 0 and rand() % 100 == 0)
 			currentCurve = 0;
 
 		line.curve = currentCurve;
 
-		// fixme this should be parametrized, or at least random
-		if(i > 750 and i < 1510 and range1) line.y = sin(i/30.0)*range1size;
-		if(i > 1510 and i < 2270 and range2) line.y = sin(i/30.0)*range2size;
-		if(i > 2270 and i < 3030 and range3) line.y = sin(i/30.0)*range3size;
+		if(currentSlopeScale == 0)
+		{
+			if(rand() % 500 == 0)
+			{
+				currentSlopeScale = random_between_decimal(0.1 * segmentLength, 1500);
+				currentSlopeCycle = 20 * currentSlopeScale / segmentLength;
+				currentSlopeStart = i;
+			}
+		}
+		else if(currentSlopeScale != 0 and (i - currentSlopeStart) % currentSlopeCycle == 0 and rand()%2 == 0)
+			currentSlopeScale = 0;
+
+		line.y = currentSlopeScale != 0? currentSlopeScale * sin(M_PI * (i - currentSlopeStart)/(float) currentSlopeCycle) : 0;
 
 		if(rand() % 10 == 0)
 		{
-			line.spriteID = 0;
-			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.5, 3.0);
+			line.propIndex = 0;
+			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.5, 3.0);
 		}
 		else if(rand() % 100 == 0)
 		{
-			line.spriteID = 1;
-			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
+			line.propIndex = 1;
+			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
 		else if(rand() % 1000 == 0)
 		{
-			line.spriteID = 2;
-			line.spriteX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
+			line.propIndex = 2;
+			line.propX = (rand()%2==0? -1 : 1) * random_between_decimal(2.0, 2.5);
 		}
-
-		spec.lines.push_back(line);
 	}
 
-	static struct RoadColors {
-		Color primary, secondary, humblePrimary, humbleSecondary;
-	}
-	roadColors[] = {
-		{ Color(64, 80, 80), Color(40, 64, 64), Color(200,200,200), Color(152,  0,  0) },  // racetrack road
-		{ Color(12, 28, 12), Color(31, 28, 31), Color( 12, 28, 12), Color( 31, 28, 31) }   // euro country road
-	};
+	spec.spritesFilenames.push_back(string());
+	spec.props.push_back(Prop());
+	spec.spritesFilenames.push_back(string());
+	spec.props.push_back(Prop(true));
+	spec.spritesFilenames.push_back(string());
+	spec.props.push_back(Prop(true));
+	spec.landscapeFilename = "";
 
-	static struct LandscapeSettings {
-		Color terrainPrimary, terrainSecondary, sky;
-		string landscapeBgFilename, sprite1, sprite2, sprite3;
-	}
-	landscapeSettings[] = {
-		{ Color(  0,112,  0), Color(  0, 88,  0), Color(136,204,238), "bg.png", "bush.png", "tree.png", "redbarn.png" },  // grasslands landscape
-		{ Color( 31, 85,  0), Color( 31, 68,  0), Color(173,201,152), "bg_forest.jpg", "bush.png", "tree.png", "talltree.png" },  // forest landscape
-		{ Color( 64, 80, 80), Color( 40, 64, 64), Color( 35, 31, 32), "bg_nightcity.jpg", "bush.png", "streetlight_double.png", "buildings.png" },  // night city landscape
-		{ Color(220,170,139), Color(188,137,106), Color(248,156, 31), "bg_desert.jpg", "rock.png", "cactus.png", "cliff.png" },  // desert landscape
-		{ Color(190,229,246), Color(159,198,213), Color(123,138,155), "bg_montains.jpg", "bush_snow.png", "talltree.png", "cliff_alpine.png" },  // snow landscape
-	};
+	spec.colorRoadPrimary = Color(32, 32, 32);
+	spec.colorRoadSecondary = Color(64, 64, 64);
+	spec.colorOffRoadPrimary = Color(96, 96, 96);
+	spec.colorOffRoadSecondary = Color(128, 128, 128);
+	spec.colorHumblePrimary = Color(255, 255, 255);
+	spec.colorHumbleSecondary = Color(240, 240, 240);
 
-	const unsigned
-		ri = futil::random_between(0, sizeof(roadColors)/sizeof(RoadColors)),
-		li = futil::random_between(0, sizeof(landscapeSettings)/sizeof(LandscapeSettings));
-
-	spec.spritesFilenames.push_back("assets/"+landscapeSettings[li].sprite1);
-	spec.spritesFilenames.push_back("assets/"+landscapeSettings[li].sprite2);
-	spec.spritesFilenames.push_back("assets/"+landscapeSettings[li].sprite3);
-	spec.landscapeFilename = "assets/"+landscapeSettings[li].landscapeBgFilename;
-
-	spec.colorRoadPrimary = roadColors[ri].primary;
-	spec.colorRoadSecondary = roadColors[ri].secondary;
-	spec.colorOffRoadPrimary = landscapeSettings[li].terrainPrimary;
-	spec.colorOffRoadSecondary = landscapeSettings[li].terrainSecondary;
-	spec.colorHumblePrimary = roadColors[ri].humblePrimary;
-	spec.colorHumbleSecondary = roadColors[ri].humbleSecondary;
-
-	spec.colorLandscape = landscapeSettings[li].sky;
+	spec.colorLandscape = Color(0, 255, 255);
 	spec.colorHorizon = spec.colorOffRoadPrimary;
 
-	spec.musicFilename = "assets/music_sample.ogg";
+	spec.musicFilename = "";
 
 	return spec;
 }

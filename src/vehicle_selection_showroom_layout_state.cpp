@@ -122,10 +122,11 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		fontTitle->setFontSize(dip(22));
-		fontSubtitle->setFontSize(dip(36));
-		fontInfo->setFontSize(dip(12));
-		fontGui->setFontSize(dip(18));
+		const FontSizer fs(display.getHeight());
+		fontTitle->setSize(fs(22));
+		fontSubtitle->setSize(fs(36));
+		fontInfo->setSize(fs(12));
+		fontGui->setSize(fs(18));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}
@@ -150,15 +151,15 @@ void VehicleSelectionShowroomLayoutState::onEnter()
 	nextAppearanceButtonBounds.y = 0.580*dh;
 
 	backButton.bounds.x = 0.01*dw;
-	backButton.bounds.y = 0.95*dh - fontGui->getHeight();
+	backButton.bounds.y = 0.95*dh - fontGui->getTextHeight();
 	backButton.bounds.w = fontGui->getTextWidth(" Back ");
-	backButton.bounds.h = fontGui->getHeight();
+	backButton.bounds.h = fontGui->getTextHeight();
 	backButton.highlightSpacing = 0.007*dh;
 
 	selectButton.bounds.x = 0.85*dw;
-	selectButton.bounds.y = 0.95*dh - fontGui->getHeight();
+	selectButton.bounds.y = 0.95*dh - fontGui->getTextHeight();
 	selectButton.bounds.w = fontGui->getTextWidth(" Select ");
-	selectButton.bounds.h = fontGui->getHeight();
+	selectButton.bounds.h = fontGui->getTextHeight();
 	selectButton.highlightSpacing = backButton.highlightSpacing;
 }
 
@@ -267,7 +268,7 @@ void VehicleSelectionShowroomLayoutState::render()
 	{
 		const unsigned i = index == 0? menu.getEntries().size()-1 : index-1;
 		const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[i] == -1? vehicles[i].sprite : vehicles[i].alternateSprites[previewAltIndex[i]];
-		drawVehiclePreview(previewPreviousSprite, spriteSpec, (0.2-doff)*dw, (0.5-doffp)*dh, 1.05-0.05*fabs(trans), trans < -0.5? 0 : -1);
+		drawVehiclePreview(previewPreviousSprite, spriteSpec, (0.2-doff)*dw, (0.6-doffp)*dh, 1.05-0.05*fabs(trans), trans < -0.5? 0 : -1);
 	}
 
 	// draw next vehicle
@@ -275,7 +276,7 @@ void VehicleSelectionShowroomLayoutState::render()
 	{
 		const unsigned i = index == menu.getEntries().size()-1? 0 : index+1;
 		const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[i] == -1? vehicles[i].sprite : vehicles[i].alternateSprites[previewAltIndex[i]];
-		drawVehiclePreview(previewNextSprite, spriteSpec, (0.8-doff)*dw, (0.5-doffn)*dh, 1.05-0.05*fabs(trans), trans > 0.5? 0 : +1);
+		drawVehiclePreview(previewNextSprite, spriteSpec, (0.8-doff)*dw, (0.6-doffn)*dh, 1.05-0.05*fabs(trans), trans > 0.5? 0 : +1);
 	}
 
 	// darkening other vehicles
@@ -283,21 +284,21 @@ void VehicleSelectionShowroomLayoutState::render()
 
 	// draw current vehicle
 	const Pseudo3DVehicleAnimationSpec& spriteSpec = previewAltIndex[index] == -1? vehicles[index].sprite : vehicles[index].alternateSprites[previewAltIndex[index]];
-	drawVehiclePreview(previewCurrentSprite, spriteSpec, (0.5-doff)*dw, (0.45-doffc)*dh, 1.0+0.05*fabs(trans), trans > 0.5? -1 : trans < -0.5? +1 : 0);
+	drawVehiclePreview(previewCurrentSprite, spriteSpec, (0.5-doff)*dw, (0.55-doffc)*dh, 1.0+0.05*fabs(trans), trans > 0.5? -1 : trans < -0.5? +1 : 0);
 
 	// draw current vehicle info
 	const string lblChooseVehicle = "Choose your vehicle";
-	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontTitle->getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontTitle->getHeight(), Color::MAROON);
-	fontTitle->drawText(lblChooseVehicle, 0.95*dw - fontTitle->getTextWidth(lblChooseVehicle), 0.03*fontTitle->getHeight(), Color::WHITE);
+	fgeal::Graphics::drawFilledRectangle(0.9*dw - fontTitle->getTextWidth(lblChooseVehicle), 0, dw, 1.05*fontTitle->getTextHeight(), Color::MAROON);
+	fontTitle->drawText(lblChooseVehicle, 0.95*dw - fontTitle->getTextWidth(lblChooseVehicle), 0.03*fontTitle->getTextHeight(), Color::WHITE);
 
 	const string name = vehicle.name.empty()? "--" : vehicle.name;
 	const unsigned nameWidth = fontSubtitle->getTextWidth(name);
 	const int nameOffset = nameWidth > dw? 0.6*sin(fgeal::uptime())*(nameWidth - dw) : 0;
 	const int infoX = 0.25*dw; int infoY = 0.75*dh;
 
-	fgeal::Graphics::drawFilledRectangle(0, infoY - 1.1*fontSubtitle->getHeight(), dw, fontSubtitle->getHeight(), Color::AZURE);
-	fontSubtitle->drawText(name, 0.5*(dw-fontSubtitle->getTextWidth(name)) + nameOffset, infoY - 1.1*fontSubtitle->getHeight(), Color::WHITE);
-	fgeal::Graphics::drawFilledRectangle(0, infoY - 0.1*fontSubtitle->getHeight(), dw, 0.25*dh, Color::NAVY);
+	fgeal::Graphics::drawFilledRectangle(0, infoY - 1.1*fontSubtitle->getTextHeight(), dw, fontSubtitle->getTextHeight(), Color::AZURE);
+	fontSubtitle->drawText(name, 0.5*(dw-fontSubtitle->getTextWidth(name)) + nameOffset, infoY - 1.1*fontSubtitle->getTextHeight(), Color::WHITE);
+	fgeal::Graphics::drawFilledRectangle(0, infoY - 0.1*fontSubtitle->getTextHeight(), dw, 0.25*dh, Color::NAVY);
 	drawVehicleSpec(infoX,  infoY);
 
 	const float arrowOffset = cos(10*fgeal::uptime()) > 0? 0 : std::max(0.005f*dh, 1.0f);
@@ -454,8 +455,8 @@ void VehicleSelectionShowroomLayoutState::drawVehiclePreview(Image* sprite, cons
 	const Image::FlipMode flipMode = (angleType > 0 ? Image::FLIP_HORIZONTAL : Image::FLIP_NONE);
 	const float scalex = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.x,
 				scaley = display.getWidth() * 0.0048828125f * scale * spriteSpec.scale.y,
-				posX = x - 0.5*spriteSpec.frameWidth * scalex,
-				posY = y - 0.5*spriteSpec.frameHeight * scaley,
+				posX = x - scalex * 0.5*spriteSpec.frameWidth,
+				posY = y - scaley * (spriteSpec.frameHeight - spriteSpec.contactOffset),
 				offsetY = (angleType == 0? 0 : spriteSpec.frameHeight * (spriteSpec.stateCount/2));
 
 	sprite->drawScaledRegion(posX, posY, scalex, scaley, flipMode, 0, offsetY, spriteSpec.frameWidth, spriteSpec.frameHeight);
@@ -474,25 +475,25 @@ void VehicleSelectionShowroomLayoutState::drawVehicleSpec(float infoX, float inf
 	                           + (vehicle.engineValvetrain.empty()? "" : vehicle.engineValvetrain + " ")
 	                           + (vehicle.engineValveCount == 0?    "" : to_string(vehicle.engineValveCount) + "-valve ")
 	                           + (vehicle.engineConfiguration.empty()? "" : vehicle.engineConfiguration);
-	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText("Engine: "+(txtEngineDesc.empty()? "--" : txtEngineDesc), infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtPowerInfo = "Power:  " +to_string(vehicle.engineMaximumPower) + "hp @" + to_string((int)vehicle.engineMaximumPowerRpm)+"rpm";
-	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtPowerInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtTorqueInfo = "Torque: " +toStrRounded(vehicle.engineMaximumTorque) + "Nm @" + to_string((int)vehicle.engineMaximumTorqueRpm)+"rpm";
-	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtTorqueInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtTransmissionInfo = to_string(vehicle.engineGearCount)+"-speed transmission";
-	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtTransmissionInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtWeightInfo = "Weight: "+to_string(vehicle.mass) + "kg";
-	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtWeightInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 
 	const string txtDrivetrainInfo = "Drivetrain: "+(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ALL? "AWD"
 	                                            : (  vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_FRONT? "F"
 	                                            :    vehicle.engineLocation   == Mechanics::ENGINE_LOCATION_ON_REAR? "R" : "M")
 	                                        + string(vehicle.drivenWheelsType == Mechanics::DRIVEN_WHEELS_ON_REAR? "R" : "F"));
-	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getHeight(), Color::WHITE);
+	fontInfo->drawText(txtDrivetrainInfo, infoX, infoY+=fontInfo->getTextHeight(), Color::WHITE);
 }
 
 void VehicleSelectionShowroomLayoutState::changeSprite(bool forward)

@@ -7,11 +7,9 @@
 
 #include "course_selection_state.hpp"
 
-#include "futil/string_actions.hpp"
-
-#include "util.hpp"
-
 #include "pseudo3d_race_state.hpp"
+#include "util.hpp"
+#include "futil/string_actions.hpp"
 
 #include <cmath>
 
@@ -56,7 +54,7 @@ CourseSelectionState::CourseSelectionState(CarseGame* game)
   imgCourseEditor(null), fontSmall(null),
   imgMenuCourseArrow(null),
   backButton(), selectButton(),
-  isLoadedCourseSelected(false), isDebugCourseSelected(false),
+  raceSettings(), isLoadedCourseSelected(false), isDebugCourseSelected(false), canceledChanges(false),
   focus(FOCUS_ON_COURSE_LIST_SELECTION)
 {}
 
@@ -95,9 +93,7 @@ void CourseSelectionState::initialize()
 	menuSettings.bgColor = menuCourse.bgColor;
 	menuSettings.borderColor = menuCourse.borderColor;
 	menuSettings.focusedEntryFontColor = menuCourse.focusedEntryFontColor;
-	menuSettings.addEntry("Race type: ");
-	menuSettings.addEntry("Laps: ");
-	menuSettings.addEntry("Traffic: ");
+	for(int i = 0; i < SETTINGS_MENU_COUNT; i++) menuSettings.addEntry(string());
 	updateMenuSettingsLabels();
 	menuSettings.cursorWrapAroundEnabled = false;
 
@@ -128,18 +124,19 @@ void CourseSelectionState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		fontMain->setFontSize(dip(28));
-		fontInfo->setFontSize(dip(14));
-		fontSmall->setFontSize(dip(10));
-		menuCourse.getFont().setFontSize(dip(12));
+		const FontSizer fs(display.getHeight());
+		fontMain->setSize(fs(28));
+		fontInfo->setSize(fs(14));
+		fontSmall->setSize(fs(10));
+		menuCourse.getFont().setSize(fs(12));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}
 
 	paneBounds.x = (1/64.f)*dw;
-	paneBounds.y = (3/64.f)*dh + fontMain->getHeight();
+	paneBounds.y = (3/64.f)*dh + fontMain->getTextHeight();
 	paneBounds.w = (62/64.f)*dw;
-	paneBounds.h = dh - fontMain->getHeight() - (1/16.f)*dh;
+	paneBounds.h = dh - fontMain->getTextHeight() - (1/16.f)*dh;
 
 	portraitBounds.x = paneBounds.x + (1/64.f)*paneBounds.w;
 	portraitBounds.y = paneBounds.y + (1/64.f)*paneBounds.h;
@@ -164,29 +161,21 @@ void CourseSelectionState::onEnter()
 	menuCourse.bounds.w = 0.5*paneBounds.w;
 	menuCourse.bounds.h = (paneBounds.w - portraitBounds.h)/3;
 
-	string previouslySelectedEntryLabel;
-	if(not menuCourse.getEntries().empty())
-	{
-		previouslySelectedEntryLabel = menuCourse.getSelectedEntry().label;
-
-		// clear course list
-		while(not menuCourse.getEntries().empty())
-			menuCourse.removeEntry(0);
-	}
+	// clear course list
+	while(not menuCourse.getEntries().empty())
+		menuCourse.removeEntry(0);
 
 	menuCourse.addEntry("<Random course>");
 	menuCourse.addEntry("<Debug course>");
 	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
 	for(unsigned i = 0; i < courses.size(); i++)
-		menuCourse.addEntry((string) courses[i]);
+	{
+		menuCourse.addEntry(courses[i].toString());
+		if(courses[i].toString() == game.logic.getNextCourse().toString())  // FIXME lame comparison...
+			menuCourse.setSelectedIndex(i+2);
+	}
 
-	if(not previouslySelectedEntryLabel.empty())
-		for(unsigned i = 0; i < menuCourse.getEntries().size(); i++)
-			if(menuCourse.getEntryAt(i).label == previouslySelectedEntryLabel)
-			{
-				menuCourse.setSelectedIndex(i);
-				break;
-			}
+	raceSettings = game.logic.getNextRaceSettings();
 
 	imgMenuCourseArrowUpBounds.w = imgMenuCourseArrowUpBounds.h = dh*0.04;
 	imgMenuCourseArrowUpBounds.x = menuCourse.bounds.x + menuCourse.bounds.w - imgMenuCourseArrowUpBounds.w;
@@ -199,25 +188,32 @@ void CourseSelectionState::onEnter()
 	menuSettings.bounds.y = menuCourse.bounds.y;
 	menuSettings.bounds.w = 0.45*paneBounds.w;
 	menuSettings.bounds.h = menuCourse.bounds.h;
+	updateMenuSettingsLabels();
 
 	courseMapViewer.segmentHighlightSize = 0.005*dh;
 	courseMapViewer.bounds = courseMapBounds;
 
 	backButton.bounds.x = 0.03*dw;
-	backButton.bounds.y = 0.95*dh - fontInfo->getHeight();
+	backButton.bounds.y = 0.95*dh - fontInfo->getTextHeight();
 	backButton.bounds.w = fontInfo->getTextWidth(" Back ");
-	backButton.bounds.h = fontInfo->getHeight();
+	backButton.bounds.h = fontInfo->getTextHeight();
 
 	selectButton.bounds.x = 0.85*dw;
-	selectButton.bounds.y = 0.95*dh - fontInfo->getHeight();
+	selectButton.bounds.y = 0.95*dh - fontInfo->getTextHeight();
 	selectButton.bounds.w = fontInfo->getTextWidth(" Select ");
-	selectButton.bounds.h = fontInfo->getHeight();
+	selectButton.bounds.h = fontInfo->getTextHeight();
 
 	focus = FOCUS_ON_COURSE_LIST_SELECTION;
+	canceledChanges = false;
 }
 
 void CourseSelectionState::onLeave()
 {
+	if(canceledChanges)
+		return;
+
+	game.logic.getNextRaceSettings() = raceSettings;
+
 	if(isLoadedCourseSelected)
 		game.logic.setNextCourse(menuCourse.getSelectedIndex()-2);
 	else if(isDebugCourseSelected)
@@ -243,7 +239,7 @@ void CourseSelectionState::render()
 
 	// draw title
 	fontMain->drawText(TITLE_TEXT, (1/32.f)*dw, (1/32.f)*dh, Color::WHITE);
-	Graphics::drawLine(paneBounds.x, fontMain->getHeight()+(1/32.f)*dh, paneBounds.x + paneBounds.w, fontMain->getHeight()+(1/32.f)*dh, Color::WHITE);
+	Graphics::drawLine(paneBounds.x, fontMain->getTextHeight()+(1/32.f)*dh, paneBounds.x + paneBounds.w, fontMain->getTextHeight()+(1/32.f)*dh, Color::WHITE);
 
 	// portrait frame
 	fgeal::Graphics::drawFilledRectangle(portraitBounds, Color::DARK_GREY);
@@ -263,21 +259,21 @@ void CourseSelectionState::render()
 		const Pseudo3DCourse::Spec& course = game.logic.getCourseList()[menuCourse.getSelectedIndex() - 2];
 		const float courseLength = course.lines.size()*course.roadSegmentLength*0.001;
 		const string txtLength = "Length: " + futil::to_string(courseLength) + "Km";
-		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getHeight(), Color::WHITE);
+		fontInfo->drawText(txtLength, 1.1*(portraitBounds.x + portraitBounds.w), portraitBounds.y + fontInfo->getTextHeight(), Color::WHITE);
 		courseMapViewer.drawMap(0);
 	}
 
 	// draw course editor portrait
 	imgCourseEditor->drawScaled(courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, scaledToRect(imgCourseEditor, courseEditorPortraitBounds));
 	fontSmall->drawText("Course", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y, Color::WHITE);
-	fontSmall->drawText("  editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y+fontSmall->getHeight(), Color::WHITE);
+	fontSmall->drawText("  editor", courseEditorPortraitBounds.x, courseEditorPortraitBounds.y+fontSmall->getTextHeight(), Color::WHITE);
 	if(focus == FOCUS_ON_COURSE_EDITOR_PORTRAIT and blinkCycle)
-		fgeal::Graphics::drawRectangle(getSpacedOutline(courseEditorPortraitBounds, focusSpacing), Color::RED);
+		fgeal::Graphics::drawRectangle(courseEditorPortraitBounds.getSpacedOutline(focusSpacing), Color::RED);
 
 	// draw course list
 	menuCourse.draw();
 	if(focus == FOCUS_ON_COURSE_LIST_SELECTION and blinkCycle)
-		fgeal::Graphics::drawRectangle(getSpacedOutline(menuCourse.bounds, focusSpacing), Color::RED);
+		fgeal::Graphics::drawRectangle(menuCourse.bounds.getSpacedOutline(focusSpacing), Color::RED);
 
 	{
 		const Rectangle& bounds = imgMenuCourseArrowUpBounds;
@@ -293,7 +289,7 @@ void CourseSelectionState::render()
 	menuSettings.focusedEntryFontColor = (focus == FOCUS_ON_SETTINGS_LIST_SELECTION? Color::WHITE : Color::RED);
 	menuSettings.draw();
 	if(focus == FOCUS_ON_SETTINGS_LIST_SELECTION or (focus == FOCUS_ON_SETTINGS_LIST_HOVER and blinkCycle))
-		fgeal::Graphics::drawRectangle(getSpacedOutline(menuSettings.bounds, focusSpacing), Color::RED);
+		fgeal::Graphics::drawRectangle(menuSettings.bounds.getSpacedOutline(focusSpacing), Color::RED);
 
 	backButton.draw();
 	selectButton.draw();
@@ -320,26 +316,24 @@ void CourseSelectionState::update(float delta)
 
 void CourseSelectionState::updateMenuSettingsLabels()
 {
-	Pseudo3DRaceState::RaceSettings& raceSettings = game.logic.getNextRaceSettings();
-
 	menuSettings.getEntryAt(SETTINGS_RACE_TYPE).label = "Race type: " + Pseudo3DRaceState::toString(raceSettings.raceType);
 
 	menuSettings.getEntryAt(SETTINGS_LAPS).enabled = Pseudo3DRaceState::isRaceTypeLoop(raceSettings.raceType);
 
 	if(menuSettings.getEntryAt(SETTINGS_LAPS).enabled)
-		menuSettings.getEntryAt(SETTINGS_LAPS).label = "Laps: " + to_string(game.logic.getNextRaceSettings().lapCountGoal);
+		menuSettings.getEntryAt(SETTINGS_LAPS).label = "Laps: " + to_string(raceSettings.lapCountGoal);
 	else
 		menuSettings.getEntryAt(SETTINGS_LAPS).label = "Laps: --";
 
-	menuSettings.getEntryAt(SETTINGS_TRAFFIC_DENSITY).label = "Traffic: " + to_string(raceSettings.trafficDensity*100) + "%";
+	menuSettings.getEntryAt(SETTINGS_TRAFFIC_DENSITY).label = "Traffic (experimental): " + to_string(raceSettings.trafficDensity*100) + "%";
 }
 
 void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 {
 	if(key == Keyboard::KEY_ESCAPE and focus != FOCUS_ON_SETTINGS_LIST_SELECTION)
 	{
-		//XXX should we ensure no changes are done to course selection this way?
 		sndCursorOut->play();
+		canceledChanges = true;
 		game.enterState(game.logic.currentMainMenuStateId);
 	}
 	else switch(focus)
@@ -362,14 +356,17 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 					focus = FOCUS_ON_COURSE_EDITOR_PORTRAIT;
 				else
 					menuCourse.moveCursorUp();
+
+				isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+				isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 			}
 			else if(key == Keyboard::KEY_ARROW_DOWN)
 			{
 				sndCursorMove->play();
 				menuCourse.moveCursorDown();
+				isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+				isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 			}
-			isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
-			isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 			break;
 
 		case FOCUS_ON_SETTINGS_LIST_HOVER:
@@ -393,6 +390,7 @@ void CourseSelectionState::onKeyPressed(Keyboard::Key key)
 			if(key == Keyboard::KEY_ENTER)
 			{
 				sndCursorIn->play();
+				canceledChanges = true;
 				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);
 			}
 			else if(key == Keyboard::KEY_ARROW_DOWN)
@@ -414,7 +412,6 @@ void CourseSelectionState::handleInputOnSettings(Keyboard::Key key)
 		case Keyboard::KEY_ENTER:
 		{
 			const bool isCursorLeft = (key == Keyboard::KEY_ARROW_LEFT);
-			Pseudo3DRaceState::RaceSettings& raceSettings = game.logic.getNextRaceSettings();
 			sndCursorMove->play();
 			switch(menuSettings.getSelectedIndex())
 			{
@@ -495,19 +492,32 @@ void CourseSelectionState::onMouseButtonPressed(Mouse::Button button, int x, int
 {
 	if(button == Mouse::BUTTON_LEFT)
 	{
-		if(backButton.bounds.contains(x, y) or selectButton.bounds.contains(x, y))
-			onKeyPressed(Keyboard::KEY_ESCAPE);
+		if(selectButton.bounds.contains(x, y))
+		{
+			sndCursorIn->play();
+			game.enterState(game.logic.currentMainMenuStateId);
+		}
+		else if(backButton.bounds.contains(x, y))
+		{
+			sndCursorOut->play();
+			canceledChanges = true;
+			game.enterState(game.logic.currentMainMenuStateId);
+		}
 
 		else if(imgMenuCourseArrowUpBounds.contains(x, y))
 		{
 			sndCursorMove->play();
 			menuCourse.moveCursorUp();
+			isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+			isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 		}
 
 		else if(imgMenuCourseArrowDownBounds.contains(x, y))
 		{
 			sndCursorMove->play();
 			menuCourse.moveCursorDown();
+			isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+			isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 		}
 
 		else switch(focus)
@@ -515,6 +525,8 @@ void CourseSelectionState::onMouseButtonPressed(Mouse::Button button, int x, int
 			case FOCUS_ON_COURSE_LIST_SELECTION:
 				sndCursorMove->play();
 				menuCourse.setSelectedIndexByLocation(x, y);
+				isDebugCourseSelected = (menuCourse.getSelectedIndex() == 1);
+				isLoadedCourseSelected = (menuCourse.getSelectedIndex() > 1);
 				break;
 
 			case FOCUS_ON_SETTINGS_LIST_HOVER:
@@ -537,6 +549,7 @@ void CourseSelectionState::onMouseButtonPressed(Mouse::Button button, int x, int
 
 			case FOCUS_ON_COURSE_EDITOR_PORTRAIT:
 				sndCursorIn->play();
+				canceledChanges = true;
 				game.enterState(CarseGame::COURSE_EDITOR_STATE_ID);
 				break;
 		}

@@ -9,11 +9,11 @@
 #define PSEUDO3D_COURSE_HPP_
 #include <ciso646>
 
+#include "vehicle.hpp"
+
 #include "racing/course_spec.hpp"
 
 #include "fgeal/fgeal.hpp"
-
-#include "vehicle.hpp"
 
 #include <vector>
 
@@ -25,6 +25,8 @@ struct Pseudo3DCourse
 
 		std::string name, author, credits, comments;
 		std::string previewFilename;
+
+		std::string presetLandscapeStyleName, presetRoadStyleName;
 
 		std::string landscapeFilename;
 		fgeal::Color colorLandscape, colorHorizon,
@@ -52,15 +54,55 @@ struct Pseudo3DCourse
 		inline static Spec createFromFile(const std::string& filename) { Spec spec(0, 0); spec.loadFromFile(filename); return spec; }
 
 		/* Generates a debug course spec. */
-		static Spec generateDebugCourseSpec(float segmentLength, float roadWidth);
+		static Spec createDebug();
 
-		/* Generates a random course spec, with given length and curveness factor. */
-		static Spec generateRandomCourseSpec(float segmentLength, float roadWidth, float length, float curveness);
+		/* Generates a random course spec using the given parameters. Note: course length will be equal to (segment lentgh x segment count) */
+		static Spec createRandom(float segmentLength, float roadWidth, unsigned segmentCount, float curveness);
+
+		struct RoadStyle {
+			fgeal::Color roadPrimary, roadSecondary, humblePrimary, humbleSecondary;
+			std::string name;
+			void loadFromFile(const std::string& filename, const std::string& name=std::string());
+			static const RoadStyle DEFAULT;
+		};
+
+		struct LandscapeStyle {
+			fgeal::Color terrarinPrimary, terrainSecondary, landscape;
+			std::string landscapeBackgroundFilename, sprite1, sprite2, sprite3, name;  // todo create blocking flag
+			void loadFromFile(const std::string& filename, const std::string& name=std::string());
+			static const LandscapeStyle DEFAULT;
+		};
+
+		inline void assignStyle(const RoadStyle& style)
+		{
+			presetRoadStyleName = style.name;
+			colorRoadPrimary = style.roadPrimary;
+			colorRoadSecondary = style.roadSecondary;
+			colorHumblePrimary = style.humblePrimary;
+			colorHumbleSecondary = style.humbleSecondary;
+		}
+
+		inline void assignStyle(const LandscapeStyle& style)
+		{
+			presetLandscapeStyleName = style.name;
+			colorOffRoadPrimary = style.terrarinPrimary;
+			colorOffRoadSecondary = style.terrainSecondary;
+			colorLandscape = style.landscape;
+			colorHorizon = style.terrarinPrimary;
+			landscapeFilename = style.landscapeBackgroundFilename;
+			if(spritesFilenames.size() < 3) spritesFilenames.resize(3);
+			spritesFilenames[0] = style.sprite1;
+			spritesFilenames[1] = style.sprite2;
+			spritesFilenames[2] = style.sprite3;
+			if(props.size() < 3) props.resize(3);  // todo use blocking flag from preset (when ready)
+			props[0].blocking = false;
+			props[1].blocking = props[2].blocking = true;
+		}
 
 		private:
 		void parseProperties(const std::string& filename);
 		void loadSegments(const std::string& filename);
-		void saveProperties(const std::string& specFile, const std::string& segmentsFile);
+		void storeProperties(const std::string& specFile, const std::string& segmentsFile);
 		void saveSegments(const std::string& filename);
 	};
 

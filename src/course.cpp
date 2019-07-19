@@ -92,71 +92,62 @@ inline static void rotatePoint(Point& p, const Point& center, float angle)
 	p.y = ynew + center.y;
 }
 
-namespace // static
-{
-	struct ScreenCoordCache
-	{
-		float X, Y, W, scale, clip;
-	};
-}
-
 void Pseudo3DCourse::draw(int pos, int posX)
 {
 	if(spec.lines.empty() or spec.roadSegmentLength == 0)
 		return;
+
+	// resize cache when needed
+	if(coordCache.size() != spec.lines.size())
+		coordCache.resize(spec.lines.size(), ScreenCoordCache());
 
 	if(pos < 0)
 		pos = 0;
 
 	const unsigned N = spec.lines.size(), fromPos = pos/spec.roadSegmentLength;
 	const float camHeight = cameraHeight + spec.lines[fromPos].y;
-	float x = 0, dx = 0;
-
-	float maxY = drawAreaHeight;
-
-	// screen coordinates cache
-	vector<ScreenCoordCache> lts(N, ScreenCoordCache());
+	float x = 0, dx = 0, maxY = drawAreaHeight;
 
 	for(unsigned n = fromPos+1; n < fromPos + drawDistance; n++)
 	{
-		const CourseSpec::Segment& l = spec.lines[n%N];
-		ScreenCoordCache& lt = lts[n%N];
+		const CourseSpec::Segment& segment = spec.lines[n%N];
+		ScreenCoordCache& sc = coordCache[n%N];
 
 		// project from "world" to "screen" coordinates
 		const int camX = posX - x,
 				  camY = camHeight,
 				  camZ = pos - (n >= N? N*spec.roadSegmentLength : 0);
-		const float scale = cameraDepth / (l.z - camZ);
+		const float scale = cameraDepth / (segment.z - camZ);
 
 		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
-		lt.X = (1 + scale*(l.x - camX)) * drawAreaWidth/2;
-		lt.Y = (1 - scale*(l.y - camY)) * drawAreaHeight/2;
-		lt.W = scale * spec.roadWidth * drawAreaWidth/2;
-		lt.scale = scale;
+		sc.X = (1 + scale*(segment.x - camX)) * drawAreaWidth/2;
+		sc.Y = (1 - scale*(segment.y - camY)) * drawAreaHeight/2;
+		sc.W = scale * spec.roadWidth * drawAreaWidth/2;
+		sc.scale = scale;
 
 		// update curve
 		x += dx;
-		dx += l.curve;
+		dx += segment.curve;
 
-		lt.clip=maxY;
+		sc.clip=maxY;
 
-		if(lt.Y > maxY)
+		if(sc.Y > maxY)
 			continue;
 
-		maxY = lt.Y;
+		maxY = sc.Y;
 
 		const bool oddn = (n/3)%2;
-		const ScreenCoordCache& p = lts[(n-1)%N];
+		const ScreenCoordCache& psc = coordCache[(n-1)%N];  // previous "screen" coordinate
 
-		drawRoadQuad(0,   p.Y, drawAreaWidth,    0, lt.Y, drawAreaWidth, oddn? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary);
-		drawRoadQuad(p.X, p.Y,       p.W*1.2, lt.X, lt.Y,      lt.W*1.2, oddn? spec.colorHumblePrimary  : spec.colorHumbleSecondary);
-		drawRoadQuad(p.X, p.Y,           p.W, lt.X, lt.Y,          lt.W, oddn? spec.colorRoadPrimary    : spec.colorRoadSecondary);
+		drawRoadQuad(0,     psc.Y, drawAreaWidth, 0,    sc.Y, drawAreaWidth, oddn? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary);
+		drawRoadQuad(psc.X, psc.Y, psc.W*1.2,     sc.X, sc.Y, sc.W*1.2,      oddn? spec.colorHumblePrimary  : spec.colorHumbleSecondary);
+		drawRoadQuad(psc.X, psc.Y, psc.W,         sc.X, sc.Y, sc.W,          oddn? spec.colorRoadPrimary    : spec.colorRoadSecondary);
 	}
 
 	for(unsigned n = fromPos + drawDistance; n >= fromPos+1; n--)
 	{
 		const CourseSpec::Segment& l = spec.lines[n%N];
-		const ScreenCoordCache& lt = lts[n%N];
+		const ScreenCoordCache& lt = coordCache[n%N];
 
 		if(l.propIndex != -1)
 		{
@@ -190,7 +181,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 			{
 				const float ltprop = fractional_part(vehiclePosition), lt2prop = 1 - ltprop;
 
-				const ScreenCoordCache& lt2 = lts[(n-1)%N];
+				const ScreenCoordCache& lt2 = coordCache[(n-1)%N];
 				const float ltW = lt.W * ltprop + lt2.W * lt2prop,
 							ltX = lt.X * ltprop + lt2.X * lt2prop,
 							ltY = lt.Y * ltprop + lt2.Y * lt2prop,

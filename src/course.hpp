@@ -130,9 +130,10 @@ struct Pseudo3DCourse
 	Spec spec;
 	std::vector<fgeal::Image*> sprites;
 
+	// drawing parameters
 	int drawAreaWidth, drawAreaHeight;
 	unsigned drawDistance;
-	float cameraDepth;
+	float cameraDepth, cameraHeight;
 
 	std::vector<const Pseudo3DVehicle*> vehicles;
 	float lengthScale;

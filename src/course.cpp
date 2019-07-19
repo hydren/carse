@@ -27,7 +27,8 @@ using futil::random_between_decimal;
 
 Pseudo3DCourse::Pseudo3DCourse()
 : spec(100, 1000), sprites(),
-  drawAreaWidth(), drawAreaHeight(), drawDistance(1), cameraDepth(100),
+  drawAreaWidth(), drawAreaHeight(), drawDistance(1),
+  cameraDepth(100), cameraHeight(1500),
   lengthScale(1)
 {}
 
@@ -108,7 +109,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 		pos = 0;
 
 	const unsigned N = spec.lines.size(), fromPos = pos/spec.roadSegmentLength;
-	const float camHeight = 1500 + spec.lines[fromPos].y;
+	const float camHeight = cameraHeight + spec.lines[fromPos].y;
 	float x = 0, dx = 0;
 
 	float maxY = drawAreaHeight;

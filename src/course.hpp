@@ -127,7 +127,6 @@ struct Pseudo3DCourse
 		std::vector<float> cacheLenght;
 	};
 
-	// screen coordinates cache
 	struct ScreenCoordCache
 	{
 		float X, Y, W, scale, clip;
@@ -141,6 +140,7 @@ struct Pseudo3DCourse
 	unsigned drawDistance;
 	float cameraDepth, cameraHeight;
 
+	// screen coordinates cache
 	std::vector<ScreenCoordCache> coordCache;
 
 	/** A list of vehicles (pointers) to be displayed */

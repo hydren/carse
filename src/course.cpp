@@ -46,7 +46,7 @@ Pseudo3DCourse::~Pseudo3DCourse()
 	}
 }
 
-void Pseudo3DCourse::loadSpec(const Spec& spec)
+void Pseudo3DCourse::loadSpec(const Spec& s)
 {
 	// free assets' data
 	if(not sprites.empty())
@@ -58,7 +58,11 @@ void Pseudo3DCourse::loadSpec(const Spec& spec)
 	}
 
 	// set new spec and reset some values
-	this->spec = spec;
+	spec = s;
+
+	// resize cache when needed
+	if(coordCache.size() != spec.lines.size())
+		coordCache.resize(spec.lines.size(), ScreenCoordCache());
 
 	// load assets' data
 	for(unsigned i = 0; i < spec.spritesFilenames.size(); i++)
@@ -96,10 +100,6 @@ void Pseudo3DCourse::draw(int pos, int posX)
 {
 	if(spec.lines.empty() or spec.roadSegmentLength == 0)
 		return;
-
-	// resize cache when needed
-	if(coordCache.size() != spec.lines.size())
-		coordCache.resize(spec.lines.size(), ScreenCoordCache());
 
 	if(pos < 0)
 		pos = 0;

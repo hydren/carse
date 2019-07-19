@@ -69,7 +69,7 @@ void Pseudo3DCourse::loadSpec(const Spec& spec)
 }
 
 //custom call to draw quad
-inline static void drawRoadQuad(const Color& c, float x1, float y1, float w1, float x2, float y2, float w2)
+inline static void drawRoadQuad(float x1, float y1, float w1, float x2, float y2, float w2, const Color& c=Color::WHITE)
 {
 	fgeal::Graphics::drawFilledQuadrangle(x1-w1, y1, x2-w2, y2, x2+w2, y2, x1+w1, y1, c);
 }
@@ -119,7 +119,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 	for(unsigned n = fromPos+1; n < fromPos + drawDistance; n++)
 	{
-		CourseSpec::Segment& l = spec.lines[n%N];
+		const CourseSpec::Segment& l = spec.lines[n%N];
 		ScreenCoordCache& lt = lts[n%N];
 
 		// project from "world" to "screen" coordinates
@@ -145,15 +145,12 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 		maxY = lt.Y;
 
-		const Color grass  = (n/3)%2? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary,
-					rumble = (n/3)%2? spec.colorHumblePrimary : spec.colorHumbleSecondary,
-					road   = (n/3)%2? spec.colorRoadPrimary : spec.colorRoadSecondary;
-
+		const bool oddn = (n/3)%2;
 		const ScreenCoordCache& p = lts[(n-1)%N];
 
-		drawRoadQuad(grass,  0,  p.Y, drawAreaWidth, 0, lt.Y, drawAreaWidth);
-		drawRoadQuad(rumble, p.X, p.Y, p.W*1.2, lt.X, lt.Y, lt.W*1.2);
-		drawRoadQuad(road,   p.X, p.Y, p.W, lt.X, lt.Y, lt.W);
+		drawRoadQuad(0,   p.Y, drawAreaWidth,    0, lt.Y, drawAreaWidth, oddn? spec.colorOffRoadPrimary : spec.colorOffRoadSecondary);
+		drawRoadQuad(p.X, p.Y,       p.W*1.2, lt.X, lt.Y,      lt.W*1.2, oddn? spec.colorHumblePrimary  : spec.colorHumbleSecondary);
+		drawRoadQuad(p.X, p.Y,           p.W, lt.X, lt.Y,          lt.W, oddn? spec.colorRoadPrimary    : spec.colorRoadSecondary);
 	}
 
 	for(unsigned n = fromPos + drawDistance; n >= fromPos+1; n--)

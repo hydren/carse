@@ -31,11 +31,10 @@ struct CourseSpec
 
 		//todo add a slope field to control y-variation
 
-		float clip;
 		int propIndex;  // the index of a registered prop. -1 means no prop at all.
 		float propX;   // the position of this segment's prop
 
-		Segment() : x(0), y(0), z(0), curve(0), slope(0), clip(0), propIndex(-1), propX(0) {}
+		Segment() : x(0), y(0), z(0), curve(0), slope(0), propIndex(-1), propX(0) {}
 	};
 
 	/** the list of segments of this course */

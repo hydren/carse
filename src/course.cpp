@@ -96,7 +96,7 @@ namespace // static
 {
 	struct ScreenCoordCache
 	{
-		float X, Y, W, scale;
+		float X, Y, W, scale, clip;
 	};
 }
 
@@ -138,7 +138,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 		x += dx;
 		dx += l.curve;
 
-		l.clip=maxY;
+		lt.clip=maxY;
 
 		if(lt.Y > maxY)
 			continue;
@@ -176,7 +176,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 			destX += destW * l.propX;  // offsetX
 			destY += destH * (-1);  // offsetY
 
-			float clipH = destY+destH-l.clip;
+			float clipH = destY+destH-lt.clip;
 			if(clipH < 0)
 				clipH = 0;
 
@@ -210,7 +210,7 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 				destX += 0.135f * scale * vehicle->horizontalPosition;  // offsetX
 
-				float clipH = destY - l.clip;
+				float clipH = destY - lt.clip;
 				if(clipH < 0)
 					clipH = 0;
 

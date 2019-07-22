@@ -8,6 +8,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <algorithm>
 
 #include <cstdlib>
 #include <ctime>
@@ -72,13 +73,24 @@ namespace RaceOnlyArgs
 
 int main(int argc, char** argv)
 {
-	//configure arguments parser
-	CmdLine cmd(programPresentation, ' ', CARSE_VERSION, true);
-
-	//trick to modify the output from --version
-	struct MyOutput : public TCLAP::StdOutput { virtual void version(TCLAP::CmdLineInterface& c) {
-	cout << "\n" << programPresentation << " - version " << CARSE_VERSION << "\n" << endl;
-	}} my_output; cmd.setOutput(&my_output);
+	// configure custom arguments parser
+	struct CustomCmdLine extends public CmdLine
+	{
+		CustomCmdLine() : CmdLine(programPresentation, ' ', CARSE_VERSION, true)
+		{
+			//trick to modify the output from --version
+			struct CustomOutput extends public TCLAP::StdOutput
+			{
+				virtual void version(TCLAP::CmdLineInterface& c)
+				{
+					cout << "\n" << programPresentation << " - version " << CARSE_VERSION << "\n" << endl;
+				}
+			};
+			this->setOutput(new CustomOutput());
+		}
+		//trick to modify the output from --help to print args in reverse order of inclusion
+		void reverseArgList() { std::reverse(_argList.begin(), ------_argList.end()); }
+	} cmd;
 
 	SwitchArg argFullscreen("f", "fullscreen", "Start in fullscreen mode.", false);
 	cmd.add(argFullscreen);
@@ -86,8 +98,7 @@ int main(int argc, char** argv)
 	SwitchArg argCentered("c", "centered", "Attempt to center the window. Does nothing in fullscreen mode", false);
 	cmd.add(argCentered);
 
-	ValueArg<string> argResolution("r", "resolution", "If in windowed mode, attempt to create a window of the given size."
-			" If in fullscreen mode, attempt to start in the given resolution", false, string(), "<WIDTHxHEIGHT>");
+	ValueArg<string> argResolution("r", "resolution", "If in windowed mode, attempt to create a window of the given size. If in fullscreen mode, attempt to start in the given resolution", false, string(), "<WIDTHxHEIGHT>");
 	cmd.add(argResolution);
 
 	ValueArg<float> argMasterVolume("v", "master-volume", "Specifies the master volume, in the range [0-1] (0 being no sound, 1.0 being maximum volume)", false, 0.9f, "decimal");
@@ -106,6 +117,7 @@ int main(int argc, char** argv)
 	cmd.add(RaceOnlyArgs::hudType);
 	cmd.add(RaceOnlyArgs::imperialUnit);
 
+	cmd.reverseArgList();
 	cmd.parse(argc, argv);
 
 	int screenWidth = 800, screenHeight = 600;

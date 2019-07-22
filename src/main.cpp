@@ -64,48 +64,41 @@ int main(int argc, char** argv)
 	cout << "\n" << programPresentation << " - version " << CARSE_VERSION << "\n" << endl;
 	}} my_output; cmd.setOutput(&my_output);
 
-	SwitchArg argFullscreen("f", "fullscreen", "Tells carse to go start in fullscreen mode.", false);
+	SwitchArg argFullscreen("f", "fullscreen", "Start in fullscreen mode.", false);
 	cmd.add(argFullscreen);
 
-	SwitchArg argCentered("c", "centered", "Tells carse to attempt to center the window. Does nothing in fullscreen mode", false);
+	SwitchArg argCentered("c", "centered", "Attempt to center the window. Does nothing in fullscreen mode", false);
 	cmd.add(argCentered);
 
-	ValueArg<string> argResolution("r", "resolution", "If in windowed mode, tells carse to attempt to create a window of the given size."
-			" If in fullscreen mode, tells carse to set the given resolution", false, string(), "<WIDTHxHEIGHT>");
+	ValueArg<string> argResolution("r", "resolution", "If in windowed mode, attempt to create a window of the given size."
+			" If in fullscreen mode, attempt to start in the given resolution", false, string(), "<WIDTHxHEIGHT>");
 	cmd.add(argResolution);
 
-	ValueArg<float> argMasterVolume("v", "master-volume", "Sets the master volume, in the range [0-1] (0 being no sound, 1.0 being maximum volume)", false, -1, "decimal");
+	ValueArg<float> argMasterVolume("v", "master-volume", "Specifies the master volume, in the range [0-1] (0 being no sound, 1.0 being maximum volume)", false, -1, "decimal");
 	cmd.add(argMasterVolume);
 
-	SwitchArg argRace("R", "race", "Tells carse to go directly start a race with current vehicle and course.", false);
+	SwitchArg argRace("R", "race", "Skip menus and go straight to race with current vehicle and course.", false);
 	cmd.add(argRace);
 
-	ValueArg<int> argRaceType("T", "race-type", "When used in conjunction with the --race parameter, tells carse which race type to "
-			"run, represented by its index", false, -1, "integer");
+	ValueArg<int> argRaceType("T", "race-type", "When used together with the --race parameter, specifies the race type, represented by its index", false, -1, "integer");
 	cmd.add(argRaceType);
 
-	ValueArg<unsigned> argLapCount("L", "lap-count", "When used in conjunction with the --race-type parameter with value loop types, "
-			"tells carse the number of laps of the race", false, 0, "unsigned integer");
+	ValueArg<unsigned> argLapCount("L", "lap-count", "When used together with the --race-type parameter, specifies the number of laps of the race (loop race types only).", false, 0, "unsigned integer");
 	cmd.add(argLapCount);
 
-	ValueArg<unsigned> argCourse("C", "course", "When used in conjunction with the --race parameter, tells carse to use the given course,"
-			" represented by its index", false, 0, "unsigned integer");
+	ValueArg<unsigned> argCourse("C", "course", "When used in conjunction with the --race parameter, specifies the race course, represented by its index", false, 0, "unsigned integer");
 	cmd.add(argCourse);
 
-	SwitchArg argRandomCourse("X", "random-course", "When used in conjunction with the --race parameter, tells carse to use a generated"
-			" random course", false);
+	SwitchArg argRandomCourse("X", "random-course", "When used in conjunction with the --race parameter, generates and sets a random race course", false);
 	cmd.add(argRandomCourse);
 
-	SwitchArg argDebugCourse("D", "debug-course", "When used in conjunction with the --race parameter, tells carse to use a predefined"
-			" debug course, in debug mode.", false);
+	SwitchArg argDebugCourse("D", "debug-course", "When used in conjunction with the --race parameter, sets a predefined debug race course, in debug mode.", false);
 	cmd.add(argDebugCourse);
 
-	ValueArg<unsigned> argVehicle("V", "vehicle", "When used in conjunction with the --race parameter, tells carse to use the given vehicle,"
-			" represented by its index", false, 0, "unsigned integer");
+	ValueArg<unsigned> argVehicle("V", "vehicle", "When used in conjunction with the --race parameter, specifies the player vehicle, represented by its index", false, 0, "unsigned integer");
 	cmd.add(argVehicle);
 
-	ValueArg<int> argVehicleAltSprite("S", "vehicle-alternate-sprite", "When used in conjunction with the --vehicle parameter, tells carse to "
-			"use the given vehicle alternate sprite, represented by its index", false, -1, "integer");
+	ValueArg<int> argVehicleAltSprite("S", "vehicle-alternate-sprite", "When used in conjunction with the --vehicle parameter, specifies the alternate player vehicle sprite, represented by its index", false, -1, "integer");
 	cmd.add(argVehicleAltSprite);
 
 	cmd.parse(argc, argv);

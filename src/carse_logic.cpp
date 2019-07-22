@@ -61,7 +61,8 @@ void CarseLogic::initialize()
 
 void CarseLogic::onStatesListInitFinished()
 {
-	nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;  // set default race type
+	const Pseudo3DRaceState::RaceType defaultRaceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_TRIAL;
+	nextMatchRaceSettings.raceType = defaultRaceType;  // set default race type
 	nextMatchRaceSettings.lapCountGoal = 2;    // set default lap count
 	nextMatchRaceSettings.trafficDensity = 0;  // by default, no traffic
 	nextMatchRaceSettings.isImperialUnit = false;
@@ -74,24 +75,51 @@ void CarseLogic::onStatesListInitFinished()
 	if(raceOnlyMode)
 	{
 		if(raceOnlyDebug)
+		{
+			this->nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_DEBUG;
 			this->setNextCourseDebug();
-		else if(raceOnlyRandomCourse)
-			this->setNextCourseRandom();
+		}
 		else
-			nextMatchCourseSpec = courses[raceOnlyCourseIndex < courses.size()? raceOnlyCourseIndex : courses.size()-1];
+		{
+			if(raceOnlyRandomCourse)
+				this->setNextCourseRandom();
+			else
+			{
+				if(raceOnlyCourseIndex >= courses.size())
+				{
+					raceOnlyCourseIndex = courses.size()-1;
+					cout << "warning: specified course index is out of bounds! using another valid index instead..." << endl;
+				}
+				nextMatchCourseSpec = courses[raceOnlyCourseIndex];
+			}
 
-		if(raceOnlyRaceType < 0)
-			nextMatchRaceSettings.raceType = Pseudo3DRaceState::RACE_TYPE_LOOP_TIME_ATTACK;
-		else if(raceOnlyRaceType < Pseudo3DRaceState::RACE_TYPE_COUNT)
-			nextMatchRaceSettings.raceType = (Pseudo3DRaceState::RaceType) raceOnlyRaceType;
+			if(raceOnlyRaceType > 0 and raceOnlyRaceType < Pseudo3DRaceState::RACE_TYPE_COUNT)
+				nextMatchRaceSettings.raceType = static_cast<Pseudo3DRaceState::RaceType>(raceOnlyRaceType);
+			else
+			{
+				nextMatchRaceSettings.raceType = defaultRaceType;
+				if(raceOnlyRaceType != -1)
+					cout << "warning: specified race type index is out of bounds! using default race type instead..." << endl;
+			}
+
+			if(Pseudo3DRaceState::isRaceTypeLoop(nextMatchRaceSettings.raceType))
+				nextMatchRaceSettings.lapCountGoal = raceOnlyLapCount;
+		}
+
+		if(raceOnlyPlayerVehicleIndex >= vehicles.size())
+		{
+			raceOnlyPlayerVehicleIndex = vehicles.size()-1;
+			cout << "warning: specified player vehicle index is out of bounds! using another valid index instead..." << endl;
+		}
+		nextMatchPlayerVehicleSpec = vehicles[raceOnlyPlayerVehicleIndex];
+
+		if(raceOnlyPlayerVehicleAlternateSpriteIndex < (int) nextMatchPlayerVehicleSpec.alternateSprites.size())
+			nextMatchPlayerVehicleSpecAlternateSpriteIndex = raceOnlyPlayerVehicleAlternateSpriteIndex;
 		else
-			nextMatchRaceSettings.raceType = (Pseudo3DRaceState::RaceType) (Pseudo3DRaceState::RACE_TYPE_COUNT - 1);
-
-		if(Pseudo3DRaceState::isRaceTypeLoop(nextMatchRaceSettings.raceType))
-			nextMatchRaceSettings.lapCountGoal = raceOnlyLapCount;
-
-		nextMatchPlayerVehicleSpec = vehicles[raceOnlyPlayerVehicleIndex < vehicles.size()? raceOnlyPlayerVehicleIndex : vehicles.size()-1];
-		nextMatchPlayerVehicleSpecAlternateSpriteIndex = raceOnlyPlayerVehicleAlternateSpriteIndex < (int) nextMatchPlayerVehicleSpec.alternateSprites.size()? raceOnlyPlayerVehicleAlternateSpriteIndex : nextMatchPlayerVehicleSpec.alternateSprites.size()-1;
+		{
+			nextMatchPlayerVehicleSpecAlternateSpriteIndex = nextMatchPlayerVehicleSpec.alternateSprites.size()-1;
+			cout << "warning: specified player vehicle alternate sprite index is out of bounds! using another valid index instead..." << endl;
+		}
 	}
 	else
 	{

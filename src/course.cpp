@@ -111,7 +111,6 @@ void Pseudo3DCourse::draw(int pos, int posX)
 	for(unsigned n = fromPos+1; n < fromPos + drawDistance; n++)
 	{
 		const CourseSpec::Segment& segment = spec.lines[n%N];
-		ScreenCoordCache& sc = coordCache[n%N];
 
 		// project from "world" to "screen" coordinates
 		const int camX = posX - x,
@@ -119,7 +118,8 @@ void Pseudo3DCourse::draw(int pos, int posX)
 				  camZ = pos - (n >= N? N*spec.roadSegmentLength : 0);
 		const float scale = cameraDepth / (segment.z - camZ);
 
-		//fixme since l.x is always zero, camX is actually the one which controls the horizontal shift; it should be l.x, much like l.y controls the vertical shift
+		//fixme since segment.x is always zero, camX is actually the one which controls the horizontal shift; it should be segment.x, much like segment.y controls the vertical shift
+		ScreenCoordCache& sc = coordCache[n%N];
 		sc.X = (1 + scale*(segment.x - camX)) * drawAreaWidth/2;
 		sc.Y = (1 - scale*(segment.y - camY)) * drawAreaHeight/2;
 		sc.W = scale * spec.roadWidth * drawAreaWidth/2;
@@ -146,68 +146,70 @@ void Pseudo3DCourse::draw(int pos, int posX)
 
 	for(unsigned n = fromPos + drawDistance; n >= fromPos+1; n--)
 	{
-		const CourseSpec::Segment& l = spec.lines[n%N];
-		const ScreenCoordCache& lt = coordCache[n%N];
+		const CourseSpec::Segment& segment = spec.lines[n%N];
+		const ScreenCoordCache& sc = coordCache[n%N];  // get cached "screen" coordinate
 
-		if(l.propIndex != -1)
+		if(segment.propIndex != -1)
 		{
-			Image& s = *sprites[l.propIndex];
-			const int w = s.getWidth(),
-					  h = s.getHeight();
+			Image& propImage = *sprites[segment.propIndex];
+			const int w = propImage.getWidth(),
+					  h = propImage.getHeight();
 
-			const float scale = lt.W/150,
+			const float scale = sc.W/150,
 				  destW = w*scale,
 				  destH = h*scale;
-			float destX = lt.X + lt.scale * l.propX * drawAreaWidth/2;
-			float destY = lt.Y + 4;
+			float destX = sc.X + sc.scale * segment.propX * drawAreaWidth/2;
+			float destY = sc.Y + 4;
 
-			destX += destW * l.propX;  // offsetX
+			destX += destW * segment.propX;  // offsetX
 			destY += destH * (-1);  // offsetY
 
-			float clipH = destY+destH-lt.clip;
+			float clipH = destY+destH-sc.clip;
 			if(clipH < 0)
 				clipH = 0;
 
 			const float sw = w, sh = h-h*clipH/destH;
 
 			if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
-				s.drawScaledRegion(destX, destY, scale, scale, Image::FLIP_NONE, 0, 0, sw, sh);
+				propImage.drawScaledRegion(destX, destY, scale, scale, Image::FLIP_NONE, 0, 0, sw, sh);
 		}
 
-		const_foreach(const Pseudo3DVehicle*, vehicle, vector<const Pseudo3DVehicle*>, vehicles)
-	    {
-			const float vehiclePosition = vehicle->position * lengthScale / spec.roadSegmentLength;
+		for(unsigned i = 0; i < vehicles.size() and vehicles[i] != null; i++)
+		{
+			const Pseudo3DVehicle& vehicle = *vehicles[i];
+			const float vehiclePosition = vehicle.position * lengthScale / spec.roadSegmentLength;
 			if(((unsigned) vehiclePosition) % N == n)
 			{
-				const float ltprop = fractional_part(vehiclePosition), lt2prop = 1 - ltprop;
+				const ScreenCoordCache& psc = coordCache[(n-1)%N];  // get previous cached "screen" coordinate
+				const float segProp = fractional_part(vehiclePosition), prevSegProp = 1 - segProp;
+				const ScreenCoordCache isc = {  // interpolated screen coordinates
+						sc.X * segProp + psc.X * prevSegProp,
+						sc.Y * segProp + psc.Y * prevSegProp,
+						sc.W * segProp + psc.W * prevSegProp,
+						sc.scale * segProp + psc.scale * prevSegProp
+				};
 
-				const ScreenCoordCache& lt2 = coordCache[(n-1)%N];
-				const float ltW = lt.W * ltprop + lt2.W * lt2prop,
-							ltX = lt.X * ltprop + lt2.X * lt2prop,
-							ltY = lt.Y * ltprop + lt2.Y * lt2prop,
-							ltScale = lt.scale * ltprop + lt2.scale * lt2prop;
+				const int w = vehicle.spriteSpec.frameWidth,
+						  h = vehicle.spriteSpec.frameHeight;
 
-				const int w = vehicle->spriteSpec.frameWidth,
-						  h = vehicle->spriteSpec.frameHeight;
+				const float scale = isc.W * 1.2f,
+					  destW = w*scale*vehicle.sprites.back()->scale.x,
+					  destH = h*scale*vehicle.sprites.back()->scale.y;
+				float destX = isc.X + isc.scale * vehicle.horizontalPosition * drawAreaWidth/2;
+				float destY = isc.Y + 4;
 
-				const float scale = ltW * 1.2f,
-					  destW = w*scale*vehicle->sprites.back()->scale.x,
-					  destH = h*scale*vehicle->sprites.back()->scale.y;
-				float destX = ltX + ltScale * vehicle->horizontalPosition * drawAreaWidth/2;
-				float destY = ltY + 4;
+				destX += 0.135f * scale * vehicle.horizontalPosition;  // offsetX
 
-				destX += 0.135f * scale * vehicle->horizontalPosition;  // offsetX
-
-				float clipH = destY - lt.clip;
+				float clipH = destY - sc.clip;
 				if(clipH < 0)
 					clipH = 0;
 
 				const float sh = h-h*clipH/destH;
 
 				if(not (clipH >= destH or destW > this->drawAreaWidth or destH > this->drawAreaHeight or sh <= 1))
-					vehicle->draw(destX, destY, 0, scale, sh);
+					vehicle.draw(destX, destY, 0, scale, sh);
 			}
-	    }
+		}
 	}
 }
 

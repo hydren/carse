@@ -65,7 +65,9 @@ namespace RaceOnlyArgs
 
 	ValueArg<unsigned> vehicleIndex("V", "vehicle", "When used in conjunction with the --race parameter, specifies the player vehicle, represented by its index", false, 0, "unsigned integer");
 	ValueArg<int> vehicleAlternateSpriteIndex("S", "vehicle-alternate-sprite", "When used in conjunction with the --vehicle parameter, specifies the alternate player vehicle sprite, represented by its index", false, -1, "integer");
-	ValueArg<unsigned> simulationType("P", "simulation-type", "Specifies simulation type, represented by its index", false, 0, "unsigned integer");
+	ValueArg<unsigned> simulationType("P", "simulation-type", "When used in conjunction with the --race parameter, specifies simulation type, represented by its index", false, 0, "unsigned integer"),
+					   hudType("H", "hud", "When used in conjunction with the --race parameter, specifies HUD type, represented by its index", false, 0, "unsigned index");
+	SwitchArg imperialUnit("U", "imperial-units", "When used in conjunction with the --race parameter, uses imperial units instead of metric", false);
 }
 
 int main(int argc, char** argv)
@@ -101,6 +103,8 @@ int main(int argc, char** argv)
 	cmd.add(RaceOnlyArgs::vehicleIndex);
 	cmd.add(RaceOnlyArgs::vehicleAlternateSpriteIndex);
 	cmd.add(RaceOnlyArgs::simulationType);
+	cmd.add(RaceOnlyArgs::hudType);
+	cmd.add(RaceOnlyArgs::imperialUnit);
 
 	cmd.parse(argc, argv);
 

@@ -130,6 +130,17 @@ void CarseLogic::onStatesListInitFinished()
 			nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
 			cout << "warning: specified simulation type is out of bounds! using default type instead..." << endl;
 		}
+
+		if(RaceOnlyArgs::hudType.getValue() < Pseudo3DRaceState::HUD_TYPE_COUNT)
+			nextMatchRaceSettings.hudType = static_cast<Pseudo3DRaceState::HudType>(RaceOnlyArgs::hudType.getValue());
+		else
+		{
+			nextMatchRaceSettings.hudType = Pseudo3DRaceState::HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO;
+			cout << "warning: specified HUD type is out of bounds! using default type instead..." << endl;
+		}
+
+		if(RaceOnlyArgs::imperialUnit.isSet())
+			nextMatchRaceSettings.isImperialUnit = true;
 	}
 	else
 	{

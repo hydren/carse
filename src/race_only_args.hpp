@@ -13,9 +13,9 @@
 
 namespace RaceOnlyArgs
 {
-	extern TCLAP::SwitchArg randomCourse, debugMode;
+	extern TCLAP::SwitchArg randomCourse, debugMode, imperialUnit;
 	extern TCLAP::ValueArg<int> vehicleAlternateSpriteIndex;
-	extern TCLAP::ValueArg<unsigned> raceType, lapCount, courseIndex, vehicleIndex, simulationType;
+	extern TCLAP::ValueArg<unsigned> raceType, lapCount, courseIndex, vehicleIndex, simulationType, hudType;
 }
 
 #endif /* RACE_ONLY_ARGS_HPP_ */

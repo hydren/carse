@@ -69,10 +69,8 @@ class CarseLogic
 	void loadPresetCourseStyles();
 
 	public:
-	bool raceOnlyMode, raceOnlyDebug, raceOnlyRandomCourse;
-	unsigned raceOnlyCourseIndex, raceOnlyPlayerVehicleIndex;
-	int raceOnlyPlayerVehicleAlternateSpriteIndex, raceOnlyRaceType;
-	unsigned raceOnlyLapCount;
+	bool raceOnlyMode;
+
 	float masterVolume;
 
 	int currentMainMenuStateId, currentVehicleSelectionStateId;

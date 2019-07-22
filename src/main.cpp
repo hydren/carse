@@ -12,8 +12,6 @@
 #include <cstdlib>
 #include <ctime>
 
-#include <tclap/CmdLine.h>
-
 //#define TOPDOWN_EXAMPLE_MODE
 
 #ifdef TOPDOWN_EXAMPLE_MODE
@@ -21,6 +19,9 @@
 #else
 	#include "carse_game.hpp"
 #endif
+
+#include "race_only_args.hpp"
+#include <tclap/CmdLine.h>
 
 #include "fgeal/fgeal.hpp"
 #include "futil/string_actions.hpp"
@@ -54,6 +55,19 @@ void runSplash()
 	fgeal::rest(0.5);
 }
 
+namespace RaceOnlyArgs
+{
+	ValueArg<unsigned> raceType("T", "race-type", "When used together with the --race parameter, specifies the race type, represented by its index", false, -1, "integer"),
+					   lapCount("L", "lap-count", "When used together with the --race-type parameter, specifies the number of laps of the race (loop race types only).", false, 2, "unsigned integer"),
+					   courseIndex("C", "course", "When used in conjunction with the --race parameter, specifies the race course, represented by its index", false, 0, "unsigned integer");
+	SwitchArg randomCourse("X", "random-course", "When used in conjunction with the --race parameter, generates and sets a random race course", false),
+			  debugMode("D", "debug-mode", "When used in conjunction with the --race parameter, sets a predefined debug race course, in debug mode.", false);
+
+	ValueArg<unsigned> vehicleIndex("V", "vehicle", "When used in conjunction with the --race parameter, specifies the player vehicle, represented by its index", false, 0, "unsigned integer");
+	ValueArg<int> vehicleAlternateSpriteIndex("S", "vehicle-alternate-sprite", "When used in conjunction with the --vehicle parameter, specifies the alternate player vehicle sprite, represented by its index", false, -1, "integer");
+	ValueArg<unsigned> simulationType("P", "simulation-type", "Specifies simulation type, represented by its index", false, 0, "unsigned integer");
+}
+
 int main(int argc, char** argv)
 {
 	//configure arguments parser
@@ -74,32 +88,19 @@ int main(int argc, char** argv)
 			" If in fullscreen mode, attempt to start in the given resolution", false, string(), "<WIDTHxHEIGHT>");
 	cmd.add(argResolution);
 
-	ValueArg<float> argMasterVolume("v", "master-volume", "Specifies the master volume, in the range [0-1] (0 being no sound, 1.0 being maximum volume)", false, -1, "decimal");
+	ValueArg<float> argMasterVolume("v", "master-volume", "Specifies the master volume, in the range [0-1] (0 being no sound, 1.0 being maximum volume)", false, 0.9f, "decimal");
 	cmd.add(argMasterVolume);
 
 	SwitchArg argRace("R", "race", "Skip menus and go straight to race with current vehicle and course.", false);
 	cmd.add(argRace);
-
-	ValueArg<int> argRaceType("T", "race-type", "When used together with the --race parameter, specifies the race type, represented by its index", false, -1, "integer");
-	cmd.add(argRaceType);
-
-	ValueArg<unsigned> argLapCount("L", "lap-count", "When used together with the --race-type parameter, specifies the number of laps of the race (loop race types only).", false, 0, "unsigned integer");
-	cmd.add(argLapCount);
-
-	ValueArg<unsigned> argCourse("C", "course", "When used in conjunction with the --race parameter, specifies the race course, represented by its index", false, 0, "unsigned integer");
-	cmd.add(argCourse);
-
-	SwitchArg argRandomCourse("X", "random-course", "When used in conjunction with the --race parameter, generates and sets a random race course", false);
-	cmd.add(argRandomCourse);
-
-	SwitchArg argDebugCourse("D", "debug-course", "When used in conjunction with the --race parameter, sets a predefined debug race course, in debug mode.", false);
-	cmd.add(argDebugCourse);
-
-	ValueArg<unsigned> argVehicle("V", "vehicle", "When used in conjunction with the --race parameter, specifies the player vehicle, represented by its index", false, 0, "unsigned integer");
-	cmd.add(argVehicle);
-
-	ValueArg<int> argVehicleAltSprite("S", "vehicle-alternate-sprite", "When used in conjunction with the --vehicle parameter, specifies the alternate player vehicle sprite, represented by its index", false, -1, "integer");
-	cmd.add(argVehicleAltSprite);
+	cmd.add(RaceOnlyArgs::raceType);
+	cmd.add(RaceOnlyArgs::lapCount);
+	cmd.add(RaceOnlyArgs::courseIndex);
+	cmd.add(RaceOnlyArgs::randomCourse);
+	cmd.add(RaceOnlyArgs::debugMode);
+	cmd.add(RaceOnlyArgs::vehicleIndex);
+	cmd.add(RaceOnlyArgs::vehicleAlternateSpriteIndex);
+	cmd.add(RaceOnlyArgs::simulationType);
 
 	cmd.parse(argc, argv);
 
@@ -154,26 +155,7 @@ int main(int argc, char** argv)
 		runSplash();
 		srand(time(null));
 		CarseGame game;
-		if(argRace.isSet())
-		{
-			game.logic.raceOnlyMode = true;
-			if(argRaceType.isSet())
-				game.logic.raceOnlyRaceType = argRaceType.getValue();
-			if(argLapCount.isSet())
-				game.logic.raceOnlyLapCount = argLapCount.getValue();
-			if(argDebugCourse.isSet())
-				game.logic.raceOnlyDebug = true;
-			else if(argRandomCourse.isSet())
-				game.logic.raceOnlyRandomCourse = true;
-			else if(argCourse.isSet())
-				game.logic.raceOnlyCourseIndex = argCourse.getValue();
-			if(argVehicle.isSet())
-			{
-				game.logic.raceOnlyPlayerVehicleIndex = argVehicle.getValue();
-				if(argVehicleAltSprite.isSet())
-					game.logic.raceOnlyPlayerVehicleAlternateSpriteIndex = argVehicleAltSprite.getValue();
-			}
-		}
+		game.logic.raceOnlyMode = argRace.isSet();
 		if(argMasterVolume.isSet())
 		{
 			if(argMasterVolume.getValue() < 0.f or argMasterVolume.getValue() > 1.f)
@@ -181,7 +163,6 @@ int main(int argc, char** argv)
 			else
 				game.logic.masterVolume = argMasterVolume.getValue();
 		}
-
 		game.start();
 	}
 	catch(const fgeal::AdapterException& e)

@@ -122,6 +122,14 @@ void CarseLogic::onStatesListInitFinished()
 			nextMatchPlayerVehicleSpecAlternateSpriteIndex = nextMatchPlayerVehicleSpec.alternateSprites.size()-1;
 			cout << "warning: specified player vehicle alternate sprite index is out of bounds! using another valid index instead..." << endl;
 		}
+
+		if(RaceOnlyArgs::simulationType.getValue() < Mechanics::SIMULATION_TYPE_COUNT)
+			nextMatchSimulationType = static_cast<Mechanics::SimulationType>(RaceOnlyArgs::simulationType.getValue());
+		else
+		{
+			nextMatchSimulationType = Mechanics::SIMULATION_TYPE_SLIPLESS;
+			cout << "warning: specified simulation type is out of bounds! using default type instead..." << endl;
+		}
 	}
 	else
 	{

@@ -57,7 +57,7 @@ void runSplash()
 
 namespace RaceOnlyArgs
 {
-	ValueArg<unsigned> raceType("T", "race-type", "When used together with the --race parameter, specifies the race type, represented by its index", false, -1, "integer"),
+	ValueArg<unsigned> raceType("T", "race-type", "When used together with the --race parameter, specifies the race type, represented by its index", false, 0, "integer"),
 					   lapCount("L", "lap-count", "When used together with the --race-type parameter, specifies the number of laps of the race (loop race types only).", false, 2, "unsigned integer"),
 					   courseIndex("C", "course", "When used in conjunction with the --race parameter, specifies the race course, represented by its index", false, 0, "unsigned integer");
 	SwitchArg randomCourse("X", "random-course", "When used in conjunction with the --race parameter, generates and sets a random race course", false),

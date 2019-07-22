@@ -128,7 +128,8 @@ class Pseudo3DRaceState extends public fgeal::Game::State
 		HUD_TYPE_DIALGAUGE_TACHO_NUMERIC_SPEEDO,
 		HUD_TYPE_BAR_TACHO_NUMERIC_SPEEDO,
 		HUD_TYPE_DIALGAUGE_TACHO_AND_SPEEDO,
-		HUD_TYPE_COUNT
+
+		HUD_TYPE_COUNT  // for counting purposes...
 	};
 
 	struct RaceSettings

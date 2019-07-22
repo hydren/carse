@@ -229,17 +229,7 @@ void OptionsMenuState::onMenuSelect()
 		game.logic.getNextRaceSettings().isImperialUnit = !game.logic.getNextRaceSettings().isImperialUnit;
 
 	if(menu.getSelectedIndex() == MENU_ITEM_SIMULATION_TYPE)
-	{
-		Mechanics::SimulationType newType;
-		switch(game.logic.getSimulationType())
-		{
-			default:
-			case Mechanics::SIMULATION_TYPE_SLIPLESS:       newType = Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP; break;
-			case Mechanics::SIMULATION_TYPE_WHEEL_LOAD_CAP: newType = Mechanics::SIMULATION_TYPE_PACEJKA_BASED; break;
-			case Mechanics::SIMULATION_TYPE_PACEJKA_BASED:  newType = Mechanics::SIMULATION_TYPE_SLIPLESS; break;
-		}
-		game.logic.setSimulationType(newType);
-	}
+		game.logic.setSimulationType(static_cast<Mechanics::SimulationType>((game.logic.getSimulationType()+1)%Mechanics::SIMULATION_TYPE_COUNT));
 
 	if(menu.getSelectedIndex() == MENU_ITEM_ENABLE_JUMP)
 		game.logic.setJumpSimulationEnabled(!game.logic.isJumpSimulationEnabled());

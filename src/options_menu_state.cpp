@@ -68,6 +68,7 @@ void OptionsMenuState::initialize()
 	menu.focusedEntryBgColor = Color(16, 24, 192);
 	menu.focusedEntryFontColor = Color::WHITE;
 	menu.borderColor = Color::_TRANSPARENT;
+	menu.entryClippingAtBeginning = true;
 
 	// DO NOT USE ':' CHARACTER FOR OTHER MEANS OTHER THAN TO SEPARATE MENU ITEM AND ITEM VALUE
 	menu.addEntry("Resolution: ");

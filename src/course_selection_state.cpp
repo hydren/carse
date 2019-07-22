@@ -93,6 +93,7 @@ void CourseSelectionState::initialize()
 	menuSettings.bgColor = menuCourse.bgColor;
 	menuSettings.borderColor = menuCourse.borderColor;
 	menuSettings.focusedEntryFontColor = menuCourse.focusedEntryFontColor;
+	menuSettings.entryClippingAtBeginning = true;
 	for(int i = 0; i < SETTINGS_MENU_COUNT; i++) menuSettings.addEntry(string());
 	updateMenuSettingsLabels();
 	menuSettings.cursorWrapAroundEnabled = false;

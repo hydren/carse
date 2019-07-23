@@ -59,7 +59,10 @@ class CourseEditorState extends public fgeal::Game::State
 	bool isPresetsTabActive;
 
 	// presets tab stuff
-	fgeal::Button straightShort, straightLong, curveLeftShort, curveLeftLong, curveRightShort, curveRightLong;
+	fgeal::Button straightShortPresetButton, straightLongPresetButton,
+				  curveLeftShortPresetButton, curveLeftLongPresetButton,
+				  curveRightShortPresetButton, curveRightLongPresetButton,
+				  openCurveLeftPresetButton, openCurveRightPresetButton;
 
 	// properties tab stuff
 	fgeal::TextField landscapeStyleTextField, roadStyleTextField, courseNameTextField;

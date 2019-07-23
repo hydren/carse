@@ -69,24 +69,30 @@ void CourseEditorState::initialize()
 	presetsTabButton.font = font;
 	presetsTabButton.label = "Preset";
 
-	straightShort = presetsTabButton;
-	straightShort.highlightColor = Color::RED;
-	straightShort.label = " ' ";
+	straightShortPresetButton = presetsTabButton;
+	straightShortPresetButton.highlightColor = Color::RED;
+	straightShortPresetButton.label = " ' ";
 
-	straightLong = straightShort;
-	straightLong.label = " | ";
+	straightLongPresetButton = straightShortPresetButton;
+	straightLongPresetButton.label = " | ";
 
-	curveLeftShort = straightShort;
-	curveLeftShort.label = " '-";
+	curveLeftShortPresetButton = straightShortPresetButton;
+	curveLeftShortPresetButton.label = " '-";
 
-	curveLeftLong = straightShort;
-	curveLeftLong.label = " |_";
+	curveLeftLongPresetButton = straightShortPresetButton;
+	curveLeftLongPresetButton.label = " |_";
 
-	curveRightShort = straightShort;
-	curveRightShort.label = "-' ";
+	curveRightShortPresetButton = straightShortPresetButton;
+	curveRightShortPresetButton.label = "-' ";
 
-	curveRightLong = straightShort;
-	curveRightLong.label = "_| ";
+	curveRightLongPresetButton = straightShortPresetButton;
+	curveRightLongPresetButton.label = "_| ";
+
+	openCurveLeftPresetButton = straightShortPresetButton;
+	openCurveLeftPresetButton.label = " \\ ";
+
+	openCurveRightPresetButton = straightShortPresetButton;
+	openCurveRightPresetButton.label = " / ";
 
 	propertiesTabButton = presetsTabButton;
 	propertiesTabButton.label = "Proper.";
@@ -191,30 +197,38 @@ void CourseEditorState::onEnter()
 	presetsTabPanelBounds.w -= 2*widgetSpacing;
 	presetsTabPanelBounds.h -= 4*widgetSpacing + presetsTabButton.bounds.h + 0.1*dh;
 
-	straightShort.bounds.x = presetsTabPanelBounds.x + widgetSpacing;
-	straightShort.bounds.y = presetsTabPanelBounds.y + widgetSpacing;
-	straightShort.bounds.w = straightShort.bounds.h = 3*widgetSpacing;
-	straightShort.highlightSpacing = 0.3*widgetSpacing;
+	straightShortPresetButton.bounds.x = presetsTabPanelBounds.x + widgetSpacing;
+	straightShortPresetButton.bounds.y = presetsTabPanelBounds.y + widgetSpacing;
+	straightShortPresetButton.bounds.w = straightShortPresetButton.bounds.h = 3*widgetSpacing;
+	straightShortPresetButton.highlightSpacing = 0.3*widgetSpacing;
 
-	straightLong.bounds = straightShort.bounds;
-	straightLong.bounds.x += straightShort.bounds.w + 2*widgetSpacing;
-	straightLong.highlightSpacing = straightShort.highlightSpacing;
+	straightLongPresetButton.bounds = straightShortPresetButton.bounds;
+	straightLongPresetButton.bounds.x += straightShortPresetButton.bounds.w + 2*widgetSpacing;
+	straightLongPresetButton.highlightSpacing = straightShortPresetButton.highlightSpacing;
 
-	curveLeftShort.bounds = straightShort.bounds;
-	curveLeftShort.bounds.y += straightShort.bounds.h + 2*widgetSpacing;
-	curveLeftShort.highlightSpacing = straightShort.highlightSpacing;
+	curveLeftShortPresetButton.bounds = straightShortPresetButton.bounds;
+	curveLeftShortPresetButton.bounds.y += straightShortPresetButton.bounds.h + 2*widgetSpacing;
+	curveLeftShortPresetButton.highlightSpacing = straightShortPresetButton.highlightSpacing;
 
-	curveLeftLong.bounds = curveLeftShort.bounds;
-	curveLeftLong.bounds.x += curveLeftShort.bounds.w + 2*widgetSpacing;
-	curveLeftLong.highlightSpacing = curveLeftShort.highlightSpacing;
+	curveLeftLongPresetButton.bounds = curveLeftShortPresetButton.bounds;
+	curveLeftLongPresetButton.bounds.x += curveLeftShortPresetButton.bounds.w + 2*widgetSpacing;
+	curveLeftLongPresetButton.highlightSpacing = curveLeftShortPresetButton.highlightSpacing;
 
-	curveRightShort.bounds = curveLeftShort.bounds;
-	curveRightShort.bounds.y += curveLeftShort.bounds.h + 2*widgetSpacing;
-	curveRightShort.highlightSpacing = curveLeftShort.highlightSpacing;
+	curveRightShortPresetButton.bounds = curveLeftShortPresetButton.bounds;
+	curveRightShortPresetButton.bounds.y += curveLeftShortPresetButton.bounds.h + 2*widgetSpacing;
+	curveRightShortPresetButton.highlightSpacing = curveLeftShortPresetButton.highlightSpacing;
 
-	curveRightLong.bounds = curveRightShort.bounds;
-	curveRightLong.bounds.x += curveRightShort.bounds.w + 2*widgetSpacing;
-	curveRightLong.highlightSpacing = curveRightShort.highlightSpacing;
+	curveRightLongPresetButton.bounds = curveRightShortPresetButton.bounds;
+	curveRightLongPresetButton.bounds.x += curveRightShortPresetButton.bounds.w + 2*widgetSpacing;
+	curveRightLongPresetButton.highlightSpacing = curveRightShortPresetButton.highlightSpacing;
+
+	openCurveLeftPresetButton.bounds = curveRightShortPresetButton.bounds;
+	openCurveLeftPresetButton.bounds.y += curveRightShortPresetButton.bounds.h + 2*widgetSpacing;
+	openCurveLeftPresetButton.highlightSpacing = curveRightShortPresetButton.highlightSpacing;
+
+	openCurveRightPresetButton.bounds = openCurveLeftPresetButton.bounds;
+	openCurveRightPresetButton.bounds.x += openCurveLeftPresetButton.bounds.w + 2*widgetSpacing;
+	openCurveRightPresetButton.highlightSpacing = openCurveLeftPresetButton.highlightSpacing;
 
 	propertiesTabPanelBounds = presetsTabPanelBounds;
 
@@ -376,18 +390,22 @@ void CourseEditorState::render()
 	if(isPresetsTabActive)
 	{
 		Graphics::drawFilledRectangle(presetsTabPanelBounds, Color::BLACK);
-		straightLong.highlighted = blinkCycle and focus == ON_EDITOR and straightLong.bounds.contains(mousePosition);
-		straightLong.draw();
-		straightShort.highlighted = blinkCycle and focus == ON_EDITOR and straightShort.bounds.contains(mousePosition);
-		straightShort.draw();
-		curveLeftLong.highlighted = blinkCycle and focus == ON_EDITOR and curveLeftLong.bounds.contains(mousePosition);
-		curveLeftLong.draw();
-		curveLeftShort.highlighted = blinkCycle and focus == ON_EDITOR and curveLeftShort.bounds.contains(mousePosition);
-		curveLeftShort.draw();
-		curveRightLong.highlighted = blinkCycle and focus == ON_EDITOR and curveRightLong.bounds.contains(mousePosition);
-		curveRightLong.draw();
-		curveRightShort.highlighted = blinkCycle and focus == ON_EDITOR and curveRightShort.bounds.contains(mousePosition);
-		curveRightShort.draw();
+		straightLongPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and straightLongPresetButton.bounds.contains(mousePosition);
+		straightLongPresetButton.draw();
+		straightShortPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and straightShortPresetButton.bounds.contains(mousePosition);
+		straightShortPresetButton.draw();
+		curveLeftLongPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and curveLeftLongPresetButton.bounds.contains(mousePosition);
+		curveLeftLongPresetButton.draw();
+		curveLeftShortPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and curveLeftShortPresetButton.bounds.contains(mousePosition);
+		curveLeftShortPresetButton.draw();
+		curveRightLongPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and curveRightLongPresetButton.bounds.contains(mousePosition);
+		curveRightLongPresetButton.draw();
+		curveRightShortPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and curveRightShortPresetButton.bounds.contains(mousePosition);
+		curveRightShortPresetButton.draw();
+		openCurveLeftPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and openCurveLeftPresetButton.bounds.contains(mousePosition);
+		openCurveLeftPresetButton.draw();
+		openCurveRightPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and openCurveRightPresetButton.bounds.contains(mousePosition);
+		openCurveRightPresetButton.draw();
 	}
 	else
 	{
@@ -606,31 +624,41 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			unsigned segmentAmountToAdd = 0;
 			float totalAngle = 0;
 
-			if(straightShort.bounds.contains(x, y))
+			if(straightShortPresetButton.bounds.contains(x, y))
 				segmentAmountToAdd = shortSegmentAmount;
 
-			else if(straightLong.bounds.contains(x, y))
+			else if(straightLongPresetButton.bounds.contains(x, y))
 				segmentAmountToAdd = longSegmentAmount;
 
-			else if(curveLeftShort.bounds.contains(x, y))
+			else if(curveLeftShortPresetButton.bounds.contains(x, y))
 			{
 				totalAngle = -M_PI_2;
 				segmentAmountToAdd = shortSegmentAmount;
 			}
-			else if(curveLeftLong.bounds.contains(x, y))
+			else if(curveLeftLongPresetButton.bounds.contains(x, y))
 			{
 				totalAngle = -M_PI_2;
 				segmentAmountToAdd = longSegmentAmount;
 			}
-			else if(curveRightShort.bounds.contains(x, y))
+			else if(curveRightShortPresetButton.bounds.contains(x, y))
 			{
 				totalAngle = M_PI_2;
 				segmentAmountToAdd = shortSegmentAmount;
 			}
-			else if(curveRightLong.bounds.contains(x, y))
+			else if(curveRightLongPresetButton.bounds.contains(x, y))
 			{
 				totalAngle = M_PI_2;
 				segmentAmountToAdd = longSegmentAmount;
+			}
+			else if(openCurveLeftPresetButton.bounds.contains(x, y))
+			{
+				totalAngle = -M_PI_4;
+				segmentAmountToAdd = shortSegmentAmount;
+			}
+			else if(openCurveRightPresetButton.bounds.contains(x, y))
+			{
+				totalAngle = M_PI_4;
+				segmentAmountToAdd = shortSegmentAmount;
 			}
 
 			if(segmentAmountToAdd > 0)

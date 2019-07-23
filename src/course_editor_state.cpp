@@ -69,6 +69,25 @@ void CourseEditorState::initialize()
 	presetsTabButton.font = font;
 	presetsTabButton.label = "Preset";
 
+	straightShort = presetsTabButton;
+	straightShort.highlightColor = Color::RED;
+	straightShort.label = " ' ";
+
+	straightLong = straightShort;
+	straightLong.label = " | ";
+
+	curveLeftShort = straightShort;
+	curveLeftShort.label = " '-";
+
+	curveLeftLong = straightShort;
+	curveLeftLong.label = " |_";
+
+	curveRightShort = straightShort;
+	curveRightShort.label = "-' ";
+
+	curveRightLong = straightShort;
+	curveRightLong.label = "_| ";
+
 	propertiesTabButton = presetsTabButton;
 	propertiesTabButton.label = "Proper.";
 
@@ -171,6 +190,31 @@ void CourseEditorState::onEnter()
 	presetsTabPanelBounds.y += widgetSpacing + 0.75 * presetsTabButton.bounds.h;
 	presetsTabPanelBounds.w -= 2*widgetSpacing;
 	presetsTabPanelBounds.h -= 4*widgetSpacing + presetsTabButton.bounds.h + 0.1*dh;
+
+	straightShort.bounds.x = presetsTabPanelBounds.x + widgetSpacing;
+	straightShort.bounds.y = presetsTabPanelBounds.y + widgetSpacing;
+	straightShort.bounds.w = straightShort.bounds.h = 3*widgetSpacing;
+	straightShort.highlightSpacing = 0.3*widgetSpacing;
+
+	straightLong.bounds = straightShort.bounds;
+	straightLong.bounds.x += straightShort.bounds.w + 2*widgetSpacing;
+	straightLong.highlightSpacing = straightShort.highlightSpacing;
+
+	curveLeftShort.bounds = straightShort.bounds;
+	curveLeftShort.bounds.y += straightShort.bounds.h + 2*widgetSpacing;
+	curveLeftShort.highlightSpacing = straightShort.highlightSpacing;
+
+	curveLeftLong.bounds = curveLeftShort.bounds;
+	curveLeftLong.bounds.x += curveLeftShort.bounds.w + 2*widgetSpacing;
+	curveLeftLong.highlightSpacing = curveLeftShort.highlightSpacing;
+
+	curveRightShort.bounds = curveLeftShort.bounds;
+	curveRightShort.bounds.y += curveLeftShort.bounds.h + 2*widgetSpacing;
+	curveRightShort.highlightSpacing = curveLeftShort.highlightSpacing;
+
+	curveRightLong.bounds = curveRightShort.bounds;
+	curveRightLong.bounds.x += curveRightShort.bounds.w + 2*widgetSpacing;
+	curveRightLong.highlightSpacing = curveRightShort.highlightSpacing;
 
 	propertiesTabPanelBounds = presetsTabPanelBounds;
 
@@ -332,7 +376,18 @@ void CourseEditorState::render()
 	if(isPresetsTabActive)
 	{
 		Graphics::drawFilledRectangle(presetsTabPanelBounds, Color::BLACK);
-		// todo draw presets
+		straightLong.highlighted = blinkCycle and focus == ON_EDITOR and straightLong.bounds.contains(mousePosition);
+		straightLong.draw();
+		straightShort.highlighted = blinkCycle and focus == ON_EDITOR and straightShort.bounds.contains(mousePosition);
+		straightShort.draw();
+		curveLeftLong.highlighted = blinkCycle and focus == ON_EDITOR and curveLeftLong.bounds.contains(mousePosition);
+		curveLeftLong.draw();
+		curveLeftShort.highlighted = blinkCycle and focus == ON_EDITOR and curveLeftShort.bounds.contains(mousePosition);
+		curveLeftShort.draw();
+		curveRightLong.highlighted = blinkCycle and focus == ON_EDITOR and curveRightLong.bounds.contains(mousePosition);
+		curveRightLong.draw();
+		curveRightShort.highlighted = blinkCycle and focus == ON_EDITOR and curveRightShort.bounds.contains(mousePosition);
+		curveRightShort.draw();
 	}
 	else
 	{
@@ -545,7 +600,56 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 			setPresetsTabActive(false);
 		}
 
-		if(not isPresetsTabActive)
+		if(isPresetsTabActive)
+		{
+			const unsigned shortSegmentAmount = 100, longSegmentAmount = 3*shortSegmentAmount;
+			unsigned segmentAmountToAdd = 0;
+			float totalAngle = 0;
+
+			if(straightShort.bounds.contains(x, y))
+				segmentAmountToAdd = shortSegmentAmount;
+
+			else if(straightLong.bounds.contains(x, y))
+				segmentAmountToAdd = longSegmentAmount;
+
+			else if(curveLeftShort.bounds.contains(x, y))
+			{
+				totalAngle = -M_PI_2;
+				segmentAmountToAdd = shortSegmentAmount;
+			}
+			else if(curveLeftLong.bounds.contains(x, y))
+			{
+				totalAngle = -M_PI_2;
+				segmentAmountToAdd = longSegmentAmount;
+			}
+			else if(curveRightShort.bounds.contains(x, y))
+			{
+				totalAngle = M_PI_2;
+				segmentAmountToAdd = shortSegmentAmount;
+			}
+			else if(curveRightLong.bounds.contains(x, y))
+			{
+				totalAngle = M_PI_2;
+				segmentAmountToAdd = longSegmentAmount;
+			}
+
+			if(segmentAmountToAdd > 0)
+			{
+				CourseSpec::Segment segment;
+				if(totalAngle != 0)
+				{
+					segmentAmountToAdd *= fabs(totalAngle);
+					segment.curve = totalAngle * course.spec.roadSegmentLength/segmentAmountToAdd;
+				}
+				for(unsigned i = 0; i < segmentAmountToAdd; i++)
+				{
+					segment.z = course.spec.lines.size()*course.spec.roadSegmentLength;
+					course.spec.lines.push_back(segment);
+				}
+				this->loadCourseSpec(course.spec);
+			}
+		}
+		else
 		{
 			if(landscapeStyleChangeButton.bounds.contains(x, y))
 			{

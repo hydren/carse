@@ -796,8 +796,8 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 		spec.shadowSheetFilename = getContextualizedFilename(spec.shadowSheetFilename, prop.get("base_dir"), CarseLogic::VEHICLES_FOLDER+"/");
 
 		if(spec.shadowSheetFilename.empty())
-			cout << "warning: brakelight sprite file \"" << prop.get(key) << "\" could not be found!"
-			<< " (specified by \"" << prop.get("filename") << "\"). ignoring brakelights definitions..." << endl;
+			cout << "warning: shadow sprite file \"" << prop.get(key) << "\" could not be found!"
+			<< " (specified by \"" << prop.get("filename") << "\"). ignoring shadow definitions..." << endl;
 	}
 
 	if(not spec.shadowSheetFilename.empty()) for(unsigned stateNumber = 0; stateNumber < spec.stateCount; stateNumber++)

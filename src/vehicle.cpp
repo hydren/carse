@@ -50,7 +50,7 @@ void Pseudo3DVehicle::setSpec(const Spec& spec, int alternateSpriteIndex)
 	body.engine.configuration = spec.engineConfiguration;
 	body.engine.aspiration = spec.engineAspiration;
 	body.engine.valvetrain = spec.engineValvetrain;
-	body.engine.displacement = spec.engineDisplacement;
+	body.engine.displacement = spec.engineDisplacement != 0? spec.engineDisplacement : spec.type == Mechanics::TYPE_BIKE? 500 : 3000;
 	body.engine.valveCount = spec.engineValveCount;
 
 	// set custom gear ratios

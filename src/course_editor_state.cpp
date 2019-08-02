@@ -159,7 +159,7 @@ void CourseEditorState::onEnter()
 	// reload fonts if display size changed
 	if(lastDisplaySize.x != dw or lastDisplaySize.y != dh)
 	{
-		font->setSize(FontSizer(dh)(15));
+		font->setSize(FontSizer(dh)(14));
 		lastDisplaySize.x = dw;
 		lastDisplaySize.y = dh;
 	}

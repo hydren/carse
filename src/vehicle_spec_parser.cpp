@@ -40,7 +40,8 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec&, const Properties&);
 
 // vehicle spec default constants
 static const float
-	DEFAULT_VEHICLE_MASS = 1250,  // kg
+	DEFAULT_VEHICLE_MASS_CAR = 1250,
+	DEFAULT_VEHICLE_MASS_BIKE = 200,  // kg
 	DEFAULT_TIRE_DIAMETER = 678,  // mm
 
 	DEFAULT_CD_CAR  = 0.31,  // drag coefficient (Cd) of a 300ZX Z32
@@ -56,8 +57,10 @@ static const float
 	DEFAULT_RR_WEIGHT_DISTRIBUTION = 0.65,
 	DEFAULT_FF_WEIGHT_DISTRIBUTION = 0.40,
 
-	DEFAULT_MAXIMUM_RPM = 7000,
-	DEFAULT_MAXIMUM_POWER = 320,  // bhp
+	DEFAULT_MAXIMUM_RPM_CAR = 7000,
+	DEFAULT_MAXIMUM_POWER_CAR = 320,  // bhp
+	DEFAULT_MAXIMUM_RPM_BIKE = 10000,
+	DEFAULT_MAXIMUM_POWER_BIKE = 100,  // bhp
 	DEFAULT_GEAR_COUNT = 5,
 
 	// for the time being, assume 70% efficiency
@@ -246,11 +249,11 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 	// actually useful data
 
 	key = "engine_maximum_rpm";
-	spec.engineMaximumRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_RPM;
+	spec.engineMaximumRpm = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spec.type == Mechanics::TYPE_BIKE? DEFAULT_MAXIMUM_RPM_BIKE : DEFAULT_MAXIMUM_RPM_CAR;
 	spec.engineMinimumRpm = 1000;
 
 	key = "engine_maximum_power";
-	spec.engineMaximumPower = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_MAXIMUM_POWER;
+	spec.engineMaximumPower = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spec.type == Mechanics::TYPE_BIKE? DEFAULT_MAXIMUM_POWER_BIKE : DEFAULT_MAXIMUM_POWER_CAR;
 
 	// todo re-enable these when proper formulas have been determined from parametrization
 //	key = "engine_maximum_power_rpm";
@@ -289,10 +292,24 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 	spec.engineGearRatio.resize(spec.engineGearCount);
 
 	// first, set default ratios, then override
-	spec.engineReverseGearRatio = 3.25;
-	spec.engineDifferentialRatio = 4.0;
+	spec.engineGearRatio[spec.engineGearCount-1] = 0.8;
+	if(spec.type == Mechanics::TYPE_CAR)
+	{
+		spec.engineDifferentialRatio = 5.0;
+		for(int g = spec.engineGearCount-2; g >= 0; g--)
+			spec.engineGearRatio[g] = spec.engineGearRatio[g+1] + 0.1*(spec.engineGearCount-g);
+		spec.engineReverseGearRatio = 3.25;
+	}
+	else if(spec.type == Mechanics::TYPE_BIKE)
+	{
+		spec.engineDifferentialRatio = 7.5;
+		for(int g = spec.engineGearCount-2; g >= 0; g--)
+			spec.engineGearRatio[g] = spec.engineGearRatio[g+1] + 0.1*(spec.engineGearCount-g-1);
+	}
+	else { /* TODO */ }
+
 	for(int g = 0; g < spec.engineGearCount; g++)
-		spec.engineGearRatio[g] = 3.0 + g*2.0/(1.0 - spec.engineGearCount);  // generic gear ratio
+		cout << spec.engineGearRatio[g] << endl;
 
 	key = "gear_ratios";
 	if(prop.containsKey(key))
@@ -323,7 +340,7 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 {
 	string key = "vehicle_mass";
-	spec.mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_VEHICLE_MASS;
+	spec.mass = isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : spec.type == Mechanics::TYPE_BIKE? DEFAULT_VEHICLE_MASS_BIKE : DEFAULT_VEHICLE_MASS_CAR;
 
 	key = "tire_diameter";
 	spec.tireRadius = (isValueSpecified(prop, key)? atof(prop.get(key).c_str()) : DEFAULT_TIRE_DIAMETER) * 0.0005;
@@ -337,7 +354,7 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 		else spec.engineLocation = Mechanics::ENGINE_LOCATION_ON_FRONT;
 	}
 	else
-		spec.engineLocation = Mechanics::ENGINE_LOCATION_ON_FRONT;
+		spec.engineLocation = spec.type == Mechanics::TYPE_BIKE? Mechanics::ENGINE_LOCATION_ON_MIDDLE : Mechanics::ENGINE_LOCATION_ON_FRONT;
 
 	key = "driven_wheels";
 	if(isValueSpecified(prop, key))
@@ -392,8 +409,10 @@ static void loadChassisSpec(Pseudo3DVehicle::Spec& spec, const Properties& prop)
 
 // default sprite uint constants
 static const unsigned
-	DEFAULT_SPRITE_WIDTH = 60,
-	DEFAULT_SPRITE_HEIGHT = 35,
+	DEFAULT_SPRITE_WIDTH_CAR = 60,
+	DEFAULT_SPRITE_HEIGHT_CAR = 35,
+	DEFAULT_SPRITE_WIDTH_BIKE = 43,
+	DEFAULT_SPRITE_HEIGHT_BIKE = 70,
 	DEFAULT_BRAKELIGHTS_SPRITE_WIDTH = 32,
 	DEFAULT_BRAKELIGHTS_SPRITE_HEIGHT = 32;
 
@@ -404,10 +423,16 @@ static const float
 	DEFAULT_SPRITE_MAX_DEPICTED_TURN_ANGLE = SPRITE_IDEAL_MAX_DEPICTED_TURN_ANGLE,
 	DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION = 0.857142857143;  // ~0,857
 
+static const string DEFAULT_CAR_SHEET = "assets/car-sheet-default.png",
+					DEFAULT_BIKE_SHEET = "assets/bike-sheet-default.png";
+
 static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properties& prop)
 {
 	// aux. vars
 	string key, key2, key3;
+
+	key = "vehicle_type";
+	const bool isBike = prop.containsKey(key) and futil::to_lower(prop.get(key)) == "bike";
 
 	key = "sprite_sheet_file";
 	spec.sheetFilename = isValueSpecified(prop, key)? prop.get(key) : "default";
@@ -421,26 +446,17 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 			cout << "warning: sheet file \"" << prop.get(key) << "\" could not be found!"
 		<< " (specified by \"" << prop.get("filename") << "\"). using default sheet instead..." << endl;
 
-		// uncomment when there is a default sprite for bikes
-//		switch(type)
-//		{
-//			case TYPE_BIKE:  spec.sheetFilename = "assets/bike-sheet-default.png"; break;
-//			default:
-//			case TYPE_OTHER:
-//			case TYPE_CAR:   spec.sheetFilename = "assets/car-sheet-default.png"; break;
-//		}
-
-		spec.sheetFilename = "assets/car-sheet-default.png";
+		spec.sheetFilename = isBike? DEFAULT_BIKE_SHEET : DEFAULT_CAR_SHEET;
 	}
 
 	key = "sprite_state_count";
 	spec.stateCount = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : 1;
 
 	key = "sprite_frame_width";
-	spec.frameWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_WIDTH;
+	spec.frameWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : isBike? DEFAULT_SPRITE_WIDTH_BIKE : DEFAULT_SPRITE_WIDTH_CAR;
 
 	key = "sprite_frame_height";
-	spec.frameHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : DEFAULT_SPRITE_HEIGHT;
+	spec.frameHeight = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : isBike? DEFAULT_SPRITE_HEIGHT_BIKE : DEFAULT_SPRITE_HEIGHT_CAR;
 
 	key = "sprite_vehicle_width";
 	spec.depictedVehicleWidth = isValueSpecified(prop, key)? atoi(prop.get(key).c_str()) : futil::round(spec.frameWidth*DEFAULT_SPRITE_DEPICTED_VEHICLE_WIDTH_PROPORTION);
@@ -746,7 +762,12 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 				if(spec.brakelightsMultipleSprites)
 					brakelightsPosition.x = 0;
 				else
-					brakelightsPosition.x = 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth) + stateNumber*0.0357*spec.frameWidth;
+				{
+					if(isBike)
+						brakelightsPosition.x = 0.5*spec.frameWidth;
+					else
+						brakelightsPosition.x = 3.0*0.5*(spec.frameWidth - spec.depictedVehicleWidth) + stateNumber*0.0357*spec.frameWidth;
+				}
 			}
 			if(defaultedY)
 			{
@@ -775,7 +796,7 @@ static void loadAnimationSpec(Pseudo3DVehicleAnimationSpec& spec, const Properti
 		else
 			spec.brakelightsOffset.y = 0;
 
-		spec.brakelightsMirrowed = true;
+		spec.brakelightsMirrowed = isBike? false : true;
 		key = "brakelights_mirrowed";
 		if(isValueSpecified(prop, key))
 		{

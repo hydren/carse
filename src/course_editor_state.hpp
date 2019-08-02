@@ -54,11 +54,12 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Rectangle courseViewBounds;
 
 	// tools panel stuff
-	fgeal::Rectangle toolsPanelBounds, presetsTabPanelBounds, propertiesTabPanelBounds;
-	fgeal::Button presetsTabButton, propertiesTabButton, newButton, loadButton, saveButton, generateButton, exitButton;
-	bool isPresetsTabActive;
+	fgeal::Panel toolsPanel;
+	fgeal::TabbedPane toolsTabbedPane;
+	fgeal::Button newButton, loadButton, saveButton, generateButton, exitButton;
 
 	// presets tab stuff
+	fgeal::Panel presetsTabPanel;
 	fgeal::Button shortStraightPresetButton, longStraightPresetButton,
 				  short90LeftCurvePresetButton, long90LeftCurvePresetButton,
 				  short90RightCurvePresetButton, long90RightCurvePresetButton,
@@ -66,6 +67,7 @@ class CourseEditorState extends public fgeal::Game::State
 				  straight20UpSlopePresetButton, straight20DownSlopePresetButton;
 
 	// properties tab stuff
+	fgeal::Panel propertiesTabPanel;
 	fgeal::TextField landscapeStyleTextField, roadStyleTextField, courseNameTextField;
 	int selectedLandscapeStyleIndex, selectedRoadStyleIndex;
 	fgeal::Button landscapeStyleChangeButton, roadStyleChangeButton;
@@ -105,7 +107,6 @@ class CourseEditorState extends public fgeal::Game::State
 
 	private:
 	void reloadFileList();
-	void setPresetsTabActive(bool choice=true);
 	void loadCourseSpec(const Pseudo3DCourse::Spec&);
 };
 

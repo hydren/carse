@@ -31,13 +31,15 @@ using std::string;
 using futil::ends_with;
 using futil::Properties;
 
+//#define checkHighlightedOnEditor(button) button.highlighted = blinkCycle and focus == ON_EDITOR and button.bounds.contains(mousePosition)
+//#define checkHighlighted(button) button.highlighted = blinkCycle and button.bounds.contains(mousePosition)
+
 int CourseEditorState::getId() { return CarseGame::COURSE_EDITOR_STATE_ID; }
 
 CourseEditorState::CourseEditorState(CarseGame* game)
 : State(*game), game(*game), lastDisplaySize(), focus(),
   font(null), sndCursorMove(null), sndCursorIn(null), sndCursorOut(null),
   newButton(), loadButton(), saveButton(), generateButton(), exitButton(),
-  isPresetsTabActive(),
   selectedLandscapeStyleIndex(), selectedRoadStyleIndex(), landscapeStyleChangeButton(), roadStyleChangeButton(),
   imgMenuCourseArrow(null), loadDialogSelectButton(), loadDialogCancelButton(),
   saveDialogSaveButton(), saveDialogCancelButton()
@@ -62,62 +64,81 @@ void CourseEditorState::initialize()
 	saveDialogTextField.textColor = Color::WHITE;
 	saveDialogTextField.borderColor = Color::_TRANSPARENT;
 
-	presetsTabButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
-	presetsTabButton.bgColor = Color::GREY;
-	presetsTabButton.borderColor = Color::_TRANSPARENT;
-	presetsTabButton.highlightColor = Color::LIGHT_GREY;
-	presetsTabButton.font = font;
-	presetsTabButton.label = "Preset";
+	toolsPanel.bgColor = Color::DARK_GREY;
 
-	shortStraightPresetButton = presetsTabButton;
+	toolsTabbedPane.bgColor = Color::_TRANSPARENT;
+	toolsTabbedPane.font = font;
+	toolsPanel.addComponent(static_cast<fgeal::Panel&>(toolsTabbedPane));
+
+	presetsTabPanel.bgColor = Color::BLACK;
+	toolsTabbedPane.addComponent(presetsTabPanel, " Presets");
+
+	shortStraightPresetButton.shape = Button::SHAPE_ROUNDED_RECTANGULAR;
+	shortStraightPresetButton.bgColor = Color::GREY;
+	shortStraightPresetButton.borderColor = Color::_TRANSPARENT;
 	shortStraightPresetButton.highlightColor = Color::RED;
+	shortStraightPresetButton.font = font;
 	shortStraightPresetButton.label = " ' ";
+	presetsTabPanel.addHighlightableComponent(shortStraightPresetButton);
 
 	longStraightPresetButton = shortStraightPresetButton;
 	longStraightPresetButton.label = " | ";
+	presetsTabPanel.addHighlightableComponent(longStraightPresetButton);
 
 	short90LeftCurvePresetButton = shortStraightPresetButton;
 	short90LeftCurvePresetButton.label = " '-";
+	presetsTabPanel.addHighlightableComponent(short90LeftCurvePresetButton);
 
 	long90LeftCurvePresetButton = shortStraightPresetButton;
 	long90LeftCurvePresetButton.label = " |_";
+	presetsTabPanel.addHighlightableComponent(long90LeftCurvePresetButton);
 
 	short90RightCurvePresetButton = shortStraightPresetButton;
 	short90RightCurvePresetButton.label = "-' ";
+	presetsTabPanel.addHighlightableComponent(short90RightCurvePresetButton);
 
 	long90RightCurvePresetButton = shortStraightPresetButton;
 	long90RightCurvePresetButton.label = "_| ";
+	presetsTabPanel.addHighlightableComponent(long90RightCurvePresetButton);
 
 	short45LeftCurvePresetButton = shortStraightPresetButton;
 	short45LeftCurvePresetButton.label = " \\ ";
+	presetsTabPanel.addHighlightableComponent(short45LeftCurvePresetButton);
 
 	short45RightCurvePresetButton = shortStraightPresetButton;
 	short45RightCurvePresetButton.label = " / ";
+	presetsTabPanel.addHighlightableComponent(short45RightCurvePresetButton);
 
 	straight20UpSlopePresetButton = shortStraightPresetButton;
 	straight20UpSlopePresetButton.label = "/ \\";
+	presetsTabPanel.addHighlightableComponent(straight20UpSlopePresetButton);
 
 	straight20DownSlopePresetButton = shortStraightPresetButton;
 	straight20DownSlopePresetButton.label = "\\ /";
+	presetsTabPanel.addHighlightableComponent(straight20DownSlopePresetButton);
 
-	propertiesTabButton = presetsTabButton;
-	propertiesTabButton.label = "Proper.";
+	propertiesTabPanel.bgColor = Color::GREY;
+	toolsTabbedPane.addComponent(propertiesTabPanel, " Propert.");
 
 	courseNameTextField = saveDialogTextField;
 	courseNameTextField.caretHidden = true;
+	propertiesTabPanel.addComponent(courseNameTextField);
 
 	roadStyleTextField = landscapeStyleTextField = courseNameTextField;
+	propertiesTabPanel.addComponent(roadStyleTextField);
+	propertiesTabPanel.addComponent(landscapeStyleTextField);
 
-	landscapeStyleChangeButton = presetsTabButton;
+	landscapeStyleChangeButton = shortStraightPresetButton;
 	landscapeStyleChangeButton.shape = Button::SHAPE_RECTANGULAR;
 	landscapeStyleChangeButton.bgColor = Color::LIGHT_GREY;
 	landscapeStyleChangeButton.label = ">>";
+	propertiesTabPanel.addComponent(landscapeStyleChangeButton);
 
 	roadStyleChangeButton = landscapeStyleChangeButton;
+	propertiesTabPanel.addComponent(roadStyleChangeButton);
 
-	newButton = presetsTabButton;
+	newButton = shortStraightPresetButton;
 	newButton.shape = Button::SHAPE_RECTANGULAR;
-	newButton.highlightColor = Color::RED;
 	newButton.label = "New";
 
 	loadButton = newButton;
@@ -180,32 +201,24 @@ void CourseEditorState::onEnter()
 	courseViewBounds.w = 0.25*dw;
 	courseViewBounds.h = 0.20*dh;
 
-	toolsPanelBounds.x = 0;
-	toolsPanelBounds.y = 0.20*dh;
-	toolsPanelBounds.w = 0.25*dw;
-	toolsPanelBounds.h = 0.75*dh;
+	toolsPanel.bounds.x = 0;
+	toolsPanel.bounds.y = 0.20*dh;
+	toolsPanel.bounds.w = 0.25*dw;
+	toolsPanel.bounds.h = 0.75*dh;
 
-	presetsTabButton.bounds = toolsPanelBounds;
-	presetsTabButton.bounds.x += widgetSpacing;
-	presetsTabButton.bounds.y += widgetSpacing;
-	presetsTabButton.bounds.w /= 2;
-	presetsTabButton.bounds.w -= 2*widgetSpacing;
-	presetsTabButton.bounds.h = std::max(1.2f*presetsTabButton.font->getTextHeight(), 2*widgetSpacing);
-	presetsTabButton.highlighted = false;
+	toolsTabbedPane.bounds = toolsPanel.bounds;
+	toolsTabbedPane.bounds.x += widgetSpacing;
+	toolsTabbedPane.bounds.y += widgetSpacing;
+	toolsTabbedPane.bounds.w -= 2*widgetSpacing;
+	toolsTabbedPane.bounds.h -= 4*widgetSpacing + font->getTextHeight() + 0.1*dh;
+	toolsTabbedPane.pack();
 
-	propertiesTabButton.bounds = presetsTabButton.bounds;
-	propertiesTabButton.bounds.x += presetsTabButton.bounds.w + widgetSpacing;
-	propertiesTabButton.highlighted = false;
+	presetsTabPanel.bounds = toolsTabbedPane.bounds;
+	presetsTabPanel.bounds.y += 0.9*toolsTabbedPane.font->getTextHeight();
 
-	presetsTabPanelBounds = toolsPanelBounds;
-	presetsTabPanelBounds.x += widgetSpacing;
-	presetsTabPanelBounds.y += widgetSpacing + 0.75 * presetsTabButton.bounds.h;
-	presetsTabPanelBounds.w -= 2*widgetSpacing;
-	presetsTabPanelBounds.h -= 4*widgetSpacing + presetsTabButton.bounds.h + 0.1*dh;
-
-	shortStraightPresetButton.bounds.x = presetsTabPanelBounds.x + widgetSpacing;
-	shortStraightPresetButton.bounds.y = presetsTabPanelBounds.y + widgetSpacing;
-	shortStraightPresetButton.bounds.w = shortStraightPresetButton.bounds.h = 3*widgetSpacing;
+	shortStraightPresetButton.bounds.x = presetsTabPanel.bounds.x + widgetSpacing;
+	shortStraightPresetButton.bounds.y = presetsTabPanel.bounds.y + widgetSpacing;
+	shortStraightPresetButton.bounds.w = shortStraightPresetButton.bounds.h = 2.5*widgetSpacing;
 	shortStraightPresetButton.highlightSpacing = 0.3*widgetSpacing;
 
 	longStraightPresetButton.bounds = shortStraightPresetButton.bounds;
@@ -244,14 +257,14 @@ void CourseEditorState::onEnter()
 	straight20DownSlopePresetButton.bounds.x += straight20UpSlopePresetButton.bounds.w + 2*widgetSpacing;
 	straight20DownSlopePresetButton.highlightSpacing = straight20UpSlopePresetButton.highlightSpacing;
 
-	propertiesTabPanelBounds = presetsTabPanelBounds;
+	propertiesTabPanel.bounds = presetsTabPanel.bounds;
 
 	courseNameTextField.content.clear();
 	courseNameTextField.caretPosition = 0;
 	courseNameTextField.caretHidden = true;
-	courseNameTextField.bounds.x = propertiesTabPanelBounds.x + widgetSpacing;
-	courseNameTextField.bounds.y = propertiesTabPanelBounds.y + font->getTextHeight() + widgetSpacing;
-	courseNameTextField.bounds.w = propertiesTabPanelBounds.w - 2*widgetSpacing;
+	courseNameTextField.bounds.x = propertiesTabPanel.bounds.x + widgetSpacing;
+	courseNameTextField.bounds.y = propertiesTabPanel.bounds.y + font->getTextHeight() + widgetSpacing;
+	courseNameTextField.bounds.w = propertiesTabPanel.bounds.w - 2*widgetSpacing;
 	courseNameTextField.bounds.h = 1.1f*courseNameTextField.font->getTextHeight();
 
 	landscapeStyleTextField.bounds = courseNameTextField.bounds;
@@ -263,15 +276,15 @@ void CourseEditorState::onEnter()
 
 	landscapeStyleChangeButton.bounds.x = landscapeStyleTextField.bounds.x + landscapeStyleTextField.bounds.w + widgetSpacing;
 	landscapeStyleChangeButton.bounds.y = landscapeStyleTextField.bounds.y;
-	landscapeStyleChangeButton.bounds.w = propertiesTabPanelBounds.w - landscapeStyleTextField.bounds.w - 3*widgetSpacing;
-	landscapeStyleChangeButton.bounds.h = presetsTabButton.bounds.h;
+	landscapeStyleChangeButton.bounds.w = propertiesTabPanel.bounds.w - landscapeStyleTextField.bounds.w - 3*widgetSpacing;
+	landscapeStyleChangeButton.bounds.h = font->getTextHeight();
 
 	roadStyleChangeButton = landscapeStyleChangeButton;
 	roadStyleChangeButton.bounds.x = roadStyleTextField.bounds.x + roadStyleTextField.bounds.w + widgetSpacing;
 	roadStyleChangeButton.bounds.y = roadStyleTextField.bounds.y;
 
-	newButton.bounds.x = presetsTabPanelBounds.x;
-	newButton.bounds.y = presetsTabPanelBounds.y + presetsTabPanelBounds.h + widgetSpacing;
+	newButton.bounds.x = presetsTabPanel.bounds.x;
+	newButton.bounds.y = presetsTabPanel.bounds.y + presetsTabPanel.bounds.h + widgetSpacing;
 	newButton.bounds.w = 0.08*dh;
 	newButton.bounds.h = 0.05*dh;
 	newButton.highlightSpacing = 0.4*widgetSpacing;
@@ -354,7 +367,7 @@ void CourseEditorState::onEnter()
 	// initial values
 
 	focus = ON_EDITOR;
-	setPresetsTabActive();
+	toolsTabbedPane.setActiveTab(presetsTabPanel);
 
 	selectedLandscapeStyleIndex = selectedRoadStyleIndex = 0;
 	landscapeStyleTextField.content = roadStyleTextField.content = "default";
@@ -378,7 +391,8 @@ void CourseEditorState::onLeave()
 void CourseEditorState::render()
 {
 	const float widgetSpacing = 0.007*game.getDisplay().getHeight();
-	const bool blinkCycle = (cos(20*fgeal::uptime()) > 0);
+
+	const bool isBlinkCycle = (cos(20*fgeal::uptime()) > 0);
 	const Point mousePosition = Mouse::getPosition();
 
 	// Course preview
@@ -392,65 +406,29 @@ void CourseEditorState::render()
 	map.drawMap();
 	font->drawText("Course editor", courseEditorTitlePosition, Color::WHITE);
 
-	// Tools panel
-	Graphics::drawFilledRectangle(toolsPanelBounds, Color::DARK_GREY);
+	toolsPanel.hoveringDisabled = not isBlinkCycle or focus != ON_EDITOR;
+	toolsPanel.draw();
 
-	presetsTabButton.highlighted = focus == ON_EDITOR and presetsTabButton.bounds.contains(mousePosition);
-	presetsTabButton.draw();
-
-	propertiesTabButton.highlighted = focus == ON_EDITOR and propertiesTabButton.bounds.contains(mousePosition);
-	propertiesTabButton.draw();
-
-	if(isPresetsTabActive)
+	if(toolsTabbedPane.isActiveTab(propertiesTabPanel))
 	{
-		Graphics::drawFilledRectangle(presetsTabPanelBounds, Color::BLACK);
-		longStraightPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and longStraightPresetButton.bounds.contains(mousePosition);
-		longStraightPresetButton.draw();
-		shortStraightPresetButton.highlighted = blinkCycle and focus == ON_EDITOR and shortStraightPresetButton.bounds.contains(mousePosition);
-		shortStraightPresetButton.draw();
-		long90LeftCurvePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and long90LeftCurvePresetButton.bounds.contains(mousePosition);
-		long90LeftCurvePresetButton.draw();
-		short90LeftCurvePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and short90LeftCurvePresetButton.bounds.contains(mousePosition);
-		short90LeftCurvePresetButton.draw();
-		long90RightCurvePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and long90RightCurvePresetButton.bounds.contains(mousePosition);
-		long90RightCurvePresetButton.draw();
-		short90RightCurvePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and short90RightCurvePresetButton.bounds.contains(mousePosition);
-		short90RightCurvePresetButton.draw();
-		short45LeftCurvePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and short45LeftCurvePresetButton.bounds.contains(mousePosition);
-		short45LeftCurvePresetButton.draw();
-		short45RightCurvePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and short45RightCurvePresetButton.bounds.contains(mousePosition);
-		short45RightCurvePresetButton.draw();
-		straight20UpSlopePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and straight20UpSlopePresetButton.bounds.contains(mousePosition);
-		straight20UpSlopePresetButton.draw();
-		straight20DownSlopePresetButton.highlighted = blinkCycle and focus == ON_EDITOR and straight20DownSlopePresetButton.bounds.contains(mousePosition);
-		straight20DownSlopePresetButton.draw();
-	}
-	else
-	{
-		Graphics::drawFilledRectangle(propertiesTabPanelBounds, Color::GREY);
-		courseNameTextField.draw();
 		font->drawText("name:", courseNameTextField.bounds.x, courseNameTextField.bounds.y - font->getTextHeight());
-		landscapeStyleTextField.draw();
 		font->drawText("landscape:", landscapeStyleTextField.bounds.x, landscapeStyleTextField.bounds.y - font->getTextHeight());
-		landscapeStyleChangeButton.draw();
-		roadStyleTextField.draw();
 		font->drawText("road style:", roadStyleTextField.bounds.x, roadStyleTextField.bounds.y - font->getTextHeight());
-		roadStyleChangeButton.draw();
 	}
 
-	newButton.highlighted = blinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
+	newButton.highlighted = isBlinkCycle and focus == ON_EDITOR and newButton.bounds.contains(mousePosition);
 	newButton.draw();
 
-	loadButton.highlighted = blinkCycle and focus == ON_EDITOR and loadButton.bounds.contains(mousePosition);
+	loadButton.highlighted = isBlinkCycle and focus == ON_EDITOR and loadButton.bounds.contains(mousePosition);
 	loadButton.draw();
 
-	saveButton.highlighted = blinkCycle and focus == ON_EDITOR and saveButton.bounds.contains(mousePosition);
+	saveButton.highlighted = isBlinkCycle and focus == ON_EDITOR and saveButton.bounds.contains(mousePosition);
 	saveButton.draw();
 
-	generateButton.highlighted = blinkCycle and focus == ON_EDITOR and generateButton.bounds.contains(mousePosition);
+	generateButton.highlighted = isBlinkCycle and focus == ON_EDITOR and generateButton.bounds.contains(mousePosition);
 	generateButton.draw();
 
-	exitButton.highlighted = blinkCycle and focus == ON_EDITOR and exitButton.bounds.contains(mousePosition);
+	exitButton.highlighted = isBlinkCycle and focus == ON_EDITOR and exitButton.bounds.contains(mousePosition);
 	exitButton.draw();
 
 	// load file dialog
@@ -470,10 +448,10 @@ void CourseEditorState::render()
 			imgMenuCourseArrow->drawScaledRotated(bounds.x+bounds.w/4, bounds.y+bounds.h*0.8, scaledToRect(imgMenuCourseArrow, bounds), M_PI/2, bounds.w/2, bounds.h/2, Image::FLIP_HORIZONTAL);
 		}
 
-		loadDialogSelectButton.highlighted = blinkCycle and loadDialogSelectButton.bounds.contains(mousePosition);
+		loadDialogSelectButton.highlighted = isBlinkCycle and loadDialogSelectButton.bounds.contains(mousePosition);
 		loadDialogSelectButton.draw();
 
-		loadDialogCancelButton.highlighted = blinkCycle and loadDialogCancelButton.bounds.contains(mousePosition);
+		loadDialogCancelButton.highlighted = isBlinkCycle and loadDialogCancelButton.bounds.contains(mousePosition);
 		loadDialogCancelButton.draw();
 	}
 
@@ -487,10 +465,10 @@ void CourseEditorState::render()
 
 		saveDialogTextField.draw();
 
-		saveDialogSaveButton.highlighted = blinkCycle and saveDialogSaveButton.bounds.contains(mousePosition);
+		saveDialogSaveButton.highlighted = isBlinkCycle and saveDialogSaveButton.bounds.contains(mousePosition);
 		saveDialogSaveButton.draw();
 
-		saveDialogCancelButton.highlighted = blinkCycle and saveDialogCancelButton.bounds.contains(mousePosition);
+		saveDialogCancelButton.highlighted = isBlinkCycle and saveDialogCancelButton.bounds.contains(mousePosition);
 		saveDialogCancelButton.draw();
 	}
 
@@ -624,19 +602,11 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 {
 	if(focus == ON_EDITOR)
 	{
-		if(presetsTabButton.bounds.contains(x, y) and not isPresetsTabActive)
+		if(toolsTabbedPane.setActiveTabByButtonPosition(x, y))
 		{
 			sndCursorMove->play();
-			setPresetsTabActive();
 		}
-
-		if(propertiesTabButton.bounds.contains(x, y) and isPresetsTabActive)
-		{
-			sndCursorMove->play();
-			setPresetsTabActive(false);
-		}
-
-		if(isPresetsTabActive)
+		else if(toolsTabbedPane.isActiveTab(presetsTabPanel))
 		{
 			const unsigned shortSegmentAmount = 100, longSegmentAmount = 3*shortSegmentAmount;
 			unsigned segmentAmountToAdd = 0;
@@ -880,18 +850,6 @@ void CourseEditorState::reloadFileList()
 	const vector<Pseudo3DCourse::Spec>& courses = game.logic.getCourseList();
 	for(unsigned i = 0; i < courses.size(); i++)
 		fileMenu.addEntry(courses[i].filename);
-}
-
-void CourseEditorState::setPresetsTabActive(bool choice)
-{
-	isPresetsTabActive = choice;
-	Button &selectedButton = isPresetsTabActive? presetsTabButton : propertiesTabButton,
-		   &unselectedButton = isPresetsTabActive? propertiesTabButton : presetsTabButton;
-
-	selectedButton.bgColor = Color::GREY;
-	selectedButton.textColor = Color::BLACK;
-	unselectedButton.bgColor = Color(112, 112, 112);
-	unselectedButton.textColor = Color::DARK_GREY.getDarker();
 }
 
 void CourseEditorState::loadCourseSpec(const Pseudo3DCourse::Spec& spec)

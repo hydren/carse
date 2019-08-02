@@ -293,23 +293,19 @@ static void loadPowertrainSpec(Pseudo3DVehicle::Spec& spec, const Properties& pr
 
 	// first, set default ratios, then override
 	spec.engineGearRatio[spec.engineGearCount-1] = 0.8;
-	if(spec.type == Mechanics::TYPE_CAR)
+	if(spec.type == Mechanics::TYPE_BIKE)
+	{
+		spec.engineDifferentialRatio = 7.5;
+		for(int g = spec.engineGearCount-2; g >= 0; g--)
+			spec.engineGearRatio[g] = spec.engineGearRatio[g+1] + 0.1*(spec.engineGearCount-g-1);
+	}
+	else  // car type or other
 	{
 		spec.engineDifferentialRatio = 5.0;
 		for(int g = spec.engineGearCount-2; g >= 0; g--)
 			spec.engineGearRatio[g] = spec.engineGearRatio[g+1] + 0.1*(spec.engineGearCount-g);
 		spec.engineReverseGearRatio = 3.25;
 	}
-	else if(spec.type == Mechanics::TYPE_BIKE)
-	{
-		spec.engineDifferentialRatio = 7.5;
-		for(int g = spec.engineGearCount-2; g >= 0; g--)
-			spec.engineGearRatio[g] = spec.engineGearRatio[g+1] + 0.1*(spec.engineGearCount-g-1);
-	}
-	else { /* TODO */ }
-
-	for(int g = 0; g < spec.engineGearCount; g++)
-		cout << spec.engineGearRatio[g] << endl;
 
 	key = "gear_ratios";
 	if(prop.containsKey(key))

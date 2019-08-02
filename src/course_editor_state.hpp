@@ -88,6 +88,7 @@ class CourseEditorState extends public fgeal::Game::State
 	fgeal::Rectangle statusBarBounds;
 	fgeal::Point scaleIndicatorPosition;
 	std::string scaleIndicatorText;
+	fgeal::Button eraseButton;
 
 	public:
 	virtual int getId();

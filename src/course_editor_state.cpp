@@ -15,6 +15,8 @@
 #include "futil/random.h"
 #include "futil/collection_actions.hpp"
 
+#include <algorithm>
+
 using fgeal::Display;
 using fgeal::Color;
 using fgeal::Graphics;
@@ -164,6 +166,10 @@ void CourseEditorState::initialize()
 	saveDialogSaveButton.label = "Save";
 
 	saveDialogCancelButton = loadDialogCancelButton;
+
+	eraseButton = landscapeStyleChangeButton;
+	eraseButton.font = &game.sharedResources->fontDev;
+	eraseButton.label = "Erase";
 
 	// loan some shared resources
 	sndCursorMove = &game.sharedResources->sndCursorMove;
@@ -364,6 +370,12 @@ void CourseEditorState::onEnter()
 	scaleIndicatorPosition.y = statusBarBounds.y;
 	scaleIndicatorText.clear();
 
+	eraseButton.bounds.w = 4.0 * widgetSpacing;
+	eraseButton.bounds.h = 0.8 * statusBarBounds.h;
+	eraseButton.bounds.x = dw - eraseButton.bounds.w - widgetSpacing;
+	eraseButton.bounds.y = dh - eraseButton.bounds.h - 0.5*(statusBarBounds.h - eraseButton.bounds.h);
+	eraseButton.highlightSpacing = 0.5*(statusBarBounds.h - eraseButton.bounds.h);
+
 	// initial values
 
 	focus = ON_EDITOR;
@@ -474,6 +486,10 @@ void CourseEditorState::render()
 
 	// status bar
 	Graphics::drawFilledRectangle(statusBarBounds, Color::GREY);
+	eraseButton.highlightColor = Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)? Color::MAGENTA:
+			 	 	 	 	 	 Keyboard::isKeyPressed(Keyboard::KEY_LEFT_CONTROL)? Color::ROSE: Color::RED;
+	eraseButton.highlighted = isBlinkCycle and focus == ON_EDITOR and eraseButton.bounds.contains(mousePosition);
+	eraseButton.draw();
 	game.sharedResources->fontDev.drawText(scaleIndicatorText, scaleIndicatorPosition, Color::WHITE);
 }
 
@@ -753,6 +769,15 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 		{
 			sndCursorOut->play();
 			game.enterState(CarseGame::COURSE_SELECTION_STATE_ID);
+		}
+
+		if(eraseButton.bounds.contains(x, y))
+		{
+			const unsigned ammountToRemove = std::max(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)?  100:
+													  Keyboard::isKeyPressed(Keyboard::KEY_LEFT_CONTROL)? 10: 1, (int) course.spec.lines.size());
+			sndCursorIn->play();
+			course.spec.lines.resize(course.spec.lines.size() - ammountToRemove);
+			this->loadCourseSpec(course.spec);
 		}
 	}
 	else if(focus == ON_FILE_MENU)

@@ -773,7 +773,7 @@ void CourseEditorState::onMouseButtonPressed(Mouse::Button button, int x, int y)
 
 		if(eraseButton.bounds.contains(x, y))
 		{
-			const unsigned ammountToRemove = std::max(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)?  100:
+			const unsigned ammountToRemove = std::min(Keyboard::isKeyPressed(Keyboard::KEY_LEFT_SHIFT)?  100:
 													  Keyboard::isKeyPressed(Keyboard::KEY_LEFT_CONTROL)? 10: 1, (int) course.spec.lines.size());
 			sndCursorIn->play();
 			course.spec.lines.resize(course.spec.lines.size() - ammountToRemove);
